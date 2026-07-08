@@ -4,7 +4,7 @@ Tags: ai, content-generation, seo, automation, gutenberg
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.59.0
+Stable tag: 2.14.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -252,39 +252,45 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Changelog ==
 
-= 1.38.0 =
-* Phase 4.4c — portal cycle-usage widget for monitoring monthly
-  generation quotas.
+= 2.14.0 =
+* Campaign view now shows posts created vs posts published at a
+  glance.
 
-= 1.37.0 =
-* Phase 3.7 — workspace rename, ownership transfer, and
-  multi-workspace switcher in the portal.
+= 2.13.0 =
+* Channels are now included with every paid plan — no separate
+  add-on.
+* Draft posts published after a manual review now count toward the
+  campaign's published total.
+* LinkedIn: connect multiple Pages, wait for uploaded images to
+  finish processing before posting, and show clearer Page names.
 
-= 1.36.0 =
-* Phase 3.4 — personas and visual settings hoisted to workspace root
-  for multi-site agencies.
-* Phase 4.1–4.3 — per-tier quota config, per-generation usage
-  metering, Stripe metered overage reporting.
-* Phase 1.0h — retired the legacy Action Scheduler image chain in
-  favour of the unified cloud image pipeline.
+= 2.12.0 =
+* Weave your own referral or affiliate links into relevant posts
+  (paid plans).
+* AI-powered "Suggest competitors" on the site profile.
 
-= 1.35.0 =
-* Cloud-only generation (Phases 3-6) — retired bring-your-own-key
-  adapters; all generation routes through Structura Cloud.
+= 2.11.0 =
+* Video channel (early access): store card, configuration, and
+  per-platform caption packages in wp-admin.
+* Visual presets now carry video styling alongside image styling.
 
-= 1.34.1 =
-* Image regeneration modal: multi-provider picker, 60-second
-  timeout, prompt prefill.
+= 2.10.0 =
+* Keyword discovery tuned for realistic blog reach.
+* Cleaner article headings (no keyword stuffing) and authority links
+  are verified before they are inserted.
 
-= 1.34.0 =
-* New marketing-site comparison surface and improved sitemap
-  hygiene.
+= 2.0.0 =
+* Keywords, authority sources, and competitors now live on each
+  campaign instead of the site, so every campaign can target its own
+  niche.
+* Channels can also be managed from the Structura customer portal.
 
-For older entries, see the full changelog in the project repository:
-https://github.com/yuriy-vasilyev/structura-core/blob/main/CHANGELOG.md
+For older entries, see the full changelog in the public source
+repository:
+https://github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md
 
 == Upgrade Notice ==
 
-= 1.38.0 =
-Adds the cycle-usage widget and improves multi-workspace handling.
-Safe upgrade — no database migrations.
+= 2.14.0 =
+Campaign publish counters and LinkedIn publishing reliability
+improvements. Safe upgrade — no database migrations.
