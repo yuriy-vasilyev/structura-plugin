@@ -1,0 +1,13 @@
+{
+  "name": "@structura/i18n-contracts",
+  "version": "1.0.0",
+  "description": "Shared i18n contracts (error keys, email keys, locales) used by web, plugin, and functions. Source of truth — functions/src/i18n-contracts is generated from this.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

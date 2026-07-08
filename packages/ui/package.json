@@ -1,0 +1,93 @@
+{
+  "name": "@structura/ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./pricing": {
+      "types": "./src/pricing/index.ts",
+      "import": "./src/pricing/index.ts"
+    },
+    "./logos": {
+      "types": "./src/logos/index.ts",
+      "import": "./src/logos/index.ts"
+    },
+    "./utils": {
+      "types": "./src/utils.ts",
+      "import": "./src/utils.ts"
+    },
+    "./product-facts": {
+      "types": "./src/product-facts.ts",
+      "import": "./src/product-facts.ts"
+    },
+    "./forms": {
+      "types": "./src/forms/index.ts",
+      "import": "./src/forms/index.ts"
+    },
+    "./pagination-utils": {
+      "types": "./src/components/pagination-utils.ts",
+      "import": "./src/components/pagination-utils.ts"
+    },
+    "./pagination": {
+      "types": "./src/components/Pagination.tsx",
+      "import": "./src/components/Pagination.tsx"
+    },
+    "./badge": {
+      "types": "./src/components/Badge.tsx",
+      "import": "./src/components/Badge.tsx"
+    },
+    "./button": {
+      "types": "./src/components/Button.tsx",
+      "import": "./src/components/Button.tsx"
+    },
+    "./input-field": {
+      "types": "./src/components/InputField.tsx",
+      "import": "./src/components/InputField.tsx"
+    },
+    "./text-area": {
+      "types": "./src/components/TextArea.tsx",
+      "import": "./src/components/TextArea.tsx"
+    },
+    "./select": {
+      "types": "./src/components/Select.tsx",
+      "import": "./src/components/Select.tsx"
+    },
+    "./stepper": {
+      "types": "./src/components/Stepper.tsx",
+      "import": "./src/components/Stepper.tsx"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@headlessui/tailwindcss": "^0.2.2",
+    "@structura/tailwind-config": "workspace:*",
+    "jsdom": "^25.0.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@structura/types": "workspace:*",
+    "lucide-react": "^0.539.0",
+    "zod": "^4.3.6"
+  }
+}

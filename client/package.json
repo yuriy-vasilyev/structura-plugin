@@ -1,0 +1,40 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "build/index.js",
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "pnpm --filter @structura/types build",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "makepot": "cd .. && php -d memory_limit=-1 $(command -v wp) i18n make-pot . plugin/languages/structura-php.pot --domain=structura --slug=structura --include=plugin/includes,plugin/structura.php --exclude=_old-wp,wordpress,node_modules,.next,vendor,build,dist,.claude,.git && node scripts/extract-client-pot.mjs plugin/languages/structura-client.pot && msgcat --use-first plugin/languages/structura-php.pot plugin/languages/structura-client.pot -o plugin/languages/structura.pot && rm plugin/languages/structura-php.pot plugin/languages/structura-client.pot && node scripts/po-to-wp-json.mjs",
+    "makejson": "cd .. && node scripts/po-to-wp-json.mjs"
+  },
+  "dependencies": {
+    "@structura/tailwind-config": "workspace:*",
+    "@structura/types": "workspace:*",
+    "@structura/ui": "workspace:*",
+    "cronstrue": "^3.12.0",
+    "posthog-js": "^1.374.4",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@wordpress/api-fetch": "^7.37.0",
+    "@wordpress/components": "^31.0.0",
+    "@wordpress/element": "^6.37.0",
+    "@wordpress/i18n": "^6.10.0",
+    "@wordpress/url": "^4.37.0",
+    "jsdom": "^25.0.1",
+    "vitest": "^2.1.9"
+  }
+}

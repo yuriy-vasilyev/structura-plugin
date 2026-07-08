@@ -1,0 +1,5 @@
+@import "@structura/tailwind-config/theme.css";
+
+@import "tailwindcss";
+
+@source "src/**/*.{js,ts,jsx,tsx}";

@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@import "@structura/tailwind-config/theme.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source "src/**/*.{html,js,jsx,ts,tsx}";
+@source "../../packages/ui/src/**/*.{js,ts,jsx,tsx}";
+
+@utility s-hidden {
+    display: none;
+}
+
+/* Keyframes must be defined in standard CSS for Tailwind 4 to pick them up via vars */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(300%);
+    }
+}
+
+@layer components {
+    /* Main Container Background - Matches WP Admin Standard */
+    .structura-app-wrapper {
+        background-color: #f0f0f1;
+        min-height: 100vh;
+        font-family: var(--font-sans), sans-serif;
+        color: var(--color-neutral-600);
+    }
+
+    :is(.dark, .dark *) .structura-app-wrapper {
+        background-color: var(--color-neutral-950);
+        color: var(--color-neutral-300);
+    }
+
+    /* Nav Links */
+    .nav-item {
+        @apply inline-flex items-center hover:text-neutral-900! hover:bg-neutral-50 px-3 py-2 border border-transparent text-sm font-medium rounded-lg transition-colors text-neutral-500! dark:text-neutral-400! dark:hover:text-white! dark:hover:bg-neutral-800;
+        transition-duration: var(--duration-fast);
+        transition-timing-function: var(--ease-out);
+    }
+
+    .nav-item-active {
+        @apply text-brand-600! bg-brand-50! font-semibold dark:text-brand-400! dark:bg-brand-950/20!;
+    }
+}
+
+/* While the full-screen onboarding wizard is open it portals to
+   document.body at z-index 100000 (to cover wp-admin's #wpadminbar +
+   left nav). HeadlessUI v2 hosts ALL overlays — dialogs, Select
+   dropdowns, tooltips — inside a single `#headlessui-portal-root` it
+   appends to <body> with position:static / z-index:auto. In normal
+   flow that root paints BEHIND the wizard's positioned overlay, so the
+   per-component z-[100050]/z-[100060] never win (z-index can't escape
+   the root's auto stacking level). Elevating the root itself above the
+   wizard is the only fix that works across portals. Scoped to the open
+   state via the body class the wizard sets, so app-wide stacking is
+   untouched. */
+body.structura-wizard-open #headlessui-portal-root {
+    position: relative;
+    z-index: 100050;
+}
+
+@layer base {
+    :where(#structura-root) :where(h1, h2, h3, h4, h5, h6) {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    :where(#structura-root) :where(p) {
+        margin: 0;
+    }
+
+    :where(#structura-root) :where(label) {
+        margin: 0;
+    }
+}

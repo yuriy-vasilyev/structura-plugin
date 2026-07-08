@@ -1,0 +1,85 @@
+{
+  "openai": {
+    "defaults": {
+      "text": "gpt-5.2-2025-12-11",
+      "fast": "gpt-5.4-mini",
+      "image": "dall-e-3"
+    },
+    "available": [
+      { "id": "gpt-5.2-2025-12-11", "name": "GPT-5.2 (new)", "type": "text" },
+      { "id": "gpt-5.4-mini", "name": "GPT-5.4 Mini", "type": "text" },
+      { "id": "gpt-5-nano-2025-08-07", "name": "GPT-5 nano", "type": "text" },
+      { "id": "gpt-4o", "name": "GPT-4o (Standard)", "type": "text" },
+      { "id": "gpt-4o-mini", "name": "GPT-4o Mini (Fast)", "type": "text" },
+      { "id": "dall-e-3", "name": "DALL-E 3", "type": "image" },
+      { "id": "gpt-image-1.5", "name": "GPT Image 1.5", "type": "image" }
+    ],
+    "manifest": {
+      "gpt-5.2-2025-12-11": { "family": "chat", "endpoint": "v1/chat/completions" },
+      "gpt-5.4-mini": { "family": "chat", "endpoint": "v1/chat/completions" },
+      "gpt-5-nano-2025-08-07": { "family": "chat", "endpoint": "v1/chat/completions" },
+      "gpt-4o": { "family": "chat", "endpoint": "v1/chat/completions" },
+      "gpt-4o-mini": { "family": "chat", "endpoint": "v1/chat/completions" },
+      "dall-e-3": {
+        "family": "image",
+        "endpoint": "v1/images/generations",
+        "sizes": { "1:1": "1024x1024", "16:9": "1792x1024", "9:16": "1024x1792" },
+        "qualities": ["standard", "hd"],
+        "default_quality": "standard"
+      },
+      "gpt-image-1.5": {
+        "family": "image",
+        "endpoint": "v1/images/generations",
+        "sizes": { "1:1": "1024x1024", "16:9": "1536x1024", "9:16": "1024x1536" },
+        "qualities": ["low", "medium", "high", "auto"],
+        "default_quality": "auto"
+      }
+    }
+  },
+  "gemini": {
+    "defaults": {
+      "text": "gemini-3.1-pro-preview",
+      "fast": "gemini-3-flash-preview",
+      "image": "gemini-3-pro-image-preview"
+    },
+    "available": [
+      { "id": "gemini-3.1-pro-preview", "name": "Gemini 3.1 Pro (New)", "type": "text" },
+      { "id": "gemini-3-flash-preview", "name": "Gemini 3 Flash", "type": "text" },
+      { "id": "gemini-2.5-pro", "name": "Gemini 2.5 Pro (Legacy)", "type": "text" },
+      { "id": "gemini-2.5-flash-image", "name": "Nano Banana", "type": "image" },
+      { "id": "gemini-3-pro-image-preview", "name": "Nano Banana Pro", "type": "image" }
+    ],
+    "manifest": {
+      "gemini-3.1-pro-preview": { "family": "text", "endpoint": "generateContent" },
+      "gemini-3-flash-preview": { "family": "text", "endpoint": "generateContent" },
+      "gemini-2.5-pro": { "family": "text", "endpoint": "generateContent" },
+      "gemini-2.5-flash-image": {
+        "family": "image",
+        "endpoint": "predict",
+        "ratios": ["1:1", "4:3", "16:9", "9:16"]
+      },
+      "gemini-3-pro-image-preview": {
+        "family": "image",
+        "endpoint": "generateContent",
+        "ratios": ["1:1", "4:3", "16:9", "9:16"]
+      }
+    }
+  },
+  "anthropic": {
+    "defaults": {
+      "text": "claude-sonnet-4-6",
+      "fast": "claude-haiku-4-5-20251001",
+      "image": ""
+    },
+    "available": [
+      { "id": "claude-sonnet-4-6", "name": "Claude Sonnet 4.6", "type": "text" },
+      { "id": "claude-haiku-4-5-20251001", "name": "Claude Haiku 4.5", "type": "text" },
+      { "id": "claude-opus-4-7", "name": "Claude Opus 4.7", "type": "text" }
+    ],
+    "manifest": {
+      "claude-sonnet-4-6": { "family": "messages", "endpoint": "v1/messages", "max_output_tokens": 8192 },
+      "claude-haiku-4-5-20251001": { "family": "messages", "endpoint": "v1/messages", "max_output_tokens": 8192 },
+      "claude-opus-4-7": { "family": "messages", "endpoint": "v1/messages", "max_output_tokens": 8192 }
+    }
+  }
+}

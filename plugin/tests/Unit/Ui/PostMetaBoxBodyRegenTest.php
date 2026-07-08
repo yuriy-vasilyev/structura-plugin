@@ -1,0 +1,267 @@
+<?php
+
+namespace Structura\Tests\Unit\Ui;
+
+use Brain\Monkey\Functions;
+use Mockery;
+use Structura\Tests\Unit\TestCase;
+use Structura\Ui\Post_Meta_Box;
+
+/**
+ * Unit tests for the body-image regen flow on `Post_Meta_Box`.
+ *
+ * Scope: input-validation branches of `ajax_regenerate_body_image`.
+ * The happy path runs `Task_Runner::generate_post_images` which
+ * sideloads via WP media APIs — too many side effects to exercise in
+ * a Brain Monkey unit test. Those land in the integration suite.
+ *
+ * What this suite pins:
+ *   - permission rejection
+ *   - missing post_id
+ *   - missing/non-attachment attachment_id
+ *   - missing campaign meta on the post
+ *   - missing slot meta on the attachment (hand-uploaded image)
+ *   - rejecting the featured slot (delegate to the meta-box flow)
+ */
+class PostMetaBoxBodyRegenTest extends TestCase
+{
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
+    private function set_post_data(array $data): void
+    {
+        $_POST = array_merge([
+            'nonce' => 'test_nonce',
+        ], $data);
+    }
+
+    private function stub_nonce_pass(): void
+    {
+        // check_ajax_referer returns truthy on success; we don't care
+        // about return value, just that the function doesn't terminate.
+        Functions\when('check_ajax_referer')->justReturn(true);
+        Functions\when('current_user_can')->justReturn(true);
+    }
+
+    /** @test */
+    public function rejects_when_user_lacks_edit_posts(): void
+    {
+        Functions\when('check_ajax_referer')->justReturn(true);
+        Functions\when('current_user_can')->justReturn(false);
+
+        $captured = null;
+        Functions\when('wp_send_json_error')->alias(function ($payload) use (&$captured) {
+            $captured = $payload;
+            // wp_send_json_error wp_die()s in production. In tests we
+            // throw to exit the handler the same way.
+            throw new \RuntimeException('wp_send_json_error');
+        });
+
+        $this->set_post_data([]);
+
+        try {
+            (new Post_Meta_Box())->ajax_regenerate_body_image();
+        } catch (\RuntimeException $e) {
+            // expected
+        }
+
+        $this->assertNotNull($captured);
+        $this->assertSame('Permission denied.', $captured['message']);
+    }
+
+    /** @test */
+    public function rejects_when_post_id_missing(): void
+    {
+        $this->stub_nonce_pass();
+        Functions\when('get_post')->justReturn(null);
+
+        $captured = null;
+        Functions\when('wp_send_json_error')->alias(function ($payload) use (&$captured) {
+            $captured = $payload;
+            throw new \RuntimeException('wp_send_json_error');
+        });
+
+        $this->set_post_data(['post_id' => 0]);
+
+        try {
+            (new Post_Meta_Box())->ajax_regenerate_body_image();
+        } catch (\RuntimeException $e) {
+            // expected
+        }
+
+        $this->assertSame('Invalid post.', $captured['message']);
+    }
+
+    /** @test */
+    public function rejects_when_attachment_is_not_an_attachment(): void
+    {
+        $this->stub_nonce_pass();
+        Functions\when('get_post')->justReturn((object) ['ID' => 42]);
+        Functions\when('get_post_type')->justReturn('post'); // NOT 'attachment'
+
+        $captured = null;
+        Functions\when('wp_send_json_error')->alias(function ($payload) use (&$captured) {
+            $captured = $payload;
+            throw new \RuntimeException('wp_send_json_error');
+        });
+
+        $this->set_post_data([
+            'post_id'       => 42,
+            'attachment_id' => 100,
+        ]);
+
+        try {
+            (new Post_Meta_Box())->ajax_regenerate_body_image();
+        } catch (\RuntimeException $e) {
+            // expected
+        }
+
+        $this->assertSame('Invalid attachment.', $captured['message']);
+    }
+
+    /** @test */
+    public function rejects_when_post_has_no_campaign_meta(): void
+    {
+        $this->stub_nonce_pass();
+        Functions\when('get_post')->justReturn((object) ['ID' => 42]);
+        Functions\when('get_post_type')->justReturn('attachment');
+        Functions\when('get_post_meta')->alias(function ($post_id, $key) {
+            // No `_structura_campaign_id` set → handler bails.
+            return '';
+        });
+
+        $captured = null;
+        Functions\when('wp_send_json_error')->alias(function ($payload) use (&$captured) {
+            $captured = $payload;
+            throw new \RuntimeException('wp_send_json_error');
+        });
+
+        $this->set_post_data([
+            'post_id'       => 42,
+            'attachment_id' => 100,
+        ]);
+
+        try {
+            (new Post_Meta_Box())->ajax_regenerate_body_image();
+        } catch (\RuntimeException $e) {
+            // expected
+        }
+
+        $this->assertSame('This post was not generated by Structura.', $captured['message']);
+    }
+
+    /** @test */
+    public function rejects_when_attachment_has_no_structura_slot_meta(): void
+    {
+        // A hand-uploaded image inside a Structura post — block isn't
+        // ours to regenerate. Refuse rather than guessing a slot.
+        $this->stub_nonce_pass();
+        Functions\when('get_post')->justReturn((object) ['ID' => 42]);
+        Functions\when('get_post_type')->justReturn('attachment');
+        Functions\when('get_post_meta')->alias(function ($post_id, $key) {
+            if ($key === '_structura_campaign_id') return 'camp_nanoid';
+            if ($key === '_structura_image_slot') return ''; // hand-uploaded
+            return '';
+        });
+
+        $captured = null;
+        Functions\when('wp_send_json_error')->alias(function ($payload) use (&$captured) {
+            $captured = $payload;
+            throw new \RuntimeException('wp_send_json_error');
+        });
+
+        $this->set_post_data([
+            'post_id'       => 42,
+            'attachment_id' => 100,
+        ]);
+
+        try {
+            (new Post_Meta_Box())->ajax_regenerate_body_image();
+        } catch (\RuntimeException $e) {
+            // expected
+        }
+
+        $this->assertSame('This image is not a body image.', $captured['message']);
+    }
+
+    /** @test */
+    public function rejects_featured_slot_to_force_use_of_meta_box_handler(): void
+    {
+        // The dedicated featured-image flow lives on the meta-box
+        // sidebar (`ajax_regenerate_image`). Routing featured through
+        // here would skip the thumbnail-set side effect users expect.
+        $this->stub_nonce_pass();
+        Functions\when('get_post')->justReturn((object) ['ID' => 42]);
+        Functions\when('get_post_type')->justReturn('attachment');
+        Functions\when('get_post_meta')->alias(function ($post_id, $key) {
+            if ($key === '_structura_campaign_id') return 'camp_nanoid';
+            if ($key === '_structura_image_slot') return 'featured';
+            return '';
+        });
+
+        $captured = null;
+        Functions\when('wp_send_json_error')->alias(function ($payload) use (&$captured) {
+            $captured = $payload;
+            throw new \RuntimeException('wp_send_json_error');
+        });
+
+        $this->set_post_data([
+            'post_id'       => 42,
+            'attachment_id' => 100,
+        ]);
+
+        try {
+            (new Post_Meta_Box())->ajax_regenerate_body_image();
+        } catch (\RuntimeException $e) {
+            // expected
+        }
+
+        $this->assertSame('This image is not a body image.', $captured['message']);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    //  REST META REGISTRATION
+    //
+    //  The Gutenberg block-editor extension reads `_structura_image_slot`
+    //  via `getMedia(id).meta`. WordPress only includes a meta key in the
+    //  attachment REST response when it's been registered with
+    //  `register_post_meta(..., show_in_rest: true)`. Pin the registration
+    //  call so a future refactor doesn't accidentally drop it (the
+    //  symptom would be the editor button never appearing on body
+    //  images, with no obvious failure mode).
+    // ──────────────────────────────────────────────────────────────────────
+    /** @test */
+    public function register_attachment_meta_registers_both_keys_with_rest(): void
+    {
+        $registered = [];
+        Functions\when('register_post_meta')->alias(
+            function ($post_type, $meta_key, $args) use (&$registered) {
+                $registered[] = [
+                    'post_type' => $post_type,
+                    'meta_key'  => $meta_key,
+                    'show_in_rest' => $args['show_in_rest'] ?? false,
+                    'single'   => $args['single'] ?? false,
+                    'type'     => $args['type'] ?? null,
+                ];
+                return true;
+            }
+        );
+
+        (new Post_Meta_Box())->register_attachment_meta();
+
+        $this->assertCount(2, $registered);
+        $keys = array_column($registered, 'meta_key');
+        $this->assertContains('_structura_image_slot', $keys);
+        $this->assertContains('_structura_image_topic', $keys);
+
+        foreach ($registered as $entry) {
+            $this->assertSame('attachment', $entry['post_type']);
+            $this->assertTrue($entry['show_in_rest']);
+            $this->assertTrue($entry['single']);
+            $this->assertSame('string', $entry['type']);
+        }
+    }
+}

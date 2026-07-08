@@ -1,0 +1,7 @@
+node_modules/
+plugin/vendor/
+plugin/assets/
+packages/*/dist/
+*.tsbuildinfo
+*.log
+.DS_Store

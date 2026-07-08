@@ -1,0 +1,44 @@
+# Files and directories excluded from the wp.org distribution ZIP.
+#
+# Consumed by 10up's `wp-svn-tools` and other wp.org-targeted build
+# helpers. The release CI in `.github/workflows/release.yml` keeps a
+# parallel rsync exclude list — both paths must stay in sync so the
+# CI-built ZIP and any manually-built ZIP behave identically.
+
+# VCS
+.git
+.github
+.gitignore
+.gitattributes
+
+# Build artefacts and dev caches
+.DS_Store
+.phpunit.result.cache
+.vite
+assets/.vite
+
+# Composer / Node dev tooling.
+# Note: composer.json is intentionally NOT excluded — wp.org's review
+# guidance (and PCP's `missing_composer_json_file`) require the manifest
+# to ship alongside the bundled vendor/ directory.
+composer.lock
+node_modules
+
+# Tests
+tests
+bin
+phpunit.xml.dist
+phpunit-integration.xml.dist
+
+# Hand-written dev-only assets
+assets-static/meta-box-preview.html
+
+# Editor / OS noise
+*.log
+.idea
+.vscode
+*.swp
+Thumbs.db
+
+# Distribution self
+.distignore

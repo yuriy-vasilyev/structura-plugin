@@ -1,0 +1,368 @@
+@theme {
+    /* ================================================================
+       TYPOGRAPHY
+       ================================================================ */
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+    /* ================================================================
+       PRIMARY BRAND (Indigo)
+       Note: These are the current stock Indigo values. The design guide
+       targets a bespoke palette shifted toward violet-indigo. When the
+       custom palette is finalized, update ONLY these tokens — the rest
+       of the codebase references `brand-*` and adapts automatically.
+       ================================================================ */
+    --color-brand-50: #eef2ff;
+    --color-brand-100: #e0e7ff;
+    --color-brand-200: #c7d2fe;
+    --color-brand-300: #a5b4fc;
+    --color-brand-400: #818cf8;
+    --color-brand-500: #6366f1;
+    --color-brand-600: #4f46e5;
+    --color-brand-700: #4338ca;
+    --color-brand-800: #3730a3;
+    --color-brand-900: #312e81;
+    --color-brand-950: #1e1b4b;
+
+    /* ================================================================
+       PREMIUM GOLD (muted bronze-gold)
+       The single premium accent — used by the most expensive tier
+       (Cloud Pro) AND the Founding-Customer offer (badges, discounted
+       price, band, volume-strip discounts). Deliberately muted/bronze
+       (NOT the bright/orange stock `amber-*`) so it reads as
+       limited-edition / high-value. Source: founding-pricing design
+       handoff Design Tokens. Use `gold-500/600` for accent text in
+       light, `gold-300` in dark; `gold-300` solid chips with `gold-950`
+       ink; `gold-50` / `gold-950` for soft surfaces.
+       ================================================================ */
+    --color-gold-50: #fdf6e9;
+    --color-gold-100: #f9e8c4;
+    --color-gold-200: #f2d091;
+    --color-gold-300: #e8b25a;
+    --color-gold-400: #d9982f;
+    --color-gold-500: #b9791a;
+    --color-gold-600: #935e12;
+    --color-gold-700: #714a0e;
+    --color-gold-800: #593b0c;
+    --color-gold-900: #4a2f08;
+    --color-gold-950: #2a2008;
+
+    /* ================================================================
+       NEUTRALS
+       Note: The design guide targets tinted neutrals (2-4% brand hue
+       mixed in). When ready, update these values in place.
+       ================================================================ */
+    --color-neutral-50: #f9fafb;
+    --color-neutral-100: #f3f4f6;
+    --color-neutral-200: #e5e7eb;
+    --color-neutral-300: #d1d5db;
+    --color-neutral-400: #9ca3af;
+    --color-neutral-500: #6b7280;
+    --color-neutral-600: #4b5563;
+    --color-neutral-700: #374151;
+    --color-neutral-800: #1f2937;
+    --color-neutral-900: #111827;
+    --color-neutral-950: #030712;
+
+    /* ================================================================
+       LOGO COLORS
+       Dedicated tokens for the "Ascending Overlap" mark so every
+       surface that renders the logo stays consistent automatically.
+       ================================================================ */
+    --color-logo-foundation: #2a2574;
+    --color-logo-structure: #6366f1;
+    --color-logo-peak: #a5b4fc;
+
+    /* ================================================================
+       ELEVATION SHADOWS
+       Multi-layered shadows for the Surface & Elevation System.
+       Level 0 = base (no shadow), Levels 1-3 below.
+       ================================================================ */
+    --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-floating: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 10px 20px -2px rgba(0, 0, 0, 0.10);
+    --shadow-overlay: 0 8px 16px -4px rgba(0, 0, 0, 0.08), 0 24px 48px -8px rgba(0, 0, 0, 0.16);
+    /*
+     * Soft brand selection glow — the "selected card" treatment from the
+     * video-channel handoff (PresetRadioCard). The rgba is the design
+     * guide's target brand-600 (#5B3FE5) at 14%; expressed as a literal
+     * because shadows can't reference the `--color-brand-*` tokens in a
+     * color-mix-free way that Tailwind 4 shadow utilities understand.
+     * Revisit when the bespoke palette lands in the tokens above.
+     */
+    --shadow-glow-brand: 0 0 0 4px rgba(91, 63, 229, 0.14);
+
+    /* ================================================================
+       BREAKPOINTS
+       ================================================================ */
+    --breakpoint-xs: 30rem;
+    --breakpoint-sm: 600px;
+
+    /* ================================================================
+       MOTION TOKENS
+       Duration scale + easing curves for the motion design system.
+       Components should reference these instead of hard-coded values.
+       ================================================================ */
+
+    /* --- Durations --- */
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+    --duration-slower: 600ms;
+
+    /* --- Easing Curves ---
+       --ease-out:    Spring-like deceleration — for ENTRANCES
+       --ease-in:     Acceleration — for EXITS
+       --ease-in-out: Symmetric — for CONTINUOUS motion (loaders, etc.)
+       --ease-spring: Overshoot spring — for PLAYFUL micro-interactions
+    */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* ================================================================
+       ANIMATIONS (Tailwind `animate-*` utilities)
+       ================================================================ */
+
+    /* Existing */
+    --animate-scale: scale 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --animate-subtle-pulse: subtle-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --animate-shimmer: shimmer 1.5s infinite linear;
+    /*
+     * `progress-flow` — slow horizontal sweep of a wide gradient used by
+     * the CampaignRunProgress strip (in-flight campaign runs on the list
+     * card and the campaign detail header). 6s period keeps the motion
+     * on the edge of conscious perception ("something is happening")
+     * without crossing into distracting territory. Linear easing because
+     * any curved ease would make the flow visibly hitch at the seams.
+     * See `features/progress/components/CampaignRunProgress.tsx`.
+     */
+    --animate-progress-flow: progressFlow 6s linear infinite;
+    /*
+     * Texture overlays for CampaignRunProgress (spec: gemini redesign
+     * 2026-04-22). Four variants, selectable via the `texture` prop:
+     *
+     *   - `lines` (default): 45° diagonal stripes drifting left→right.
+     *     Reads as "conveyor belt" — the strongest affordance that
+     *     something is actively moving. 1.2s period keeps the perceived
+     *     speed brisk without becoming agitating.
+     *   - `grid`: radial-dot matrix drifting diagonally. Subtle — reads
+     *     as "texture" not "motion" — for surfaces where the flowing
+     *     fill already carries the momentum and we just want the fill
+     *     to feel "technical" rather than flat.
+     *   - `pulse-subtle`: soft opacity oscillation of a brand-500 tint
+     *     over the fill. 3s period. For ambient surfaces where explicit
+     *     motion would be distracting.
+     *   - `progress-flow` (existing, reused as the `flow` texture): a
+     *     left/right gradient sweep inside the fill.
+     */
+    --animate-progress-lines: progressLines 1.2s linear infinite;
+    --animate-progress-grid: progressGrid 4s linear infinite;
+    --animate-pulse-subtle: pulseSubtle 3s ease-in-out infinite;
+    /*
+     * `progress-runner` — the indeterminate ProgressBar's looping runner
+     * (video-channel "Rendering" rows). A 1/3-width fill sweeps the track
+     * once per 1.6s; the spring-like --ease-out makes each pass launch
+     * fast and glide out, reading as "actively working" rather than a
+     * metronome. Margins (not transforms) so the runner clips cleanly
+     * against the track's overflow-hidden rounded ends.
+     */
+    --animate-progress-runner: progressRunner 1.6s var(--ease-out) infinite;
+    /*
+     * `pulse-dot` — the Badge dot's in-progress pulse ("Rendering").
+     * Opacity-only (1→0.3) so the 6px dot never changes footprint next
+     * to 10px badge text; 1.4s ease-in-out keeps it calm at rest.
+     */
+    --animate-pulse-dot: pulseDot 1.4s ease-in-out infinite;
+
+    /* Updated: uses the spring-like ease-out curve */
+    --animate-in: fadeInUp 0.5s var(--ease-out) forwards;
+
+    /* New entrance animations */
+    --animate-fade-in: fadeIn var(--duration-normal) var(--ease-out) forwards;
+    --animate-scale-in: scaleIn var(--duration-normal) var(--ease-out) forwards;
+    --animate-slide-in-bottom: slideInFromBottom var(--duration-normal) var(--ease-out) forwards;
+    --animate-slide-in-right: slideInFromRight var(--duration-normal) var(--ease-out) forwards;
+
+    /* ================================================================
+       KEYFRAMES
+       ================================================================ */
+
+    @keyframes scale {
+        0%,
+        100% {
+            transform: scale(1.1);
+        }
+        50% {
+            transform: scale(0.9);
+        }
+    }
+
+    @keyframes subtle-pulse {
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    /*
+     * `progressFlow` — continuous left-to-right wash over a 200%-wide
+     * background gradient. Consumers apply it via `animate-progress-flow`
+     * together with `background-size: 200% 100%` so the gradient has room
+     * to translate without exposing its edges. Pairs well with a
+     * gradient like
+     *   linear-gradient(90deg, color-A, color-B, color-A)
+     * because the A-endpoint wrap keeps the seam invisible.
+     */
+    @keyframes progressFlow {
+        0% {
+            background-position: 0% 0%;
+        }
+        100% {
+            background-position: 200% 0%;
+        }
+    }
+
+    /*
+     * Diagonal stripes texture. Consumers set
+     *   background-image: linear-gradient(45deg, <color> 25%, transparent 25%, transparent 50%, <color> 50%, <color> 75%, transparent 75%, transparent);
+     *   background-size: 32px 32px;
+     * and let this keyframe slide the pattern across 32px per cycle so
+     * the stripes appear to travel left→right without ever lining up
+     * with a seam.
+     */
+    @keyframes progressLines {
+        0% {
+            background-position: 0 0;
+        }
+        100% {
+            background-position: 32px 0;
+        }
+    }
+
+    /*
+     * Radial-dot grid texture. Pairs with
+     *   background-image: radial-gradient(<color> 1px, transparent 0);
+     *   background-size: 8px 8px;
+     * Longer period (4s) than `progressLines` because the drift is
+     * subtle — it's meant to feel like "technical texture" rather than
+     * "moving conveyor".
+     */
+    @keyframes progressGrid {
+        0% {
+            background-position: 0 0;
+        }
+        100% {
+            background-position: 8px 8px;
+        }
+    }
+
+    /*
+     * Subtle opacity pulse — for ambient surfaces where explicit motion
+     * would be distracting. 30%→80% range so the pulse is perceptible
+     * but never fully fades or fully solidifies (either extreme reads
+     * as a flicker).
+     */
+    @keyframes pulseSubtle {
+        0%,
+        100% {
+            opacity: 0.3;
+        }
+        50% {
+            opacity: 0.8;
+        }
+    }
+
+    /*
+     * Indeterminate progress runner — pairs with a `w-1/3` fill inside an
+     * `overflow-hidden` track. -35% → 105% keeps the runner fully
+     * off-track at both loop edges so the restart never pops.
+     */
+    @keyframes progressRunner {
+        0% {
+            margin-left: -35%;
+        }
+        100% {
+            margin-left: 105%;
+        }
+    }
+
+    @keyframes pulseDot {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.3;
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* New keyframes */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes slideInFromBottom {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInFromRight {
+        from {
+            opacity: 0;
+            transform: translateX(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+}

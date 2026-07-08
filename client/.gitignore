@@ -1,0 +1,8 @@
+# Playwright e2e artifacts
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Saved wp-admin login session (created by e2e/global-setup.ts) — never commit
+e2e/.auth/
