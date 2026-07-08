@@ -64,7 +64,8 @@ get a free license:
 
 The plugin's compiled JavaScript at `assets/structura.js` is built
 from TypeScript sources hosted publicly at
-https://github.com/yuriy-vasilyev/structura-core/tree/main/client.
+https://github.com/yuriy-vasilyev/structura-plugin — see that
+repository's README for reproducible build instructions.
 
 == Installation ==
 
