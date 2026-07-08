@@ -364,6 +364,23 @@ class License_Manager
     }
 
     /**
+     * True when the install has a cloud workspace bearer bound — a
+     * licensed activation OR a bootstrapped anonymous ("none") workspace.
+     * Keys off the persisted `api_token` (Phase 3.5 auth), NOT the
+     * `license_key`, so it's the right gate for any cloud round-trip that
+     * works for both tiers (e.g. Bridge Diagnostics). Mirrors the SPA's
+     * `useLicense().hasWorkspace` and the `structuraConfig.has_workspace`
+     * snapshot.
+     */
+    public static function has_workspace(): bool
+    {
+        $data  = Key_Manager::get_license_payload();
+        $token = is_array($data) ? ($data['api_token'] ?? '') : '';
+
+        return is_string($token) && $token !== '';
+    }
+
+    /**
      * Get License Info for the React Dashboard
      */
     public static function get_license_data(): array

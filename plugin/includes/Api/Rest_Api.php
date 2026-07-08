@@ -980,10 +980,14 @@ class Rest_Api
      */
     public function handle_pulse_initiate($request)
     {
-        $license = License_Manager::get_license_data();
-
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        // Bridge Diagnostics work for every cloud-connected install, not
+        // just licensed ones — anonymous/"none" workspaces run cloud
+        // generation too and need to verify the same handshake (Yurii
+        // wp.org testing 2026-07-08). Gate on workspace presence (bearer
+        // bound) rather than a license key; a truly unconfigured install
+        // has nothing to probe.
+        if ( ! License_Manager::has_workspace()) {
+            return new \WP_Error('no_workspace', __('Connect to Structura Cloud first.', 'structura'), ['status' => 403]);
         }
 
         // Run the shared handshake probe so the manual "Run Pulse Check"
@@ -1014,15 +1018,19 @@ class Rest_Api
 
     public function initiate_error_test()
     {
-        $license_data = \Structura\Core\License_Manager::get_license_data();
-        if (empty($license_data['license_key'])) {
-            return ['success' => false, 'message' => 'License missing.'];
+        // Anonymous/"none" workspaces can simulate the signed-error
+        // handshake too — gate on workspace presence, not a license key.
+        // The cloud resolves the signing secret from the bearer-injected
+        // activation (Cloud_Client adds it), so an empty licenseKey is
+        // fine here (Yurii wp.org testing 2026-07-08).
+        if ( ! \Structura\Core\License_Manager::has_workspace()) {
+            return ['success' => false, 'message' => 'Not connected to Structura Cloud.'];
         }
 
-        $data = \Structura\Core\Key_Manager::get_license_payload();
+        $license_data = \Structura\Core\License_Manager::get_license_data();
 
         Cloud_Client::post('/performPulseCheck', [
-            'licenseKey'       => $license_data['license_key'],
+            'licenseKey'       => $license_data['license_key'] ?? '',
             'domain'           => wp_parse_url(get_site_url(), PHP_URL_HOST),
             'webhookUrl'       => rest_url('structura/v1/webhook/receive-blueprint'),
             'simulate_error'   => true, // The trigger

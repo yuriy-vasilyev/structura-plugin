@@ -18,7 +18,9 @@ use Structura\Tests\Unit\TestCase;
  *   - A `body.success === true` verdict caches `ok = true`.
  *   - An outbound WP_Error (WE can't reach the cloud — a different fault)
  *     leaves the cached verdict UNTOUCHED rather than crying wolf.
- *   - No license → no probe, and any stale verdict is cleared.
+ *   - No workspace → no probe, and any stale verdict is cleared.
+ *   - An anonymous ("none") workspace (bearer, no license key) DOES
+ *     probe — it receives delivered posts over the same webhook.
  *   - `is_unreachable()` treats an un-probed site as reachable (unknown
  *     ≠ broken) and only returns true on an explicit `ok = false`.
  *
@@ -56,9 +58,9 @@ class SiteReachabilityTest extends TestCase
         // The localhost / firewalled case: our egress to the cloud works
         // (no WP_Error), but the cloud's POST back to our webhook failed,
         // so the cloud reports success:false.
-        Mockery::mock('alias:Structura\Core\License_Manager')
-            ->shouldReceive('get_license_data')
-            ->andReturn(['license_key' => 'KEY-ABC']);
+        $lm = Mockery::mock('alias:Structura\Core\License_Manager');
+        $lm->shouldReceive('has_workspace')->andReturn(true);
+        $lm->shouldReceive('get_license_data')->andReturn(['license_key' => 'KEY-ABC']);
 
         Mockery::mock('alias:Structura\Core\Cloud_Client')
             ->shouldReceive('post')
@@ -89,9 +91,9 @@ class SiteReachabilityTest extends TestCase
     /** @test */
     public function probe_caches_reachable_when_the_handshake_succeeds(): void
     {
-        Mockery::mock('alias:Structura\Core\License_Manager')
-            ->shouldReceive('get_license_data')
-            ->andReturn(['license_key' => 'KEY-ABC']);
+        $lm = Mockery::mock('alias:Structura\Core\License_Manager');
+        $lm->shouldReceive('has_workspace')->andReturn(true);
+        $lm->shouldReceive('get_license_data')->andReturn(['license_key' => 'KEY-ABC']);
 
         Mockery::mock('alias:Structura\Core\Cloud_Client')
             ->shouldReceive('post')
@@ -122,9 +124,9 @@ class SiteReachabilityTest extends TestCase
         // A WP_Error means OUR request to the cloud failed — that says
         // nothing about whether the cloud can reach us, so we must not
         // flip the banner. No update_option, no delete_option.
-        Mockery::mock('alias:Structura\Core\License_Manager')
-            ->shouldReceive('get_license_data')
-            ->andReturn(['license_key' => 'KEY-ABC']);
+        $lm = Mockery::mock('alias:Structura\Core\License_Manager');
+        $lm->shouldReceive('has_workspace')->andReturn(true);
+        $lm->shouldReceive('get_license_data')->andReturn(['license_key' => 'KEY-ABC']);
 
         Mockery::mock('alias:Structura\Core\Cloud_Client')
             ->shouldReceive('post')
@@ -141,11 +143,15 @@ class SiteReachabilityTest extends TestCase
     }
 
     /** @test */
-    public function probe_is_a_noop_and_clears_stale_state_without_a_license(): void
+    public function probe_is_a_noop_and_clears_stale_state_without_a_workspace(): void
     {
+        // A truly unconfigured install (no bearer bound) has no activation
+        // to sign a probe and nothing to verify — skip and clear any stale
+        // verdict so a site that was unreachable, then disconnected,
+        // doesn't keep warning.
         Mockery::mock('alias:Structura\Core\License_Manager')
-            ->shouldReceive('get_license_data')
-            ->andReturn([]);
+            ->shouldReceive('has_workspace')
+            ->andReturn(false);
 
         $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
         $cloud->shouldReceive('post')->never();
@@ -157,7 +163,42 @@ class SiteReachabilityTest extends TestCase
         $state = Site_Reachability::probe_and_store();
 
         $this->assertTrue($state['ok']);
-        $this->assertSame('no_license', $state['reason']);
+        $this->assertSame('no_workspace', $state['reason']);
+    }
+
+    /** @test */
+    public function probe_runs_for_an_anonymous_workspace_with_no_license_key(): void
+    {
+        // Regression (2026-07-08): anonymous/"none" installs have a bearer
+        // but no license key. They still receive delivered posts over the
+        // webhook, so the reachability probe must run for them — the empty
+        // licenseKey is fine because the cloud resolves the signing secret
+        // from the bearer Cloud_Client injects.
+        $lm = Mockery::mock('alias:Structura\Core\License_Manager');
+        $lm->shouldReceive('has_workspace')->andReturn(true);
+        $lm->shouldReceive('get_license_data')->andReturn([]); // no license_key
+
+        $captured = null;
+        Mockery::mock('alias:Structura\Core\Cloud_Client')
+            ->shouldReceive('post')
+            ->once()
+            ->with(
+                '/performPulseCheck',
+                Mockery::on(function ($payload) use (&$captured) {
+                    $captured = $payload;
+                    return true;
+                }),
+                Mockery::any()
+            )
+            ->andReturn(['code' => 200, 'body' => ['success' => true, 'message' => 'Pulse verified!']]);
+
+        $this->expectFn('update_option')->once();
+
+        $state = Site_Reachability::probe_and_store();
+
+        $this->assertTrue($state['ok']);
+        // The probe still goes out, carrying an empty licenseKey.
+        $this->assertSame('', $captured['licenseKey']);
     }
 
     /** @test */

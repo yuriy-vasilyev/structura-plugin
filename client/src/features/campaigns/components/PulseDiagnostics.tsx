@@ -18,7 +18,14 @@ interface PulseDiagnosticsProps {
 }
 
 export const PulseDiagnostics = ({ autoRun = false }: PulseDiagnosticsProps) => {
-  const { license } = useLicense();
+  // Gate on workspace presence, not a license key: anonymous/"none"
+  // installs run cloud generation over the same handshake and must be
+  // able to verify it too (Yurii wp.org testing 2026-07-08). `hasWorkspace`
+  // is true for both a licensed activation and a bootstrapped anonymous
+  // workspace; a truly unconfigured install (no bearer) has nothing to
+  // probe, so the buttons stay disabled there.
+  const { hasWorkspace } = useLicense();
+  const canDiagnose = hasWorkspace === true;
   const { mutate: handleTest, isPending, status } = usePulseCheck();
   const [isTestingError, setIsTestingError] = useState(false);
 
@@ -26,10 +33,10 @@ export const PulseDiagnostics = ({ autoRun = false }: PulseDiagnosticsProps) => 
   const autoRanRef = useRef(false);
   useEffect(() => {
     if (autoRanRef.current || !autoRun) return;
-    if (!license?.license_key || isPending) return;
+    if (!canDiagnose || isPending) return;
     autoRanRef.current = true;
     handleTest();
-  }, [autoRun, license?.license_key, isPending, handleTest]);
+  }, [autoRun, canDiagnose, isPending, handleTest]);
 
   const handleTestError = async () => {
     setIsTestingError(true);
@@ -79,7 +86,7 @@ export const PulseDiagnostics = ({ autoRun = false }: PulseDiagnosticsProps) => 
             variant="secondary"
             size="sm"
             onClick={() => handleTest()}
-            disabled={isPending || isTestingError || !license?.license_key}
+            disabled={isPending || isTestingError || !canDiagnose}
             className="text-emerald-700! dark:text-emerald-400!"
           >
             {isPending ? (
@@ -94,7 +101,7 @@ export const PulseDiagnostics = ({ autoRun = false }: PulseDiagnosticsProps) => 
             variant="secondary"
             size="sm"
             onClick={handleTestError}
-            disabled={isPending || isTestingError || !license?.license_key}
+            disabled={isPending || isTestingError || !canDiagnose}
             className="text-red-700! dark:text-red-400!"
           >
             {isTestingError ? (

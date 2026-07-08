@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.14.1](https://github.com/yuriy-vasilyev/structura-core/compare/v2.14.0...v2.14.1) (2026-07-08)
+
+
+### Bug Fixes
+
+* **none-tier:** wp.org "none"-tier UX fixes across wizard, diagnostics, and run screen ([e6d9cdb](https://github.com/yuriy-vasilyev/structura-core/commit/e6d9cdb3897ee4aa737ef08bc01d1346681e3581))
+* **scheduler:** resolve webhook signing secret by workspace for "none" installs ([ff997ac](https://github.com/yuriy-vasilyev/structura-core/commit/ff997ac56aa5ba9ba1936793ec9b89116fc21865))
+
 ## [2.14.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.13.0...v2.14.0) (2026-07-08)
 
 

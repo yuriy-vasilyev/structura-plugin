@@ -62,7 +62,7 @@ import { isOnboardingDismissed } from "../utils/onboardingDismissal";
 export const useOnboardingAutoRedirect = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { hasUsableLicense, hasWorkspace } = useLicense();
+  const { hasUsableLicense, hasWorkspace, isPaidLicense } = useLicense();
   // All tiers — the wizard auto-creates its state on first read and
   // returns `justCreated`. requireActivationBearer guards it server-
   // side, so it's gated on workspace presence: firing it without a
@@ -80,8 +80,21 @@ export const useOnboardingAutoRedirect = () => {
     // The needs-positioning nudge respects a prior explicit Exit; the
     // justCreated path doesn't need to (it can only ever fire on the very
     // first state read, before an Exit could exist).
+    //
+    // Gated on `isPaidLicense` (2026-07-08): positioning is captured on
+    // the wizard's SEO step, which is a LOCKED teaser for none/free tiers
+    // — they can never satisfy `activationNeedsPositioning`, so it stays
+    // true forever and the nudge re-opened the wizard on EVERY SPA load
+    // even after the user completed and exited it. Worse, Finish clears
+    // the Exit dismissal, so completing the wizard actively re-armed the
+    // loop. The nudge only makes sense when the tier can actually provide
+    // positioning; none/free get the wizard once via `justCreated` and
+    // are never yanked back. Paid installs (incl. the 2nd-site-under-a-
+    // completed-workspace case this nudge exists for) are unaffected.
     const needsPositioningNudge =
-      data?.activationNeedsPositioning && !isOnboardingDismissed();
+      data?.activationNeedsPositioning &&
+      isPaidLicense &&
+      !isOnboardingDismissed();
     // Fresh keyless install → the wizard's license gate is the first-
     // run surface. `had_prior_activation` (default true on plugin
     // builds predating the flag — don't yank on old builds) excludes
@@ -103,6 +116,7 @@ export const useOnboardingAutoRedirect = () => {
     data?.justCreated,
     data?.activationNeedsPositioning,
     hasUsableLicense,
+    isPaidLicense,
     location.pathname,
     navigate,
   ]);

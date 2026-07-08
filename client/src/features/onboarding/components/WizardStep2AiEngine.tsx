@@ -131,6 +131,27 @@ export const WizardStep2AiEngine = () => {
     );
   }
 
+  // Pre-emptive cap locking. A tier can connect at most
+  // `providerCountCap` providers. The old logic keyed the cap lock off
+  // `installed.length >= cap`, so on a `none` tier (cap 1) with nothing
+  // connected yet BOTH OpenAI and Gemini rendered as freely connectable
+  // — implying the user could connect two — and Gemini only flipped to
+  // the "Free License" cap-lock AFTER OpenAI was connected (Yurii wp.org
+  // testing 2026-07-08). Instead, lock the extras up front: the first
+  // `slotsLeft` tier-eligible, not-yet-connected providers (catalog
+  // order — OpenAI first) stay connectable; the rest read as cap-locked
+  // from the start. Free (cap 2) still shows both; paid shows all.
+  const slotsLeft = Math.max(0, providerCountCap - installed.length);
+  const capLockedIds = new Set<string>();
+  {
+    let slot = 0;
+    for (const id of available) {
+      if (!providers[id]) continue; // not offered at this tier at all
+      if (slot >= slotsLeft) capLockedIds.add(id);
+      slot++;
+    }
+  }
+
   const openWizard = (id: string, reconfigure = false) => {
     const meta = catalog[id];
     const status = providers[id];
@@ -229,8 +250,8 @@ export const WizardStep2AiEngine = () => {
               const meta = catalog[id];
               if (!meta) return null;
               const isAvailableForTier = !!providers[id];
-              const atCap = installed.length >= providerCountCap;
-              const isCapLocked = atCap && isAvailableForTier;
+              const isCapLocked =
+                isAvailableForTier && capLockedIds.has(id);
               const cardAvailable = isAvailableForTier && !isCapLocked;
               return (
                 <AvailableProviderCard

@@ -25,7 +25,7 @@
  * banner — written on mount (lazily) and on finish.
  */
 
-import { useEffect, useRef } from "@wordpress/element";
+import { useEffect, useMemo, useRef } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import ReactDOM from "react-dom";
 import { useNavigate } from "react-router";
@@ -93,18 +93,49 @@ export const OnboardingPage = () => {
     (s) => s.setLicenseGateSkipped,
   );
 
-  // Managed (cloud) plans run on Structura's master keys — there is no
-  // provider to connect, so the AI-engine step (2) is removed from the
-  // flow entirely. The step component that normally reports validity
-  // never mounts, so it's auto-validated here; any stale navigation
-  // onto it (persisted activeStep from a pre-upgrade session, deep
-  // link) bounces forward to step 3.
+  // Steps removed from the flow for this tier:
+  //   - Cloud (managed) plans run on Structura's master keys — there's
+  //     no provider to connect, so the AI-engine step (2) is dropped.
+  //   - `none`/anonymous installs can't generate images at all, so the
+  //     Visuals step (4) is pure dead weight (2026-07-08). Free CAN
+  //     generate images (PNG only), so this is none-only — NOT
+  //     `!isPaidLicense`.
+  // A removed step's component never mounts to report validity, so the
+  // effect below auto-validates it (else `canFinish`/reachability would
+  // wait forever) and bounces any stale navigation that lands on it —
+  // persisted activeStep from a pre-upgrade session, a deep link —
+  // forward to the next visible step.
   const isCloud = isManagedPlan(currentPlan as PlanId);
+  const hiddenSteps = useMemo<WizardStepId[]>(
+    () => [
+      ...(isCloud ? [2 as WizardStepId] : []),
+      ...(currentPlan === "none" ? [4 as WizardStepId] : []),
+    ],
+    [isCloud, currentPlan],
+  );
+  const isHiddenStep = (step: WizardStepId) => hiddenSteps.includes(step);
+  const nextVisibleStep = (from: WizardStepId): WizardStepId => {
+    let n = from + 1;
+    while (n <= 6 && isHiddenStep(n as WizardStepId)) n++;
+    return Math.min(n, 6) as WizardStepId;
+  };
+  const prevVisibleStep = (from: WizardStepId): WizardStepId => {
+    let p = from - 1;
+    while (p >= 1 && isHiddenStep(p as WizardStepId)) p--;
+    return Math.max(p, 1) as WizardStepId;
+  };
   useEffect(() => {
-    if (!isCloud) return;
-    setStepValid(2, true);
-    if (activeStep === 2) setActiveStep(3);
-  }, [isCloud, activeStep, setStepValid, setActiveStep]);
+    let bounced = false;
+    for (const s of hiddenSteps) {
+      setStepValid(s, true);
+      if (activeStep === s && !bounced) {
+        setActiveStep(nextVisibleStep(s));
+        bounced = true;
+      }
+    }
+    // nextVisibleStep is a stable closure over hiddenSteps (already a dep).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hiddenSteps, activeStep, setStepValid, setActiveStep]);
 
   // Commit happens ONCE, when leaving the last input step (Personas,
   // step 5) — the wizard's real "submit". `finishedRef` makes re-entry
@@ -224,9 +255,9 @@ export const OnboardingPage = () => {
       return;
     }
     if (activeStep < 5) {
-      // Cloud plans have no AI-engine step — hop 1 → 3 directly.
-      const next = activeStep + 1;
-      setActiveStep((isCloud && next === 2 ? 3 : next) as WizardStepId);
+      // Hop over any step removed from this tier's flow (cloud's step 2,
+      // none's step 4).
+      setActiveStep(nextVisibleStep(activeStep));
     }
   };
 
@@ -239,9 +270,8 @@ export const OnboardingPage = () => {
 
   const handleBack = () => {
     if (activeStep === 1) return;
-    // Mirror Continue's hop: cloud plans skip the AI-engine step.
-    const prev = activeStep - 1;
-    setActiveStep((isCloud && prev === 2 ? 1 : prev) as WizardStepId);
+    // Mirror Continue's hop: skip any step removed from this tier's flow.
+    setActiveStep(prevVisibleStep(activeStep));
   };
 
   // Steps 1–4: Continue requires the CURRENT step valid. Step 5 ("Finish
@@ -252,6 +282,11 @@ export const OnboardingPage = () => {
     activeStep >= 5 ? canFinish : stepValidity[activeStep];
 
   const renderStep = () => {
+    // A step removed from this tier's flow never renders. The auto-
+    // validate effect keeps it out of reach, but this guards the first
+    // frame before that effect runs (persisted activeStep / deep link).
+    if (isHiddenStep(activeStep)) return null;
+
     // Free / none tier: ONLY the SEO step is locked. Keyword / competitor
     // / authority intelligence is the paid magic — free can't use it. But
     // they CAN (and should) fill in everything else: site info, AI engine,
@@ -310,7 +345,7 @@ export const OnboardingPage = () => {
       activeStep={activeStep}
       completedSteps={completedSteps}
       skippedSteps={[]}
-      hiddenSteps={isCloud ? [2] : []}
+      hiddenSteps={hiddenSteps}
       reachableSteps={([1, 2, 3, 4, 5, 6] as WizardStepId[]).filter(
         isStepReachable,
       )}

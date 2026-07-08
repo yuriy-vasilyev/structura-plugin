@@ -71,16 +71,25 @@ final class Site_Reachability {
 	 * @return array{ok:bool,checked_at?:int,message?:string,reason?:string}
 	 */
 	public static function probe_and_store(): array {
-		$license = License_Manager::get_license_data();
-		if ( empty( $license['license_key'] ) ) {
+		// Probe for any cloud-connected install — licensed OR anonymous
+		// ("none"). Anonymous workspaces receive delivered posts over the
+		// same webhook, so the cloud→site reachability verdict matters to
+		// them too (Yurii wp.org testing 2026-07-08). Gate on workspace
+		// presence (bearer bound); a truly unconfigured install has no
+		// activation to sign a probe and nothing to verify, so clear any
+		// stale verdict and bail.
+		if ( ! License_Manager::has_workspace() ) {
 			delete_option( self::OPTION );
-			return [ 'ok' => true, 'reason' => 'no_license' ];
+			return [ 'ok' => true, 'reason' => 'no_workspace' ];
 		}
 
-		$result = Cloud_Client::post(
+		$license = License_Manager::get_license_data();
+		$result  = Cloud_Client::post(
 			'/performPulseCheck',
 			[
-				'licenseKey' => $license['license_key'],
+				// Empty for anonymous installs — the cloud resolves the
+				// activation secret from the bearer Cloud_Client injects.
+				'licenseKey' => $license['license_key'] ?? '',
 				// Cosmetic/log context only — the cloud resolves the
 				// activation secret from the `activationId` that
 				// Cloud_Client injects centrally, not from this host.

@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ExternalLink,
   Loader2,
+  PencilLine,
   RefreshCw,
 } from "lucide-react";
 import { Badge, Button, cn } from "@structura/ui";
@@ -16,6 +17,8 @@ import { PageDescription } from "@/components/Layout/PageSubtitle";
 import type { RunStatusSerialized } from "@structura/types";
 import { useCampaignRunQuery } from "@/features/progress/api/useCampaignRunQuery";
 import { RunTimeline } from "@/features/progress/components/RunTimeline";
+import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutations";
+import type { CampaignFormData } from "@/features/campaigns/types";
 
 /**
  * Detail page for a single ad-hoc generation kicked off via the
@@ -31,13 +34,11 @@ import { RunTimeline } from "@/features/progress/components/RunTimeline";
  *
  * The page polls the same `useCampaignRunQuery` hook the campaign
  * detail page uses. Once the run reaches a terminal state, polling
- * stops and the user sees the receipt — including a "View post"
- * link when `resultPostId` lands and a "Run again" button that
- * takes them back to `/generate`.
- *
- * Future enhancement: pre-fill the form with the run's
- * `inputSnapshot` when "Run again" is clicked. Today we just
- * navigate back; the form starts blank.
+ * stops and the user sees the receipt — including a status-aware
+ * result banner (published / draft / pending, each with the right
+ * CTA) when `resultPostId` lands, and a "Run again" button that
+ * replays this run's exact `inputSnapshot` params as a fresh run
+ * rather than dropping the user on a blank form.
  */
 /**
  * Grace window during which a 404 from `useCampaignRunQuery` is treated
@@ -66,7 +67,6 @@ const INITIAL_GRACE_WINDOW_MS = 90_000;
 
 export const SinglePostRunDetailPage = () => {
   const { runId } = useParams<{ runId: string }>();
-  const navigate = useNavigate();
   const { data, isError, isLoading } = useCampaignRunQuery(runId ?? null);
 
   // Pin the page-mount timestamp on first render. The `useState`
@@ -122,7 +122,7 @@ export const SinglePostRunDetailPage = () => {
     return <QueueingState runId={runId} />;
   }
 
-  return <SinglePostRunDetailLoaded run={data.run} onRunAgain={() => navigate("/generate")} />;
+  return <SinglePostRunDetailLoaded run={data.run} />;
 };
 
 /**
@@ -195,13 +195,9 @@ const TERMINAL_STATUSES = new Set([
   "cancelled",
 ]);
 
-const SinglePostRunDetailLoaded = ({
-  run,
-  onRunAgain,
-}: {
-  run: RunStatusSerialized;
-  onRunAgain: () => void;
-}) => {
+const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
+  const navigate = useNavigate();
+  const { generatePost, isGenerating } = useCampaignMutations();
   const isTerminal = TERMINAL_STATUSES.has(run.status);
   const isSuccess =
     run.status === "succeeded" || run.status === "succeeded_with_warnings";
@@ -221,6 +217,35 @@ const SinglePostRunDetailLoaded = ({
   const imageProvider = readString(inputs, "intelligence", "imageProvider");
   const language = readString(inputs, "intelligence", "language");
   const personaName = readString(inputs, "intelligence", "personaName");
+
+  // The status the user *requested* for the post — the only source that
+  // distinguishes draft/pending/publish (`outputs.post.status` can't
+  // represent "pending"). Drives the success banner wording + CTA below.
+  // Defaults to "publish" for older runs with no snapshot.
+  const requestedStatus =
+    readString(inputs, "structure", "postStatus") || "publish";
+
+  // "Run again" replays the EXACT params of this run rather than dropping
+  // the user on a blank Generate form. `inputSnapshot` already IS the
+  // clustered `CampaignFormData` the original submission produced, so we
+  // hand it straight to the same mutation the form uses and navigate to
+  // the freshly-minted run. Falls back to the blank form only for legacy
+  // runs (pre-2026-05-01) that carry no snapshot to replay.
+  const handleRunAgain = async () => {
+    if (!inputs) {
+      navigate("/generate");
+      return;
+    }
+    try {
+      const result = await generatePost({
+        data: inputs as unknown as CampaignFormData,
+      });
+      const newRunId = (result as { run_id?: string })?.run_id;
+      navigate(newRunId ? `/generate/runs/${newRunId}` : "/generate");
+    } catch {
+      // Error toast is surfaced by the mutation itself.
+    }
+  };
 
   return (
     <PageContainer variant="narrow">
@@ -252,8 +277,17 @@ const SinglePostRunDetailLoaded = ({
         </div>
 
         {isTerminal && (
-          <Button variant="secondary" size="sm" onClick={onRunAgain}>
-            <RefreshCw size={14} className="mr-1.5" />
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleRunAgain}
+            disabled={isGenerating}
+          >
+            {isGenerating ? (
+              <Loader2 size={14} className="mr-1.5 animate-spin" />
+            ) : (
+              <RefreshCw size={14} className="mr-1.5" />
+            )}
             {__("Run again", "structura")}
           </Button>
         )}
@@ -325,43 +359,13 @@ const SinglePostRunDetailLoaded = ({
 
       {/* ── Result ───────────────────────────────────────────── */}
       {isSuccess && run.resultPostId ? (
-        <section className="mb-6 rounded-2xl border border-emerald-200/70 bg-emerald-50/40 p-6 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/20">
-          <div className="flex items-start gap-3">
-            <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-            <div className="flex-1">
-              <p className="m-0! font-medium text-emerald-900 dark:text-emerald-100">
-                {__("Post published", "structura")}
-              </p>
-              {run.resultPostUrl && (
-                <a
-                  href={run.resultPostUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-flex items-center gap-1 text-sm text-emerald-700 hover:underline dark:text-emerald-300"
-                >
-                  {run.resultPostUrl}
-                  <ExternalLink size={12} />
-                </a>
-              )}
-            </div>
-          </div>
-        </section>
+        <SuccessResult
+          requestedStatus={requestedStatus}
+          postId={run.resultPostId}
+          postUrl={run.resultPostUrl}
+        />
       ) : run.status === "failed" ? (
-        <section className="mb-6 rounded-2xl border border-red-200/70 bg-red-50/40 p-6 shadow-sm dark:border-red-900/40 dark:bg-red-950/20">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="mt-0.5 h-5 w-5 text-red-600 dark:text-red-400" />
-            <div className="flex-1">
-              <p className="m-0! font-medium text-red-900 dark:text-red-100">
-                {__("Generation failed", "structura")}
-              </p>
-              {run.error?.userMessage && (
-                <p className="mt-2 text-sm text-red-800 dark:text-red-200 m-0!">
-                  {run.error.userMessage}
-                </p>
-              )}
-            </div>
-          </div>
-        </section>
+        <FailureResult error={run.error} />
       ) : null}
       {/* The non-terminal "Working on your post…" banner used to live
           here as a fallback after the success / failed branches; it
@@ -372,7 +376,149 @@ const SinglePostRunDetailLoaded = ({
   );
 };
 
+/**
+ * Status-aware success banner. A run that finished doesn't necessarily
+ * mean the post is *published* — the user may have asked for a draft or
+ * a pending-review post, in which case "Post published" is a lie and the
+ * "View post" permalink lands on a preview/404. We branch on the
+ * requested `postStatus` so the headline + CTA match reality: published
+ * gets "View post" (front-end permalink); draft/pending get "Review …"
+ * pointing at the wp-admin editor.
+ */
+const SuccessResult = ({
+  requestedStatus,
+  postId,
+  postUrl,
+}: {
+  requestedStatus: string;
+  postId: number | string;
+  postUrl?: string;
+}) => {
+  const isPublished = requestedStatus === "publish";
+  const isPending = requestedStatus === "pending";
+
+  const title = isPublished
+    ? __("Post published", "structura")
+    : isPending
+    ? __("Post submitted for review", "structura")
+    : __("Draft created", "structura");
+
+  const helper = isPublished
+    ? null
+    : isPending
+    ? __("It's saved as pending review — nothing is live yet.", "structura")
+    : __("It's saved as a draft — nothing is live yet.", "structura");
+
+  const editUrl = buildEditPostUrl(postId);
+
+  return (
+    <section className="mb-6 rounded-2xl border border-emerald-200/70 bg-emerald-50/40 p-6 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/20">
+      <div className="flex items-start gap-3">
+        <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+        <div className="flex-1">
+          <p className="m-0! font-medium text-emerald-900 dark:text-emerald-100">
+            {title}
+          </p>
+          {helper && (
+            <p className="mt-1 text-sm text-emerald-800/90 dark:text-emerald-200/90 m-0!">
+              {helper}
+            </p>
+          )}
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            {/* Published → the live permalink is the useful CTA. */}
+            {isPublished && postUrl && (
+              <a
+                href={postUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-300"
+              >
+                {__("View post", "structura")}
+                <ExternalLink size={13} />
+              </a>
+            )}
+            {/* Draft/pending → the editor is where the user reviews it. */}
+            {!isPublished && editUrl && (
+              <a
+                href={editUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-300"
+              >
+                {isPending
+                  ? __("Review post", "structura")
+                  : __("Review draft", "structura")}
+                <PencilLine size={13} />
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+/**
+ * Failed-run banner. Shows the real cause inline rather than telling the
+ * user to "check the logs" — anonymous/"none" installs have no logs
+ * surface at all (the System Logs page was retired 2026-05-25), and even
+ * on licensed installs sending someone off to a separate page for an
+ * error we already hold is poor UX. We render `userMessage` when present,
+ * fall back to the operator-safe `devMessage`, and always surface a small
+ * technical line (`code · kind`) so there's something concrete to report.
+ */
+const FailureResult = ({
+  error,
+}: {
+  error: RunStatusSerialized["error"];
+}) => {
+  const primary = error?.userMessage || error?.devMessage;
+  const techBits = [error?.code, error?.errorKind].filter(Boolean);
+
+  return (
+    <section className="mb-6 rounded-2xl border border-red-200/70 bg-red-50/40 p-6 shadow-sm dark:border-red-900/40 dark:bg-red-950/20">
+      <div className="flex items-start gap-3">
+        <AlertCircle className="mt-0.5 h-5 w-5 text-red-600 dark:text-red-400" />
+        <div className="flex-1">
+          <p className="m-0! font-medium text-red-900 dark:text-red-100">
+            {__("Generation failed", "structura")}
+          </p>
+          <p className="mt-2 text-sm text-red-800 dark:text-red-200 m-0!">
+            {primary ||
+              __(
+                "The run stopped before the post was created. Try Run again, or adjust your inputs and retry.",
+                "structura",
+              )}
+          </p>
+          {techBits.length > 0 && (
+            <p className="mt-2 font-mono text-[11px] text-red-700/80 dark:text-red-300/70 m-0!">
+              {techBits.join(" · ")}
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 /* ── helpers ───────────────────────────────────────────────── */
+
+/**
+ * Build a wp-admin post-editor URL from a post id. The SPA is served
+ * from `…/wp-admin/admin.php?page=structura`, so the admin base is the
+ * current path with the trailing `admin.php` stripped — this survives
+ * subdirectory installs, custom admin slugs, and reverse proxies where
+ * deriving from `structuraConfig.domain` alone would lose the path.
+ * Returns "" in non-browser contexts (Vitest) so callers can guard.
+ */
+const buildEditPostUrl = (postId: number | string): string => {
+  if (typeof window === "undefined") return "";
+  const { origin, pathname } = window.location;
+  const adminDir = pathname.replace(/admin\.php$/, "");
+  return `${origin}${adminDir}post.php?post=${encodeURIComponent(
+    String(postId),
+  )}&action=edit`;
+};
 
 const StatusPill = ({ status }: { status: RunStatusSerialized["status"] }) => {
   const intent =

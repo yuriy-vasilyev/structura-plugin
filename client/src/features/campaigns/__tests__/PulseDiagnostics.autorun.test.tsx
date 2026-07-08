@@ -5,7 +5,11 @@
  * `#/settings?run=connection-check`, and Settings passes `autoRun` so the
  * pulse check (which re-probes cloud→site reachability) fires on landing
  * instead of the user having to find + click it. Pins: fires exactly once
- * on mount when autoRun + a license are present, and not otherwise.
+ * on mount when autoRun + a cloud workspace are present, and not otherwise.
+ *
+ * Gate changed 2026-07-08 from `license.license_key` to `hasWorkspace` so
+ * anonymous/"none" installs (no license key, but a bootstrapped workspace)
+ * can run diagnostics too.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render } from "@testing-library/react";
@@ -14,9 +18,7 @@ const pulseMock = vi.hoisted(() => ({
   current: { mutate: vi.fn(), isPending: false, status: "idle" as string },
 }));
 const licenseMock = vi.hoisted(() => ({
-  current: { license: { license_key: "lic-123" } } as {
-    license: { license_key: string } | null;
-  },
+  current: { hasWorkspace: true } as { hasWorkspace: boolean | null },
 }));
 
 vi.mock("@wordpress/i18n", () => ({ __: (t: string) => t }));
@@ -38,11 +40,20 @@ import { PulseDiagnostics } from "../components/PulseDiagnostics";
 
 beforeEach(() => {
   pulseMock.current = { mutate: vi.fn(), isPending: false, status: "idle" };
-  licenseMock.current = { license: { license_key: "lic-123" } };
+  licenseMock.current = { hasWorkspace: true };
 });
 
 describe("PulseDiagnostics — autoRun", () => {
-  it("fires the pulse check once on mount when autoRun + license present", () => {
+  it("fires the pulse check once on mount when autoRun + a workspace present", () => {
+    render(<PulseDiagnostics autoRun />);
+    expect(pulseMock.current.mutate).toHaveBeenCalledTimes(1);
+  });
+
+  it("fires for an anonymous/'none' install (workspace, no license key)", () => {
+    // Regression (2026-07-08): the old license-key gate left Bridge
+    // Diagnostics disabled for anonymous installs even though they run
+    // cloud generation over the same handshake.
+    licenseMock.current = { hasWorkspace: true };
     render(<PulseDiagnostics autoRun />);
     expect(pulseMock.current.mutate).toHaveBeenCalledTimes(1);
   });
@@ -52,8 +63,8 @@ describe("PulseDiagnostics — autoRun", () => {
     expect(pulseMock.current.mutate).not.toHaveBeenCalled();
   });
 
-  it("does NOT fire without a license key", () => {
-    licenseMock.current = { license: { license_key: "" } };
+  it("does NOT fire without a workspace (unconfigured install)", () => {
+    licenseMock.current = { hasWorkspace: false };
     render(<PulseDiagnostics autoRun />);
     expect(pulseMock.current.mutate).not.toHaveBeenCalled();
   });

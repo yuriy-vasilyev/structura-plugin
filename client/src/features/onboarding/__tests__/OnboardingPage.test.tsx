@@ -159,6 +159,73 @@ describe("OnboardingPage — managed-plan AI-engine skip", () => {
   });
 });
 
+describe("OnboardingPage — none-tier Visuals skip (2026-07-08)", () => {
+  // `none`/anonymous installs can't generate images, so the Visuals step
+  // (4) is removed from their flow. Anonymous installs reach the wizard
+  // past the license gate via "continue without an account"
+  // (licenseGateSkipped) + a bootstrapped workspace.
+  const anonymousNone = () => {
+    licenseMock.current = {
+      ...licenseMock.current,
+      plan: "none",
+      isPaidLicense: false,
+      hasUsableLicense: false,
+      hasWorkspace: true,
+    };
+    useWizardStore.getState().setLicenseGateSkipped(true);
+  };
+
+  it("hides the Visuals pill and renumbers Personas to step 4", () => {
+    anonymousNone();
+    render(<OnboardingPage />);
+
+    expect(screen.queryByText("Visuals")).toBeNull();
+    // Personas renumbers from canonical 5 to displayed 4 (Visuals gone).
+    expect(screen.getByLabelText(/Step 4: Personas/)).toBeInTheDocument();
+  });
+
+  it("auto-validates step 4 so it never gates step 5 / finish", async () => {
+    anonymousNone();
+    render(<OnboardingPage />);
+
+    await waitFor(() =>
+      expect(useWizardStore.getState().stepValidity[4]).toBe(true),
+    );
+  });
+
+  it("Continue from step 3 hops to step 5, Back from 5 returns to 3", async () => {
+    anonymousNone();
+    useWizardStore.getState().setStepValid(1, true);
+    useWizardStore.getState().setStepValid(2, true);
+    useWizardStore.getState().setStepValid(3, true);
+    useWizardStore.getState().setActiveStep(3);
+    render(<OnboardingPage />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Continue/ }));
+    await waitFor(() =>
+      expect(useWizardStore.getState().activeStep).toBe(5),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Back/ }));
+    await waitFor(() =>
+      expect(useWizardStore.getState().activeStep).toBe(3),
+    );
+  });
+
+  it("keeps the Visuals step on a free plan (free CAN generate PNG)", () => {
+    licenseMock.current = {
+      ...licenseMock.current,
+      plan: "free",
+      isPaidLicense: false,
+      hasUsableLicense: true,
+      hasWorkspace: true,
+    };
+    render(<OnboardingPage />);
+
+    expect(screen.getByText("Visuals")).toBeInTheDocument();
+  });
+});
+
 describe("OnboardingPage — license gate", () => {
   const keyless = (hasWorkspace: boolean) => {
     licenseMock.current = {

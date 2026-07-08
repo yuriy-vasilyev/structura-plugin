@@ -21,6 +21,7 @@ const licenseMock = vi.hoisted(() => ({
   current: {
     hasUsableLicense: false as boolean | null,
     hasWorkspace: false as boolean | null,
+    isPaidLicense: false as boolean,
   },
 }));
 vi.mock("@/features/settings", () => ({
@@ -52,7 +53,11 @@ const setConfig = (config: Record<string, unknown>) => {
 beforeEach(() => {
   navigateMock.mockReset();
   locationMock.current = { pathname: "/" };
-  licenseMock.current = { hasUsableLicense: false, hasWorkspace: false };
+  licenseMock.current = {
+    hasUsableLicense: false,
+    hasWorkspace: false,
+    isPaidLicense: false,
+  };
   wizardDataMock.current = undefined;
   dismissedMock.current = false;
   setConfig({ had_prior_activation: false });
@@ -94,9 +99,50 @@ describe("useOnboardingAutoRedirect", () => {
   });
 
   it("still redirects on justCreated for a licensed workspace", () => {
-    licenseMock.current = { hasUsableLicense: true, hasWorkspace: true };
+    licenseMock.current = {
+      hasUsableLicense: true,
+      hasWorkspace: true,
+      isPaidLicense: true,
+    };
     setConfig({ had_prior_activation: true });
     wizardDataMock.current = { justCreated: true };
+    renderHook(() => useOnboardingAutoRedirect());
+
+    expect(navigateMock).toHaveBeenCalledWith("/onboarding");
+  });
+
+  // Regression (2026-07-08): a completed none/free wizard re-opened on
+  // every SPA load. positioning is a LOCKED step for those tiers, so
+  // `activationNeedsPositioning` stays true forever and the nudge fired
+  // endlessly. The nudge is now gated to tiers that can actually capture
+  // positioning.
+  it("does NOT re-nudge a none/free install that can't capture positioning", () => {
+    licenseMock.current = {
+      hasUsableLicense: true,
+      hasWorkspace: true,
+      isPaidLicense: false,
+    };
+    setConfig({ had_prior_activation: true });
+    wizardDataMock.current = {
+      justCreated: false,
+      activationNeedsPositioning: true,
+    };
+    renderHook(() => useOnboardingAutoRedirect());
+
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("still nudges a PAID new site that needs positioning (2nd-site case)", () => {
+    licenseMock.current = {
+      hasUsableLicense: true,
+      hasWorkspace: true,
+      isPaidLicense: true,
+    };
+    setConfig({ had_prior_activation: true });
+    wizardDataMock.current = {
+      justCreated: false,
+      activationNeedsPositioning: true,
+    };
     renderHook(() => useOnboardingAutoRedirect());
 
     expect(navigateMock).toHaveBeenCalledWith("/onboarding");

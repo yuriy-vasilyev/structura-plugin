@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { __ } from "@wordpress/i18n";
+import { __, sprintf } from "@wordpress/i18n";
 import { Alert, Button } from "@structura/ui";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router";
@@ -7,17 +7,19 @@ import { usePersonasQuery } from "@/features/personas";
 
 /**
  * Inline advisory for the Generate Post / New Campaign surfaces —
- * surfaces when the user is about to run a campaign with only the
- * auto-seeded default ("House voice") persona on file.
+ * surfaces when the user has exactly ONE persona on file.
  *
- * Why an advisory rather than a hard block: every fresh install (both
- * licensed AND anonymous, since Phase 1.8) lands with one
- * auto-seeded persona by `License_Manager::seed_default_persona_if_needed()`.
- * That's enough to run a campaign, so we let the user proceed — but
- * a single voice across every post produces tonally identical
- * content. A one-line "we'll use this; consider adding more" hint
- * gets the user to the personas page without forcing them through
- * it before they can do anything.
+ * Why an advisory rather than a hard block: a single voice across every
+ * post produces tonally identical content. A one-line "we'll use this;
+ * consider adding more" hint gets the user to the personas page without
+ * forcing them through it before they can do anything.
+ *
+ * Copy note (2026-07-08): this used to assert the single persona was the
+ * auto-seeded "House voice" default. That's wrong — a user who picks ONE
+ * persona from the onboarding templates also lands here, and telling them
+ * they're on an "auto-seeded default" they never chose reads as a bug.
+ * The copy now names the actual persona and makes no claim about its
+ * origin, which is true whether it was seeded or hand-picked.
  *
  * Visibility:
  *   - Hidden while personas are loading (avoids a "you have one
@@ -39,15 +41,26 @@ export const DefaultPersonaAdvisory: FC = () => {
   const count = personas?.length ?? 0;
   if (count !== 1) return null;
 
+  const personaName = personas?.[0]?.name ?? "";
+
   return (
     <Alert variant="info">
       <Sparkles />
-      <Alert.Title>{__("Using your default persona", "structura")}</Alert.Title>
+      <Alert.Title>{__("Using your only persona", "structura")}</Alert.Title>
       <Alert.Description>
-        {__(
-          "This run will use the auto-seeded \"House voice\" persona. Add a couple more personas to vary tone across campaigns and posts.",
-          "structura"
-        )}
+        {personaName
+          ? // translators: %s is the persona name.
+            sprintf(
+              __(
+                "Every post will use “%s” — your only persona. Add a couple more to vary tone across campaigns and posts.",
+                "structura",
+              ),
+              personaName,
+            )
+          : __(
+              "Every post will use your only persona. Add a couple more to vary tone across campaigns and posts.",
+              "structura",
+            )}
       </Alert.Description>
       <Alert.Action>
         <Button size="sm" variant="secondary" onClick={() => navigate("/personas")}>

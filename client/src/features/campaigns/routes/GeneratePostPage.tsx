@@ -201,6 +201,30 @@ const GeneratePostPage = () => {
     }));
   }, [aiSettings, defaultTextProvider, defaultImageProvider]);
 
+  // Auto-pin the only persona (2026-07-08). "Random persona" is
+  // meaningless with a single persona on file, and the dropdown below
+  // omits the "random" option entirely in that case — so leaving
+  // `personaId` on its default "random" would render the Select with no
+  // matching option (a blank trigger). Pin the one persona instead.
+  const hasPinnedSinglePersona = useRef(false);
+  useEffect(() => {
+    if (hasPinnedSinglePersona.current) return;
+    if (loadingPersonas) return;
+    if (personas.length !== 1) return;
+    hasPinnedSinglePersona.current = true;
+    setFormData((prev) =>
+      prev.intelligence.personaId === "random"
+        ? {
+            ...prev,
+            intelligence: {
+              ...prev.intelligence,
+              personaId: String(personas[0].id),
+            },
+          }
+        : prev,
+    );
+  }, [loadingPersonas, personas]);
+
   // Helpers
   const update = <K extends keyof CampaignFormData>(
     cluster: K,
@@ -296,8 +320,13 @@ const GeneratePostPage = () => {
   // handler `Number()`-d the value back, which produced `NaN` for
   // nanoids and silently dropped the selection (the Persona trigger
   // showed its placeholder after every click).
+  // "Random persona" only makes sense with 2+ personas to rotate
+  // between; with a single persona it's noise (and that persona is
+  // auto-pinned above), so omit it.
   const personaOptions = [
-    { value: "random", label: __("Random persona", "structura") },
+    ...(personas.length > 1
+      ? [{ value: "random", label: __("Random persona", "structura") }]
+      : []),
     ...personas.map((p) => ({ value: String(p.id), label: p.name })),
   ];
 

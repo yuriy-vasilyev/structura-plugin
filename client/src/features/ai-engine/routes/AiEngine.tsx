@@ -140,6 +140,24 @@ export const AiEngine = () => {
     return <PageLoader label={__("Syncing AI Vault…", "structura")} size="lg" padding="lg" />;
   }
 
+  // Pre-emptive cap locking — mirrors WizardStep2AiEngine (Yurii wp.org
+  // testing 2026-07-08). Keying the cap lock off `installed.length >=
+  // cap` made a `none` tier (cap 1) show BOTH OpenAI and Gemini as
+  // freely connectable until the first connect consumed the slot. Lock
+  // the extras up front instead: the first `slotsLeft` tier-eligible,
+  // not-yet-connected providers (catalog order) stay connectable; the
+  // rest read as cap-locked "Free License" from the start.
+  const slotsLeft = Math.max(0, providerCountCap - installed.length);
+  const capLockedIds = new Set<string>();
+  {
+    let slot = 0;
+    for (const id of available) {
+      if (!providers[id]) continue; // not offered at this tier at all
+      if (slot >= slotsLeft) capLockedIds.add(id);
+      slot++;
+    }
+  }
+
   /* ── Wizard helpers ───────────────────────────────────────────── */
   const openWizard = (id: string, reconfigure = false) => {
     const meta = catalog[id];
@@ -282,16 +300,17 @@ export const AiEngine = () => {
                 // If it's only in `catalog` (all providers), it's locked for this tier.
                 const isAvailableForTier = !!providers[id];
 
-                // Phase 1.8 §1.8.4 — when the calling tier already
-                // has its allowance of providers configured, the
-                // alternate available-for-tier cards flip to a
-                // cap-locked presentation rather than disappearing.
-                // Reason: a hidden card leaves the user wondering
-                // why "OpenAI" is gone after they connected Gemini;
-                // a visible-but-locked card with a "Get Free License"
-                // CTA gives them the swap-or-upgrade story explicitly.
-                const atCap = installed.length >= providerCountCap;
-                const isCapLocked = atCap && isAvailableForTier;
+                // Phase 1.8 §1.8.4 — available-for-tier cards beyond the
+                // tier's provider allowance flip to a cap-locked
+                // presentation rather than disappearing. Reason: a hidden
+                // card leaves the user wondering why "OpenAI" is gone
+                // after they connected Gemini; a visible-but-locked card
+                // with a "Get Free License" CTA gives them the swap-or-
+                // upgrade story explicitly. `capLockedIds` locks the
+                // extras up front (see the computation above) rather than
+                // only after the cap is physically consumed.
+                const isCapLocked =
+                  isAvailableForTier && capLockedIds.has(id);
 
                 // The user-visible "available" flag flips to false on
                 // either path so the card renders in the locked
