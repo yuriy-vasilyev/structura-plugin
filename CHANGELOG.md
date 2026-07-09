@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.15.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.14.1...v2.15.0) (2026-07-09)
+
+
+### Features
+
+* **post-status:** remove "pending", default to draft, and make run labels status-aware ([38aeea8](https://github.com/yuriy-vasilyev/structura-core/commit/38aeea874631b60fc1e1071ba656567eda63748f))
+* **video:** Gemini TTS voices with BYOK-aware key routing ([c1bd9e5](https://github.com/yuriy-vasilyev/structura-core/commit/c1bd9e52c2f5e53164ec7ba0a4fe858f044e7e14))
+* **video:** grouped two-provider voice picker across wp-admin and portal ([e57c0aa](https://github.com/yuriy-vasilyev/structura-core/commit/e57c0aa03699464e3b021540065bcdd2e104fdff))
+* **video:** raise the monthly video cap 20 → 40 ([25fed69](https://github.com/yuriy-vasilyev/structura-core/commit/25fed69ab620c0a08afa5c780fec440b399f2859))
+* **video:** Remotion composition package with six-template lineup ([924ac23](https://github.com/yuriy-vasilyev/structura-core/commit/924ac2359c8098782b4b4d13f51568adc4d50587))
+* **video:** remotion render pipeline, default renderer with Shotstack rollback ([70bbf8d](https://github.com/yuriy-vasilyev/structura-core/commit/70bbf8d206ec258fbf70e80cc136912fefe8cbb3))
+* **visuals:** fall back to a generic image style instead of blocking when no preset is bound ([ff2bac1](https://github.com/yuriy-vasilyev/structura-core/commit/ff2bac15496a2aef909ccdb215c2ff26c9482e06))
+
+
+### Bug Fixes
+
+* **none-tier:** gate AI-suggest to paid tiers + stop Visuals fetch when locked ([130f4ef](https://github.com/yuriy-vasilyev/structura-core/commit/130f4efb8b38d3b66d4ce40772f0d39f5200a279))
+* **portal:** wider video configure modal + scalable campaign bindings list ([281bc00](https://github.com/yuriy-vasilyev/structura-core/commit/281bc0010bfb65005cf05c7181543c211a063f0a))
+* **video:** 4GiB worker + capped render concurrency after first-render OOM ([9bcf2fa](https://github.com/yuriy-vasilyev/structura-core/commit/9bcf2fa2a3deaeadf6e230de397760bf17d42d88))
+* **video:** accept Remotion template ids as preset videoStyle values ([610b535](https://github.com/yuriy-vasilyev/structura-core/commit/610b535a9a86a54ce3ae46da20413075b6f7a410))
+
 ## [2.14.1](https://github.com/yuriy-vasilyev/structura-core/compare/v2.14.0...v2.14.1) (2026-07-08)
 
 
