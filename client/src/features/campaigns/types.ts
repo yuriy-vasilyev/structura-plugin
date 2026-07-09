@@ -97,16 +97,19 @@ export interface CampaignIntelligence {
 /**
  * WP post status a campaign writes generated posts to.
  *
- *   - `publish` — auto-publish the post (default; matches historical
- *     behavior when the `structura_post_status` global option existed)
+ *   - `publish` — auto-publish the post
  *   - `draft`   — save as a draft; the reviewer opens it in wp-admin later
- *   - `pending` — send for moderation review (the WP "Pending Review" state)
+ *
+ * "pending" was removed 2026-07-09: WordPress's "Pending Review" state never
+ * behaved distinctly for our generated posts (it read as a draft to the
+ * author), so the option only caused "is it published?" confusion. Legacy
+ * campaigns persisted with "pending" are normalized to "draft" on read.
  *
  * Lives on the Structure cluster because it shapes the output shell — it's
  * analogous to "enabled blocks" and "disclosure", not to intelligence knobs
  * like language or post length.
  */
-export type CampaignPostStatus = "publish" | "draft" | "pending";
+export type CampaignPostStatus = "publish" | "draft";
 
 export interface CampaignStructure {
   enabledBlocks: SUPPORTED_BLOCK_TYPE[];

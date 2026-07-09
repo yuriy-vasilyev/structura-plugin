@@ -30,6 +30,7 @@ import {
   MILESTONE_ORDER,
   milestoneOrderForFlowAndTier,
   isTerminalMilestone,
+  resolveRunPostStatus,
 } from "../milestones";
 
 // List kept in sync with the `Milestone` union in `packages/types/src/index.ts`.
@@ -150,5 +151,46 @@ describe("isTerminalMilestone", () => {
     // progress state rather than prematurely showing a success receipt
     // for a milestone the cloud meant as still-running.
     expect(isTerminalMilestone("something_new")).toBe(false);
+  });
+});
+
+describe("resolveRunPostStatus", () => {
+  it("prefers the actual result status (outputs.post.status)", () => {
+    expect(resolveRunPostStatus({ outputs: { post: { status: "draft" } } })).toBe("draft");
+    expect(resolveRunPostStatus({ outputs: { post: { status: "publish" } } })).toBe("publish");
+  });
+
+  it("falls back to the requested status from inputSnapshot", () => {
+    expect(
+      resolveRunPostStatus({ inputSnapshot: { structure: { postStatus: "draft" } } }),
+    ).toBe("draft");
+  });
+
+  it("collapses a legacy 'pending' to draft (pending removed 2026-07-09)", () => {
+    expect(
+      resolveRunPostStatus({ inputSnapshot: { structure: { postStatus: "pending" } } }),
+    ).toBe("draft");
+  });
+
+  it("assumes publish when there is no signal at all", () => {
+    expect(resolveRunPostStatus({})).toBe("publish");
+  });
+});
+
+describe("milestoneHeadline — status-aware publish/done steps", () => {
+  it("relabels publishing + done for a draft run", () => {
+    expect(milestoneHeadline("publishing", "draft")).toBe("Saving to WordPress");
+    expect(milestoneHeadline("done", "draft")).toBe("Draft saved");
+  });
+
+  it("keeps the published wording for a published run (default)", () => {
+    expect(milestoneHeadline("publishing")).toBe("Publishing to WordPress");
+    expect(milestoneHeadline("publishing", "publish")).toBe("Publishing to WordPress");
+    expect(milestoneHeadline("done", "publish")).toBe("Post published");
+  });
+
+  it("relabels the publishing subtext for a draft run", () => {
+    expect(milestoneSubtext("publishing", "draft")).toBe("Saving the draft to WordPress");
+    expect(milestoneSubtext("publishing")).toBe("Pushing the post into WordPress");
   });
 });

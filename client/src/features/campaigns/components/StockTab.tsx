@@ -21,6 +21,7 @@ import {
   type StockEntryView,
 } from "@/features/campaigns/api/useStockListQuery";
 import { useStockMutations } from "@/features/campaigns/api/useStockMutations";
+import { normalizePostStatus } from "@/features/campaigns/helpers";
 
 /**
  * Stock tab — visibility + control over the campaign's pre-generated
@@ -87,7 +88,8 @@ const StockBanner: FC<{ campaign: Campaign }> = ({ campaign }) => {
       intelligence: campaign.intelligence,
       structure: {
         ...campaign.structure,
-        postStatus: campaign.structure.postStatus ?? "publish",
+        // Normalize legacy "pending" (removed 2026-07-09) → "draft".
+        postStatus: normalizePostStatus(campaign.structure.postStatus ?? "publish"),
       },
       taxonomy: campaign.taxonomy,
       schedule: { ...campaign.schedule, pregenerationEnabled: true },

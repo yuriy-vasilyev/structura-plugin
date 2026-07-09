@@ -42,6 +42,7 @@ export const ChannelsConnectionsPage = () => {
     data: connections,
     videoQuota,
     boundVisualPreset,
+    videoTts,
     isLoading,
     isError,
     error,
@@ -93,8 +94,9 @@ export const ChannelsConnectionsPage = () => {
   // Post-OAuth landing: pop the settings modal for the just-created
   // row so the user sees their bindings + cadence options
   // immediately. The connection is already saved with defaults
-  // (all campaigns, every post; video: voice Ava, style Clean — its
-  // install flow reuses this same hand-off), so closing the modal
+  // (all campaigns, every post; video: voice Zephyr, styling from the
+  // bound visual preset — its install flow reuses this same hand-off),
+  // so closing the modal
   // without touching anything keeps the wiring functional.
   //
   // Strip the query param after consuming it so a refresh doesn't
@@ -324,6 +326,7 @@ export const ChannelsConnectionsPage = () => {
           connection={configuringConnection}
           videoQuota={videoQuota}
           boundVisualPreset={boundVisualPreset}
+          videoTts={videoTts}
           open={true}
           onClose={() => setConfiguringConnection(null)}
         />

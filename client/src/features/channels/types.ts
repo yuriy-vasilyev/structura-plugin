@@ -214,11 +214,13 @@ export interface ConnectionSummary {
    */
   externalAccountMeta?: IndexNowMeta | LinkedInMeta | Record<string, unknown>;
   /**
-   * Video-channel voice id (`"ava"` … `"noah"`, see `VIDEO_VOICES` in
-   * `videoChannel.ts`). Only present on `integrationId === "video"`
-   * connections; the cloud defaults fresh installs to `"ava"`. Optional on
-   * read — the UI falls back to the Ava default when absent so a
-   * pre-video-release doc (or a non-video connection) renders cleanly.
+   * Video-channel voiceover voice. Canonical `provider:id` form
+   * (`"openai:nova"`, `"gemini:Zephyr"`) post voice-picker-v2; legacy
+   * persona ids (`"ava"` … `"noah"`) stay valid forever and resolve via
+   * `resolveStoredVideoVoice()` in `@structura/types`. Only present on
+   * `integrationId === "video"` connections. Optional on read — the UI
+   * falls back to `DEFAULT_VIDEO_VOICE` (`gemini:Zephyr`) when absent so
+   * a pre-video-release doc (or a non-video connection) renders cleanly.
    */
   videoVoice?: string;
   /**
@@ -407,6 +409,26 @@ export interface VideoQuota {
 }
 
 /**
+ * TTS provider availability for the video voice picker, returned
+ * top-level on `channelsListConnections`. Mirrors `VideoTtsAvailability`
+ * in `functions/src/channels/endpoints/connections.ts`.
+ *
+ *   - `managed: true` (cloud / cloud_pro) — renders narrate on platform
+ *     master keys, so both provider groups are selectable and the picker
+ *     shows no gate UI.
+ *   - `managed: false` (BYOK) — a provider group is selectable iff the
+ *     matching `providers` flag is `true` (active workspace credential).
+ *
+ * Optional during the rollout window: an older cloud omits it, and the
+ * picker treats absence like `managed` (no gate UI) — never lock a user
+ * out on missing data.
+ */
+export interface VideoTtsAvailability {
+  managed: boolean;
+  providers: { openai: boolean; gemini: boolean };
+}
+
+/**
  * Bound-visual-preset digest for the Video channel's read-only style
  * summary in the Configure dialog (video-visuals handoff §3). Mirrors
  * `BoundVisualPresetSummary` in
@@ -446,6 +468,12 @@ export interface ListConnectionsResponse {
    *     one release window.
    */
   boundVisualPreset?: BoundVisualPresetSummary | null;
+  /**
+   * TTS provider availability for the voice picker's BYOK gating. Absent
+   * on older clouds (pre voice-picker-v2) for at least one release
+   * window — treated as "no gates" (see {@link VideoTtsAvailability}).
+   */
+  videoTts?: VideoTtsAvailability;
 }
 
 export interface SaveConnectionResponse {
@@ -583,9 +611,12 @@ export interface UpdateConnectionSettingsInput {
    */
   selected_organization_urn?: string;
   /**
-   * Video-only voiceover voice id (one of `VIDEO_VOICES`). Only send for
-   * `integrationId === "video"` connections — the cloud validates the id
-   * against its own voice catalog and ignores the field elsewhere.
+   * Video-only voiceover voice — canonical `provider:id` from
+   * `VIDEO_VOICE_CATALOG` (`@structura/types`). The picker always writes
+   * the canonical form; the cloud also accepts (and canonicalizes)
+   * legacy persona ids. Only send for `integrationId === "video"`
+   * connections — the cloud validates the id against its own voice
+   * catalog and ignores the field elsewhere.
    */
   video_voice?: string;
   /**

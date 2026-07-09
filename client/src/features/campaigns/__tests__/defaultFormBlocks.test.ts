@@ -7,7 +7,7 @@
  * toggle — only the *default* changes.
  */
 import { describe, expect, it } from "vitest";
-import { getCampaignFormDataForLicense } from "../helpers";
+import { getCampaignFormDataForLicense, normalizePostStatus } from "../helpers";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
 
 describe("getCampaignFormDataForLicense — enabledBlocks defaults", () => {
@@ -43,16 +43,28 @@ describe("getCampaignFormDataForLicense — enabledBlocks defaults", () => {
 });
 
 describe("getCampaignFormDataForLicense — postStatus default", () => {
-  // New campaigns default to "pending" (changed 2026-06-07) so generated
-  // posts wait for a human review before going live. Pinned across all
-  // tiers because each tier branch spreads `structure` independently —
-  // a tier-specific override would silently diverge.
+  // New campaigns default to "draft" (2026-07-09; "pending" was removed
+  // because WP treated it as a draft anyway) so generated posts wait for
+  // a human review before going live. Pinned across all tiers because
+  // each tier branch spreads `structure` independently — a tier-specific
+  // override would silently diverge.
   it.each([
     ["paid", { isPaidLicense: true, isLicensed: true }],
     ["free", { isPaidLicense: false, isLicensed: true }],
     ["none", { isPaidLicense: false, isLicensed: false }],
-  ] as const)("%s tier defaults postStatus to pending", (_tier, license) => {
+  ] as const)("%s tier defaults postStatus to draft", (_tier, license) => {
     const { structure } = getCampaignFormDataForLicense(license);
-    expect(structure.postStatus).toBe("pending");
+    expect(structure.postStatus).toBe("draft");
+  });
+});
+
+describe("normalizePostStatus", () => {
+  it("keeps publish, and collapses everything else (incl. legacy pending) to draft", () => {
+    expect(normalizePostStatus("publish")).toBe("publish");
+    expect(normalizePostStatus("draft")).toBe("draft");
+    // "pending" was removed 2026-07-09 — WP treated it as a draft anyway.
+    expect(normalizePostStatus("pending")).toBe("draft");
+    expect(normalizePostStatus(undefined)).toBe("draft");
+    expect(normalizePostStatus("garbage")).toBe("draft");
   });
 });

@@ -50,9 +50,10 @@ export const postStatusLabel = (status: CampaignPostStatus | string): string => 
     case "publish":
       return __("Published", "structura");
     case "draft":
-      return __("Draft", "structura");
+    // "pending" was removed as a campaign option (2026-07-09); a legacy
+    // persisted value reads as a draft (which is how WP treated it).
     case "pending":
-      return __("Pending review", "structura");
+      return __("Draft", "structura");
     case "future":
       return __("Scheduled", "structura");
     case "private":

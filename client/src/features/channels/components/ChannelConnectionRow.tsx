@@ -45,11 +45,8 @@ import { connectionStatusLabel } from "../labels";
 import { useVerifyIndexNowKeyfile } from "../api/useIndexNow";
 import { IntegrationIcon } from "./IntegrationIcon";
 import { buildMarketingPricingUrl } from "@/utils/portalLinks";
-import {
-  VIDEO_INTEGRATION_ID,
-  videoStyleById,
-  videoVoiceById,
-} from "../videoChannel";
+import { resolveStoredVideoVoice } from "@structura/types";
+import { VIDEO_INTEGRATION_ID, videoStyleById } from "../videoChannel";
 
 interface ChannelConnectionRowProps {
   connection: ConnectionSummary;
@@ -220,9 +217,13 @@ export const ChannelConnectionRow = ({
                 <span>
                   {isVideo ? (
                     sprintf(
-                      /* translators: %1$s = voice name (e.g. "Ava"), %2$s = visual preset name (e.g. "Clean"), %3$s = cadence ("every post" / "every 3th post"). */
+                      /* translators: %1$s = voice name (e.g. "Nova"), %2$s = visual preset name (e.g. "Clean"), %3$s = cadence ("every post" / "every 3th post"). */
                       __("Voice %1$s · %2$s preset · %3$s", "structura"),
-                      videoVoiceById(connection.videoVoice).name,
+                      // Stored value may be canonical ("gemini:Zephyr") or a
+                      // legacy persona id ("ava") — resolve to the real
+                      // voice name so the row matches what the picker shows.
+                      resolveStoredVideoVoice(connection.videoVoice).option
+                        .name,
                       videoStyleById(effectiveVideoStyle).name,
                       (connection.postCadenceN ?? 1) <= 1
                         ? __("every post", "structura")

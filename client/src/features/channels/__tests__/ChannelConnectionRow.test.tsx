@@ -274,7 +274,7 @@ describe("ChannelConnectionRow — video channel", () => {
     // Settings summary instead of "Notifications in …".
     expect(screen.queryByText(/notifications in/i)).toBeNull();
     const row = screen.getByRole("listitem");
-    expect(row).toHaveTextContent("Voice Ava · Clean preset · every post");
+    expect(row).toHaveTextContent("Voice Nova · Clean preset · every post");
   });
 
   it("prefers the bound preset's style over the connection's legacy field once the digest arrives", () => {
@@ -298,7 +298,7 @@ describe("ChannelConnectionRow — video channel", () => {
       </ul>,
     );
     expect(screen.getByRole("listitem")).toHaveTextContent(
-      "Voice Ava · Kinetic preset · every post",
+      "Voice Nova · Kinetic preset · every post",
     );
   });
 
@@ -315,11 +315,11 @@ describe("ChannelConnectionRow — video channel", () => {
     );
     // Unbound sites render stock Clean regardless of the legacy field.
     expect(screen.getByRole("listitem")).toHaveTextContent(
-      "Voice Ava · Clean preset · every post",
+      "Voice Zephyr · Clean preset · every post",
     );
   });
 
-  it("summarizes a throttled cadence and falls back to Ava/Clean defaults", () => {
+  it("summarizes a throttled cadence and falls back to Zephyr/Clean defaults", () => {
     render(
       <ul>
         <ChannelConnectionRow
@@ -330,7 +330,7 @@ describe("ChannelConnectionRow — video channel", () => {
       </ul>,
     );
     const row = screen.getByRole("listitem");
-    expect(row).toHaveTextContent("Voice Ava · Clean preset · every 3th post");
+    expect(row).toHaveTextContent("Voice Zephyr · Clean preset · every 3th post");
   });
 
   it("renders the compact quota meter when quota data is available", () => {

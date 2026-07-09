@@ -1,7 +1,17 @@
-import { CampaignFormData } from "@/features/campaigns/types";
+import { CampaignFormData, CampaignPostStatus } from "@/features/campaigns/types";
 import { DEFAULT_CAMPAIGN_FORM_DATA } from "@/features/campaigns/constants";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
 import type { SeoOptimizationRules } from "@/features/settings/types";
+
+/**
+ * Coerce any persisted / wire post-status value to the two we support.
+ * "pending" was removed 2026-07-09 (WP treated it as a draft), so a
+ * legacy campaign persisted with "pending" — or any unrecognized value —
+ * reads back as "draft" rather than selecting a now-missing option or
+ * being mislabelled as published.
+ */
+export const normalizePostStatus = (value: unknown): CampaignPostStatus =>
+  value === "publish" ? "publish" : "draft";
 
 /**
  * All six user-toggleable SEO rules in `SeoRuleName` are Pro-gated in

@@ -33,6 +33,7 @@ import type {
   ConnectionSummary,
   ListConnectionsResponse,
   VideoQuota,
+  VideoTtsAvailability,
 } from "../types";
 
 interface ChannelConnectionsData {
@@ -40,6 +41,8 @@ interface ChannelConnectionsData {
   videoQuota?: VideoQuota;
   /** See ListConnectionsResponse — `undefined` (older cloud) ≠ `null`. */
   boundVisualPreset?: BoundVisualPresetSummary | null;
+  /** TTS provider gating for the voice picker; absent = older cloud = no gates. */
+  videoTts?: VideoTtsAvailability;
 }
 
 export const useChannelConnectionsQuery = () => {
@@ -89,7 +92,24 @@ export const useChannelConnectionsQuery = () => {
               typeof rawPreset.label === "string"
             ? rawPreset
             : undefined;
-      return { connections, videoQuota, boundVisualPreset };
+      // TTS availability for the voice picker. A malformed doc degrades to
+      // `undefined` (= "older cloud"), which the picker treats as managed
+      // (no gate UI) — a wire hiccup must never lock voices away.
+      const rawTts = response?.videoTts;
+      const videoTts: VideoTtsAvailability | undefined =
+        rawTts &&
+        typeof rawTts.managed === "boolean" &&
+        typeof rawTts.providers?.openai === "boolean" &&
+        typeof rawTts.providers?.gemini === "boolean"
+          ? {
+              managed: rawTts.managed,
+              providers: {
+                openai: rawTts.providers.openai,
+                gemini: rawTts.providers.gemini,
+              },
+            }
+          : undefined;
+      return { connections, videoQuota, boundVisualPreset, videoTts };
     },
   });
 
@@ -101,5 +121,7 @@ export const useChannelConnectionsQuery = () => {
     videoQuota: query.data?.videoQuota,
     /** Bound-preset digest for the Video dialog (see ListConnectionsResponse). */
     boundVisualPreset: query.data?.boundVisualPreset,
+    /** TTS provider availability for the voice picker's BYOK gating. */
+    videoTts: query.data?.videoTts,
   };
 };

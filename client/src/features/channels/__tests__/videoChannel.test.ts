@@ -2,10 +2,10 @@
  * Video channel constants + pure helpers.
  *
  * Pins the wire-adjacent vocabulary the Video channel UI is built on:
- *   - the six v1 voices and three style presets (ids are what rides the
- *     `video_voice` / `video_style` wire fields — a typo here is a dead
- *     save, so the ids are asserted verbatim);
- *   - the CDN sample-URL shape;
+ *   - the three style presets (ids are what rides the `video_style` wire
+ *     field — a typo here is a dead save, so the ids are asserted
+ *     verbatim; the VOICE catalog moved to `@structura/types` and is
+ *     covered through the ConfigureConnectionModal tests);
  *   - the row-state resolver, especially the client-side "expired"
  *     derivation (status "ready" + expiresAt in the past) the cloud never
  *     sends explicitly;
@@ -18,10 +18,8 @@ import { describe, expect, it } from "vitest";
 import {
   CAPTION_LIMITS,
   DEFAULT_VIDEO_STYLE,
-  DEFAULT_VIDEO_VOICE,
   VIDEO_INTEGRATION_ID,
   VIDEO_STYLE_PRESETS,
-  VIDEO_VOICES,
   captionHook,
   formatVideoBytes,
   formatVideoDuration,
@@ -29,8 +27,6 @@ import {
   parseCaptionBlocks,
   resolveVideoRowState,
   videoStyleById,
-  videoVoiceById,
-  voiceSampleUrl,
 } from "../videoChannel";
 import type { VideoJob, VideoSocialPackages } from "../types";
 
@@ -49,24 +45,6 @@ describe("video channel constants", () => {
     expect(VIDEO_INTEGRATION_ID).toBe("video");
   });
 
-  it("ships the six v1 voices with their wire ids in order", () => {
-    expect(VIDEO_VOICES.map((v) => v.id)).toEqual([
-      "ava",
-      "marcus",
-      "lena",
-      "oliver",
-      "priya",
-      "noah",
-    ]);
-    // Names/descriptors are proper nouns + tone fragments — untranslated
-    // by design, so asserting the literals is safe.
-    expect(videoVoiceById("marcus")).toMatchObject({
-      name: "Marcus",
-      descriptor: "Deep · Authoritative",
-      sexTag: "M",
-    });
-  });
-
   it("ships the three v1 style presets with their wire ids", () => {
     expect(VIDEO_STYLE_PRESETS.map((p) => p.id)).toEqual([
       "clean",
@@ -79,20 +57,11 @@ describe("video channel constants", () => {
     });
   });
 
-  it("defaults to Ava / Clean — the install-time defaults", () => {
-    expect(DEFAULT_VIDEO_VOICE).toBe("ava");
+  it("defaults to Clean — the install-time default", () => {
     expect(DEFAULT_VIDEO_STYLE).toBe("clean");
-    // Unknown / missing ids fall back to the defaults so a newer cloud
-    // voice id never crashes the row or the modal.
-    expect(videoVoiceById(undefined).id).toBe("ava");
-    expect(videoVoiceById("someone-new").id).toBe("ava");
+    // Unknown / missing ids fall back to the default so a newer cloud
+    // style id never crashes the row or the modal.
     expect(videoStyleById("holo").id).toBe("clean");
-  });
-
-  it("builds voice sample URLs on the releases CDN", () => {
-    expect(voiceSampleUrl("lena")).toBe(
-      "https://storage.googleapis.com/structura-releases/assets/voice-samples/lena.mp3",
-    );
   });
 });
 

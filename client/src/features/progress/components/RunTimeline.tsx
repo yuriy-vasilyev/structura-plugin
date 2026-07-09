@@ -9,6 +9,7 @@ import {
   milestoneIcon,
   milestoneOrderForFlowAndTier,
   milestoneSubtext,
+  resolveRunPostStatus,
 } from "../milestones";
 import { formatDuration } from "../formatDuration";
 
@@ -595,6 +596,10 @@ export const RunTimeline = ({
   const isTerminalSuccess = run.status === "succeeded" || run.status === "succeeded_with_warnings";
   const isFailed = run.status === "failed";
   const isCancelled = run.status === "cancelled";
+  // Draft runs relabel the "Publishing to WordPress" / "Post published"
+  // steps ("Saving to WordPress" / "Draft saved") — a draft never went
+  // live, so the published wording was misleading (2026-07-09).
+  const postStatus = resolveRunPostStatus(run);
 
   // Line-fill height — fraction of the stepper the filled line covers,
   // pinned to the active milestone's position. On terminal success we
@@ -785,6 +790,7 @@ export const RunTimeline = ({
             <TimelineRow
               key={milestone}
               milestoneId={milestone}
+              postStatus={postStatus}
               state={state}
               density={density}
               elapsedMs={elapsedMs}
@@ -847,6 +853,8 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 
 interface TimelineRowProps {
   milestoneId: Milestone;
+  /** Effective post status — relabels the publish/done rows for drafts. */
+  postStatus: "publish" | "draft";
   state: TimelineState;
   density: "standard" | "compact";
   elapsedMs?: number;
@@ -872,6 +880,7 @@ interface TimelineRowProps {
 
 const TimelineRow = ({
   milestoneId,
+  postStatus,
   state,
   density,
   elapsedMs,
@@ -972,7 +981,7 @@ const TimelineRow = ({
                   (isCancelled || isWarning) && "text-amber-700 dark:text-amber-300"
                 )}
               >
-                {milestoneHeadline(milestoneId)}
+                {milestoneHeadline(milestoneId, postStatus)}
               </span>
               {/* Subtext: explanation rows for the steps that need one —
                   the failing step carries the cloud's error.userMessage,

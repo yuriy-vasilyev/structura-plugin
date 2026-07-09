@@ -13,7 +13,7 @@
  */
 
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
@@ -322,7 +322,7 @@ describe("ConfigureConnectionModal — video channel", () => {
     ).toBeInTheDocument();
   });
 
-  it("saves the defaults (ava / clean) and omits notification_locale", async () => {
+  it("saves the defaults (gemini:Zephyr / clean) and omits notification_locale", async () => {
     apiFetchMock.mockResolvedValueOnce({
       success: true,
       connection: videoConnection(),
@@ -344,7 +344,9 @@ describe("ConfigureConnectionModal — video channel", () => {
           method: "POST",
           data: expect.objectContaining({
             connection_id: "conn-video",
-            video_voice: "ava",
+            // New-connection default (no stored voice) — the shared
+            // catalog's DEFAULT_VIDEO_VOICE, already canonical.
+            video_voice: "gemini:Zephyr",
             video_style: "clean",
           }),
         }),
@@ -376,7 +378,9 @@ describe("ConfigureConnectionModal — video channel", () => {
       expect(apiFetchMock).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            video_voice: "lena",
+            // Legacy persona "lena" resolves to its real voice and the
+            // save writes the CANONICAL id (the cloud canonicalizes too).
+            video_voice: "openai:shimmer",
             video_style: "bold",
           }),
         }),
@@ -442,8 +446,9 @@ describe("ConfigureConnectionModal — video channel", () => {
       />,
     );
 
-    // The trigger adornment plays the currently selected voice (Ava).
-    const play = screen.getByRole("button", { name: /play sample of Ava/i });
+    // The trigger adornment plays the currently selected voice (the
+    // Zephyr default for a fresh connection).
+    const play = screen.getByRole("button", { name: /play sample of Zephyr/i });
     expect(play).toHaveAttribute("aria-pressed", "false");
     fireEvent.click(play);
     // Playing state flips the affordance to a stop control. jsdom can't
@@ -455,7 +460,7 @@ describe("ConfigureConnectionModal — video channel", () => {
     ).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("button", { name: /stop voice preview/i }));
     expect(
-      screen.getByRole("button", { name: /play sample of Ava/i }),
+      screen.getByRole("button", { name: /play sample of Zephyr/i }),
     ).toHaveAttribute("aria-pressed", "false");
   });
 });
@@ -574,7 +579,8 @@ describe("ConfigureConnectionModal — video bound-preset summary", () => {
       );
       expect(call).toBeTruthy();
       const data = (call![0] as { data: Record<string, unknown> }).data;
-      expect(data.video_voice).toBe("lena");
+      // Legacy "lena" resolves to its real voice; the wire is canonical.
+      expect(data.video_voice).toBe("openai:shimmer");
       expect(data.video_style).toBeUndefined();
     });
   });
@@ -633,5 +639,303 @@ describe("ConfigureConnectionModal — video bound-preset summary", () => {
         }),
       );
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Video channel — grouped voice picker (voice-picker handoff, 2026-07)
+// ---------------------------------------------------------------------------
+//
+// The flat 6-persona Select is replaced by the @structura/ui Combobox fed
+// from the shared VIDEO_VOICE_CATALOG (packages/types): OpenAI (9) +
+// Gemini (30) groups, legacy-persona resolution, canonical save wire, and
+// BYOK provider gating via the `videoTts` field on channelsListConnections.
+
+describe("ConfigureConnectionModal — video voice picker", () => {
+  const videoConnection = (
+    overrides: Partial<ConnectionSummary> = {},
+  ): ConnectionSummary =>
+    makeConnection({
+      connectionId: "conn-video",
+      integrationId: "video",
+      displayName: "Vertical video",
+      externalAccountId: null,
+      externalAccountMeta: undefined,
+      ...overrides,
+    });
+
+  const openVoicePicker = () => {
+    fireEvent.click(screen.getByRole("combobox"));
+    return screen.getByRole("listbox");
+  };
+
+  it("renders all 39 catalog voices in two provider groups", () => {
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={videoConnection()}
+        open
+        onClose={() => {}}
+      />,
+    );
+
+    const listbox = openVoicePicker();
+    const openai = within(listbox).getByRole("group", { name: "OpenAI" });
+    const gemini = within(listbox).getByRole("group", { name: "Gemini" });
+    expect(within(openai).getAllByRole("option")).toHaveLength(9);
+    expect(within(gemini).getAllByRole("option")).toHaveLength(30);
+    expect(within(listbox).getAllByRole("option")).toHaveLength(39);
+    // Zephyr (the platform default) carries the "Default" chip.
+    expect(
+      within(gemini).getByRole("option", { name: /Zephyr/ }),
+    ).toHaveTextContent("Default");
+    // Search placeholder interpolates the unlocked count (all 39 here).
+    expect(screen.getByPlaceholderText("Search 39 voices…")).toBeInTheDocument();
+    // Footnote pinned under the list.
+    expect(
+      screen.getByText("Samples are English; videos follow your post language."),
+    ).toBeInTheDocument();
+  });
+
+  it("preselects the Zephyr default (with provider badge) on a new connection", () => {
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={videoConnection()} // no stored videoVoice
+        open
+        onClose={() => {}}
+      />,
+    );
+    const trigger = screen.getByRole("combobox");
+    expect(trigger).toHaveTextContent("Zephyr");
+    expect(trigger).toHaveTextContent("Bright · Energetic");
+    // Provider mini-badge rides the trigger as a leading adornment.
+    expect(screen.getByText("Gemini")).toBeInTheDocument();
+    // No legacy helper for a canonical/absent stored value.
+    expect(screen.queryByText(/now appears under its real name/)).toBeNull();
+  });
+
+  it("resolves a legacy persona value to its real voice and shows the one-time helper", () => {
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={videoConnection({ videoVoice: "ava" })}
+        open
+        onClose={() => {}}
+      />,
+    );
+    // The picker never shows persona names — "ava" renders as Nova.
+    const trigger = screen.getByRole("combobox");
+    expect(trigger).toHaveTextContent("Nova");
+    expect(trigger).toHaveTextContent("Warm · Conversational");
+    expect(screen.getByText("OpenAI")).toBeInTheDocument();
+    // Reassurance helper interpolates persona + real voice names.
+    expect(
+      screen.getByText(/now appears under its real name, Nova/),
+    ).toHaveTextContent(
+      "Your voice ‘Ava’ now appears under its real name, Nova. It’s the same voice — nothing about your videos changes.",
+    );
+  });
+
+  it("keeps the helper hidden for a canonical stored value", () => {
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={videoConnection({ videoVoice: "gemini:Puck" })}
+        open
+        onClose={() => {}}
+      />,
+    );
+    expect(screen.getByRole("combobox")).toHaveTextContent("Puck");
+    expect(screen.queryByText(/now appears under its real name/)).toBeNull();
+  });
+
+  it("saves the canonical id for a legacy persona connection (video_voice wire)", async () => {
+    apiFetchMock.mockResolvedValueOnce({
+      success: true,
+      connection: videoConnection(),
+    });
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={videoConnection({ videoVoice: "ava" })}
+        open
+        onClose={() => {}}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /save settings/i }));
+
+    await waitFor(() => {
+      expect(apiFetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: "/structura/v1/channels/connections/settings",
+          method: "POST",
+          data: expect.objectContaining({
+            connection_id: "conn-video",
+            video_voice: "openai:nova",
+          }),
+        }),
+      );
+    });
+  });
+
+  it("saves a picked voice's canonical id", async () => {
+    apiFetchMock.mockResolvedValueOnce({
+      success: true,
+      connection: videoConnection(),
+    });
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={videoConnection()}
+        open
+        onClose={() => {}}
+      />,
+    );
+
+    openVoicePicker();
+    fireEvent.click(screen.getByRole("option", { name: /Onyx/ }));
+    fireEvent.click(screen.getByRole("button", { name: /save settings/i }));
+
+    await waitFor(() => {
+      expect(apiFetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ video_voice: "openai:onyx" }),
+        }),
+      );
+    });
+  });
+
+  it("builds sample URLs per provider extension (openai mp3, gemini wav)", () => {
+    // Capture Audio construction so the CDN URL contract is pinned:
+    // v2 path, `{provider}-{id}` file, wav for Gemini / mp3 for OpenAI.
+    const sources: string[] = [];
+    class FakeAudio {
+      onended: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(src: string) {
+        sources.push(src);
+      }
+      play() {
+        return Promise.resolve();
+      }
+      pause() {}
+    }
+    vi.stubGlobal("Audio", FakeAudio);
+    try {
+      renderWithClient(
+        <ConfigureConnectionModal
+          connection={videoConnection()}
+          open
+          onClose={() => {}}
+        />,
+      );
+      openVoicePicker();
+      fireEvent.click(screen.getByRole("button", { name: /play sample of Puck/i }));
+      fireEvent.click(screen.getByRole("button", { name: /play sample of Nova/i }));
+      expect(sources).toEqual([
+        "https://storage.googleapis.com/structura-releases/assets/voice-samples/v2/gemini-Puck.wav",
+        "https://storage.googleapis.com/structura-releases/assets/voice-samples/v2/openai-nova.mp3",
+      ]);
+      // Row playback stays a sample action: the selection didn't change.
+      expect(screen.getByRole("listbox")).toBeInTheDocument();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("gates a missing BYOK provider with the teaser row instead of its options", () => {
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={videoConnection()}
+        videoTts={{ managed: false, providers: { openai: true, gemini: false } }}
+        open
+        onClose={() => {}}
+      />,
+    );
+
+    const listbox = openVoicePicker();
+    // Unlocked OpenAI options render; gated Gemini ones don't.
+    expect(within(listbox).getAllByRole("option")).toHaveLength(9);
+    const gemini = within(listbox).getByRole("group", { name: "Gemini" });
+    expect(within(gemini).queryAllByRole("option")).toHaveLength(0);
+    expect(gemini).toHaveTextContent(
+      "Connect a Gemini API key to unlock 30 more voices.",
+    );
+    // CTA deep-links to the AI-keys surface (hash-routed SPA).
+    expect(
+      within(gemini).getByRole("link", { name: "Open AI keys" }),
+    ).toHaveAttribute("href", "#/ai-engine");
+    // Placeholder counts only the unlocked voices.
+    expect(screen.getByPlaceholderText("Search 9 voices…")).toBeInTheDocument();
+  });
+
+  it("gates a missing OpenAI key symmetrically", () => {
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={videoConnection()}
+        videoTts={{ managed: false, providers: { openai: false, gemini: true } }}
+        open
+        onClose={() => {}}
+      />,
+    );
+    const listbox = openVoicePicker();
+    expect(within(listbox).getAllByRole("option")).toHaveLength(30);
+    expect(
+      within(listbox).getByRole("group", { name: "OpenAI" }),
+    ).toHaveTextContent("Connect a OpenAI API key to unlock 9 more voices.");
+    expect(screen.getByPlaceholderText("Search 30 voices…")).toBeInTheDocument();
+  });
+
+  it("shows no gate UI on managed plans regardless of provider flags", () => {
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={videoConnection()}
+        videoTts={{ managed: true, providers: { openai: false, gemini: false } }}
+        open
+        onClose={() => {}}
+      />,
+    );
+    const listbox = openVoicePicker();
+    expect(within(listbox).getAllByRole("option")).toHaveLength(39);
+    expect(screen.queryByText(/API key to unlock/)).toBeNull();
+  });
+
+  it("replaces the combobox with the blocking gate panel when NO provider key exists", () => {
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={videoConnection()}
+        videoTts={{ managed: false, providers: { openai: false, gemini: false } }}
+        open
+        onClose={() => {}}
+      />,
+    );
+
+    // No dropdown to dead-end in…
+    expect(screen.queryByRole("combobox")).toBeNull();
+    // …the blocking panel takes the Voice slot…
+    expect(screen.getByText("Voiceover needs an AI key")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Videos are narrated with OpenAI or Gemini text-to-speech. Connect either key to choose from 39 voices — video rendering stays paused until then.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /connect an ai key/i }),
+    ).toHaveAttribute("href", "/ai-engine");
+    // …and the rest of the modal stays intact (cadence + save footer).
+    expect(screen.getByTestId("cadence-picker")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /save settings/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("treats an absent videoTts field as unlocked (older cloud back-compat)", () => {
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={videoConnection()}
+        open
+        onClose={() => {}}
+      />,
+    );
+    const listbox = openVoicePicker();
+    expect(within(listbox).getAllByRole("option")).toHaveLength(39);
+    expect(screen.queryByText(/API key to unlock/)).toBeNull();
+    expect(screen.queryByText("Voiceover needs an AI key")).toBeNull();
   });
 });

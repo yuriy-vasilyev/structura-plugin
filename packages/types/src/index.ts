@@ -10,6 +10,8 @@ import { Timestamp } from "firebase-admin/firestore";
  * live in `functions/src/types/functions.ts` and should NOT be added here.
  */
 
+export * from "./videoVoices";
+
 
 /**
  * CORE IDENTITY

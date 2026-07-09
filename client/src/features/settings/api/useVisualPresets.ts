@@ -99,12 +99,16 @@ export interface VisualContent {
 const presetsKey = ["visual-presets"] as const;
 
 export function useVisualPresetsQuery() {
-  const { hasUsableLicense } = useLicense();
+  const { hasUsableLicense, isLicensed } = useLicense();
   return useQuery({
     queryKey: presetsKey,
     queryFn: () =>
       apiFetch<VisualPresetsResponse>({ path: "/structura/v1/visual-presets" }),
-    enabled: hasUsableLicense === true,
+    // `isLicensed` (plan !== "none") mirrors the VisualsPage locked-teaser
+    // gate so a plan-"none" install that still carries a license_key
+    // doesn't fire this fetch under the teaser and surface a stray
+    // "Cookie check failed" toast (Yurii 2026-07-09). See useVisualQuery.
+    enabled: hasUsableLicense === true && isLicensed,
     staleTime: 1000 * 60 * 2,
   });
 }

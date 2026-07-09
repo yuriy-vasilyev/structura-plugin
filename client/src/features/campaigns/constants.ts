@@ -126,12 +126,13 @@ export const DEFAULT_CAMPAIGN_FORM_DATA: CampaignFormData = {
       // locale's wording.
       text: __("This content was assisted by AI.", "structura"),
     },
-    // "pending" so freshly created campaigns require a human review pass
-    // before anything goes live (changed 2026-06-07 from the historical
-    // "publish" default). Only affects new campaigns — existing campaigns
-    // keep their persisted value, and pre-postStatus campaigns still fall
-    // back to "publish" everywhere (`?? "publish"` reads stay untouched).
-    postStatus: "pending",
+    // "draft" so freshly created campaigns save for a human review pass
+    // before anything goes live (2026-07-09: was "pending", but that WP
+    // state read as a draft anyway and confused the "is it published?"
+    // messaging, so it was removed — draft is the honest default). Only
+    // affects new campaigns; existing campaigns keep their persisted value
+    // (legacy "pending" normalizes to "draft" on read).
+    postStatus: "draft",
   },
   taxonomy: {
     categories: { mode: "auto", list: [] },

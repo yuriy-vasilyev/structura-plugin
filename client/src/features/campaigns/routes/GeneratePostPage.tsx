@@ -15,7 +15,7 @@ import { useMagicSuggest } from "@/hooks/useMagicSuggest";
 import type { AIProvider } from "@/features/campaigns/types";
 import { usePersonasQuery } from "@/features/personas";
 import { useAiConnections, useDefaultProviders, useLicense } from "@/features/settings";
-import { useVisualPresetsQuery } from "@/features/settings/api/useVisualPresets";
+import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
 import {
   buildMarketingPricingUrl,
   buildPortalSignupUrl,
@@ -35,7 +35,7 @@ import { isManagedPlan, type PlanId } from "@structura/types";
 const POST_STATUS_OPTIONS: Array<{ value: CampaignPostStatus; label: string }> = [
   { value: "publish", label: __("Publish immediately", "structura") },
   { value: "draft", label: __("Save as draft", "structura") },
-  { value: "pending", label: __("Pending review", "structura") },
+  // "Pending review" was removed 2026-07-09 — WP treated it as a draft.
 ];
 
 // ─── Campaign mode selector ──────────────────────────────────────────
@@ -266,29 +266,22 @@ const GeneratePostPage = () => {
   // Unauthorized, filling System Logs with errors.
   const isEngineReady = isManagedAiPlan || hasApiKey;
 
-  // Visual-preset gate. The cloud refuses to enter the image-gen phase
-  // when no preset is bound to this activation
-  // (`getBoundPresetForActivation` returns null →
-  // `ERROR_VISUAL_PRESET_UNBOUND` throw). Pre-flight it on the client so
-  // a user who toggled featured/body images ON without binding a preset
-  // doesn't burn ~4 minutes on text gen + research before the cloud
-  // hard-fails — cms.xerx.io 2026-05-22 ate a 4m 16s synthesis cycle on
-  // exactly this scenario.
+  // Whether the form requests any AI image. Drives the non-blocking
+  // "no visual style set" nudge below.
   //
-  // `useVisualPresetsQuery` carries the workspace's preset list AND the
-  // currently-bound id; `boundPresetId === null` means no binding for
-  // THIS activation. The check only matters when the user actually
-  // requested at least one image — text-only runs skip image gen
-  // entirely and don't touch the preset path.
-  const { data: presetsData, isLoading: presetsLoading } =
-    useVisualPresetsQuery();
+  // History: this used to be a hard pre-flight gate — the cloud threw
+  // `ERROR_VISUAL_PRESET_UNBOUND` when no preset was bound, so we blocked
+  // submit to avoid burning ~4 minutes of text gen before the failure
+  // (cms.xerx.io 2026-05-22). As of 2026-07-09 the cloud instead falls
+  // back to a generic house style (`resolveInlineImageStyle`), so a
+  // missing preset no longer blocks — a site upgraded from "none" (which
+  // skipped the Visuals wizard step) can still generate images. The
+  // `VisualStyleFallbackNotice` below just makes the user aware.
   const wantsAnyImage =
     formData.structure.featuredImage || formData.structure.bodyImages;
-  const presetBindingMissing =
-    !presetsLoading && wantsAnyImage && presetsData?.boundPresetId == null;
 
   const handleGenerate = async () => {
-    if (!isValid || !isEngineReady || presetBindingMissing || hasNoPersonas) return;
+    if (!isValid || !isEngineReady || hasNoPersonas) return;
     try {
       // The mutation returns the run_id the plugin minted upfront.
       // Navigate to the run-detail surface in-place so the user sees
@@ -375,32 +368,8 @@ const GeneratePostPage = () => {
         </div>
       )}
 
-      {/* ── Visual preset not bound ─────────────────────────── */}
-      {presetBindingMissing && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/60 px-5 py-4 dark:border-amber-900/40 dark:bg-amber-950/20">
-          <p className="m-0! text-sm font-semibold text-amber-800 dark:text-amber-200">
-            {__(
-              "Bind a visual preset before generating images.",
-              "structura"
-            )}
-          </p>
-          <p className="m-0! mt-1 text-xs text-amber-700 dark:text-amber-300">
-            {__(
-              "This site has featured/body images enabled but no art-direction preset is bound. Pick one in Visuals, or turn images off above to generate text-only.",
-              "structura"
-            )}
-          </p>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="mt-2"
-            onClick={() => navigate("/visuals")}
-          >
-            {__("Go to Visuals", "structura")}
-            <ArrowRight size={14} className="ml-1.5" />
-          </Button>
-        </div>
-      )}
+      {/* ── No visual style set — non-blocking heads-up ──────── */}
+      <VisualStyleFallbackNotice imagesEnabled={wantsAnyImage} />
 
       {/* ── 1. What to write about ───────────────────────────── */}
       <Section title={__("What should we write about?", "structura")}>
@@ -969,7 +938,7 @@ const GeneratePostPage = () => {
         <Button
           onClick={handleGenerate}
           loading={isGenerating}
-          disabled={!isValid || !isEngineReady || presetBindingMissing || hasNoPersonas}
+          disabled={!isValid || !isEngineReady || hasNoPersonas}
         >
           <Zap size={14} className="mr-1.5" />
           {__("Generate Now", "structura")}

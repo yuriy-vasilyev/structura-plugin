@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button, cn, InputField } from "@structura/ui";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
+import { useLicense } from "@/features/settings";
 import { useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { AIProvider, CampaignMode } from "@/features/campaigns/types";
 import { ProviderPill } from "../ProviderPill";
@@ -141,6 +142,11 @@ export const mergeTopicChips = (
 
 export const GuidedInterview = ({ onComplete }: GuidedInterviewProps) => {
   const { suggest, isSuggesting } = useMagicSuggest();
+  // The interview is AI-driven (topic chips + the strategy synthesis), so
+  // it's a paid-tier feature. Non-paid keep the "Skip interview — I'll
+  // fill in the details myself" path below, so nothing is blocked; they
+  // just don't get the cloud calls (2026-07-09).
+  const { isPaidLicense } = useLicense();
   const { formData, updateForm } = useCampaignForm();
 
   // Provider comes from campaign form — switching here persists across all steps
@@ -163,6 +169,7 @@ export const GuidedInterview = ({ onComplete }: GuidedInterviewProps) => {
   // Pre-load AI topic chips silently (using apiFetch directly to avoid error toasts).
   // Re-fetches when the active provider changes.
   useEffect(() => {
+    if (!isPaidLicense) return; // AI topic chips are a paid-tier feature.
     if (isLoadingTopics) return;
     if (topicProvider === activeProvider) return; // already fetched for this provider
 
@@ -646,7 +653,7 @@ export const GuidedInterview = ({ onComplete }: GuidedInterviewProps) => {
             </Button>
           )}
 
-          {isLastQuestion && hasAnswer && (
+          {isLastQuestion && hasAnswer && isPaidLicense && (
             <div className="flex items-center gap-3">
               {/* While the cloud thinks, show what we're doing — vague
                   enough to keep the magic feeling magical, specific
@@ -665,6 +672,22 @@ export const GuidedInterview = ({ onComplete }: GuidedInterviewProps) => {
                 {__("Generate Campaign Strategy", "structura")}
               </Button>
             </div>
+          )}
+
+          {isLastQuestion && hasAnswer && !isPaidLicense && (
+            // AI strategy synthesis is Pro-only; free/none use the
+            // "Skip interview — I'll fill in the details myself" link
+            // below to proceed manually.
+            <Button
+              disabled
+              className="from-brand-600 to-purple-600 bg-gradient-to-r font-bold"
+            >
+              <Wand2 size={16} className="mr-2" />
+              {__("Generate Campaign Strategy", "structura")}
+              <span className="ml-2 rounded-md bg-white/25 px-1.5 py-0.5 text-[8px] font-black tracking-wider uppercase">
+                {__("Pro", "structura")}
+              </span>
+            </Button>
           )}
         </div>
       </div>

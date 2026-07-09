@@ -18,8 +18,8 @@
  *      defaults (all campaigns, every post) so closing the modal
  *      without changes keeps the wiring functional. Video installs
  *      reuse the same `?configure=` hand-off after the zero-credential
- *      install, so their defaults (voice Ava, style Clean) get the
- *      same first-land treatment.
+ *      install, so their defaults (voice Zephyr, preset-driven styling)
+ *      get the same first-land treatment.
  *
  *   2. Edit affordance on a connection row — same component, opened
  *      explicitly from the Edit button. Replaces the install-flow
@@ -27,12 +27,15 @@
  *      AddWebhookForm asks for a webhook URL OAuth doesn't have).
  *
  * Video channel (integrationId === "video") swaps the section stack per
- * the design handoff (marketing/design_handoff_video_channel/README.md §2):
- * Voice select (with inline 2s sample preview), then the shared
- * bindings/cadence pair with a video-specific cadence label, and a
- * monthly quota meter in the footer. Video is not a notifier, so the
- * notification-language select is hidden and no `notification_locale`
- * rides its save payload — instead `video_voice` does.
+ * the design handoffs (marketing/design_handoff_video_channel/README.md §2
+ * + marketing/design_handoff_voice_picker/README.md): a grouped
+ * two-provider voice combobox (39 voices, sample playback, BYOK provider
+ * gating via the `videoTts` wire field, legacy-persona resolution), then
+ * the shared bindings/cadence pair with a video-specific cadence label,
+ * and a monthly quota meter in the footer. Video is not a notifier, so
+ * the notification-language select is hidden and no `notification_locale`
+ * rides its save payload — instead `video_voice` does (always the
+ * canonical `provider:id`).
  *
  * Visual style (video-visuals handoff §3, 2026-07): styling moved onto
  * the site's bound visual preset. When the cloud sends the
@@ -52,6 +55,7 @@ import { __, sprintf } from "@wordpress/i18n";
 import { Link } from "react-router";
 import {
   Button,
+  Combobox,
   Dialog,
   PresetRadioCard,
   PresetRadioCardGroup,
@@ -60,7 +64,23 @@ import {
   Switch,
   toast,
 } from "@structura/ui";
-import { ArrowRight, Palette, Play, Square, X } from "lucide-react";
+import type { ComboboxGroup } from "@structura/ui";
+import {
+  ArrowRight,
+  Info,
+  KeyRound,
+  Palette,
+  Play,
+  Square,
+  X,
+} from "lucide-react";
+import {
+  VIDEO_VOICE_CATALOG,
+  resolveStoredVideoVoice,
+  videoVoiceSampleUrl,
+  DEFAULT_VIDEO_VOICE,
+} from "@structura/types";
+import type { VideoTtsProvider } from "@structura/types";
 import { useChannelConnectionMutations } from "../api/useChannelConnectionMutations";
 import { CadencePicker } from "./CadencePicker";
 import { CampaignBindingsPicker } from "./CampaignBindingsPicker";
@@ -69,16 +89,13 @@ import type {
   ConnectionSummary,
   LinkedInMeta,
   VideoQuota,
+  VideoTtsAvailability,
 } from "../types";
 import {
   DEFAULT_VIDEO_STYLE,
-  DEFAULT_VIDEO_VOICE,
   VIDEO_INTEGRATION_ID,
   VIDEO_STYLE_PRESETS,
-  VIDEO_VOICES,
   videoStyleById,
-  videoVoiceById,
-  voiceSampleUrl,
 } from "../videoChannel";
 
 /**
@@ -123,6 +140,14 @@ interface ConfigureConnectionModalProps {
    * `null` = the "no preset bound yet" edge state.
    */
   boundVisualPreset?: BoundVisualPresetSummary | null;
+  /**
+   * TTS provider availability (top-level on `channelsListConnections`),
+   * video connections only — drives the voice picker's BYOK gating.
+   * Absent (older cloud, one-release back-compat window) is treated like
+   * `managed`: both provider groups selectable, no gate UI. A wire gap
+   * must never lock voices away.
+   */
+  videoTts?: VideoTtsAvailability;
 }
 
 export const ConfigureConnectionModal = ({
@@ -131,6 +156,7 @@ export const ConfigureConnectionModal = ({
   onClose,
   videoQuota,
   boundVisualPreset,
+  videoTts,
 }: ConfigureConnectionModalProps) => {
   const isVideo = connection.integrationId === VIDEO_INTEGRATION_ID;
   // Once the cloud sends the digest (object OR null), the preset owns
@@ -154,12 +180,15 @@ export const ConfigureConnectionModal = ({
     connection.attachFeaturedImage ?? true,
   );
 
-  // Video voice + visual style — seeded from the summary, falling back to
-  // the install defaults so a pre-field doc (or a just-installed
-  // connection whose write hasn't round-tripped) renders a valid choice.
-  const [videoVoice, setVideoVoice] = useState<string>(
-    connection.videoVoice ?? DEFAULT_VIDEO_VOICE,
-  );
+  // Video voice — the stored value may be a legacy persona id ("ava"), a
+  // bare OpenAI id, or canonical `provider:id`; resolve it so the picker
+  // always holds a canonical catalog id (falling back to the Zephyr
+  // default for pre-field docs / just-installed connections). The persona
+  // label, when present, drives the one-time "Ava is now Nova" helper
+  // under the field — it keys off the STORED value, so it stays visible
+  // until the first save canonicalizes the doc (handoff §Closed trigger).
+  const storedVoice = resolveStoredVideoVoice(connection.videoVoice);
+  const [videoVoice, setVideoVoice] = useState<string>(storedVoice.option.id);
   const [videoStyle, setVideoStyle] = useState<string>(
     connection.videoStyle ?? DEFAULT_VIDEO_STYLE,
   );
@@ -230,7 +259,9 @@ export const ConfigureConnectionModal = ({
         // here makes the wire intent unambiguous.
         bound_campaign_ids: boundCampaignIds,
         post_cadence_n: postCadenceN,
-        // Voice rides the wire ONLY for video connections; the cloud
+        // Voice rides the wire ONLY for video connections — always the
+        // canonical `provider:id` (the picker resolves legacy persona
+        // values on open, and the cloud canonicalizes too); the cloud
         // validates the id against its own catalog. Style is only sent
         // while an older cloud still owns it per-connection — once the
         // boundVisualPreset digest arrives, styling lives on the visual
@@ -344,7 +375,13 @@ export const ConfigureConnectionModal = ({
           <div className="space-y-5">
             {isVideo && (
               <>
-                <VideoVoiceSection value={videoVoice} onChange={setVideoVoice} />
+                <VideoVoiceSection
+                  value={videoVoice}
+                  onChange={setVideoVoice}
+                  legacyPersonaLabel={storedVoice.legacyPersonaLabel}
+                  legacyResolvedName={storedVoice.option.name}
+                  videoTts={videoTts}
+                />
                 {presetOwnsStyle ? (
                   <BoundPresetStyleSummary digest={boundVisualPreset ?? null} />
                 ) : (
@@ -473,7 +510,8 @@ export const ConfigureConnectionModal = ({
 };
 
 // ---------------------------------------------------------------------------
-// Video sections — voice picker with inline sample preview + style presets.
+// Video sections — grouped voice combobox with sample playback + style
+// summary. Voice picker handoff: marketing/design_handoff_voice_picker.
 // ---------------------------------------------------------------------------
 
 /**
@@ -481,6 +519,9 @@ export const ConfigureConnectionModal = ({
  * starting any preview stops the previous one; a failed load/play stops
  * silently (samples may 404 until they're generated — that must never
  * toast or crash the modal, handoff decision #1).
+ *
+ * `voiceId` is the canonical `provider:id`; the sample URL's extension
+ * follows the provider (OpenAI mp3, Gemini wav) via videoVoiceSampleUrl.
  */
 function useVoicePreview() {
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
@@ -509,7 +550,7 @@ function useVoicePreview() {
       return;
     }
     stop();
-    const audio = new Audio(voiceSampleUrl(voiceId));
+    const audio = new Audio(videoVoiceSampleUrl(voiceId));
     audioRef.current = audio;
     setPlayingVoiceId(voiceId);
     const clear = () => {
@@ -606,75 +647,240 @@ function VoiceWaveform() {
   );
 }
 
+/**
+ * Provider display names for group headers and the trigger's mini-badge.
+ * Proper nouns — deliberately untranslated (voice-picker handoff §i18n).
+ */
+const VIDEO_TTS_PROVIDER_LABELS: Record<VideoTtsProvider, string> = {
+  openai: "OpenAI",
+  gemini: "Gemini",
+};
+
+/**
+ * The wp-admin SPA is hash-routed, so the AI-keys surface (where BYOK
+ * users connect OpenAI / Gemini credentials) lives at `#/ai-engine`.
+ */
+const AI_KEYS_ROUTE = "/ai-engine";
+
+/**
+ * Voice section — grouped two-provider combobox (voice-picker handoff).
+ *
+ * Gating (BYOK): `videoTts` absent (older cloud, one-release back-compat
+ * window) or `managed` → both groups selectable, no gate UI. BYOK with
+ * one provider missing → that group renders the locked header + teaser
+ * row. BYOK with NO TTS-capable key → the whole field is replaced by the
+ * blocking gate panel (no disabled dropdown to dead-end in); the rest of
+ * the modal stays intact.
+ *
+ * `legacyPersonaLabel` / `legacyResolvedName` come from the STORED value
+ * (not the live selection): while the connection still stores a persona
+ * id ("ava"), the one-time reassurance helper renders under the field —
+ * the first save canonicalizes the doc and the helper never comes back.
+ */
 function VideoVoiceSection({
   value,
   onChange,
+  legacyPersonaLabel,
+  legacyResolvedName,
+  videoTts,
 }: {
   value: string;
   onChange: (voiceId: string) => void;
+  legacyPersonaLabel?: string;
+  legacyResolvedName: string;
+  videoTts?: VideoTtsAvailability;
 }) {
   const { playingVoiceId, toggle } = useVoicePreview();
-  const selected = videoVoiceById(value);
+  // `value` is canonical by construction, but resolve defensively so an
+  // unknown id from a newer cloud never blanks the trigger.
+  const selected = resolveStoredVideoVoice(value).option;
 
-  // Trigger label: "Ava — Warm · Conversational". Select's option labels
-  // are plain strings, so the descriptor can't carry its own muted tint
-  // inside the closed trigger — an accepted fidelity trade against
-  // hand-rolling the whole listbox.
-  const options = VIDEO_VOICES.map((voice) => ({
-    value: voice.id,
-    label: `${voice.name} — ${voice.descriptor}`,
-  }));
+  const providerUnlocked = (provider: VideoTtsProvider): boolean =>
+    videoTts === undefined || videoTts.managed || videoTts.providers[provider];
+  const fullyBlocked =
+    !providerUnlocked("openai") && !providerUnlocked("gemini");
+
+  const overline = (
+    <span className="mb-2 block text-[10px] font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
+      {__("Voice", "structura")}
+    </span>
+  );
+  const helper = (
+    <p className="m-0! text-xs text-neutral-500 dark:text-neutral-400">
+      {__("Voiceover and captions follow each post’s language.", "structura")}
+    </p>
+  );
+
+  if (fullyBlocked) {
+    // BYOK with no TTS-capable key: blocking gate panel instead of a
+    // disabled dropdown a user could dead-end in (handoff §Tier gating).
+    // The rest of the section stack renders unchanged around it.
+    return (
+      <div className="space-y-1.5">
+        {overline}
+        <div className="flex items-center gap-3 rounded-xl border border-dashed border-neutral-300 px-3.5 py-3 dark:border-neutral-600">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-400 dark:bg-white/[.06] dark:text-neutral-500">
+            <KeyRound size={16} aria-hidden />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="m-0! text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+              {__("Voiceover needs an AI key", "structura")}
+            </p>
+            <p className="m-0! mt-0.5! text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+              {sprintf(
+                /* translators: %d = total number of available voices. "OpenAI" / "Gemini" are product names — do not translate them. */
+                __(
+                  "Videos are narrated with OpenAI or Gemini text-to-speech. Connect either key to choose from %d voices — video rendering stays paused until then.",
+                  "structura",
+                ),
+                VIDEO_VOICE_CATALOG.length,
+              )}
+            </p>
+          </div>
+          <Button asChild variant="secondary" size="sm" className="shrink-0">
+            {/* Link, not button — it navigates (same pattern as the
+                visual-preset summary row). */}
+            <Link to={AI_KEYS_ROUTE}>
+              {__("Connect an AI key", "structura")}
+              <ArrowRight size={13} className="ml-1" aria-hidden />
+            </Link>
+          </Button>
+        </div>
+        {helper}
+      </div>
+    );
+  }
+
+  const groups: ComboboxGroup[] = (["openai", "gemini"] as const).map(
+    (provider) => {
+      const voices = VIDEO_VOICE_CATALOG.filter((v) => v.provider === provider);
+      const unlocked = providerUnlocked(provider);
+      return {
+        id: provider,
+        label: VIDEO_TTS_PROVIDER_LABELS[provider],
+        options: voices.map((voice) => ({
+          id: voice.id,
+          label: voice.name,
+          // Descriptors are tone words — untranslated by the same rule as
+          // the voice names (see @structura/types videoVoices.ts).
+          description: voice.descriptor,
+          ...(voice.id === DEFAULT_VIDEO_VOICE
+            ? { badge: __("Default", "structura") }
+            : {}),
+          trailing: (
+            <>
+              {playingVoiceId === voice.id && <VoiceWaveform />}
+              <VoicePreviewButton
+                voiceName={voice.name}
+                playing={playingVoiceId === voice.id}
+                onToggle={() => toggle(voice.id)}
+              />
+            </>
+          ),
+        })),
+        // Locked group: header (lock icon + full count) + teaser row
+        // instead of options — never hidden (discovery), never selectable.
+        ...(unlocked
+          ? {}
+          : {
+              gate: {
+                text: sprintf(
+                  /* translators: %1$s = TTS provider name ("OpenAI" / "Gemini" — do not translate), %2$d = number of voices it unlocks. */
+                  __(
+                    "Connect a %1$s API key to unlock %2$d more voices.",
+                    "structura",
+                  ),
+                  VIDEO_TTS_PROVIDER_LABELS[provider],
+                  voices.length,
+                ),
+                cta: {
+                  label: __("Open AI keys", "structura"),
+                  // Plain href (the SPA is hash-routed) — the Combobox
+                  // gate CTA is an anchor, not a router Link.
+                  href: `#${AI_KEYS_ROUTE}`,
+                },
+              },
+            }),
+      };
+    },
+  );
+
+  // Search placeholder counts only what the user can actually pick —
+  // gated options are excluded from search anyway.
+  const unlockedCount = groups.reduce(
+    (n, group) => n + (group.gate ? 0 : group.options.length),
+    0,
+  );
 
   return (
     <div className="space-y-1.5">
-      <Select
-        value={value}
-        onValueChange={(val) => onChange(String(val))}
-        options={options}
-      >
-        <Select.Label>{__("Voice", "structura")}</Select.Label>
-        <Select.Trigger
-          placeholder={__("Choose a voice…", "structura")}
-          trailingAdornment={
-            <VoicePreviewButton
-              voiceName={selected.name}
-              playing={playingVoiceId === selected.id}
-              onToggle={() => toggle(selected.id)}
-            />
-          }
-        />
-        <Select.Content className="w-(--button-width)">
-          {VIDEO_VOICES.map((voice) => (
-            <Select.Item key={voice.id} value={voice.id}>
-              <span className="flex items-center gap-1.5">
-                <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                  {voice.name}
-                </span>
-                <span className="rounded-full bg-neutral-100 px-1.5 py-0.5 text-[9px] font-bold text-neutral-500 dark:bg-white/10 dark:text-neutral-400">
-                  {voice.sexTag}
-                </span>
-                {playingVoiceId === voice.id && <VoiceWaveform />}
-                <span className="ml-auto">
-                  <VoicePreviewButton
-                    voiceName={voice.name}
-                    playing={playingVoiceId === voice.id}
-                    onToggle={() => toggle(voice.id)}
-                  />
-                </span>
-              </span>
-              <span className="block text-[11px] font-normal text-neutral-500 dark:text-neutral-400">
-                {voice.descriptor}
-              </span>
-            </Select.Item>
-          ))}
-          <p className="m-0! border-t border-neutral-100 px-2.5 py-2 text-[11px] text-neutral-400 dark:border-neutral-700 dark:text-neutral-500">
-            {__("Samples are 2-second English previews of each voice — your videos are voiced in each post\u2019s language.", "structura")}
-          </p>
-        </Select.Content>
-      </Select>
-      <p className="m-0! text-xs text-neutral-500 dark:text-neutral-400">
-        {__("Voiceover and captions follow each post’s language.", "structura")}
-      </p>
+      {overline}
+      <Combobox
+        value={selected.id}
+        onChange={onChange}
+        groups={groups}
+        placeholder={sprintf(
+          /* translators: %d = number of selectable voices. */
+          __("Search %d voices…", "structura"),
+          unlockedCount,
+        )}
+        footnote={__(
+          "Samples are English; videos follow your post language.",
+          "structura",
+        )}
+        noMatchesLabel={(query) =>
+          sprintf(
+            /* translators: %s = the search text that matched no voices. */
+            __("No voices match “%s”", "structura"),
+            query,
+          )
+        }
+        clearSearchLabel={__("Clear search", "structura")}
+        searchCountLabel={(matched, total) =>
+          sprintf(
+            /* translators: group-header count while searching. %1$d = matching voices, %2$d = total voices in the group. */
+            __("%1$d of %2$d", "structura"),
+            matched,
+            total,
+          )
+        }
+        leadingAdornment={
+          <span className="rounded-md bg-neutral-100 px-1.5 py-0.5 text-[10px] font-bold text-neutral-500 dark:bg-white/10 dark:text-neutral-400">
+            {VIDEO_TTS_PROVIDER_LABELS[selected.provider]}
+          </span>
+        }
+        trailingAdornment={
+          <VoicePreviewButton
+            voiceName={selected.name}
+            playing={playingVoiceId === selected.id}
+            onToggle={() => toggle(selected.id)}
+          />
+        }
+        // Space on the keyboard-focused row toggles its sample (handoff
+        // §A11y) — same one-at-a-time mechanics as the click path.
+        onOptionAction={toggle}
+      />
+      {legacyPersonaLabel != null && (
+        <p className="m-0! flex items-start gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+          <Info
+            size={13}
+            className="mt-0.5 shrink-0 text-brand-500 dark:text-brand-400"
+            aria-hidden
+          />
+          <span>
+            {sprintf(
+              /* translators: %1$s = the retired persona name (e.g. "Ava"), %2$s = the real voice name it maps to (e.g. "Nova"). */
+              __(
+                "Your voice ‘%1$s’ now appears under its real name, %2$s. It’s the same voice — nothing about your videos changes.",
+                "structura",
+              ),
+              legacyPersonaLabel,
+              legacyResolvedName,
+            )}
+          </span>
+        </p>
+      )}
+      {helper}
     </div>
   );
 }

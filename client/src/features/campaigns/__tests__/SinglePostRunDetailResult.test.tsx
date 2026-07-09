@@ -112,7 +112,7 @@ describe("SinglePostRunDetailPage — success banner (#10)", () => {
     expect(cta?.getAttribute("href")).toContain("post.php?post=42");
   });
 
-  it("says 'Post submitted for review' for a pending run", () => {
+  it("treats a legacy 'pending' run as a draft (pending removed 2026-07-09)", () => {
     runQueryMock.current = makeRun({
       inputSnapshot: {
         identity: { objective: "A topic long enough to pass" },
@@ -121,8 +121,9 @@ describe("SinglePostRunDetailPage — success banner (#10)", () => {
     });
     render(<SinglePostRunDetailPage />);
 
-    expect(screen.getByText("Post submitted for review")).toBeInTheDocument();
-    expect(screen.getByText("Review post")).toBeInTheDocument();
+    expect(screen.getByText("Draft created")).toBeInTheDocument();
+    expect(screen.getByText("Review draft")).toBeInTheDocument();
+    expect(screen.queryByText("Post published")).toBeNull();
   });
 });
 

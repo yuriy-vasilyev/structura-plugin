@@ -5,7 +5,7 @@ import { Button, Dialog, InputField, Select, TextArea, toast } from "@structura/
 import { READING_LEVEL_OPTIONS, TONE_OPTIONS } from "../data/personaTemplates";
 import { Persona, ReadingLevelOption, ToneOption, WpUser } from "../types";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
-import { useDefaultProviders } from "@/features/settings";
+import { useDefaultProviders, useLicense } from "@/features/settings";
 import { AIProvider } from "@/features/campaigns/types";
 import { ProviderPill } from "@/features/campaigns/components/ProviderPill";
 import { MagicSuggestProgress } from "@/features/campaigns/components/MagicSuggestProgress";
@@ -28,6 +28,11 @@ export const PersonaEditor = ({ persona, users, onClose, onSave }: PersonaEditor
   });
   const [isSaving, setIsSaving] = useState(false);
   const { suggest, isSuggesting } = useMagicSuggest();
+  // AI persona suggestion is a paid-tier feature — on none/free the
+  // trigger renders as a disabled "Pro" hint instead (2026-07-09; the
+  // reported none-tier leak where "Reading your site / Architecting"
+  // ran on an anonymous install).
+  const { isPaidLicense } = useLicense();
 
   useEffect(() => {
     if (persona) {
@@ -68,36 +73,50 @@ export const PersonaEditor = ({ persona, users, onClose, onSave }: PersonaEditor
                 : __("Edit Persona", "structura")}
             </Dialog.Title>
 
-            <div className="flex items-center gap-2">
-              {/* Persona suggestion runs through `useMagicSuggest("persona")`.
-                  Since 2026-05-27 the cloud grounds this on the site's
-                  homepage scrape AND its own recent published posts (voice
-                  samples), so the generated persona matches the existing
-                  writing voice — the staged-progress copy reflects that
-                  same research work the other suggestion modes show. */}
-              <MagicSuggestProgress isLoading={isSuggesting} variant="inline" />
-              <ProviderPill
-                provider={activeProvider}
-                onProviderChange={setProviderOverride}
-              />
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleMagicSuggest}
-                disabled={isSuggesting || isSaving}
-              >
-                {isSuggesting ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Sparkles className="size-4" />
-                )}
+            {isPaidLicense ? (
+              <div className="flex items-center gap-2">
+                {/* Persona suggestion runs through `useMagicSuggest("persona")`.
+                    Since 2026-05-27 the cloud grounds this on the site's
+                    homepage scrape AND its own recent published posts (voice
+                    samples), so the generated persona matches the existing
+                    writing voice — the staged-progress copy reflects that
+                    same research work the other suggestion modes show. */}
+                <MagicSuggestProgress isLoading={isSuggesting} variant="inline" />
+                <ProviderPill
+                  provider={activeProvider}
+                  onProviderChange={setProviderOverride}
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleMagicSuggest}
+                  disabled={isSuggesting || isSaving}
+                >
+                  {isSuggesting ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="size-4" />
+                  )}
+                  <span className="ml-2 text-[10px] font-bold tracking-wider uppercase">
+                    {isSuggesting
+                      ? __("Architecting…", "structura")
+                      : __("Magic Suggest", "structura")}
+                  </span>
+                </Button>
+              </div>
+            ) : (
+              // Non-paid: keep the affordance discoverable but locked, so
+              // the upsell is visible without exposing the cloud call.
+              <Button variant="secondary" size="sm" disabled>
+                <Sparkles className="size-4" />
                 <span className="ml-2 text-[10px] font-bold tracking-wider uppercase">
-                  {isSuggesting
-                    ? __("Architecting…", "structura")
-                    : __("Magic Suggest", "structura")}
+                  {__("Magic Suggest", "structura")}
+                </span>
+                <span className="ml-2 rounded-md bg-brand-100 px-1.5 py-0.5 text-[8px] font-black tracking-wider text-brand-600 uppercase dark:bg-brand-950/30 dark:text-brand-400">
+                  {__("Pro", "structura")}
                 </span>
               </Button>
-            </div>
+            )}
           </div>
         </Dialog.Header>
 

@@ -232,7 +232,18 @@ export const milestoneOrderForFlowAndTier = (
  * pick up the currently-active locale. A bare eager-string map would
  * freeze the copy at module-load time and stop translating.
  */
-export const milestoneHeadline = (m: Milestone | string): string => {
+export const milestoneHeadline = (
+  m: Milestone | string,
+  postStatus: "publish" | "draft" = "publish",
+): string => {
+  // The two terminal-ish steps announce an outcome, so they must reflect
+  // whether the post actually went live or was saved as a draft. Claiming
+  // "Publishing to WordPress" / "Post published" for a draft run was the
+  // reported confusion (2026-07-09).
+  if (postStatus === "draft") {
+    if (m === "publishing") return __("Saving to WordPress", "structura");
+    if (m === "done") return __("Draft saved", "structura");
+  }
   const resolver = MILESTONE_HEADLINES[m as Milestone];
   if (!resolver) {
     // Forward-compat: cloud can emit a new milestone id we don't know
@@ -244,13 +255,42 @@ export const milestoneHeadline = (m: Milestone | string): string => {
 };
 
 /**
+ * Effective post status for label purposes. Prefers what actually
+ * happened (`outputs.post.status`, patched by the plugin post-insert),
+ * falls back to what was requested (`inputSnapshot.structure.postStatus`),
+ * and assumes "publish" only when there's no signal at all (pre-2026-05
+ * runs). Legacy "pending" collapses to "draft" — that status was removed
+ * 2026-07-09 (WP never held our posts distinctly in pending review).
+ */
+export const resolveRunPostStatus = (run: {
+  outputs?: { post?: { status?: string } };
+  inputSnapshot?: unknown;
+}): "publish" | "draft" => {
+  const actual = run.outputs?.post?.status;
+  if (actual === "draft") return "draft";
+  if (actual === "publish") return "publish";
+  const inputs = run.inputSnapshot as
+    | { structure?: { postStatus?: string } }
+    | undefined;
+  const requested = inputs?.structure?.postStatus;
+  if (requested === "draft" || requested === "pending") return "draft";
+  return "publish";
+};
+
+/**
  * Resolve the user-facing subtext for a milestone id. Same wrap-in-a-
  * function pattern as `milestoneHeadline` so @wordpress/i18n's runtime
  * locale swap picks the right value at render time. Returns `undefined`
  * for milestones with no second line (drafting, images, done, error)
  * so callers can render conditionally without an empty-string check.
  */
-export const milestoneSubtext = (m: Milestone | string): string | undefined => {
+export const milestoneSubtext = (
+  m: Milestone | string,
+  postStatus: "publish" | "draft" = "publish",
+): string | undefined => {
+  if (postStatus === "draft" && m === "publishing") {
+    return __("Saving the draft to WordPress", "structura");
+  }
   const resolver = MILESTONE_SUBTEXTS[m as Milestone];
   if (!resolver) return undefined;
   return resolver();

@@ -276,7 +276,7 @@ function GatingHint({ entry }: { entry: IntegrationCatalogEntry }) {
     if (isVideo) {
       return (
         <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
-          {__("Includes 20 videos/mo", "structura")}
+          {__("Includes 40 videos/mo", "structura")}
         </span>
       );
     }

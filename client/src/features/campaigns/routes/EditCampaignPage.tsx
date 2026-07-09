@@ -44,6 +44,8 @@ import { AIProvider, Campaign, CampaignFormData, CampaignMode } from "@/features
 import { SeoRuleName, SUPPORTED_BLOCK_TYPE, useDefaultProviders, useLicense, useSeoRules, } from "@/features/settings";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
 import { CoreContentSettings } from "@/features/campaigns/components/CoreContentSettings";
+import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
+import { normalizePostStatus } from "@/features/campaigns/helpers";
 import { getBadgeIntentByCampaignStatus } from "@/utils/helpers";
 import { campaignStatusLabel } from "@/features/campaigns/labels";
 
@@ -80,7 +82,10 @@ const EditCampaignPage = () => {
     intelligence: campaign.intelligence,
     structure: {
       ...campaign.structure,
-      postStatus: campaign.structure.postStatus ?? "publish",
+      // Normalize legacy "pending" (removed 2026-07-09) → "draft"; a
+      // pre-postStatus campaign (no value) keeps the historical publish
+      // default it actually ran with.
+      postStatus: normalizePostStatus(campaign.structure.postStatus ?? "publish"),
     },
     taxonomy: campaign.taxonomy,
     schedule: campaign.schedule,
@@ -721,6 +726,11 @@ const EditAdvancedSettings = () => {
               }
               isDisabled={!isPaidLicense}
               badge={!isPaidLicense ? <ProBadge /> : undefined}
+            />
+            {/* Non-blocking heads-up when images are on but no visual
+                style is bound — the cloud falls back to a generic look. */}
+            <VisualStyleFallbackNotice
+              imagesEnabled={structure.featuredImage || structure.bodyImages}
             />
           </SettingsGroup>
 

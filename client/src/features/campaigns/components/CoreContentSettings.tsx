@@ -29,7 +29,7 @@ import { CampaignPostStatus } from "@/features/campaigns/types";
 const POST_STATUS_OPTIONS: Array<{ value: CampaignPostStatus; label: string }> = [
   { value: "publish", label: __("Publish immediately", "structura") },
   { value: "draft", label: __("Save as draft", "structura") },
-  { value: "pending", label: __("Pending review", "structura") },
+  // "Pending review" was removed 2026-07-09 — WP treated it as a draft.
 ];
 
 export const CoreContentSettings = () => {

@@ -1,0 +1,27 @@
+{
+  "name": "@structura/video-compositions",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Remotion compositions for the video channel — prototype of the Shotstack renderer replacement.",
+  "type": "module",
+  "scripts": {
+    "bundle": "node scripts/bundle.mjs",
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/google-fonts": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@remotion/bundler": "^4.0.0",
+    "@remotion/cli": "^4.0.0",
+    "@types/react": "^18.3.3",
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0"
+  }
+}

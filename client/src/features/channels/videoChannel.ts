@@ -7,11 +7,16 @@
  *
  * Design handoff: marketing/design_handoff_video_channel/README.md.
  *
- * i18n note: voice/preset display names and their descriptors are proper
- * nouns / tone fragments ("Ava", "Warm · Conversational", "Kinetic") and
+ * Voice data does NOT live here anymore: the two-provider voice catalog
+ * (39 voices, legacy persona mapping, sample URLs) moved to
+ * `@structura/types` (`videoVoices.ts`) so the wp-admin SPA and the
+ * portal picker can't drift — import `VIDEO_VOICE_CATALOG`,
+ * `resolveStoredVideoVoice()`, `videoVoiceSampleUrl()` from there.
+ *
+ * i18n note: preset display names and their descriptors are proper
+ * nouns / tone fragments ("Kinetic", "Minimal captions, soft fades") and
  * are deliberately NOT wrapped in `__()` — they read identically in all
- * four locales, and translating a voice's name would desync it from the
- * audible sample.
+ * four locales.
  */
 
 import type { VideoJob, VideoSocialPackages } from "./types";
@@ -19,35 +24,8 @@ import type { VideoJob, VideoSocialPackages } from "./types";
 /** Catalog id of the Video channel integration. */
 export const VIDEO_INTEGRATION_ID = "video";
 
-/** Voice a fresh install starts with (cloud applies the same default). */
-export const DEFAULT_VIDEO_VOICE = "ava";
-
 /** Visual style a fresh install starts with. */
 export const DEFAULT_VIDEO_STYLE = "clean";
-
-/**
- * One selectable voiceover voice. `id` is the `video_voice` wire value;
- * `sexTag` is the one-letter pill in the voice menu (handoff §2.1).
- */
-export interface VideoVoiceOption {
-  id: string;
-  name: string;
-  descriptor: string;
-  sexTag: "F" | "M";
-}
-
-/**
- * The six v1 voices, in menu order. Keep ids in lockstep with the cloud's
- * voice catalog — an unknown id is rejected on save.
- */
-export const VIDEO_VOICES: readonly VideoVoiceOption[] = [
-  { id: "ava", name: "Ava", descriptor: "Warm · Conversational", sexTag: "F" },
-  { id: "marcus", name: "Marcus", descriptor: "Deep · Authoritative", sexTag: "M" },
-  { id: "lena", name: "Lena", descriptor: "Bright · Energetic", sexTag: "F" },
-  { id: "oliver", name: "Oliver", descriptor: "Crisp · Neutral", sexTag: "M" },
-  { id: "priya", name: "Priya", descriptor: "Friendly · Upbeat", sexTag: "F" },
-  { id: "noah", name: "Noah", descriptor: "Calm · Narrative", sexTag: "M" },
-];
 
 /**
  * One visual-style preset. `id` is the `video_style` wire value.
@@ -65,27 +43,10 @@ export const VIDEO_STYLE_PRESETS: readonly VideoStylePreset[] = [
   { id: "kinetic", name: "Kinetic", descriptor: "Word-by-word motion" },
 ];
 
-/**
- * Resolve a voice id to its option, falling back to the Ava default so an
- * unknown id from a newer cloud (or an absent field on a pre-video doc)
- * never crashes a row or the modal.
- */
-export const videoVoiceById = (id: string | undefined): VideoVoiceOption =>
-  VIDEO_VOICES.find((v) => v.id === id) ??
-  (VIDEO_VOICES.find((v) => v.id === DEFAULT_VIDEO_VOICE) as VideoVoiceOption);
-
 /** Resolve a style id to its preset, falling back to Clean. */
 export const videoStyleById = (id: string | undefined): VideoStylePreset =>
   VIDEO_STYLE_PRESETS.find((p) => p.id === id) ??
   (VIDEO_STYLE_PRESETS.find((p) => p.id === DEFAULT_VIDEO_STYLE) as VideoStylePreset);
-
-/**
- * CDN URL of a voice's static 2-second preview sample. The file may 404
- * until samples are generated — playback failures must stay silent (stop
- * the playing state, no toast).
- */
-export const voiceSampleUrl = (voiceId: string): string =>
-  `https://storage.googleapis.com/structura-releases/assets/voice-samples/${voiceId}.mp3`;
 
 /**
  * The five lifecycle states an activity row renders (handoff §3).

@@ -35,6 +35,7 @@ export * from "./components/InputField";
 export * from "./components/FileUpload";
 export * from "./components/TextArea";
 export * from "./components/Select";
+export * from "./components/Combobox";
 export * from "./components/Skeleton";
 export * from "./components/Pagination";
 export * from "./components/Stepper";

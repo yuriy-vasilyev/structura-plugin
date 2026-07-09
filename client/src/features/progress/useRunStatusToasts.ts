@@ -3,6 +3,7 @@ import { __, sprintf } from "@wordpress/i18n";
 import { toast } from "@structura/ui";
 import { useRuns } from "./context/RunsContext";
 import { useCampaignRunQuery } from "./api/useCampaignRunQuery";
+import { resolveRunPostStatus } from "./milestones";
 
 /**
  * Broadcasts terminal run-status transitions via the global `@structura/ui`
@@ -85,6 +86,9 @@ export const useRunStatusToasts = () => {
 
     const run = data?.run;
     const campaignName = run?.campaignName ?? "";
+    // A draft run never went live — announce it as a saved draft, not a
+    // published/live post (2026-07-09).
+    const isDraft = run ? resolveRunPostStatus(run) === "draft" : false;
 
     if (statusForToast === "failed") {
       const userMessage =
@@ -111,16 +115,25 @@ export const useRunStatusToasts = () => {
 
     if (statusForToast === "succeeded") {
       const title = campaignName
-        ? // translators: %s is a campaign name
-          sprintf(__("%s — post published", "structura"), campaignName)
-        : __("Post published", "structura");
+        ? isDraft
+          ? // translators: %s is a campaign name
+            sprintf(__("%s — draft saved", "structura"), campaignName)
+          : // translators: %s is a campaign name
+            sprintf(__("%s — post published", "structura"), campaignName)
+        : isDraft
+          ? __("Draft saved", "structura")
+          : __("Post published", "structura");
       toast.success(
-        __("Your new post is live.", "structura"),
+        isDraft
+          ? __("Your new draft is ready to review.", "structura")
+          : __("Your new post is live.", "structura"),
         {
           title,
           action: run?.resultPostUrl
             ? {
-                label: __("View post", "structura"),
+                label: isDraft
+                  ? __("Review draft", "structura")
+                  : __("View post", "structura"),
                 onClick: () => {
                   window.open(run.resultPostUrl!, "_blank", "noopener");
                 },
@@ -138,14 +151,24 @@ export const useRunStatusToasts = () => {
 
     if (statusForToast === "succeeded_with_warnings") {
       const title = campaignName
-        ? // translators: %s is a campaign name
-          sprintf(__("%s — published with warnings", "structura"), campaignName)
-        : __("Post published with warnings", "structura");
+        ? isDraft
+          ? // translators: %s is a campaign name
+            sprintf(__("%s — draft saved with warnings", "structura"), campaignName)
+          : // translators: %s is a campaign name
+            sprintf(__("%s — published with warnings", "structura"), campaignName)
+        : isDraft
+          ? __("Draft saved with warnings", "structura")
+          : __("Post published with warnings", "structura");
       toast.warning(
-        __(
-          "The post went live, but one or more steps reported a problem.",
-          "structura",
-        ),
+        isDraft
+          ? __(
+              "The draft was saved, but one or more steps reported a problem.",
+              "structura",
+            )
+          : __(
+              "The post went live, but one or more steps reported a problem.",
+              "structura",
+            ),
         {
           title,
           duration: 10_000,

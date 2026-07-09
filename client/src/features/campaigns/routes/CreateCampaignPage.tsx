@@ -35,6 +35,7 @@ import { DefaultPersonaAdvisory } from "@/components/Shared/DefaultPersonaAdviso
 import { NoPersonasBlocker } from "@/components/Shared/NoPersonasBlocker";
 import { usePersonasQuery } from "@/features/personas";
 import { PageBuilderCompatCard } from "@/features/campaigns/components/PageBuilderCompatCard";
+import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
 import { CampaignProvider, useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { useCampaignDraftStore } from "@/features/campaigns/context/draftStore";
 import {
@@ -955,6 +956,12 @@ const AdvancedSettings = () => {
                 </a>
               </p>
             )}
+            {/* Non-blocking heads-up when images are on but no visual
+                style is bound — the cloud falls back to a generic look
+                (2026-07-09). */}
+            <VisualStyleFallbackNotice
+              imagesEnabled={structure.featuredImage || structure.bodyImages}
+            />
           </SettingsGroup>
 
           {/* ── Content Blocks ───────────────────────────────────── */}

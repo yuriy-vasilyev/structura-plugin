@@ -1121,10 +1121,12 @@ const formatPostStatus = (status?: string) => {
     case "publish":
       return __("Publish immediately", "structura");
     case "draft":
-      return __("Save as draft", "structura");
+    // "pending" was removed 2026-07-09; legacy values read as a draft.
     case "pending":
-      return __("Pending review", "structura");
+      return __("Save as draft", "structura");
     default:
+      // Pre-postStatus campaigns (no persisted value) genuinely used the
+      // historical publish default, so keep that here.
       return __("Publish immediately", "structura");
   }
 };

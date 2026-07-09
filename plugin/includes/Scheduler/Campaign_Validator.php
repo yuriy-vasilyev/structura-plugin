@@ -160,13 +160,14 @@ class Campaign_Validator
             FILTER_VALIDATE_BOOLEAN,
         );
 
-        // Per-campaign post_status — whitelist against the three WP states
-        // Task_Runner accepts. Anything else (or missing) falls back to the
-        // historical default 'publish'.
-        $allowed_post_statuses = ['publish', 'draft', 'pending'];
+        // Per-campaign post_status — whitelist against the WP states
+        // Task_Runner accepts. 'pending' was removed 2026-07-09 (WP treated
+        // it as a draft); anything else (or missing) falls back to 'draft',
+        // the safe default now that surprise-publishing is the worst case.
+        $allowed_post_statuses = ['publish', 'draft'];
         $clean['post_status']  = in_array($params['post_status'] ?? '', $allowed_post_statuses, true)
             ? $params['post_status']
-            : 'publish';
+            : 'draft';
 
         $clean['category_mode']      = sanitize_key($params['category_mode'] ?? 'auto');
         $clean['allowed_categories'] = array_map('intval', (array)($params['allowed_categories'] ?? []));

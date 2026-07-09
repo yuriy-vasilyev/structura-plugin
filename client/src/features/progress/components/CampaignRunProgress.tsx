@@ -15,6 +15,7 @@ import {
   milestoneIcon,
   milestoneOrderForFlowAndTier,
   milestoneSubtext,
+  resolveRunPostStatus,
 } from "../milestones";
 import { RunTimeline } from "./RunTimeline";
 
@@ -330,13 +331,18 @@ const CampaignRunProgressMatcher = ({
   // `run.headline` only when the SPA doesn't know the milestone id
   // (forward-compat: cloud emits a new milestone before the bundle
   // ships copy for it).
+  // A draft run never went live, so the terminal + in-flight publish
+  // wording is relabelled ("Draft saved" / "Saving to WordPress").
+  const postStatus = resolveRunPostStatus(run);
   const label = isSuccess
-    ? __("Post published", "structura")
+    ? postStatus === "draft"
+      ? __("Draft saved", "structura")
+      : __("Post published", "structura")
     : isFailure
       ? __("Generation stopped", "structura")
       : isAwaitingPull
         ? __("Delivering via a backup method", "structura")
-        : milestoneHeadline(run.currentStep) || run.headline;
+        : milestoneHeadline(run.currentStep, postStatus) || run.headline;
 
   // Subtext only in-flight — terminal subtexts are carried by the
   // dedicated toast / receipt surfaces. Same localisation story as
@@ -350,7 +356,7 @@ const CampaignRunProgressMatcher = ({
             "Your site blocked direct delivery, so we're delivering this post another way. It may take a few minutes.",
             "structura",
           )
-        : milestoneSubtext(run.currentStep) ?? run.subtext
+        : milestoneSubtext(run.currentStep, postStatus) ?? run.subtext
       : undefined;
 
   // Trailing metric on the right side. Percent while in flight; no glyph

@@ -378,12 +378,13 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
 
 /**
  * Status-aware success banner. A run that finished doesn't necessarily
- * mean the post is *published* — the user may have asked for a draft or
- * a pending-review post, in which case "Post published" is a lie and the
- * "View post" permalink lands on a preview/404. We branch on the
- * requested `postStatus` so the headline + CTA match reality: published
- * gets "View post" (front-end permalink); draft/pending get "Review …"
- * pointing at the wp-admin editor.
+ * mean the post is *published* — the user may have asked for a draft, in
+ * which case "Post published" is a lie and the "View post" permalink
+ * lands on a preview/404. We branch on the requested `postStatus` so the
+ * headline + CTA match reality: published gets "View post" (front-end
+ * permalink); draft gets "Review draft" pointing at the wp-admin editor.
+ * ("pending" was removed 2026-07-09; any legacy value is treated as a
+ * draft — which is what WP stored it as.)
  */
 const SuccessResult = ({
   requestedStatus,
@@ -395,18 +396,13 @@ const SuccessResult = ({
   postUrl?: string;
 }) => {
   const isPublished = requestedStatus === "publish";
-  const isPending = requestedStatus === "pending";
 
   const title = isPublished
     ? __("Post published", "structura")
-    : isPending
-    ? __("Post submitted for review", "structura")
     : __("Draft created", "structura");
 
   const helper = isPublished
     ? null
-    : isPending
-    ? __("It's saved as pending review — nothing is live yet.", "structura")
     : __("It's saved as a draft — nothing is live yet.", "structura");
 
   const editUrl = buildEditPostUrl(postId);
@@ -437,7 +433,7 @@ const SuccessResult = ({
                 <ExternalLink size={13} />
               </a>
             )}
-            {/* Draft/pending → the editor is where the user reviews it. */}
+            {/* Draft → the editor is where the user reviews it. */}
             {!isPublished && editUrl && (
               <a
                 href={editUrl}
@@ -445,9 +441,7 @@ const SuccessResult = ({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-300"
               >
-                {isPending
-                  ? __("Review post", "structura")
-                  : __("Review draft", "structura")}
+                {__("Review draft", "structura")}
                 <PencilLine size={13} />
               </a>
             )}

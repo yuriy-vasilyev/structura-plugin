@@ -340,7 +340,7 @@ describe("CatalogEntryCard — category pill labels", () => {
 describe("CatalogEntryCard — video channel premium card", () => {
   // The Video card keeps the shared grid geometry + CTA logic but adds the
   // premium hairline ring, a fuchsia "Video" category pill, capability
-  // chips, and per-state hints ("Includes 20 videos/mo" when installable,
+  // chips, and per-state hints ("Includes 40 videos/mo" when installable,
   // "Requires Cloud Pro" when plan-blocked). The catalog currently ships
   // the entry with comingSoon: true — but the card must render every
   // entitlement state correctly so flipping the server flag needs no UI
@@ -391,7 +391,7 @@ describe("CatalogEntryCard — video channel premium card", () => {
     expect(
       screen.getByRole("button", { name: /^install$/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Includes 20 videos/mo")).toBeInTheDocument();
+    expect(screen.getByText("Includes 40 videos/mo")).toBeInTheDocument();
   });
 
   it("upgrade_plan: shows the Requires Cloud Pro hint and an upgrade link", () => {
@@ -427,6 +427,6 @@ describe("CatalogEntryCard — video channel premium card", () => {
       screen.getByRole("button", { name: /coming soon/i }),
     ).toBeDisabled();
     // No quota hint while nothing is installable.
-    expect(screen.queryByText("Includes 20 videos/mo")).toBeNull();
+    expect(screen.queryByText("Includes 40 videos/mo")).toBeNull();
   });
 });

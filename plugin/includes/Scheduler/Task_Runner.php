@@ -1057,7 +1057,13 @@ class Task_Runner
         // and this fell through to 'publish'). Default to the safe 'draft';
         // the cloud now always sends an explicit status for the surfaces that
         // have a picker, so this fallback only guards genuinely absent values.
-        $allowed_post_statuses = ['publish', 'draft', 'pending'];
+        //
+        // 'pending' was removed 2026-07-09 — WordPress's Pending Review state
+        // read as a draft for our generated posts, so it only muddied the
+        // "is it published?" messaging. A legacy campaign persisted with
+        // 'pending' now fails this whitelist and coerces to 'draft' — the
+        // exact state WP put it in anyway.
+        $allowed_post_statuses = ['publish', 'draft'];
         $campaign_post_status = $campaign['structure']['postStatus'] ?? 'draft';
         if (!in_array($campaign_post_status, $allowed_post_statuses, true)) {
             $campaign_post_status = 'draft';

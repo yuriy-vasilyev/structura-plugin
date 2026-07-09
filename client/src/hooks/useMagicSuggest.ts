@@ -3,6 +3,7 @@ import apiFetch from "@wordpress/api-fetch";
 import { useToast } from "@structura/ui";
 import { __ } from "@wordpress/i18n";
 import { AIProvider } from "@/features/campaigns";
+import { useLicense } from "@/features/settings";
 import { humanizeSuggestionError } from "@/hooks/humanizeSuggestionError";
 
 export type SuggestionMode = "persona" | "campaign" | "visual" | "topic_chips";
@@ -17,12 +18,20 @@ interface SuggestionOptions {
 export const useMagicSuggest = () => {
   const [isSuggesting, setIsSuggesting] = useState(false);
   const { errorToast } = useToast();
+  const { isPaidLicense } = useLicense();
 
   /**
    * Triggers the architectural suggestion engine.
    * Returns a parsed object or string depending on the mode.
    */
   const suggest = async (mode: SuggestionMode, options: SuggestionOptions) => {
+    // AI suggestions are a paid-tier feature. This central guard is the
+    // safety net BEHIND each surface's own UI gate (2026-07-09): even if
+    // a trigger is left ungated on some surface, it can never leak a
+    // cloud suggestion to a none/free install. Returns null so existing
+    // call sites (which already handle a null result) no-op cleanly.
+    if (!isPaidLicense) return null;
+
     setIsSuggesting(true);
 
     try {
