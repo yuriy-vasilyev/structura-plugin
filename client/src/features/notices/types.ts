@@ -16,7 +16,8 @@ export type NoticeCategory =
   | "quota"
   | "byok"
   | "generation"
-  | "plugin-health";
+  | "plugin-health"
+  | "seo-intel";
 
 export type NoticeSeverity = "warning" | "error";
 

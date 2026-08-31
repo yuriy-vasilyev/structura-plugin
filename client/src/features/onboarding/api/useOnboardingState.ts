@@ -152,6 +152,34 @@ export function useResetWizardMutation() {
   });
 }
 
+/**
+ * Durably record that the user has finished or exited the setup wizard, so
+ * the auto-redirect never resurrects it. Hits a plugin-LOCAL route (no cloud
+ * dependency) — the only completion signal that works for the anonymous/none
+ * tier, which has no license_key and so never reaches the cloud wizard state.
+ *
+ * Optimistically flips the localized bootstrap flag on success so the
+ * in-session gate honours it immediately, without waiting for a page reload.
+ * Best-effort: a failure must not toast (the localStorage dismissal is the
+ * offline fallback), so it's marked `silentError`.
+ */
+export function useDismissOnboardingMutation() {
+  return useMutation<{ success: boolean }, Error, void>({
+    meta: { silentError: true },
+    mutationFn: async () => {
+      const res = await apiFetch<{ success: boolean }>({
+        path: "/structura/v1/onboarding/dismiss",
+        method: "POST",
+        data: {},
+      });
+      if (typeof window !== "undefined" && window.structuraConfig) {
+        window.structuraConfig.onboarding_dismissed = true;
+      }
+      return res;
+    },
+  });
+}
+
 /** Same shape as save, marks a step skipped instead. */
 export function useSkipWizardStepMutation() {
   const queryClient = useQueryClient();

@@ -33,13 +33,14 @@ import {
   Trash2,
 } from "lucide-react";
 import { Badge, Button, ConfirmDialog, QuotaMeter, toast } from "@structura/ui";
-import type {
-  BoundVisualPresetSummary,
-  ConnectionSummary,
-  ConnectionStatus,
-  IndexNowMeta,
-  IntegrationCatalogEntry,
-  VideoQuota,
+import {
+  GSC_INTEGRATION_ID,
+  type BoundVisualPresetSummary,
+  type ConnectionSummary,
+  type ConnectionStatus,
+  type IndexNowMeta,
+  type IntegrationCatalogEntry,
+  type VideoQuota,
 } from "../types";
 import { connectionStatusLabel } from "../labels";
 import { useVerifyIndexNowKeyfile } from "../api/useIndexNow";
@@ -215,7 +216,12 @@ export const ChannelConnectionRow = ({
                   aria-hidden
                 />
                 <span>
-                  {isVideo ? (
+                  {connection.integrationId === GSC_INTEGRATION_ID ? (
+                    // GSC never notifies or publishes — "Notifications in …"
+                    // would wrongly imply outbound behaviour, so its meta
+                    // line states the read-only nature instead.
+                    __("Read-only insights", "structura")
+                  ) : isVideo ? (
                     sprintf(
                       /* translators: %1$s = voice name (e.g. "Nova"), %2$s = visual preset name (e.g. "Clean"), %3$s = cadence ("every post" / "every 3th post"). */
                       __("Voice %1$s · %2$s preset · %3$s", "structura"),

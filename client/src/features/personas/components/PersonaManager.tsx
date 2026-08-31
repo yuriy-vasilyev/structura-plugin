@@ -117,6 +117,12 @@ export const PersonaManager = ({
   const gridPersonas = perSite ? personas.filter((p) => memberSet.has(String(p.id))) : personas;
   const bindable = perSite ? personas.filter((p) => !memberSet.has(String(p.id))) : [];
 
+  // When nothing is bound AND nothing is bindable we render the full
+  // EmptyState, which carries its OWN New/Templates CTAs — so the top actions
+  // row would duplicate them. Hide the top row in that case (wizard fresh
+  // install before the House voice seed lands).
+  const showEmptyState = gridPersonas.length === 0 && bindable.length === 0;
+
   /**
    * Create/template save. In per-site mode the new persona is auto-bound so
    * "New" yields a voice for this site, not an orphan in the shared library.
@@ -131,7 +137,7 @@ export const PersonaManager = ({
 
   return (
     <div className="space-y-6">
-      {!hideActions && (
+      {!hideActions && !showEmptyState && (
         <div className="flex items-center justify-end gap-3">
           <Button variant="secondary" onClick={c.openTemplates} className="shadow-sm">
             <BookOpen className="mr-2 size-4" /> {__("Templates", "structura")}
@@ -142,7 +148,7 @@ export const PersonaManager = ({
         </div>
       )}
 
-      {gridPersonas.length === 0 && bindable.length === 0 ? (
+      {showEmptyState ? (
         (emptyState ?? (
           <EmptyState
             icon={<Users size={28} />}

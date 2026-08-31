@@ -33,6 +33,11 @@ phpunit-integration.xml.dist
 # Hand-written dev-only assets
 assets-static/meta-box-preview.html
 
+# Compiled PHP-side translations — wp.org distributes these via
+# translate.wordpress.org. The SPA's languages/*.json stay.
+languages/*.po
+languages/*.mo
+
 # Editor / OS noise
 *.log
 .idea

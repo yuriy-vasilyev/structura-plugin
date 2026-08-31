@@ -219,6 +219,7 @@ const EditCampaignInner = ({ campaign }: { campaign: Campaign }) => {
       const bank = keywordsRef.current.getKeywords();
       updateForm("keywords", {
         bank,
+        discoveryMeta: keywordsRef.current.getDiscoveryMeta(),
         discoveredAt: bank.length > 0 ? new Date().toISOString() : null,
       });
     }
@@ -286,6 +287,7 @@ const EditCampaignInner = ({ campaign }: { campaign: Campaign }) => {
               language={formData.intelligence.language}
               provider={formData.intelligence.textProvider}
               existingKeywords={formData.keywords?.bank}
+              existingDiscoveryMeta={formData.keywords?.discoveryMeta}
               onKeywordsChange={() => {}}
               onPhaseChange={setKeywordsPhase}
             />
@@ -373,7 +375,7 @@ const StrategyEditSection = () => {
       {/* Campaign mode */}
       <div>
         <label className="mb-2 block text-[10px] font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
-          {__("Campaign Mode", "structura")}
+          {__("Writing approach", "structura")}
         </label>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {CAMPAIGN_MODES.map((mode) => {

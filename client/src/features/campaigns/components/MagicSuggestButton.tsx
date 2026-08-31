@@ -3,7 +3,7 @@ import { __ } from "@wordpress/i18n";
 import { Button, cn } from "@structura/ui";
 import { Wand2 } from "lucide-react";
 
-import { useLicense, useDefaultProviders } from "@/features/settings";
+import { useDefaultProviders, useLicense } from "@/features/settings";
 import { AIProvider } from "@/features/campaigns/types";
 import { ProviderPill } from "./ProviderPill";
 import { MagicSuggestProgress } from "./MagicSuggestProgress";
@@ -63,13 +63,13 @@ export const MagicSuggestButton: FC<MagicSuggestButtonProps> = ({
       <div
         className={cn(
           "flex items-center justify-between rounded-xl border border-dashed border-neutral-200 bg-neutral-50/50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900/40",
-          className,
+          className
         )}
       >
         <span className="text-xs text-neutral-500 dark:text-neutral-400">
           {__("Magic suggestions are available on Pro and above.", "structura")}
         </span>
-        <span className="rounded-md bg-brand-100 px-1.5 py-0.5 text-[8px] font-black tracking-wider text-brand-600 uppercase dark:bg-brand-950/30 dark:text-brand-400">
+        <span className="bg-brand-100 text-brand-600 dark:bg-brand-950/30 dark:text-brand-400 rounded-md px-1.5 py-0.5 text-[8px] font-black tracking-wider uppercase">
           {__("Pro", "structura")}
         </span>
       </div>
@@ -80,7 +80,7 @@ export const MagicSuggestButton: FC<MagicSuggestButtonProps> = ({
     <div
       className={cn(
         "rounded-xl border border-neutral-100 bg-neutral-50/50 p-3 dark:border-neutral-800 dark:bg-neutral-800/20",
-        className,
+        className
       )}
     >
       {!isLoading ? (
@@ -90,21 +90,18 @@ export const MagicSuggestButton: FC<MagicSuggestButtonProps> = ({
               size="sm"
               onClick={() => onTrigger(activeProvider)}
               disabled={isLoading}
-              className="bg-gradient-to-r from-brand-600 to-purple-600 font-bold shadow-sm shadow-brand-600/15"
+              className="from-brand-600 shadow-brand-600/15 bg-gradient-to-r to-purple-600 font-bold shadow-sm"
             >
               <Wand2 size={14} className="mr-1.5" />
               {ctaLabel}
             </Button>
             {subLabel && (
-              <p className="m-0! mt-1.5 text-[10px] text-neutral-400 dark:text-neutral-500">
+              <p className="mt-1.5! mb-0! text-[10px] text-neutral-400 dark:text-neutral-500">
                 {subLabel}
               </p>
             )}
           </div>
-          <ProviderPill
-            provider={activeProvider}
-            onProviderChange={setProviderOverride}
-          />
+          <ProviderPill provider={activeProvider} onProviderChange={setProviderOverride} />
         </div>
       ) : (
         <MagicSuggestProgress isLoading={isLoading} variant="panel" />

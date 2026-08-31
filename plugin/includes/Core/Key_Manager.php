@@ -52,6 +52,23 @@ class Key_Manager
     }
 
     /**
+     * Drop just the license/bearer payload, leaving the stable
+     * install-id sticker and any legacy BYOK rows untouched.
+     *
+     * Used by {@see Cloud_Client}'s self-heal path when the cloud
+     * rejects a stashed anonymous bearer with repeated 401s — clearing
+     * the dead credentials lets
+     * {@see Anonymous_Bootstrap::maybe_bootstrap()} re-mint a fresh
+     * shadow workspace on the next admin load. Distinct from
+     * {@see self::wipe_all_keys()}, which is the uninstall-time sweep
+     * that also removes the install-id and legacy key rows.
+     */
+    public static function clear_license_payload(): void
+    {
+        delete_option('structura_license_data');
+    }
+
+    /**
      * Wipes the license payload AND any leftover BYOK key rows from
      * earlier plugin versions. Called by `uninstall.php` when the
      * user opts in to the "delete all data" toggle.

@@ -1,17 +1,28 @@
 import { __ } from "@wordpress/i18n";
 import { Link } from "react-router";
 import { Badge, Card } from "@structura/ui";
-import {
-  AlertCircle,
-  CheckCircle2,
-  ExternalLink,
-  Loader2,
-  Sparkles,
-  XCircle,
-  Zap,
-} from "lucide-react";
+import { AlertCircle, CheckCircle2, ExternalLink, Loader2, Sparkles, XCircle, Zap, } from "lucide-react";
 import type { RunStatusSerialized } from "@structura/types";
-import { useSinglePostRunsQuery } from "@/features/progress";
+import { useSinglePostRunsQuery } from "@/features/progress"; /**
+ * Dashboard widget — "Recent generations".
+ *
+ * Lists the most recent ephemeral runs (one-off `/generate` form
+ * submissions), newest-first. Each row links through to the persistent
+ * `/generate/runs/{runId}` receipt page so the user can re-open a
+ * specific generation later — same persistence contract as campaign
+ * runs, applied to one-off posts.
+ *
+ * Self-hides on an empty list, so safe to mount unconditionally on the
+ * Overview. The list is capped at 5 rows to match the at-a-glance
+ * intent of the dashboard; deeper history is not surfaced here (we
+ * could add a "View all" link later if a use case for it shows up).
+ *
+ * Polling cadence is owned by `useSinglePostRunsQuery` — fast 30s
+ * tick while in-flight rows are present, paused otherwise. The
+ * generate-post mutation invalidates the cache key on success so
+ * brand-new submissions appear immediately without waiting for the
+ * next tick.
+ */
 
 /**
  * Dashboard widget — "Recent generations".
@@ -38,8 +49,7 @@ import { useSinglePostRunsQuery } from "@/features/progress";
 const MAX_VISIBLE_ROWS = 5;
 
 /** Cache-bust threshold for "title is empty" runs (early-failure cases). */
-const FALLBACK_TITLE = (): string =>
-  __("Single-post generation", "structura");
+const FALLBACK_TITLE = (): string => __("Single-post generation", "structura");
 
 /**
  * Pull a friendly headline out of a single-post run. Priority:
@@ -50,17 +60,17 @@ const FALLBACK_TITLE = (): string =>
  *   3. A neutral fallback so we never render an empty row.
  */
 const deriveTitle = (run: RunStatusSerialized): string => {
-  const snapshot = (run as RunStatusSerialized & {
-    inputSnapshot?: Record<string, unknown>;
-  }).inputSnapshot;
+  const snapshot = (
+    run as RunStatusSerialized & {
+      inputSnapshot?: Record<string, unknown>;
+    }
+  ).inputSnapshot;
   if (snapshot && typeof snapshot === "object") {
     const identity = snapshot.identity;
     if (identity && typeof identity === "object") {
       const objective = (identity as Record<string, unknown>).objective;
       if (typeof objective === "string" && objective.trim()) {
-        return objective.length > 80
-          ? objective.slice(0, 77) + "…"
-          : objective;
+        return objective.length > 80 ? objective.slice(0, 77) + "…" : objective;
       }
     }
   }
@@ -75,9 +85,7 @@ const deriveTitle = (run: RunStatusSerialized): string => {
  */
 const StatusIcon = ({ status }: { status: RunStatusSerialized["status"] }) => {
   if (status === "succeeded" || status === "succeeded_with_warnings") {
-    return (
-      <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-    );
+    return <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />;
   }
   if (status === "failed") {
     return <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />;
@@ -85,9 +93,7 @@ const StatusIcon = ({ status }: { status: RunStatusSerialized["status"] }) => {
   if (status === "cancelled") {
     return <XCircle className="h-4 w-4 text-neutral-400" />;
   }
-  return (
-    <Loader2 className="h-4 w-4 animate-spin text-blue-600 dark:text-blue-400" />
-  );
+  return <Loader2 className="h-4 w-4 animate-spin text-blue-600 dark:text-blue-400" />;
 };
 
 /**
@@ -104,10 +110,8 @@ const relativeTime = (iso: string): string => {
     const absMs = Math.abs(diffMs);
     const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
     if (absMs < 60_000) return rtf.format(Math.round(diffMs / 1000), "second");
-    if (absMs < 3_600_000)
-      return rtf.format(Math.round(diffMs / 60_000), "minute");
-    if (absMs < 86_400_000)
-      return rtf.format(Math.round(diffMs / 3_600_000), "hour");
+    if (absMs < 3_600_000) return rtf.format(Math.round(diffMs / 60_000), "minute");
+    if (absMs < 86_400_000) return rtf.format(Math.round(diffMs / 3_600_000), "hour");
     return rtf.format(Math.round(diffMs / 86_400_000), "day");
   } catch {
     return iso;
@@ -135,7 +139,7 @@ export const RecentSinglePostRuns = () => {
         </h3>
         <Link
           to="/generate"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+          className="text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 inline-flex items-center gap-1.5 text-xs font-semibold"
         >
           <Zap size={12} />
           {__("Generate Post", "structura")}
@@ -145,8 +149,7 @@ export const RecentSinglePostRuns = () => {
       <ul className="divide-y divide-gray-100 dark:divide-neutral-800">
         {runs.map((run) => {
           const title = deriveTitle(run);
-          const isInFlight =
-            run.status === "queued" || run.status === "running";
+          const isInFlight = run.status === "queued" || run.status === "running";
           return (
             <li
               key={run.runId}
@@ -164,7 +167,7 @@ export const RecentSinglePostRuns = () => {
                     <p className="m-0! truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">
                       {title}
                     </p>
-                    <p className="m-0! mt-0.5 text-[11px] text-neutral-500 dark:text-neutral-400">
+                    <p className="mt-0.5! mb-0! text-[11px] text-neutral-500 dark:text-neutral-400">
                       {relativeTime(run.startedAt)}
                       {run.headline && isInFlight ? ` • ${run.headline}` : ""}
                     </p>
@@ -172,8 +175,7 @@ export const RecentSinglePostRuns = () => {
                 </div>
 
                 <div className="flex shrink-0 items-center gap-2">
-                  {run.status === "succeeded" ||
-                  run.status === "succeeded_with_warnings" ? (
+                  {run.status === "succeeded" || run.status === "succeeded_with_warnings" ? (
                     <Badge variant="solid" intent="success">
                       {__("Done", "structura")}
                     </Badge>
@@ -191,8 +193,7 @@ export const RecentSinglePostRuns = () => {
                     </Badge>
                   )}
                   {run.resultPostUrl &&
-                    (run.status === "succeeded" ||
-                      run.status === "succeeded_with_warnings") && (
+                    (run.status === "succeeded" || run.status === "succeeded_with_warnings") && (
                       <a
                         href={run.resultPostUrl}
                         target="_blank"

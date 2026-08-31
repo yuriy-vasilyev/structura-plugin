@@ -1,4 +1,12 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { __, sprintf } from "@wordpress/i18n";
 import {
   AlertTriangle,
@@ -11,12 +19,24 @@ import {
   RefreshCw,
   Search,
   Sparkles,
-  TrendingUp,
   X,
 } from "lucide-react";
-import { Badge, Button, cn, InputField } from "@structura/ui";
-import { BankKeyword } from "@/features/campaigns/types";
-import { keywordVolumeLabel } from "@/features/campaigns/labels";
+import {
+  Badge,
+  Button,
+  cn,
+  InputField,
+  KeywordBankList,
+  provenanceFromWireSource,
+  type KeywordBankItem,
+  type KeywordRowMetrics,
+} from "@structura/ui";
+import { BankKeyword, KeywordDiscoveryMeta } from "@/features/campaigns/types";
+import {
+  keywordBankLabels,
+  keywordModeCaption,
+  keywordRowLabels,
+} from "./keywordBankLabels";
 import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutations";
 import { useLicense } from "@/features/settings";
 import { docsUrl } from "@/utils/docsUrl";
@@ -36,6 +56,12 @@ type DiscoveryPhase =
 export interface KeywordDiscoveryHandle {
   /** Returns the current keyword bank (for parent to include in creation payload). */
   getKeywords: () => BankKeyword[];
+  /**
+   * What the last discovery resolved (mode / KD ceiling / data path), or
+   * null for a hand-curated bank. Persisted next to the bank so the edit
+   * flow renders the same ranked list the wizard did.
+   */
+  getDiscoveryMeta: () => KeywordDiscoveryMeta | null;
   /** Save keywords to an existing campaign. Only valid when campaignId is provided. */
   save: (campaignId: string | number) => Promise<void>;
   /** Whether discovery is currently running. */
@@ -60,6 +86,8 @@ interface StepKeywordsProps {
   provider?: string;
   /** If provided, shows existing keywords in edit mode instead of running discovery. */
   existingKeywords?: BankKeyword[];
+  /** The persisted discovery meta for `existingKeywords` (edit flow / wizard back-nav). */
+  existingDiscoveryMeta?: KeywordDiscoveryMeta | null;
   /** Called whenever keyword count changes (for parent button label updates). */
   onKeywordsChange?: (count: number) => void;
   /** Called when the discovery phase changes (for parent to track busy/complete states). */
@@ -83,26 +111,6 @@ interface StepKeywordsProps {
 // it into the rewrite.
 const DOCS_URL = docsUrl("using/campaigns/target-keywords");
 
-const SOURCE_ICONS: Record<string, typeof Search> = {
-  related_search: Search,
-  people_also_ask: TrendingUp,
-  ai_generated: Sparkles,
-  manual: Plus,
-};
-
-const SOURCE_LABELS: Record<string, string> = {
-  related_search: __("Related Search", "structura"),
-  people_also_ask: __("People Also Ask", "structura"),
-  ai_generated: __("AI Assistant", "structura"),
-  manual: __("Manual", "structura"),
-};
-
-const VOLUME_COLORS: Record<string, string> = {
-  high: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400",
-  medium: "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400",
-  low: "bg-neutral-50 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400",
-};
-
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps>(
@@ -114,6 +122,7 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
       language,
       provider,
       existingKeywords,
+      existingDiscoveryMeta,
       onKeywordsChange,
       onPhaseChange,
       onSkipToNextStep,
@@ -131,8 +140,13 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
     // back to the legacy LLM-only pipeline ("legacy"). Drives the
     // data-source badge so users know whether their bank is grounded
     // in real Google data or AI estimation.
-    const [dataPath, setDataPath] = useState<"provider" | "legacy" | null>(null);
+    const [discoveryMeta, setDiscoveryMeta] = useState<KeywordDiscoveryMeta | null>(
+      existingDiscoveryMeta ?? null
+    );
+    const dataPath = discoveryMeta?.path ?? null;
     const [newKeywordInput, setNewKeywordInput] = useState("");
+    // Bumped per discovery so the list's collapsed state resets (spec §3).
+    const [listKey, setListKey] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
     const { discoverKeywordsDetached, isDiscoveringKeywords, saveKeywords } =
       useCampaignMutations();
@@ -154,12 +168,13 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
       ref,
       () => ({
         getKeywords: () => keywords,
+        getDiscoveryMeta: () => discoveryMeta,
         save: async (id: string | number) => {
-          await saveKeywords({ campaignId: id, keywords });
+          await saveKeywords({ campaignId: id, keywords, discoveryMeta });
         },
         isBusy: isRunning || (phase !== "complete" && phase !== "idle"),
       }),
-      [keywords, isRunning, phase, saveKeywords]
+      [keywords, discoveryMeta, isRunning, phase, saveKeywords]
     );
 
     // Run discovery
@@ -186,14 +201,35 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
         clearTimeout(phaseTimer2);
         clearTimeout(phaseTimer3);
 
-        // Merge the real DFS monthly-volume numbers (response `metrics` map,
-        // keyed by keyword) onto each keyword so the chips can show them.
+        // Merge the real DFS metrics (response `metrics` map, keyed by
+        // keyword) onto each keyword: volume, KD, intent and the "+N"
+        // variant count the ranked rows render. Persisted inline on the
+        // BankKeyword (the plugin's bank IS an object array on the doc).
         const metrics = result?.metrics ?? {};
         const discovered = (result?.keywords ?? []).map((k: BankKeyword) => {
-          const vol = metrics[k.keyword]?.volumeNumber;
-          return typeof vol === "number" ? { ...k, volumeNumber: vol } : k;
+          const m = metrics[k.keyword];
+          if (!m) return k;
+          return {
+            ...k,
+            ...(typeof m.volumeNumber === "number" ? { volumeNumber: m.volumeNumber } : {}),
+            ...(typeof m.difficulty === "number" ? { difficulty: m.difficulty } : {}),
+            ...(m.intent ? { intent: m.intent } : {}),
+            ...(typeof m.variantCount === "number" ? { variantCount: m.variantCount } : {}),
+          };
         });
-        setDataPath(result?.meta?.path ?? null);
+        const path = result?.meta?.path;
+        setDiscoveryMeta(
+          path === "provider" || path === "legacy"
+            ? {
+                // Legacy runs carry no KD → "no cap": every row winnable,
+                // no pillar group — the list is in estimated mode anyway.
+                resolvedMode: result?.meta?.resolvedMode ?? "authority",
+                kdCeiling: result?.meta?.kdCeiling ?? null,
+                path,
+              }
+            : null
+        );
+        setListKey((k) => k + 1);
 
         // Preserve manually added keywords — merge them with discovered ones
         setKeywords((prev) => {
@@ -241,6 +277,37 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
     const removeKeyword = (keyword: string) => {
       setKeywords((prev) => prev.filter((k) => k.keyword !== keyword));
     };
+
+    // The bank array IS the publish order (the round-robin walks it top to
+    // bottom), so move-to-top is a plain reorder.
+    const moveKeywordToTop = (keyword: string) => {
+      setKeywords((prev) => {
+        const idx = prev.findIndex((k) => k.keyword === keyword);
+        if (idx <= 0) return prev;
+        return [prev[idx], ...prev.slice(0, idx), ...prev.slice(idx + 1)];
+      });
+    };
+
+    const estimated = dataPath === "legacy";
+    const kdCeiling = discoveryMeta?.kdCeiling ?? null;
+    const bankItems = useMemo<KeywordBankItem[]>(
+      () =>
+        keywords.map((k) => {
+          const metrics: KeywordRowMetrics = {};
+          if (typeof k.volumeNumber === "number") metrics.volumeNumber = k.volumeNumber;
+          if (k.volume) metrics.volumeBucket = k.volume;
+          if (typeof k.difficulty === "number") metrics.kd = k.difficulty;
+          if (k.intent === "informational" || k.intent === "commercial") metrics.intent = k.intent;
+          return {
+            keyword: k.keyword,
+            source: provenanceFromWireSource(k.source),
+            metrics,
+            ...(typeof k.variantCount === "number" ? { variantCount: k.variantCount } : {}),
+          };
+        }),
+      [keywords]
+    );
+    const modeCaption = keywordModeCaption(discoveryMeta);
 
     const addManualKeyword = () => {
       const raw = newKeywordInput.trim().toLowerCase();
@@ -446,16 +513,25 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
           </div>
         ) : null}
 
-        {/* Keyword pills */}
+        {/* Ranked keyword bank — the order IS the publish order (design
+            handoff marketing/design_handoff_keyword_bank). The manual-add
+            input keeps its place below the list. */}
         {keywords.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {keywords.map((kw) => (
-              <KeywordPill
-                key={kw.keyword}
-                keyword={kw}
-                onRemove={() => removeKeyword(kw.keyword)}
-              />
-            ))}
+          <div className="mb-4">
+            <KeywordBankList
+              key={listKey}
+              items={bankItems}
+              kdCeiling={kdCeiling}
+              estimated={estimated}
+              modeCaption={modeCaption.caption}
+              modeTooltip={modeCaption.tooltip}
+              onRemove={removeKeyword}
+              onMoveToTop={moveKeywordToTop}
+              addInputRef={inputRef}
+              locale={typeof document !== "undefined" ? document.documentElement.lang || undefined : undefined}
+              labels={keywordBankLabels()}
+              rowLabels={keywordRowLabels()}
+            />
           </div>
         )}
 
@@ -504,47 +580,6 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
 StepKeywords.displayName = "StepKeywords";
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
-
-/** Compact monthly-volume label: 1.2K / 12K / 850. */
-function compactVolume(n: number): string {
-  if (n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "") + "K";
-  return n.toLocaleString();
-}
-
-const KeywordPill = ({ keyword, onRemove }: { keyword: BankKeyword; onRemove: () => void }) => {
-  const Icon = SOURCE_ICONS[keyword.source] ?? Search;
-  const volumeClass = keyword.volume ? VOLUME_COLORS[keyword.volume] : "";
-
-  return (
-    <div className="group border-brand-200 bg-brand-50 hover:border-brand-300 dark:border-brand-900/40 dark:bg-brand-950/30 dark:hover:border-brand-800 flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors">
-      <Icon size={12} className="text-brand-500 dark:text-brand-400 shrink-0" />
-      <span className="text-brand-900 dark:text-brand-100">{keyword.keyword}</span>
-      {typeof keyword.volumeNumber === "number" ? (
-        // Real DFS monthly volume — the strongest signal; show it verbatim.
-        <span className="shrink-0 font-mono text-[9px] font-bold text-brand-500 dark:text-brand-300">
-          {compactVolume(keyword.volumeNumber)}/mo
-        </span>
-      ) : keyword.volume ? (
-        <span
-          className={cn(
-            "shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase",
-            volumeClass
-          )}
-        >
-          {keywordVolumeLabel(keyword.volume)}
-        </span>
-      ) : null}
-      <button
-        type="button"
-        onClick={onRemove}
-        className="ml-0.5 shrink-0 cursor-pointer rounded p-0.5 text-neutral-400 transition-colors hover:text-red-500 dark:text-neutral-500"
-        title={__("Remove keyword", "structura")}
-      >
-        <X size={10} />
-      </button>
-    </div>
-  );
-};
 
 // ─── Premium Discovery Loader ───────────────────────────────────────────────
 

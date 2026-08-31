@@ -9,6 +9,7 @@
  *       specs/pricing-v2-implementation.md §8.1.
  */
 export * from "./PlanCard";
+export * from "./founding-offer";
 export * from "./CurrencyToggle";
 export * from "./AgencyVolumeStrip";
 export * from "./ComparisonMatrix";

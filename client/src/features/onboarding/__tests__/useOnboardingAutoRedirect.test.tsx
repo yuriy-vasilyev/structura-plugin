@@ -30,7 +30,11 @@ vi.mock("@/features/settings", () => ({
 
 const wizardDataMock = vi.hoisted(() => ({
   current: undefined as
-    | { justCreated?: boolean; activationNeedsPositioning?: boolean }
+    | {
+        justCreated?: boolean;
+        activationNeedsPositioning?: boolean;
+        state?: { completedAt?: string | null };
+      }
     | undefined,
 }));
 vi.mock("../api/useOnboardingState", () => ({
@@ -38,8 +42,10 @@ vi.mock("../api/useOnboardingState", () => ({
 }));
 
 const dismissedMock = vi.hoisted(() => ({ current: false }));
+const clearAllMock = vi.hoisted(() => vi.fn());
 vi.mock("../utils/onboardingDismissal", () => ({
   isOnboardingDismissed: () => dismissedMock.current,
+  clearAllOnboardingStorage: clearAllMock,
 }));
 
 import { useOnboardingAutoRedirect } from "../hooks/useOnboardingAutoRedirect";
@@ -60,6 +66,7 @@ beforeEach(() => {
   };
   wizardDataMock.current = undefined;
   dismissedMock.current = false;
+  clearAllMock.mockReset();
   setConfig({ had_prior_activation: false });
 });
 
@@ -146,5 +153,66 @@ describe("useOnboardingAutoRedirect", () => {
     renderHook(() => useOnboardingAutoRedirect());
 
     expect(navigateMock).toHaveBeenCalledWith("/onboarding");
+  });
+
+  // Regression (2026-07-20, 3rd occurrence): the wizard reappeared after
+  // completion because the suppressor was a localStorage flag keyed by the
+  // activation id, which drifts on workspace re-provision. The durable
+  // server-side `onboarding_dismissed` wp_option (localized here) now wins
+  // over EVERY trigger — including justCreated and the keyless fresh-install
+  // path — regardless of activation-id drift or tier (anonymous included).
+  it("does NOT redirect when the server onboarding_dismissed flag is set", () => {
+    licenseMock.current = {
+      hasUsableLicense: true,
+      hasWorkspace: true,
+      isPaidLicense: true,
+    };
+    // justCreated would normally redirect — the durable seal overrides it.
+    wizardDataMock.current = { justCreated: true };
+    setConfig({ had_prior_activation: false, onboarding_dismissed: true });
+    renderHook(() => useOnboardingAutoRedirect());
+
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("does NOT redirect a keyless fresh install once server-dismissed", () => {
+    // The exact reported case: anonymous tier, no license, fresh activation
+    // id (no localStorage flag), but onboarding already finished/exited once.
+    setConfig({ had_prior_activation: false, onboarding_dismissed: true });
+    renderHook(() => useOnboardingAutoRedirect());
+
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("treats a licensed workspace's completedAt as a durable seal", () => {
+    licenseMock.current = {
+      hasUsableLicense: true,
+      hasWorkspace: true,
+      isPaidLicense: true,
+    };
+    setConfig({ had_prior_activation: true });
+    wizardDataMock.current = {
+      justCreated: false,
+      activationNeedsPositioning: true,
+      state: { completedAt: "2026-07-20T00:00:00.000Z" },
+    };
+    renderHook(() => useOnboardingAutoRedirect());
+
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("sweeps stale onboarding localStorage once dismissed, off the wizard route", () => {
+    setConfig({ had_prior_activation: false, onboarding_dismissed: true });
+    renderHook(() => useOnboardingAutoRedirect());
+
+    expect(clearAllMock).toHaveBeenCalled();
+  });
+
+  it("does NOT sweep while the user is inside the wizard (manual re-run)", () => {
+    locationMock.current = { pathname: "/onboarding" };
+    setConfig({ had_prior_activation: false, onboarding_dismissed: true });
+    renderHook(() => useOnboardingAutoRedirect());
+
+    expect(clearAllMock).not.toHaveBeenCalled();
   });
 });

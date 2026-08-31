@@ -31,6 +31,7 @@ import { milestoneHeadline, milestoneOrderForFlow } from "../milestones";
 import { formatDuration } from "../formatDuration";
 import { RunTimeline } from "../components/RunTimeline";
 import { usePersonasQuery } from "@/features/personas";
+import { SearchPerformanceSection } from "@/features/channels/components/SearchPerformanceSection";
 
 /**
  * Per-run receipt view. Read-only for Phase 1 — Retry, Dismiss, and the
@@ -123,17 +124,37 @@ const NotFoundState = () => (
  * page can handle loading/error purely and this can assume `run`
  * is defined.
  */
-const RunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => (
-  <PageContainer variant="narrow">
-    <RunDetailHeader run={run} />
-    <div className="space-y-6">
-      <RunTimeline run={run} />
-      <RunInputsCard run={run} />
-      <RunOutputsCard run={run} />
-      <RunTechnicalInspector run={run} />
-    </div>
-  </PageContainer>
-);
+const RunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
+  const isSuccess = run.status === "succeeded" || run.status === "succeeded_with_warnings";
+  // Search stats only exist for LIVE posts. `outputs.post.status` is
+  // absent on older runs (pre-outputs-snapshot) — treat absent as
+  // published, since a resultPostUrl on a successful run was the live
+  // permalink in that era (back-compat default, house rule §10).
+  const isLivePost =
+    isSuccess &&
+    Boolean(run.resultPostUrl) &&
+    (run.outputs?.post?.status ?? "publish") === "publish";
+
+  return (
+    <PageContainer variant="narrow">
+      <RunDetailHeader run={run} />
+      <div className="space-y-6">
+        <RunTimeline run={run} />
+        <RunInputsCard run={run} />
+        <RunOutputsCard run={run} />
+        {/* Search performance (GSC) — after the production results, per
+            design handoff Board 10 (section follows the result surface). */}
+        {isLivePost && (
+          <SearchPerformanceSection
+            pageUrl={run.resultPostUrl!}
+            publishedAt={run.endedAt ?? run.startedAt}
+          />
+        )}
+        <RunTechnicalInspector run={run} />
+      </div>
+    </PageContainer>
+  );
+};
 
 // ─── Header ─────────────────────────────────────────────────────────────────
 
@@ -620,7 +641,7 @@ const FailureOutputs = ({ run }: { run: RunStatusSerialized }) => {
         {userMessage ? (
           <>
             <p className="m-0! text-sm font-medium text-red-900 dark:text-red-200">{userMessage}</p>
-            <p className="m-0! mt-1 text-xs text-red-700/80 dark:text-red-300/70">
+            <p className="mt-1! mb-0! text-xs text-red-700/80 dark:text-red-300/70">
               {stoppedAtHint}
             </p>
           </>
@@ -645,7 +666,7 @@ const FailureOutputs = ({ run }: { run: RunStatusSerialized }) => {
             <p className="m-0! text-sm font-medium text-amber-900 dark:text-amber-100">
               {userMessage}
             </p>
-            <p className="m-0! mt-1 text-xs text-amber-800/80 dark:text-amber-200/70">
+            <p className="mt-1! mb-0! text-xs text-amber-800/80 dark:text-amber-200/70">
               {stoppedAtHint}
             </p>
           </>
@@ -781,7 +802,7 @@ const ImageFailuresList = ({
               ? __("Featured image", "structura")
               : __("Body image", "structura")}
           </p>
-          <p className="m-0! mt-1 text-amber-800 dark:text-amber-200/80">{failure.reason}</p>
+          <p className="mt-1! mb-0! text-amber-800 dark:text-amber-200/80">{failure.reason}</p>
         </li>
       ))}
     </ul>

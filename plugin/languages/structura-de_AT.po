@@ -3060,6 +3060,10 @@ msgstr "Aktion fehlgeschlagen:"
 msgid "Campaign duplicated."
 msgstr "Kampagne dupliziert."
 
+#: client/src/features/campaigns/api/useCampaignMutations.ts:394
+msgid "Campaign deleted."
+msgstr "Kampagne gelöscht."
+
 #: client/src/features/campaigns/api/useCampaignMutations.ts:349
 msgid "Campaign archived successfully."
 msgstr "Kampagne erfolgreich archiviert."
@@ -9966,3 +9970,11 @@ msgstr "KI"
 
 #~ msgid "And notifying your channels"
 #~ msgstr "Und Benachrichtigung deiner Channels"
+
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx
+msgid "That looks like a web address, not an API key. Paste the key itself — it starts with \"%s\"."
+msgstr "Das sieht nach einer Webadresse aus, nicht nach einem API-Schlüssel. Füge den Schlüssel selbst ein — er beginnt mit „%s“."
+
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx
+msgid "That looks like a web address, not an API key. Paste the key itself from your provider's dashboard."
+msgstr "Das sieht nach einer Webadresse aus, nicht nach einem API-Schlüssel. Füge den Schlüssel selbst aus dem Dashboard deines Anbieters ein."

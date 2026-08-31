@@ -122,6 +122,7 @@ interface Channels_Connections_Service_Interface
      * @param string|null                     $selected_organization_urn LinkedIn-only posting-target switch. `null` = leave untouched; `''` or `'personal'` = personal profile; an org URN = that company Page. Ignored for non-LinkedIn connections.
      * @param string|null                     $video_voice             Video-only voiceover voice id (e.g. `'ava'`). `null` = leave untouched; the cloud validates the id against its voice catalog. Ignored for non-video connections.
      * @param string|null                     $video_style             Video-only visual-style preset id (`'clean'|'bold'|'kinetic'`). Same semantics as `$video_voice`.
+     * @param string|null                     $selected_gsc_property   Google Search Console only: the property this connection reads (`'https://example.com/'` or `'sc-domain:example.com'`). `null` or `''` = leave untouched — unlike the LinkedIn URN there is NO empty-string sentinel; the cloud validates the value against the properties captured at connect and 400s on anything else. Ignored for non-GSC connections.
      *
      * @return array{connection: array<string, mixed>}|\WP_Error
      */
@@ -133,7 +134,8 @@ interface Channels_Connections_Service_Interface
         ?bool $attach_featured_image = null,
         ?string $selected_organization_urn = null,
         ?string $video_voice = null,
-        ?string $video_style = null
+        ?string $video_style = null,
+        ?string $selected_gsc_property = null
     );
 
     /**
@@ -164,6 +166,49 @@ interface Channels_Connections_Service_Interface
      * }|\WP_Error
      */
     public function list_catalog();
+
+    /**
+     * Fetch one page's Google Search Console stats from the cloud mirror.
+     *
+     * The page is identified by its public permalink — the SPA sends
+     * `run.resultPostUrl`, the cloud looks the page up by normalized-URL
+     * hash. The response carries a `state` field
+     * (`not_connected|expired|pulling|ready`) the panel branches on;
+     * `pulling` means the first mirror pull is in flight and the SPA
+     * should poll.
+     *
+     * @since 2.17.0
+     *
+     * @param string $page_url Public permalink of the post.
+     *
+     * @return array<string, mixed>|\WP_Error
+     */
+    public function get_gsc_post_stats(string $page_url);
+
+    /**
+     * Fetch the site-level Google Search Console overview (28-day totals,
+     * deltas, daily series) from the cloud mirror. Same `state` contract
+     * as {@see get_gsc_post_stats}.
+     *
+     * @since 2.17.0
+     *
+     * @param bool $summary Glance-card mode — totals + top mover only.
+     *
+     * @return array<string, mixed>|\WP_Error
+     */
+    public function get_gsc_site_overview(bool $summary = false);
+
+    /**
+     * Re-list the connected Google account's Search Console properties on
+     * the stored token — the connect modal's "I've verified — check again"
+     * action. No new OAuth round-trip; the cloud refreshes the connection
+     * summary and auto-selects a fresh match when none was chosen yet.
+     *
+     * @since 2.18.0
+     *
+     * @return array<string, mixed>|\WP_Error
+     */
+    public function refresh_gsc_properties();
 
     /**
      * Initiate an OAuth flow for the given integration. Calls the cloud's

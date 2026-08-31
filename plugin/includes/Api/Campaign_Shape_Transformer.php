@@ -51,6 +51,12 @@ class Campaign_Shape_Transformer
             'intelligence' => [
                 'textProvider'          => $cloud['textProvider'] ?? 'gemini',
                 'textModel'             => $cloud['textModel'] ?? '',
+                // Model quality tier (top|mid). Null on campaigns saved before
+                // the tier picker shipped — the SPA reads null as "no tier,
+                // fall back to the concrete model" and the picker opens on the
+                // model rather than a tier.
+                'textTier'              => $cloud['textTier'] ?? null,
+                'imageTier'             => $cloud['imageTier'] ?? null,
                 'imageProvider'         => $cloud['imageProvider'] ?? null,
                 'imageModel'            => $cloud['imageModel'] ?? '',
                 'fallbackTextProvider'  => $cloud['fallbackTextProvider'] ?? null,
@@ -105,6 +111,11 @@ class Campaign_Shape_Transformer
             'keywords'     => [
                 'bank'         => (array) ($cloud['keywordBank'] ?? []),
                 'discoveredAt' => $cloud['keywordsDiscoveredAt'] ?? null,
+                // What the last discovery resolved (mode / KD ceiling / data
+                // path) — the ranked keyword bank renders its "Balanced ·
+                // KD ≤ 65" caption + pillars group from it. Optional:
+                // absent on docs saved before 2026-08-28 (CLAUDE.md §10).
+                'discoveryMeta' => self::sanitize_discovery_meta($cloud['keywordDiscoveryMeta'] ?? null),
             ],
             'stats'        => [
                 'postsPublished' => (int) ($cloud['postsPublished'] ?? 0),
@@ -171,7 +182,7 @@ class Campaign_Shape_Transformer
      */
     public static function wp_input_to_cloud(array $wp_input): array
     {
-        return [
+        $cloud = [
             'name'                  => sanitize_text_field($wp_input['name'] ?? ''),
             'objective'             => sanitize_textarea_field($wp_input['objective'] ?? $wp_input['topic'] ?? ''),
             'campaignMode'          => sanitize_key($wp_input['campaign_mode'] ?? 'traffic_magnet'),
@@ -211,6 +222,31 @@ class Campaign_Shape_Transformer
             'postsPublished'        => (int) ($wp_input['posts_published'] ?? 0),
             'lastRunTimestamp'      => $wp_input['last_run_timestamp'] ?? null,
         ];
+        // Ranked keyword bank: the resolved discovery mode / ceiling / path
+        // the SPA received from discover-keywords. Only when supplied — an
+        // absent key must not null out what the doc already holds.
+        if (isset($wp_input['keyword_discovery_meta'])) {
+            $meta = self::sanitize_discovery_meta($wp_input['keyword_discovery_meta']);
+            if ($meta !== null) {
+                $cloud['keywordDiscoveryMeta'] = $meta;
+            }
+        }
+
+
+        // Model quality tier — forwarded ONLY when the SPA supplied a valid
+        // top|mid. Omitting it otherwise keeps a tier-less campaign resolving
+        // off textModel/imageModel and stops a PATCH that doesn't carry the
+        // tier from writing a null over a stored one (rollout §10). The
+        // Campaign_Validator already whitelisted the value; this guards the
+        // wp_cluster_to_cloud / direct callers that skip the validator.
+        if (in_array($wp_input['text_tier'] ?? null, ['top', 'mid'], true)) {
+            $cloud['textTier'] = $wp_input['text_tier'];
+        }
+        if (in_array($wp_input['image_tier'] ?? null, ['top', 'mid'], true)) {
+            $cloud['imageTier'] = $wp_input['image_tier'];
+        }
+
+        return $cloud;
     }
 
     /**
@@ -234,7 +270,7 @@ class Campaign_Shape_Transformer
         $keywords     = $wp_cluster['keywords'] ?? [];
         $stats        = $wp_cluster['stats'] ?? [];
 
-        return [
+        $cloud = [
             'campaignId'            => (string) ($wp_cluster['id'] ?? ''),
             'name'                  => $identity['name'] ?? '',
             'objective'             => $identity['objective'] ?? '',
@@ -275,6 +311,25 @@ class Campaign_Shape_Transformer
             'postsPublished'        => (int) ($stats['postsPublished'] ?? 0),
             'lastRunTimestamp'      => null,
         ];
+
+        // Resolved discovery mode / ceiling / path (see cloud_to_wp). Omitted
+        // when the cluster has none so a legacy migration stays meta-less.
+        $meta = self::sanitize_discovery_meta($keywords['discoveryMeta'] ?? null);
+        if ($meta !== null) {
+            $cloud['keywordDiscoveryMeta'] = $meta;
+        }
+
+        // Preserve a tier the cluster already carried (migrated campaigns that
+        // were saved through the tier picker). Absent on legacy clusters —
+        // omitted so the migrated doc stays tier-less rather than pinned to null.
+        if (in_array($intelligence['textTier'] ?? null, ['top', 'mid'], true)) {
+            $cloud['textTier'] = $intelligence['textTier'];
+        }
+        if (in_array($intelligence['imageTier'] ?? null, ['top', 'mid'], true)) {
+            $cloud['imageTier'] = $intelligence['imageTier'];
+        }
+
+        return $cloud;
     }
 
     /**
@@ -328,6 +383,37 @@ class Campaign_Shape_Transformer
             return null;
         }
         return $value;
+    }
+
+    /**
+     * Sanitize the resolved keyword-discovery meta (`keywordDiscoveryMeta`):
+     * `{ resolvedMode: winnable|balanced|authority, kdCeiling: int|null,
+     * path: provider|legacy }`. Returns null for anything that isn't a
+     * well-formed object so a bad payload can never poison the doc —
+     * the SPA then simply renders every row as winnable.
+     *
+     * @param mixed $raw
+     * @return array{resolvedMode:string,kdCeiling:int|null,path:string}|null
+     */
+    public static function sanitize_discovery_meta($raw): ?array
+    {
+        if ( ! is_array($raw)) {
+            return null;
+        }
+        $mode = sanitize_key($raw['resolvedMode'] ?? '');
+        $path = sanitize_key($raw['path'] ?? '');
+        if ( ! in_array($mode, ['winnable', 'balanced', 'authority'], true)) {
+            return null;
+        }
+        if ( ! in_array($path, ['provider', 'legacy'], true)) {
+            return null;
+        }
+        $ceiling = $raw['kdCeiling'] ?? null;
+        return [
+            'resolvedMode' => $mode,
+            'kdCeiling'    => is_numeric($ceiling) ? (int) $ceiling : null,
+            'path'         => $path,
+        ];
     }
 
     /**

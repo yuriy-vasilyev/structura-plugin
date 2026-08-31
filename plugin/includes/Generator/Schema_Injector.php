@@ -87,12 +87,22 @@ class Schema_Injector
     /**
      * Echo one schema node as a pretty-printed JSON-LD <script>.
      *
+     * Deliberately NOT passing `JSON_UNESCAPED_SLASHES`: with slashes
+     * escaped, a `</script>` sequence inside any string value (a post
+     * title, an excerpt, a category name) is emitted as `<\/script>`,
+     * which the HTML parser does not treat as the end of the script
+     * element — so schema data can never break out of the JSON-LD
+     * block and inject markup. JSON parsers (and Google's) read
+     * `\/` as `/`, so the structured data is unchanged. Flagged in the
+     * wp.org plugin review (2026-08-27).
+     *
      * @param array<string, mixed> $schema
      */
     private function print_schema(array $schema): void
     {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() with slashes escaped is the correct escaping for a JSON-LD script body; esc_html() would corrupt the JSON.
         echo '<script type="application/ld+json">' . "\n"
-             . wp_json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
+             . wp_json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
              . "\n</script>\n";
     }
 

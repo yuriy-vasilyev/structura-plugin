@@ -45,6 +45,7 @@ vi.mock("../api/useWizardSeo", () => ({
 }));
 vi.mock("../api/useOnboardingState", () => ({
   useSaveWizardStepMutation: () => ({ mutateAsync: vi.fn() }),
+  useDismissOnboardingMutation: () => ({ mutateAsync: vi.fn() }),
 }));
 vi.mock("../utils/onboardingDismissal", () => ({
   clearOnboardingDismissed: vi.fn(),

@@ -11,6 +11,7 @@ import { useDefaultProviders, useLicense } from "@/features/settings";
 import { Card, InputField, Select, TextArea, cn } from "@structura/ui";
 import { AIProvider, CampaignMode } from "@/features/campaigns/types";
 import { ProviderToggle } from "../ProviderToggle";
+import { mirrorModelForTier } from "@/features/campaigns/modelTier";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
 import { MagicSuggestButton } from "@/features/campaigns/components/MagicSuggestButton";
 
@@ -198,18 +199,38 @@ export const StepObjective = () => {
             textProvider={formData.intelligence.textProvider}
             imageProvider={formData.intelligence.imageProvider}
             onTextProviderChange={(p) =>
-              updateForm("intelligence", { textProvider: p, textModel: "" })
+              updateForm("intelligence", {
+                textProvider: p,
+                textModel:
+                  mirrorModelForTier(p, "text", formData.intelligence.textTier ?? "mid") ?? "",
+              })
             }
             onImageProviderChange={(p) =>
-              updateForm("intelligence", { imageProvider: p, imageModel: "" })
+              updateForm("intelligence", {
+                imageProvider: p,
+                imageModel:
+                  mirrorModelForTier(p, "image", formData.intelligence.imageTier ?? "mid") ?? "",
+              })
             }
             availableTextProviders={availableProviders}
             availableImageProviders={availableImageProviders}
-            showModelSelectors={!isCloud}
-            textModel={formData.intelligence.textModel}
-            imageModel={formData.intelligence.imageModel}
-            onTextModelChange={(val) => updateForm("intelligence", { textModel: val })}
-            onImageModelChange={(val) => updateForm("intelligence", { imageModel: val })}
+            showTierSelectors={!isCloud}
+            textTier={formData.intelligence.textTier ?? "mid"}
+            imageTier={formData.intelligence.imageTier ?? "mid"}
+            onTextTierChange={(t) =>
+              updateForm("intelligence", {
+                textTier: t,
+                textModel:
+                  mirrorModelForTier(formData.intelligence.textProvider, "text", t) ?? "",
+              })
+            }
+            onImageTierChange={(t) =>
+              updateForm("intelligence", {
+                imageTier: t,
+                imageModel:
+                  mirrorModelForTier(formData.intelligence.imageProvider, "image", t) ?? "",
+              })
+            }
           />
         </Card>
       )}

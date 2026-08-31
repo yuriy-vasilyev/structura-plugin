@@ -26,7 +26,24 @@ vi.mock("@wordpress/i18n", () => ({
 }));
 
 const positioningSuggestMock = vi.hoisted(() => vi.fn());
-const competitorsSuggestMock = vi.hoisted(() => vi.fn());
+// Captures the args of every useWizardAiCompetitorsQuery render so tests
+// can assert on the `enabled` gate; `result.current` is what the hook
+// "returns" (the cached suggestions).
+const aiCompetitorsQueryMock = vi.hoisted(() => {
+  const calls: Array<{ enabled: boolean }> = [];
+  return {
+    calls,
+    result: {
+      current: {
+        data: undefined as
+          | { suggestions: Array<{ domain: string; rationale: string }> }
+          | undefined,
+        isFetching: false,
+        refetch: vi.fn(),
+      },
+    },
+  };
+});
 const licenseMock = vi.hoisted(() => ({
   current: { plan: "cloud", isPaidLicense: true },
 }));
@@ -37,6 +54,13 @@ const analysisMock = vi.hoisted(() => ({
 vi.mock("@/features/settings", () => ({
   useLicense: () => licenseMock.current,
 }));
+// The GSC connect card owns its own channel-connection queries (it needs a
+// QueryClient this suite doesn't provide) and has a dedicated test file —
+// stub it to a marker so this suite stays focused on the SEO step itself
+// while still pinning that the step mounts the card.
+vi.mock("../components/WizardGscConnectCard", () => ({
+  WizardGscConnectCard: () => <div data-testid="gsc-connect-card-stub" />,
+}));
 vi.mock("@/features/site/api/useSiteAnalysis", () => ({
   useSiteAnalysisQuery: () => analysisMock.current,
 }));
@@ -45,10 +69,13 @@ vi.mock("../api/useWizardSeo", () => ({
     mutateAsync: positioningSuggestMock,
     isPending: false,
   }),
-  useSuggestWizardCompetitorsMutation: () => ({
-    mutateAsync: competitorsSuggestMock,
-    isPending: false,
-  }),
+  useWizardAiCompetitorsQuery: (input: { enabled: boolean }) => {
+    aiCompetitorsQueryMock.calls.push({ enabled: input.enabled });
+    // Mirror the real query: no data until the gate opens.
+    return input.enabled
+      ? aiCompetitorsQueryMock.result.current
+      : { data: undefined, isFetching: false, refetch: vi.fn() };
+  },
 }));
 
 import { WizardStep3SeoIntelligence } from "../components/WizardStep3SeoIntelligence";
@@ -65,7 +92,12 @@ function renderStep() {
 beforeEach(() => {
   useWizardStore.getState().reset();
   positioningSuggestMock.mockReset();
-  competitorsSuggestMock.mockReset();
+  aiCompetitorsQueryMock.calls.length = 0;
+  aiCompetitorsQueryMock.result.current = {
+    data: undefined,
+    isFetching: false,
+    refetch: vi.fn(),
+  };
   licenseMock.current = { plan: "cloud", isPaidLicense: true };
   analysisMock.current = { data: undefined };
 });
@@ -79,9 +111,13 @@ describe("WizardStep3SeoIntelligence — auto-suggest orchestration", () => {
         resolvePositioning = res;
       }),
     );
-    competitorsSuggestMock.mockResolvedValue({
-      suggestions: [{ domain: "koala.ai", rationale: "Same audience." }],
-    });
+    aiCompetitorsQueryMock.result.current = {
+      data: {
+        suggestions: [{ domain: "koala.ai", rationale: "Same audience." }],
+      },
+      isFetching: false,
+      refetch: vi.fn(),
+    };
 
     renderStep();
 
@@ -117,7 +153,6 @@ describe("WizardStep3SeoIntelligence — auto-suggest orchestration", () => {
       who: "Site owners",
       problem: "No time to write",
     });
-    competitorsSuggestMock.mockResolvedValue({ suggestions: [] });
 
     renderStep();
 
@@ -133,8 +168,13 @@ describe("WizardStep3SeoIntelligence — auto-suggest orchestration", () => {
     // no second positioning call.
     expect(screen.queryByText("Researching your business")).toBeNull();
     expect(positioningSuggestMock).not.toHaveBeenCalled();
-    // The one-shot competitor watcher still fans out off the warmed positioning.
-    await waitFor(() => expect(competitorsSuggestMock).toHaveBeenCalled());
+    // The cached competitor query still arms itself off the warmed
+    // positioning (enabled gate opens without any blocking pass).
+    await waitFor(() =>
+      expect(
+        aiCompetitorsQueryMock.calls.some((c) => c.enabled),
+      ).toBe(true),
+    );
   });
 
   it("does NOT auto-run for a returning user with existing content", async () => {

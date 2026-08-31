@@ -153,8 +153,15 @@ const Body = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => 
 Body.displayName = "Dialog.Body";
 
 const Footer = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  // flex-wrap: buttons never shrink (`text-nowrap`) and the panel clips
+  // (`overflow-hidden`), so a footer row that outgrows a `md` panel —
+  // long labels, longer de/fr translations — must wrap to a second row
+  // instead of cutting the primary CTA off at the panel edge.
   <div
-    className={cn("mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end", className)}
+    className={cn(
+      "mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:justify-end",
+      className
+    )}
     {...props}
   />
 );

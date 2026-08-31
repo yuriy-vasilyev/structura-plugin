@@ -69,14 +69,25 @@ function isImageValue(value: string, accept: string): boolean {
   return IMAGE_EXT.test(value);
 }
 
-function formatBytes(bytes: number): string {
+/**
+ * Human-readable file size — "812 B", "24 KB", "2.4 MB".
+ *
+ * Shared by the upload primitives (FileUpload, ResearchAttachments) so
+ * size copy stays identical across every dropzone and rejection message.
+ */
+export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** Does `file` satisfy the `accept` attribute string? */
-function matchesAccept(file: File, accept: string): boolean {
+/**
+ * Does `file` satisfy the `accept` attribute string?
+ *
+ * Exported for the multi-file sibling (ResearchAttachments) so both
+ * primitives validate with the exact same token semantics.
+ */
+export function matchesAccept(file: File, accept: string): boolean {
   const tokens = accept
     .split(",")
     .map((t) => t.trim().toLowerCase())

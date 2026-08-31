@@ -2,17 +2,6 @@ export interface LicenseData {
   is_pro: boolean;
   is_licensed: boolean;
   plan: string;
-  /**
-   * Workspace audience ("individual" / "agency") cached by the plugin
-   * at activation / heartbeat time so the plan badge can compose its
-   * full label ("Cloud Individual") on first paint — before this the
-   * audience only arrived with the cloud heartbeat, flashing the
-   * name-only label for a few seconds on every load. Optional for one
-   * release window (plugin builds predating 2026-06-07 omit it) and
-   * null until a cloud that ships the field has been heard from; the
-   * cloud heartbeat stays authoritative client-side.
-   */
-  audience?: string | null;
   license_key: string;
   upgrade_url: string;
   /**

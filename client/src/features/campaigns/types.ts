@@ -60,6 +60,17 @@ export interface CampaignIntelligence {
   textModel: string;
   imageModel: string;
   /**
+   * BYOK quality tier (top | mid) — the tier-based replacement for the concrete
+   * `textModel` / `imageModel`. When set, the cloud resolves the concrete model
+   * at generation time and prefers the tier over the model. `textModel` /
+   * `imageModel` are still written as the concrete mirror so display / legacy
+   * reads keep working. Optional and additive during rollout (§10): managed
+   * tiers leave it unset (the model is owned server-side); older campaigns have
+   * no tier and fall back to the concrete model.
+   */
+  textTier?: "top" | "mid";
+  imageTier?: "top" | "mid";
+  /**
    * Optional per-campaign safety net — on a transient (429 / 5xx / timeout)
    * failure the cloud retries the call through this provider once before
    * surfacing the error.
@@ -196,6 +207,19 @@ export interface CampaignLastRunSignal {
 }
 
 /**
+ * One uploaded research document reference, as returned by
+ * `POST /structura/v1/research-docs` (the cloud extractor already holds the
+ * extracted text under this id). The generation request only carries the
+ * reference — never the file bytes.
+ */
+export interface ResearchAttachmentRef {
+  /** Server-assigned attachment id (`attachmentId` on the upload response). */
+  id: string;
+  /** Original file name, echoed on the run receipt / Run again dialog. */
+  name: string;
+}
+
+/**
  * THE UNIFIED CAMPAIGN
  */
 export interface Campaign {
@@ -208,6 +232,17 @@ export interface Campaign {
   schedule: CampaignSchedule;
   authority?: CampaignAuthority;
   keywords?: CampaignKeywords;
+  /**
+   * Research material attached on the single-post "Generate a Post" flow
+   * (max 5). Lives at the campaign's top level because that's where the
+   * plugin stamps it on the inline ephemeral campaign
+   * (`Rest_Api::generate_single_post` → `researchAttachments`), which is
+   * exactly the cluster shape the run's `inputSnapshot` stores — so a
+   * "Run again" replay carries the refs for free. Optional and absent
+   * everywhere else (scheduled campaigns have no attachments UI), and on
+   * every legacy snapshot. @since 2.19.0
+   */
+  researchAttachments?: ResearchAttachmentRef[];
   stats: {
     postsPublished: number;
     /**
@@ -240,7 +275,21 @@ export interface Campaign {
  */
 export interface BankKeyword {
   keyword: string;
-  source: "related_search" | "people_also_ask" | "ai_generated" | "manual";
+  /**
+   * How the keyword was discovered — the cloud's wire vocabulary. The
+   * provider-path values (`ranking` / `near_ranking` / `suggestion` / `gap`)
+   * are mapped to the row glyphs display-side; never renamed on the wire.
+   */
+  source:
+    | "related_search"
+    | "people_also_ask"
+    | "ai_generated"
+    | "manual"
+    | "ranking"
+    | "near_ranking"
+    | "suggestion"
+    | "gap";
+  /** Legacy (AI-estimated) path: a volume bucket instead of a number. */
   volume?: "high" | "medium" | "low";
   /**
    * Real monthly search volume from DataForSEO (provider discovery path),
@@ -248,12 +297,31 @@ export interface BankKeyword {
    * map. Display-only; absent for the legacy LLM path and manual adds.
    */
   volumeNumber?: number;
+  /** Keyword difficulty 0–100 (provider path); drives the KD meter. */
+  difficulty?: number;
+  /** Searcher intent (provider path); the row labels DIY / Research. */
+  intent?: "informational" | "navigational" | "commercial" | "transactional";
+  /** Long-tail variants ready for this keyword (server-computed "+N"). */
+  variantCount?: number;
   usageCount: number;
+}
+
+/**
+ * What the last keyword discovery resolved — mirrors the cloud's
+ * `KeywordDiscoveryMeta`. The ranked bank renders its "Balanced · KD ≤ 65"
+ * caption, the pillars group and the Live-data badge from it. Optional:
+ * absent on campaigns saved before 2026-08-28.
+ */
+export interface KeywordDiscoveryMeta {
+  resolvedMode: "winnable" | "balanced" | "authority";
+  kdCeiling: number | null;
+  path: "provider" | "legacy";
 }
 
 export interface CampaignKeywords {
   bank: BankKeyword[];
   discoveredAt: string | null;
+  discoveryMeta?: KeywordDiscoveryMeta | null;
 }
 
 /**

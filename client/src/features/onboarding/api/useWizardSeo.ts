@@ -176,11 +176,68 @@ export function useSuggestWizardKeywordsMutation() {
   });
 }
 
+const AI_COMPETITORS_QUERY_KEY = [
+  "onboarding",
+  "wizard",
+  "ai-competitors",
+] as const;
+
+/**
+ * Cached AI competitor suggestions for the wizard's SEO step — the
+ * fallback for when DataForSEO's SERP-overlap discovery finds nothing
+ * (new / un-indexed domains).
+ *
+ * A QUERY, not a mutation, on purpose: the step used to auto-fire a
+ * mutation from a mount-scoped one-shot effect and keep the results in
+ * component state. Anything that remounted the step (license/settings
+ * churn, route bounces) reset both, so the SPA re-burned the AI call
+ * every ~10s and the results never stuck — the competitors row showed
+ * "Looking for likely competitors…" forever (agency report 2026-07-15,
+ * workspace e7e0969b). With a stable key + `staleTime: Infinity` the
+ * fetch happens once per session and every remount is a cache hit.
+ *
+ * `refetch()` is the manual "Suggest competitors" path — options are
+ * re-read on every render, so a refetch always carries the CURRENT
+ * positioning + exclude list.
+ */
+export function useWizardAiCompetitorsQuery(input: {
+  positioning: { what: string; who: string; problem: string };
+  excludeDomains: string[];
+  enabled: boolean;
+}) {
+  return useQuery<{
+    suggestions: SuggestedCompetitor[];
+    reason?: "ai_unavailable" | "error";
+  }>({
+    queryKey: AI_COMPETITORS_QUERY_KEY,
+    enabled: input.enabled,
+    staleTime: Infinity,
+    // Background auto-suggest — a failure must not raise the global
+    // "Data Fetch Error" toast; manual add remains available.
+    meta: { silentError: true },
+    queryFn: async () => {
+      return apiFetch({
+        path: "/structura/v1/wizard/competitors/suggest",
+        method: "POST",
+        data: {
+          positioning: input.positioning,
+          excludeDomains: input.excludeDomains,
+        },
+      });
+    },
+  });
+}
+
 /**
  * AI competitor suggestions — the fallback for when DataForSEO's
  * SERP-overlap discovery finds nothing (new / un-indexed domains).
  * Input: optional positioning + the domains already on the list (so we
  * never re-suggest them). Results are AI guesses, surfaced as such.
+ *
+ * @remarks The wizard's SEO step uses the cached
+ * {@link useWizardAiCompetitorsQuery} instead; this mutation remains
+ * for on-demand surfaces (Site → Competitors re-discover, the campaign
+ * Competitors step) where every invocation is user-initiated.
  */
 export function useSuggestWizardCompetitorsMutation() {
   return useMutation<

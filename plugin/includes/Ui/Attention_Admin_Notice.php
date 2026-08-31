@@ -86,6 +86,13 @@ class Attention_Admin_Notice
     public static function init(): void
     {
         add_action('admin_notices', [self::class, 'maybe_render']);
+        // Stylesheet + dismiss script go out from `admin_enqueue_scripts`
+        // (head of the page) rather than from the render callback so the
+        // card is styled on first paint instead of flashing unstyled
+        // until the footer's late-style pass. Same predicate as
+        // `maybe_render()` — `get_runs()` is transient-cached so the
+        // second evaluation is a cache hit.
+        add_action('admin_enqueue_scripts', [self::class, 'maybe_enqueue_assets']);
         add_action('wp_ajax_' . self::AJAX_ACTION, [self::class, 'handle_dismiss']);
     }
 
@@ -111,13 +118,43 @@ class Attention_Admin_Notice
      */
     public static function maybe_render(): void
     {
-        if ( ! current_user_can('manage_options')) {
+        $renderable = self::resolve_renderable();
+        if ($renderable === null) {
             return;
+        }
+        [$runs, $current_ids] = $renderable;
+        Admin_Notice_Assets::enqueue_dismiss_script();
+        self::render($runs, $current_ids);
+    }
+
+    /**
+     * `admin_enqueue_scripts` callback — see {@see init()}.
+     */
+    public static function maybe_enqueue_assets(): void
+    {
+        if (self::resolve_renderable() === null) {
+            return;
+        }
+        Admin_Notice_Assets::enqueue_attention_style();
+        Admin_Notice_Assets::enqueue_dismiss_script();
+    }
+
+    /**
+     * The single gate shared by rendering and asset enqueueing.
+     *
+     * @return array{0: array<int, array<string, mixed>>, 1: array<int, string>}|null
+     *         `[$runs, $current_ids]` when the card should show for the
+     *         current admin, null when it should stay silent.
+     */
+    private static function resolve_renderable(): ?array
+    {
+        if ( ! current_user_can('manage_options')) {
+            return null;
         }
 
         $runs = self::get_runs();
         if (empty($runs)) {
-            return;
+            return null;
         }
 
         // Normalize to a list of string ids — the snooze comparison is id-based
@@ -131,17 +168,17 @@ class Attention_Admin_Notice
         }
 
         if (empty($current_ids)) {
-            return;
+            return null;
         }
 
         $snoozed   = self::get_snoozed_ids_for_current_user();
         $new_ids   = array_values(array_diff($current_ids, $snoozed));
 
         if (empty($new_ids)) {
-            return;
+            return null;
         }
 
-        self::render($runs, $current_ids);
+        return [$runs, $current_ids];
     }
 
     /**
@@ -349,218 +386,16 @@ class Attention_Admin_Notice
             role="alert"
             aria-live="polite"
             data-run-ids='<?php echo esc_attr($run_ids_json); ?>'
+            data-structura-dismiss-action="<?php echo esc_attr($action); ?>"
+            data-structura-dismiss-nonce="<?php echo esc_attr($nonce); ?>"
+            data-structura-dismiss-url="<?php echo esc_url($ajax_url); ?>"
         >
-            <style>
-                /* All selectors scoped to `.structura-attn` so we never
-                   leak styles into the rest of wp-admin. The stylesheet
-                   is tiny (~2KB) and only emitted on pageviews where
-                   the notice actually renders. */
-                .structura-attn {
-                    margin: 18px 20px 12px 2px;
-                    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, system-ui, sans-serif;
-                    color: #e0e7ff;
-                }
-                .structura-attn__card {
-                    position: relative;
-                    border-radius: 14px;
-                    padding: 20px 24px;
-                    background:
-                        radial-gradient(120% 140% at 0% 0%, rgba(99,102,241,0.35) 0%, transparent 55%),
-                        linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #1e1b4b 100%);
-                    box-shadow:
-                        0 1px 0 rgba(255,255,255,0.08) inset,
-                        0 10px 30px -10px rgba(30, 27, 75, 0.55),
-                        0 2px 6px -2px rgba(30, 27, 75, 0.35);
-                    border: 1px solid rgba(165, 180, 252, 0.22);
-                    overflow: hidden;
-                }
-                .structura-attn__card::before {
-                    /* Thin accent bar signals severity without the
-                       stock WP red/yellow left-border look. */
-                    content: "";
-                    position: absolute;
-                    inset: 0 0 auto 0;
-                    height: 3px;
-                    background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #6366f1 100%);
-                    opacity: 0.85;
-                }
-                .structura-attn__close {
-                    position: absolute;
-                    top: 14px;
-                    right: 14px;
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 8px;
-                    border: 1px solid rgba(255,255,255,0.1);
-                    background: rgba(255,255,255,0.04);
-                    color: #c7d2fe;
-                    cursor: pointer;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: background .15s ease, color .15s ease, border-color .15s ease;
-                }
-                .structura-attn__close:hover,
-                .structura-attn__close:focus {
-                    background: rgba(255,255,255,0.08);
-                    color: #ffffff;
-                    border-color: rgba(255,255,255,0.25);
-                    outline: none;
-                }
-                .structura-attn__close svg {
-                    width: 14px;
-                    height: 14px;
-                }
-                .structura-attn__header {
-                    display: flex;
-                    align-items: flex-start;
-                    gap: 14px;
-                    padding-right: 40px; /* room for the × button */
-                }
-                .structura-attn__mark {
-                    flex: 0 0 auto;
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 10px;
-                    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-                    box-shadow: 0 6px 16px -6px rgba(99,102,241,0.55);
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .structura-attn__mark svg {
-                    width: 22px;
-                    height: 22px;
-                }
-                .structura-attn__title {
-                    margin: 0 0 2px;
-                    font-size: 15px;
-                    font-weight: 600;
-                    color: #ffffff;
-                    letter-spacing: -0.01em;
-                }
-                .structura-attn__subtitle {
-                    margin: 0;
-                    font-size: 13px;
-                    line-height: 1.4;
-                    color: rgba(199, 210, 254, 0.85);
-                }
-                .structura-attn__list {
-                    margin: 14px 0 0;
-                    padding: 0;
-                    list-style: none;
-                    display: grid;
-                    gap: 1px;
-                    background: rgba(255,255,255,0.06);
-                    border-radius: 10px;
-                    overflow: hidden;
-                    border: 1px solid rgba(255,255,255,0.06);
-                }
-                .structura-attn__row {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    padding: 10px 14px;
-                    background: rgba(30, 27, 75, 0.55);
-                    text-decoration: none;
-                    color: #e0e7ff;
-                    transition: background .12s ease;
-                    min-width: 0;
-                }
-                .structura-attn__row:hover,
-                .structura-attn__row:focus {
-                    background: rgba(49, 46, 129, 0.9);
-                    outline: none;
-                    color: #ffffff;
-                }
-                .structura-attn__pill {
-                    flex: 0 0 auto;
-                    font-size: 10px;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    letter-spacing: 0.04em;
-                    padding: 3px 8px;
-                    border-radius: 999px;
-                    border: 1px solid currentColor;
-                    line-height: 1;
-                }
-                .structura-attn__pill--failed {
-                    color: #fca5a5;
-                }
-                .structura-attn__pill--warnings {
-                    color: #fcd34d;
-                }
-                .structura-attn__row-text {
-                    flex: 1 1 auto;
-                    min-width: 0;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 2px;
-                }
-                .structura-attn__campaign {
-                    font-size: 13px;
-                    font-weight: 600;
-                    color: #ffffff;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-                .structura-attn__step {
-                    font-size: 11.5px;
-                    color: rgba(199, 210, 254, 0.78);
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-                .structura-attn__time {
-                    flex: 0 0 auto;
-                    font-size: 11.5px;
-                    color: rgba(199, 210, 254, 0.6);
-                    font-variant-numeric: tabular-nums;
-                }
-                .structura-attn__actions {
-                    margin-top: 14px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 10px;
-                    flex-wrap: wrap;
-                }
-                .structura-attn__cta {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 6px;
-                    padding: 8px 14px;
-                    border-radius: 8px;
-                    background: #ffffff;
-                    color: #1e1b4b;
-                    font-weight: 600;
-                    font-size: 13px;
-                    text-decoration: none;
-                    transition: transform .1s ease, box-shadow .15s ease;
-                    box-shadow: 0 6px 18px -6px rgba(255,255,255,0.25);
-                }
-                .structura-attn__cta:hover,
-                .structura-attn__cta:focus {
-                    transform: translateY(-1px);
-                    color: #1e1b4b;
-                    box-shadow: 0 10px 22px -8px rgba(255,255,255,0.32);
-                    outline: none;
-                }
-                .structura-attn__overflow {
-                    font-size: 12px;
-                    color: rgba(199, 210, 254, 0.75);
-                }
-                @media (max-width: 600px) {
-                    .structura-attn__row-text { gap: 4px; }
-                    .structura-attn__time { display: none; }
-                }
-            </style>
 
             <div class="structura-attn__card">
                 <button
                     type="button"
                     class="structura-attn__close"
+                    data-structura-dismiss-trigger
                     aria-label="<?php echo esc_attr__('Dismiss Structura attention notice', 'structura'); ?>"
                 >
                     <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -655,39 +490,6 @@ class Attention_Admin_Notice
                 </div>
             </div>
 
-            <script>
-            (function () {
-                var card = document.currentScript && document.currentScript.parentElement;
-                if (!card) return;
-                var closeBtn = card.querySelector('.structura-attn__close');
-                if (!closeBtn) return;
-                closeBtn.addEventListener('click', function () {
-                    var ids = [];
-                    try { ids = JSON.parse(card.getAttribute('data-run-ids') || '[]'); }
-                    catch (e) { ids = []; }
-                    var body = new FormData();
-                    body.append('action', <?php echo wp_json_encode($action); ?>);
-                    body.append('_wpnonce', <?php echo wp_json_encode($nonce); ?>);
-                    // PHP expects `run_ids[]` as an array. Append each id
-                    // with the bracket suffix so `$_POST['run_ids']` ends
-                    // up as an indexed array without us parsing a JSON
-                    // string server-side.
-                    for (var i = 0; i < ids.length; i++) {
-                        body.append('run_ids[]', ids[i]);
-                    }
-                    // Remove the card immediately — a flaky network
-                    // shouldn't strand the admin looking at a button
-                    // that doesn't respond. Worst case, the POST fails
-                    // and the card reappears on next load.
-                    card.parentNode && card.parentNode.removeChild(card);
-                    fetch(<?php echo wp_json_encode($ajax_url); ?>, {
-                        method: 'POST',
-                        credentials: 'same-origin',
-                        body: body
-                    });
-                });
-            })();
-            </script>
         </div>
         <?php
     }

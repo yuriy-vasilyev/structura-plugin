@@ -1,13 +1,11 @@
-import { FC, useMemo, useState, useEffect } from "react";
+import { FC } from "react";
 import { __ } from "@wordpress/i18n";
 import { AlertTriangle, Bot, Type, Image } from "lucide-react";
-import { Select, Switch, Tooltip, cn } from "@structura/ui";
-import { useAiSettingsQuery } from "@/features/ai-engine";
-import { useAvailableModelsQuery } from "@/features/ai-engine/api/useAvailableModelsQuery";
-import { maybeGetModelWarning, resolveDefaultModel } from "@/features/ai-engine/helpers";
+import { Select, Tooltip, cn } from "@structura/ui";
 import { useLicense, useDefaultProviders } from "@/features/settings";
 import { AIProvider } from "@/features/campaigns/types";
 import { getProviderVisual } from "@/features/campaigns/constants";
+import { type ModelTier, buildTierOptions } from "@/features/campaigns/modelTier";
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -79,33 +77,39 @@ export interface ProviderToggleProps {
   textProvider: AIProvider;
   /** Currently selected image provider. */
   imageProvider: AIProvider;
-  /** Called when the text provider changes. Consumer should also clear text model. */
+  /** Called when the text provider changes. Consumer should also mirror the tier's model. */
   onTextProviderChange: (provider: AIProvider) => void;
-  /** Called when the image provider changes. Consumer should also clear image model. */
+  /** Called when the image provider changes. Consumer should also mirror the tier's model. */
   onImageProviderChange: (provider: AIProvider) => void;
   /** Which providers are available for text generation. */
   availableTextProviders: string[];
   /** Which providers are available for image generation. */
   availableImageProviders: string[];
 
-  // ── Optional model selection ────────────────────────────────────────────
-  /** When true, shows text & image model selectors beneath the toggles. */
-  showModelSelectors?: boolean;
-  /** Current text model id. Required when showModelSelectors is true. */
-  textModel?: string;
-  /** Current image model id. Required when showModelSelectors is true. */
-  imageModel?: string;
-  /** Called when text model changes. */
-  onTextModelChange?: (modelId: string) => void;
-  /** Called when image model changes. */
-  onImageModelChange?: (modelId: string) => void;
+  // ── Optional model-quality TIER selection ───────────────────────────────
+  /**
+   * When true, shows the Top/Standard tier selectors beneath the toggles.
+   * BYOK/free only — managed plans own the model server-side and pass `false`.
+   */
+  showTierSelectors?: boolean;
+  /** Current text quality tier. Required when `showTierSelectors` is true. */
+  textTier?: ModelTier;
+  /** Current image quality tier. Required when `showTierSelectors` is true. */
+  imageTier?: ModelTier;
+  /** Called when the text tier changes. Consumer stores the tier + mirrors the model. */
+  onTextTierChange?: (tier: ModelTier) => void;
+  /** Called when the image tier changes. Consumer stores the tier + mirrors the model. */
+  onImageTierChange?: (tier: ModelTier) => void;
 }
 
 /**
- * Split provider toggle with per-capability provider selection.
+ * Split provider toggle with per-capability provider selection + a model-quality
+ * TIER picker.
  *
- * Shows separate text/image provider sections so users can mix providers
- * (e.g., Claude for text + DALL-E for images).
+ * A user never sees a raw model list: the only model choice is Top / Standard,
+ * labeled with the resolved model name ("Top (Gemini 3.1 Pro)"). The concrete
+ * model is resolved from the tier at generation time; the consumer mirrors it
+ * onto the campaign for display / back-compat.
  *
  * Usage A — Provider only (SuggestStrategySection):
  *   <ProviderToggle
@@ -117,7 +121,7 @@ export interface ProviderToggleProps {
  *     availableImageProviders={[...]}
  *   />
  *
- * Usage B — Provider + models (StepObjective):
+ * Usage B — Provider + tiers (StepObjective / GeneratePostPage):
  *   <ProviderToggle
  *     textProvider="openai"
  *     imageProvider="gemini"
@@ -125,11 +129,11 @@ export interface ProviderToggleProps {
  *     onImageProviderChange={...}
  *     availableTextProviders={[...]}
  *     availableImageProviders={[...]}
- *     showModelSelectors
- *     textModel="gpt-4o"
- *     imageModel="imagen-3-fast"
- *     onTextModelChange={...}
- *     onImageModelChange={...}
+ *     showTierSelectors
+ *     textTier="top"
+ *     imageTier="mid"
+ *     onTextTierChange={...}
+ *     onImageTierChange={...}
  *   />
  */
 export const ProviderToggle: FC<ProviderToggleProps> = ({
@@ -139,23 +143,14 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
   onImageProviderChange,
   availableTextProviders,
   availableImageProviders,
-  showModelSelectors = false,
-  textModel = "",
-  imageModel = "",
-  onTextModelChange,
-  onImageModelChange,
+  showTierSelectors = false,
+  textTier = "top",
+  imageTier = "top",
+  onTextTierChange,
+  onImageTierChange,
 }) => {
-  const { data: availableModels } = useAvailableModelsQuery();
-  const { data: aiSettings } = useAiSettingsQuery();
   const { isLicensed } = useLicense();
   const { isProviderIncomplete } = useDefaultProviders();
-  // Default ON — most users want their default models. Power users
-  // who want a per-post override flip the toggle off and pick from
-  // the per-provider Select below. Pre-2026-05-10 this defaulted
-  // OFF, which forced every Generate-Now run to manually re-tick
-  // the box even when the AI Engine page already had defaults
-  // configured.
-  const [useRecommended, setUseRecommended] = useState(true);
 
   // Image generation requires at least a Free license
   const showImageSection = isLicensed && availableImageProviders.length > 0;
@@ -164,70 +159,8 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
   const isTextProviderIncomplete = isProviderIncomplete(textProvider);
   const isImageProviderIncomplete = isProviderIncomplete(imageProvider);
 
-  // Sync the recommended toggle when the current models already match defaults
-  useEffect(() => {
-    if (!availableModels || !showModelSelectors) return;
-    const textDefaults = availableModels.defaults[textProvider];
-    const imageDefaults = availableModels.defaults[imageProvider];
-    if (
-      textDefaults &&
-      imageDefaults &&
-      textModel === textDefaults.text &&
-      imageModel === imageDefaults.image
-    ) {
-      setUseRecommended(true);
-    }
-  }, [availableModels, textProvider, imageProvider, textModel, imageModel, showModelSelectors]);
-
-  // Auto-fill empty models on first load. Needed standalone for
-  // GeneratePostPage (no CampaignProvider there); under the campaign
-  // form it's a no-op backstop — `useModelBackfill` in
-  // CampaignContext.tsx fills first. Both go through
-  // `resolveDefaultModel` so they can't resolve different models for
-  // the same empty field.
-  useEffect(() => {
-    if (!availableModels || !showModelSelectors) return;
-    const sources = {
-      providerSettings: aiSettings?.providers,
-      catalogDefaults: availableModels.defaults,
-    };
-    if (!textModel) {
-      const resolved = resolveDefaultModel({
-        provider: textProvider,
-        capability: "text",
-        ...sources,
-      });
-      if (resolved) onTextModelChange?.(resolved);
-    }
-    if (!imageModel) {
-      const resolved = resolveDefaultModel({
-        provider: imageProvider,
-        capability: "image",
-        ...sources,
-      });
-      if (resolved) onImageModelChange?.(resolved);
-    }
-  }, [availableModels, aiSettings, textProvider, imageProvider, showModelSelectors]);
-
-  const filteredTextModels = useMemo(
-    () => availableModels?.text?.filter((m) => m.provider === textProvider) || [],
-    [availableModels, textProvider]
-  );
-
-  const filteredImageModels = useMemo(
-    () => availableModels?.image?.filter((m) => m.provider === imageProvider) || [],
-    [availableModels, imageProvider]
-  );
-
-  const handleToggleRecommended = (checked: boolean) => {
-    setUseRecommended(checked);
-    if (checked && availableModels) {
-      const textDefaults = availableModels.defaults[textProvider];
-      const imageDefaults = availableModels.defaults[imageProvider];
-      if (textDefaults) onTextModelChange?.(textDefaults.text ?? "");
-      if (imageDefaults) onImageModelChange?.(imageDefaults.image ?? "");
-    }
-  };
+  const textTierOptions = buildTierOptions(textProvider, "text");
+  const imageTierOptions = buildTierOptions(imageProvider, "image");
 
   const showTextToggle = availableTextProviders.length > 1;
   const showImageToggle = availableImageProviders.length > 1;
@@ -296,89 +229,62 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
         </div>
       )}
 
-      {/* ── Model selectors (optional) ────────────────────────────── */}
-      {showModelSelectors && (
+      {/* ── Model quality tier (BYOK/free only) ───────────────────── */}
+      {showTierSelectors && (
         <div className="p-3 space-y-3">
-          {/* Recommended switch */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bot size={13} className="text-brand-600 dark:text-brand-400" />
-              <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase">
-                {__("Engine", "structura")}
-              </span>
-            </div>
-            <Switch
-              label={__("Recommended", "structura")}
-              checked={useRecommended}
-              onChange={handleToggleRecommended}
-            />
+          <div className="flex items-center gap-2">
+            <Bot size={13} className="text-brand-600 dark:text-brand-400" />
+            <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase">
+              {__("Engine", "structura")}
+            </span>
           </div>
 
-          {useRecommended ? (
-            <div className="animate-in fade-in slide-in-from-top-1 flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-bold text-neutral-400 uppercase">
-                {__("Using recommended models", "structura")}
+          <div className={cn(
+            "grid grid-cols-1 gap-2.5",
+            showImageSection && "sm:grid-cols-2"
+          )}>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[9px] font-bold tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
+                {__("Text Model", "structura")}
               </span>
-              <div className="ml-auto flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-0.5 text-[9px] font-bold text-brand-600 dark:bg-brand-950/30 dark:text-brand-400">
-                {availableModels?.defaults[textProvider]?.text && (
-                  <span>{availableModels.defaults[textProvider].text}</span>
-                )}
-                {showImageSection && availableModels?.defaults[imageProvider]?.image && (
-                  <>
-                    <span className="text-brand-300 dark:text-brand-600">·</span>
-                    <span>{availableModels.defaults[imageProvider].image}</span>
-                  </>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className={cn(
-              "animate-in fade-in slide-in-from-top-1 grid grid-cols-1 gap-2.5",
-              showImageSection && "sm:grid-cols-2"
-            )}>
               <Select
-                options={filteredTextModels.map((m) => ({ value: m.id, label: m.name }))}
-                value={textModel}
-                onValueChange={(val) => onTextModelChange?.(val as string)}
+                options={textTierOptions}
+                value={textTier}
+                onValueChange={(val) => onTextTierChange?.(val as ModelTier)}
               >
-                <Select.Label>{__("Text Model", "structura")}</Select.Label>
-                <Select.Trigger placeholder={__("Select text model...", "structura")} />
+                <Select.Trigger />
                 <Select.Content className="w-(--button-width)">
-                  {filteredTextModels.map((m) => (
-                    <Select.Item
-                      key={m.id}
-                      value={m.id}
-                      description={maybeGetModelWarning({ model: m.id, models: [...(availableModels?.text ?? []), ...(availableModels?.image ?? [])] })}
-                    >
-                      {m.name}
+                  {textTierOptions.map((o) => (
+                    <Select.Item key={o.value} value={o.value}>
+                      {o.label}
                     </Select.Item>
                   ))}
                 </Select.Content>
               </Select>
+            </div>
 
-              {showImageSection && (
+            {showImageSection && (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[9px] font-bold tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
+                  {__("Image Model", "structura")}
+                </span>
                 <Select
-                  options={filteredImageModels.map((m) => ({ value: m.id, label: m.name }))}
-                  value={imageModel}
-                  onValueChange={(val) => onImageModelChange?.(val as string)}
+                  options={imageTierOptions}
+                  value={imageTier}
+                  onValueChange={(val) => onImageTierChange?.(val as ModelTier)}
                 >
-                  <Select.Label>{__("Image Model", "structura")}</Select.Label>
-                  <Select.Trigger placeholder={__("Select image model...", "structura")} />
+                  <Select.Trigger />
                   <Select.Content className="w-(--button-width)">
-                    {filteredImageModels.map((m) => (
-                      <Select.Item
-                        key={m.id}
-                        value={m.id}
-                        description={maybeGetModelWarning({ model: m.id, models: [...(availableModels?.text ?? []), ...(availableModels?.image ?? [])] })}
-                      >
-                        {m.name}
+                    {imageTierOptions.map((o) => (
+                      <Select.Item key={o.value} value={o.value}>
+                        {o.label}
                       </Select.Item>
                     ))}
                   </Select.Content>
                 </Select>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

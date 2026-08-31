@@ -105,13 +105,28 @@ describe("CaptionPackage — copy payloads (raw wire strings)", () => {
     expect(writeText).toHaveBeenCalledWith(packages.shorts.description);
   });
 
-  it("Copy all composes labeled title + description", () => {
+  it("copies the hashtag run as comma-separated upload tags", () => {
     render(<CaptionPackage packages={packages} />);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Copy title and description" }),
-    );
+    expect(screen.getByText("ProgrammaticSEO, SaaS, SEO")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Copy tags" }));
+    expect(writeText).toHaveBeenCalledWith("ProgrammaticSEO, SaaS, SEO");
+  });
+
+  it("hides the Tags field when the description has no hashtag block", () => {
+    const noTags: VideoSocialPackages = {
+      ...packages,
+      shorts: { ...packages.shorts, description: "Body only, no hashtags." },
+    };
+    render(<CaptionPackage packages={noTags} />);
+    expect(screen.queryByText("Tags")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Copy tags" })).toBeNull();
+  });
+
+  it("Copy all composes labeled title + description + tags", () => {
+    render(<CaptionPackage packages={packages} />);
+    fireEvent.click(screen.getByRole("button", { name: "Copy all fields" }));
     expect(writeText).toHaveBeenCalledWith(
-      `Title:\n${packages.shorts.title}\n\nDescription:\n${packages.shorts.description}`,
+      `Title:\n${packages.shorts.title}\n\nDescription:\n${packages.shorts.description}\n\nTags:\nProgrammaticSEO, SaaS, SEO`,
     );
   });
 
@@ -175,10 +190,18 @@ describe("CaptionPackage — advisory counters", () => {
     expect(screen.getByText(`${hook.length}/125`)).toBeInTheDocument();
   });
 
+  it("counts the tags string against YouTube's /500 tags limit", () => {
+    render(<CaptionPackage packages={packages} />);
+    expect(
+      screen.getByText(`${"ProgrammaticSEO, SaaS, SEO".length}/500`),
+    ).toBeInTheDocument();
+  });
+
   it("renders no counter on the Shorts description", () => {
     render(<CaptionPackage packages={packages} />);
-    // Exactly one counter in the Shorts body — the title's.
-    expect(screen.getAllByText(/^\d+\/\d+$/)).toHaveLength(1);
+    // Exactly two counters in the Shorts body — the title's and the
+    // tags field's; none on the description.
+    expect(screen.getAllByText(/^\d+\/\d+$/)).toHaveLength(2);
   });
 });
 

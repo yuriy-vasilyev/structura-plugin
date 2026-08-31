@@ -154,6 +154,16 @@ class AnonymousBootstrapTest extends TestCase
 
     // ─── No-op paths ───────────────────────────────────────────────
 
+    /**
+     * Helper — put the cloud opt-in on record. Since the consent gate
+     * (wp.org review 2026-08-27) every bootstrap path is a no-op
+     * without it, so the fresh-install scenarios below grant it first.
+     */
+    private function grantConsent(): void
+    {
+        $this->optionsStore[Anonymous_Bootstrap::OPTION_CLOUD_CONSENT] = 'yes';
+    }
+
     /** @test */
     public function it_no_ops_when_the_install_is_already_licensed(): void
     {
@@ -203,6 +213,7 @@ class AnonymousBootstrapTest extends TestCase
     public function it_generates_an_install_id_and_bootstraps_on_a_fresh_install(): void
     {
         $this->mockIsLicensed(false);
+        $this->grantConsent();
         $saved = [];
         $this->mockKeyManager(null, $saved);
 
@@ -280,6 +291,7 @@ class AnonymousBootstrapTest extends TestCase
     public function it_reuses_an_existing_install_id_on_a_retry_after_failed_first_attempt(): void
     {
         $this->mockIsLicensed(false);
+        $this->grantConsent();
         $saved = [];
         $this->mockKeyManager(null, $saved);
 
@@ -335,6 +347,7 @@ class AnonymousBootstrapTest extends TestCase
     public function it_silently_returns_on_a_cloud_transport_error(): void
     {
         $this->mockIsLicensed(false);
+        $this->grantConsent();
         $saved = [];
         $this->mockKeyManager(null, $saved);
 
@@ -371,6 +384,7 @@ class AnonymousBootstrapTest extends TestCase
     public function it_silently_returns_on_a_cloud_rejection(): void
     {
         $this->mockIsLicensed(false);
+        $this->grantConsent();
         $saved = [];
         $this->mockKeyManager(null, $saved);
 
@@ -393,6 +407,7 @@ class AnonymousBootstrapTest extends TestCase
     public function it_silently_returns_when_the_response_body_is_malformed(): void
     {
         $this->mockIsLicensed(false);
+        $this->grantConsent();
         $saved = [];
         $this->mockKeyManager(null, $saved);
 
@@ -417,6 +432,7 @@ class AnonymousBootstrapTest extends TestCase
     public function it_only_runs_once_per_request(): void
     {
         $this->mockIsLicensed(false);
+        $this->grantConsent();
         $saved = [];
         $this->mockKeyManager(null, $saved);
 
@@ -468,5 +484,95 @@ class AnonymousBootstrapTest extends TestCase
         $this->assertCount(1, $this->optionWrites);
         $this->assertSame(Anonymous_Bootstrap::OPTION_INSTALL_ID, $this->optionWrites[0]['key']);
         $this->assertSame(false, $this->optionWrites[0]['autoload'], 'Autoload should be off — only the bootstrap path reads this.');
+    }
+
+    /** @test */
+    public function it_stays_completely_silent_on_a_fresh_install_until_cloud_consent_is_granted(): void
+    {
+        // wp.org review 2026-08-27 (guidelines 7 & 9): a fresh install must
+        // not contact Structura Cloud — nor even mint an install id — before
+        // the admin has accepted the SPA's consent screen.
+        $this->mockIsLicensed(false);
+        $saved = [];
+        $this->mockKeyManager(null, $saved);
+        Mockery::mock('alias:Structura\Core\Cloud_Client')
+            ->shouldReceive('post')
+            ->never();
+
+        Anonymous_Bootstrap::maybe_bootstrap();
+
+        $this->assertSame([], $saved, 'No credentials may be persisted before consent.');
+        $this->assertArrayNotHasKey(
+            Anonymous_Bootstrap::OPTION_INSTALL_ID,
+            $this->optionsStore,
+            'No install id may be generated before consent — it would be a persistent identifier minted without opt-in.',
+        );
+        $this->assertFalse(Anonymous_Bootstrap::has_cloud_consent());
+    }
+
+    /** @test */
+    public function has_cloud_consent_is_false_for_a_pristine_install_and_writes_nothing(): void
+    {
+        $saved = [];
+        $this->mockKeyManager(null, $saved);
+
+        $this->assertFalse(Anonymous_Bootstrap::has_cloud_consent());
+        $this->assertSame([], $this->optionWrites);
+    }
+
+    /** @test */
+    public function has_cloud_consent_grandfathers_installs_that_already_hold_a_bearer(): void
+    {
+        // Portal-channel installs predating the gate were already talking
+        // to the cloud; they must keep working and get the option backfilled.
+        $saved = [];
+        $this->mockKeyManager(
+            ['api_token' => 'anon-bearer', 'activation_id' => 'act', 'plan' => 'none', 'status' => 'active'],
+            $saved,
+        );
+
+        $this->assertTrue(Anonymous_Bootstrap::has_cloud_consent());
+        $this->assertSame(
+            'yes',
+            $this->optionsStore[Anonymous_Bootstrap::OPTION_CLOUD_CONSENT] ?? null,
+            'Backfilled so later checks are a single autoloaded option read.',
+        );
+    }
+
+    /** @test */
+    public function grant_cloud_consent_then_bootstrap_now_mints_a_workspace_in_the_same_request(): void
+    {
+        $this->mockIsLicensed(false);
+        Functions\when('is_wp_error')->justReturn(false);
+        Functions\when('get_current_user_id')->justReturn(1);
+
+        $saved   = [];
+        $payload = null;
+        $km = Mockery::mock('alias:Structura\Core\Key_Manager');
+        $km->shouldReceive('get_license_payload')->andReturnUsing(function () use (&$payload) {
+            return $payload;
+        });
+        $km->shouldReceive('save_license_payload')->andReturnUsing(function ($p) use (&$saved, &$payload) {
+            $saved[] = $p;
+            $payload = $p;
+            return true;
+        });
+        Mockery::mock('alias:Structura\Core\Cloud_Client')
+            ->shouldReceive('post')
+            ->once()
+            ->andReturn([
+                'code' => 200,
+                'body' => ['success' => true, 'activationId' => 'act', 'apiToken' => 'fresh-bearer', 'plan' => 'none'],
+            ]);
+
+        // The admin_init pass earlier in the same request no-op'd (no consent)
+        // and armed the per-request guard…
+        Anonymous_Bootstrap::maybe_bootstrap();
+        $this->assertSame([], $saved);
+
+        // …the consent endpoint must still be able to bootstrap right away.
+        Anonymous_Bootstrap::grant_cloud_consent();
+        $this->assertTrue(Anonymous_Bootstrap::bootstrap_now());
+        $this->assertSame('fresh-bearer', $saved[0]['api_token'] ?? null);
     }
 }

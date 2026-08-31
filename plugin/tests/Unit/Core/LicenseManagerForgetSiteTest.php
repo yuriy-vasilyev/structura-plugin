@@ -137,5 +137,8 @@ class LicenseManagerForgetSiteTest extends TestCase
         $this->assertContains('structura_license_data', $this->deleted_options);
         $this->assertContains('structura_had_prior_activation', $this->deleted_options);
         $this->assertContains('structura_default_persona_seeded', $this->deleted_options);
+        // Onboarding-dismissed flag cleared too, so a fresh connection
+        // re-onboards (2026-07-20 durable-onboarding fix).
+        $this->assertContains('structura_onboarding_dismissed', $this->deleted_options);
     }
 }

@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ExternalLink,
   Loader2,
+  Paperclip,
   PencilLine,
   RefreshCw,
 } from "lucide-react";
@@ -17,8 +18,18 @@ import { PageDescription } from "@/components/Layout/PageSubtitle";
 import type { RunStatusSerialized } from "@structura/types";
 import { useCampaignRunQuery } from "@/features/progress/api/useCampaignRunQuery";
 import { RunTimeline } from "@/features/progress/components/RunTimeline";
+import { SearchPerformanceSection } from "@/features/channels/components/SearchPerformanceSection";
 import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutations";
 import type { CampaignFormData } from "@/features/campaigns/types";
+import { RunAgainConfirmDialog } from "@/features/campaigns/components/RunAgainConfirmDialog";
+import { useAvailableModelsQuery } from "@/features/ai-engine/api/useAvailableModelsQuery";
+
+/** Provider id → brand name. Logos are resolved in the modal via getProviderLogo. */
+const PROVIDER_LABELS: Record<string, string> = {
+  openai: "OpenAI",
+  gemini: "Gemini",
+  anthropic: "Anthropic",
+};
 
 /**
  * Detail page for a single ad-hoc generation kicked off via the
@@ -198,6 +209,7 @@ const TERMINAL_STATUSES = new Set([
 const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
   const navigate = useNavigate();
   const { generatePost, isGenerating } = useCampaignMutations();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const isTerminal = TERMINAL_STATUSES.has(run.status);
   const isSuccess =
     run.status === "succeeded" || run.status === "succeeded_with_warnings";
@@ -214,7 +226,9 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
   const objective = readString(inputs, "identity", "objective");
   const campaignMode = readString(inputs, "identity", "campaignMode");
   const textProvider = readString(inputs, "intelligence", "textProvider");
+  const textModel = readString(inputs, "intelligence", "textModel");
   const imageProvider = readString(inputs, "intelligence", "imageProvider");
+  const imageModel = readString(inputs, "intelligence", "imageModel");
   const language = readString(inputs, "intelligence", "language");
   const personaName = readString(inputs, "intelligence", "personaName");
 
@@ -231,6 +245,19 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
   // hand it straight to the same mutation the form uses and navigate to
   // the freshly-minted run. Falls back to the blank form only for legacy
   // runs (pre-2026-05-01) that carry no snapshot to replay.
+  // The header button opens a confirmation first — re-running spends
+  // generation quota/credits and creates a NEW post, so it shouldn't fire on
+  // a single click. A legacy run with no snapshot to replay just goes to the
+  // blank form (nothing to summarize or confirm).
+  const openRunAgain = () => {
+    if (!inputs) {
+      navigate("/generate");
+      return;
+    }
+    setConfirmOpen(true);
+  };
+
+  // Confirmed replay: re-submit this run's EXACT inputSnapshot as a fresh run.
   const handleRunAgain = async () => {
     if (!inputs) {
       navigate("/generate");
@@ -243,9 +270,52 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
       const newRunId = (result as { run_id?: string })?.run_id;
       navigate(newRunId ? `/generate/runs/${newRunId}` : "/generate");
     } catch {
-      // Error toast is surfaced by the mutation itself.
+      // Error toast is surfaced by the mutation itself — close the confirm so
+      // the user stays on the page and can retry.
+      setConfirmOpen(false);
     }
   };
+
+  const focusKeyphrase = readString(inputs, "identity", "focusKeyphrase");
+
+  // Research files the run was grounded in. Top-level on the snapshot (the
+  // plugin stamps `researchAttachments` on the ephemeral campaign cluster);
+  // defensively read — legacy runs and attachment-less runs have no field.
+  const researchFileNames = readResearchFileNames(inputs);
+
+  // Resolve raw model slugs to friendly catalog names ("GPT-5.2") from the
+  // served catalog — the same source CampaignViewPage's ProviderLine uses.
+  const { data: availableModels } = useAvailableModelsQuery();
+  const providerModelValue = (providerId: string, modelId: string): string => {
+    const provider = PROVIDER_LABELS[providerId] ?? providerId;
+    const model = modelId
+      ? ([...(availableModels?.text ?? []), ...(availableModels?.image ?? [])].find(
+          (m) => m.id === modelId,
+        )?.name ?? modelId)
+      : "";
+    return model ? `${provider} · ${model}` : provider;
+  };
+
+  // Provider rows for the confirm modal — text always, image when set.
+  const runProviders = [
+    textProvider && {
+      key: "text",
+      role: "text" as const,
+      providerId: textProvider,
+      value: providerModelValue(textProvider, textModel),
+    },
+    imageProvider && {
+      key: "image",
+      role: "image" as const,
+      providerId: imageProvider,
+      value: providerModelValue(imageProvider, imageModel),
+    },
+  ].filter(Boolean) as {
+    key: string;
+    role: "text" | "image";
+    providerId: string;
+    value: string;
+  }[];
 
   return (
     <PageContainer variant="narrow">
@@ -267,9 +337,18 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
             </PageTitle>
             <div className="mt-2 flex items-center gap-2">
               <StatusPill status={run.status} />
-              {run.headline && (
+              {/* On success the cloud always writes headline "Post published"
+                  regardless of draft/publish (runs/store.ts), which mislabels a
+                  draft run. Prefer the requested status here — the same signal
+                  the success banner below uses — and fall back to the cloud
+                  headline only for non-success states. */}
+              {(isSuccess || run.headline) && (
                 <span className="text-sm text-neutral-500 dark:text-neutral-400">
-                  {run.headline}
+                  {isSuccess
+                    ? requestedStatus === "publish"
+                      ? __("Post published", "structura")
+                      : __("Draft created", "structura")
+                    : run.headline}
                 </span>
               )}
             </div>
@@ -280,7 +359,7 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
           <Button
             variant="secondary"
             size="sm"
-            onClick={handleRunAgain}
+            onClick={openRunAgain}
             disabled={isGenerating}
           >
             {isGenerating ? (
@@ -292,6 +371,22 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
           </Button>
         )}
       </div>
+
+      <RunAgainConfirmDialog
+        open={confirmOpen}
+        onClose={() => !isGenerating && setConfirmOpen(false)}
+        onConfirm={handleRunAgain}
+        submitting={isGenerating}
+        topic={objective}
+        postStatus={requestedStatus as "publish" | "draft" | "pending"}
+        providers={runProviders}
+        personaName={personaName || undefined}
+        language={language || undefined}
+        focusKeyphrase={focusKeyphrase || undefined}
+        researchAttachmentNames={
+          researchFileNames.length > 0 ? researchFileNames : undefined
+        }
+      />
 
       {/* ── In-flight banner (above the timeline) ─────────────
           For non-terminal runs we surface "Working on your post —
@@ -353,6 +448,28 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
             {personaName && (
               <Field label={__("Persona", "structura")} value={String(personaName)} />
             )}
+            {researchFileNames.length > 0 && (
+              <div>
+                <dt className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                  <Paperclip size={14} aria-hidden="true" />
+                  {__("Research files", "structura")}
+                </dt>
+                {/* File names only (handoff §Echo surfaces) — mono, one per
+                    line, truncating. No interaction; the docs themselves are
+                    ephemeral cloud-side. */}
+                <dd className="m-0! mt-1 space-y-0.5">
+                  {researchFileNames.map((name, i) => (
+                    <p
+                      key={`${name}-${i}`}
+                      className="m-0! truncate font-mono text-[11.5px] text-neutral-900 dark:text-neutral-100"
+                      title={name}
+                    >
+                      {name}
+                    </p>
+                  ))}
+                </dd>
+              </div>
+            )}
           </dl>
         </section>
       )}
@@ -367,6 +484,19 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
       ) : run.status === "failed" ? (
         <FailureResult error={run.error} />
       ) : null}
+
+      {/* ── Search performance (GSC) ─────────────────────────────
+          Only for runs that produced a LIVE post: a draft has no
+          permalink Google could have crawled, so the section would
+          only ever show empty states. Placement per design handoff
+          Board 10 — after the result banner. */}
+      {isSuccess && requestedStatus === "publish" && run.resultPostUrl && (
+        <SearchPerformanceSection
+          pageUrl={run.resultPostUrl}
+          publishedAt={run.endedAt ?? run.startedAt}
+          className="mb-6"
+        />
+      )}
       {/* The non-terminal "Working on your post…" banner used to live
           here as a fallback after the success / failed branches; it
           moved above the timeline as of 2026-05-01 (see the comment up
@@ -556,6 +686,26 @@ const readString = (
     cur = (cur as Record<string, unknown>)[k];
   }
   return typeof cur === "string" ? cur : "";
+};
+
+/**
+ * Extract the research-attachment file names from a run's inputSnapshot.
+ * Same defensive posture as {@link readString}: the field is top-level on
+ * the snapshot, absent on legacy runs, and each entry might be malformed —
+ * nameless refs are dropped rather than rendering empty rows.
+ */
+const readResearchFileNames = (
+  obj: Record<string, unknown> | undefined,
+): string[] => {
+  const raw = obj?.researchAttachments;
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((ref) =>
+      ref && typeof ref === "object" && typeof (ref as { name?: unknown }).name === "string"
+        ? (ref as { name: string }).name
+        : "",
+    )
+    .filter(Boolean);
 };
 
 export default SinglePostRunDetailPage;

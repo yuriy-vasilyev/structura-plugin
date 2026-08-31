@@ -77,6 +77,8 @@ export type PortalIntent =
   | "unlock_visuals"
   | "unlock_keyword_bank"
   | "unlock_authority"
+  | "unlock_seo"
+  | "unlock_campaign"
   | "unlock_cadence"
   | "unlock_channels"
   | "unlock_video"

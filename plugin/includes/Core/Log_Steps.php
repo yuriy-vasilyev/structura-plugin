@@ -77,6 +77,16 @@ class Log_Steps {
 	// callsites that surface a refresh failure use the same constant.
 	public const OAUTH_REFRESH = 'OAUTH:REFRESH';
 
+	/**
+	 * An autonomous (scheduled) run was aborted at delivery because the
+	 * post's slug collided with something this site already published —
+	 * the `<slug>-2` cannibalization defect (big-talk.io 2026-08-11,
+	 * structurawp.com 2026-08-25). Emitted cloud-side; mirrored here so
+	 * Cloud Logging filters and the plugin's log table agree on the
+	 * string. Spec: specs/keyword-bank-exhaustion.md §2.5.
+	 */
+	public const DUPLICATE_TOPIC_SKIPPED = 'duplicate_topic_skipped';
+
 	// ── Plugin-only steps ──────────────────────────────────────────────
 	//
 	// These have no cloud-side counterpart — they represent work that

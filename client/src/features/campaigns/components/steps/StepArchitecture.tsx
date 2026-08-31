@@ -37,11 +37,11 @@ export const StepArchitecture = () => {
   };
 
   return (
-    <div className="animate-in slide-in-from-right-4 space-y-8 duration-normal">
+    <div className="animate-in slide-in-from-right-4 duration-normal space-y-8">
       {/* SECTION 1: LINGUISTICS & MAGNITUDE */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card className="space-y-4">
-          <div className="flex items-center gap-3 text-brand-600 dark:text-brand-400">
+          <div className="text-brand-600 dark:text-brand-400 flex items-center gap-3">
             <Languages size={18} />
             <h4 className="m-0! text-[10px] font-black tracking-widest text-neutral-400 uppercase">
               {__("Output Language", "structura")}
@@ -67,7 +67,7 @@ export const StepArchitecture = () => {
         </Card>
 
         <Card className="space-y-4">
-          <div className="flex items-center gap-3 text-brand-600 dark:text-brand-400">
+          <div className="text-brand-600 dark:text-brand-400 flex items-center gap-3">
             <FileStack size={18} />
             <h4 className="m-0! text-[10px] font-black tracking-widest text-neutral-400 uppercase">
               {__("Post Length", "structura")}
@@ -100,7 +100,7 @@ export const StepArchitecture = () => {
             }
           />
           {!isPaidLicense && (
-            <p className="m-0! mt-1.5 text-[11px] leading-snug text-neutral-400 dark:text-neutral-500">
+            <p className="mt-1.5! mb-0! text-[11px] leading-snug text-neutral-400 dark:text-neutral-500">
               {__(
                 "Free and anonymous installs are capped at 500 words per post. Upgrade to Pro to publish longer posts.",
                 "structura"
@@ -224,37 +224,37 @@ export const StepArchitecture = () => {
 
       {/* SECTION 5: DISCLOSURE */}
       <div ref={disclosureRef}>
-      <Card className="border-emerald-100 bg-emerald-50/20">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3 text-emerald-600">
-            <Scale size={18} />
-            <h4 className="m-0! text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-              {__("AI Transparency Signal", "structura")}
-            </h4>
+        <Card className="border-emerald-100 bg-emerald-50/20">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3 text-emerald-600">
+              <Scale size={18} />
+              <h4 className="m-0! text-[10px] font-black tracking-widest text-neutral-400 uppercase">
+                {__("AI Transparency Signal", "structura")}
+              </h4>
+            </div>
+            <Switch
+              label={__("Enabled", "structura")}
+              checked={structure.disclosure.enabled}
+              onChange={(checked) =>
+                updateForm("structure", {
+                  disclosure: { ...structure.disclosure, enabled: checked },
+                })
+              }
+            />
           </div>
-          <Switch
-            label={__("Enabled", "structura")}
-            checked={structure.disclosure.enabled}
-            onChange={(checked) =>
+          <TextArea
+            label={__("Disclosure Notice", "structura")}
+            value={structure.disclosure.text}
+            onChange={(e) =>
               updateForm("structure", {
-                disclosure: { ...structure.disclosure, enabled: checked },
+                disclosure: { ...structure.disclosure, text: e.target.value },
               })
             }
+            disabled={!structure.disclosure.enabled}
+            rows={2}
+            className="bg-white"
           />
-        </div>
-        <TextArea
-          label={__("Disclosure Notice", "structura")}
-          value={structure.disclosure.text}
-          onChange={(e) =>
-            updateForm("structure", {
-              disclosure: { ...structure.disclosure, text: e.target.value },
-            })
-          }
-          disabled={!structure.disclosure.enabled}
-          rows={2}
-          className="bg-white"
-        />
-      </Card>
+        </Card>
       </div>
 
       {/* SECTION 6: REFERRAL LINKS — paid-only; the cloud drops referral links
@@ -272,10 +272,10 @@ export const StepArchitecture = () => {
           disabled={!isPaidLicense}
         />
         {!isPaidLicense && (
-          <p className="m-0! mt-1.5 text-[11px] leading-snug text-neutral-400 dark:text-neutral-500">
+          <p className="mt-1.5! mb-0! text-[11px] leading-snug text-neutral-400 dark:text-neutral-500">
             {__(
               "Referral links are a paid feature. Upgrade to Pro to weave your tracking links into relevant posts.",
-              "structura",
+              "structura"
             )}
           </p>
         )}

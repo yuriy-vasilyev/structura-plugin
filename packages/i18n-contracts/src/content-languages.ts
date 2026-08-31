@@ -16,6 +16,33 @@ export const SUPPORTED_CONTENT_LANGUAGES = ["en", "de", "es", "fr", "it", "pt", 
 
 export type SupportedContentLanguage = (typeof SUPPORTED_CONTENT_LANGUAGES)[number];
 
+/**
+ * What the campaign **Language** dropdown offers: every supported content
+ * language plus regional writing variants (Austrian / Swiss Standard German).
+ *
+ * A variant stores verbatim on the campaign (`de_AT`) and changes only how
+ * the text is written — vocabulary, orthography, conventions. For delivery
+ * feeds and the `?language=` filter it normalizes to its primary subtag
+ * (`de`), so the delivery axis stays {@link SUPPORTED_CONTENT_LANGUAGES}.
+ *
+ * WP-style underscore codes on purpose: the plugin SPA already stores
+ * `de_AT` / `de_CH` from its WordPress locale list
+ * (`client/src/data/languages.ts`), so both surfaces share one value space.
+ */
+export const CONTENT_LANGUAGE_OPTIONS = [
+  "en",
+  "de",
+  "de_AT",
+  "de_CH",
+  "es",
+  "fr",
+  "it",
+  "pt",
+  "nl",
+] as const;
+
+export type ContentLanguageOption = (typeof CONTENT_LANGUAGE_OPTIONS)[number];
+
 /** English display name per code — for non-i18n contexts (API docs, logs). */
 export const CONTENT_LANGUAGE_NAMES: Record<SupportedContentLanguage, string> = {
   en: "English",

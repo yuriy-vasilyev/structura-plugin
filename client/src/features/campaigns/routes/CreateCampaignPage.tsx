@@ -27,7 +27,7 @@ import {
   Tag,
   Trash2,
 } from "lucide-react";
-import { Button, Card, cn, InputField, Switch, TextArea, Tooltip } from "@structura/ui";
+import { Button, Card, cn, InputField, OptionCardGroup, Switch, TextArea, Tooltip } from "@structura/ui";
 import { PageTitle } from "@/components/Layout/PageTitle";
 import { PageDescription } from "@/components/Layout/PageSubtitle";
 import { PageContainer } from "@/components/Layout/PageContainer";
@@ -50,6 +50,7 @@ import { TaxonomySection } from "@/features/campaigns/components/TaxonomySection
 import { SelectionCard } from "@/components/Shared/SelectionCard";
 import { AIProvider, CampaignMode } from "@/features/campaigns/types";
 import { ProviderToggle } from "@/features/campaigns/components/ProviderToggle";
+import { mirrorModelForTier } from "@/features/campaigns/modelTier";
 import { CampaignAiEngineSection } from "@/features/campaigns/components/CampaignAiEngineSection";
 import { CoreContentSettings } from "@/features/campaigns/components/CoreContentSettings";
 import { SeoRuleName, SUPPORTED_BLOCK_TYPE, useDefaultProviders, useLicense, useSeoRules } from "@/features/settings";
@@ -370,6 +371,7 @@ const CreateCampaignInner = () => {
       const bank = keywordsRef.current.getKeywords();
       updateForm("keywords", {
         bank,
+        discoveryMeta: keywordsRef.current.getDiscoveryMeta(),
         discoveredAt: bank.length > 0 ? new Date().toISOString() : null,
       });
     }
@@ -501,6 +503,7 @@ const CreateCampaignInner = () => {
               language={formData.intelligence.language}
               provider={formData.intelligence.textProvider}
               existingKeywords={formData.keywords?.bank?.length ? formData.keywords.bank : undefined}
+              existingDiscoveryMeta={formData.keywords?.discoveryMeta}
               onKeywordsChange={() => {}}
               onPhaseChange={setKeywordsPhase}
               onSkipToNextStep={() => {
@@ -525,6 +528,7 @@ const CreateCampaignInner = () => {
                       const bank = keywordsRef.current.getKeywords();
                       updateForm("keywords", {
                         bank,
+                        discoveryMeta: keywordsRef.current.getDiscoveryMeta(),
                         discoveredAt: bank.length > 0 ? new Date().toISOString() : null,
                       });
                     }
@@ -1158,40 +1162,17 @@ const StrategySection = ({
       {/* Campaign mode */}
       <div>
         <label className="mb-2 block text-[10px] font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
-          {__("Campaign Mode", "structura")}
+          {__("Writing approach", "structura")}
         </label>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {CAMPAIGN_MODES.map((mode) => {
-            const isSelected = formData.identity.campaignMode === mode.value;
-            return (
-              <button
-                key={mode.value}
-                type="button"
-                onClick={() => updateForm("identity", { campaignMode: mode.value })}
-                className={cn(
-                  "cursor-pointer rounded-xl border px-3 py-3 text-left transition-all",
-                  isSelected
-                    ? "border-brand-300 bg-brand-50 shadow-sm dark:border-brand-700 dark:bg-brand-950/40"
-                    : "border-neutral-200 bg-white hover:border-brand-200 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:border-brand-800"
-                )}
-              >
-                <span
-                  className={cn(
-                    "block text-xs font-bold",
-                    isSelected
-                      ? "text-brand-700 dark:text-brand-300"
-                      : "text-neutral-700 dark:text-neutral-300"
-                  )}
-                >
-                  {mode.label}
-                </span>
-                <span className="mt-0.5 block text-[10px] text-neutral-400 dark:text-neutral-500">
-                  {mode.description}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <OptionCardGroup
+          options={CAMPAIGN_MODES}
+          // May be unset until the interview fills it in — the group then
+          // renders with no card selected (the primitive tolerates a
+          // no-match value), matching the previous hand-rolled behavior.
+          value={formData.identity.campaignMode as CampaignMode}
+          onChange={(value) => updateForm("identity", { campaignMode: value })}
+          ariaLabel={__("Writing approach", "structura")}
+        />
       </div>
 
       {/* Provider + model override — visible inline when not fully configured */}
@@ -1201,18 +1182,38 @@ const StrategySection = ({
             textProvider={formData.intelligence.textProvider}
             imageProvider={formData.intelligence.imageProvider}
             onTextProviderChange={(p: AIProvider) =>
-              updateForm("intelligence", { textProvider: p, textModel: "" })
+              updateForm("intelligence", {
+                textProvider: p,
+                textModel:
+                  mirrorModelForTier(p, "text", formData.intelligence.textTier ?? "mid") ?? "",
+              })
             }
             onImageProviderChange={(p: AIProvider) =>
-              updateForm("intelligence", { imageProvider: p, imageModel: "" })
+              updateForm("intelligence", {
+                imageProvider: p,
+                imageModel:
+                  mirrorModelForTier(p, "image", formData.intelligence.imageTier ?? "mid") ?? "",
+              })
             }
             availableTextProviders={availableProviders}
             availableImageProviders={availableImageProviders}
-            showModelSelectors={!isCloud}
-            textModel={formData.intelligence.textModel}
-            imageModel={formData.intelligence.imageModel}
-            onTextModelChange={(val: string) => updateForm("intelligence", { textModel: val })}
-            onImageModelChange={(val: string) => updateForm("intelligence", { imageModel: val })}
+            showTierSelectors={!isCloud}
+            textTier={formData.intelligence.textTier ?? "mid"}
+            imageTier={formData.intelligence.imageTier ?? "mid"}
+            onTextTierChange={(t) =>
+              updateForm("intelligence", {
+                textTier: t,
+                textModel:
+                  mirrorModelForTier(formData.intelligence.textProvider, "text", t) ?? "",
+              })
+            }
+            onImageTierChange={(t) =>
+              updateForm("intelligence", {
+                imageTier: t,
+                imageModel:
+                  mirrorModelForTier(formData.intelligence.imageProvider, "image", t) ?? "",
+              })
+            }
           />
         </Card>
       )}

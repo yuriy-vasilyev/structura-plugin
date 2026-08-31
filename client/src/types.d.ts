@@ -79,6 +79,18 @@ declare global {
        */
       had_prior_activation?: boolean;
       /**
+       * True once the user has finished OR exited the setup wizard on this
+       * install. Server-side (wp_option `structura_onboarding_dismissed`)
+       * source of truth for "don't auto-open the wizard again" — replaces the
+       * per-activation localStorage flag, whose key (the activation id) drifted
+       * on workspace re-provision and resurrected the wizard. Works for every
+       * tier, including anonymous (no license_key → never reaches cloud wizard
+       * state). Cleared on Disconnect/Forget so a fresh connection re-onboards.
+       *
+       * Optional for back-compat with older PHP; treat undefined as false.
+       */
+      onboarding_dismissed?: boolean;
+      /**
        * Bootstrap payload for `useSettingsQuery`. Same shape the
        * `/structura/v1/settings` endpoint returns, minus the
        * cloud-derived per-provider `connected` / `masked_key` fields
@@ -137,6 +149,14 @@ declare global {
        */
       has_workspace?: boolean;
       is_anonymous?: boolean;
+      /**
+       * wp.org guidelines 7 & 9 (review of 2026-08-27) — `false` on a
+       * fresh install that has never contacted Structura Cloud. The
+       * SPA renders `CloudConsentGate` instead of the app until the
+       * admin opts in (`POST /structura/v1/privacy/cloud-consent`).
+       * Omitted on plugin builds predating the gate → no gate shown.
+       */
+      cloud_consent?: boolean;
       provider_count_cap?: number;
       activation_id?: string;
       plan?: string;

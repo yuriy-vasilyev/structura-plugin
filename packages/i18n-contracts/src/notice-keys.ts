@@ -138,6 +138,50 @@ export const NOTICE_KEYS = {
       body: "notices.seoIntel.refreshed.body",
       cta: "notices.seoIntel.refreshed.cta",
     },
+    // A scheduled run fired while the campaign's keyword bank was
+    // empty (e.g. cleared by a content-language switch and never
+    // re-discovered) — the post falls back to a generic topic instead
+    // of a targeted keyphrase. Deduped per campaign until resolved.
+    // bodyParams: { campaignName: string }
+    noKeywords: {
+      title: "notices.seoIntel.noKeywords.title",
+      body: "notices.seoIntel.noKeywords.body",
+      cta: "notices.seoIntel.noKeywords.cta",
+    },
+    // Every seed in the campaign's keyword bank is already covered by a
+    // published post and no unused long-tail slot is left, so the
+    // scheduled run was SKIPPED rather than re-serving a covered keyword
+    // (which produced near-duplicate `-2` posts: big-talk.io 2026-08-11,
+    // structurawp.com 2026-08-25). Deduped per campaign until resolved.
+    // Spec: specs/keyword-bank-exhaustion.md §2.4.
+    // bodyParams: { campaignName: string }
+    bankExhausted: {
+      title: "notices.seoIntel.bankExhausted.title",
+      body: "notices.seoIntel.bankExhausted.body",
+      cta: "notices.seoIntel.bankExhausted.cta",
+    },
+    // An automatic bank refresh ran (triggered by low remaining capacity
+    // or by exhaustion) and appended net-new keywords. Automation is
+    // never silent — spec §2.4 step 2.
+    // bodyParams: { campaignName: string, newCount: string }
+    bankRefreshed: {
+      title: "notices.seoIntel.bankRefreshed.title",
+      body: "notices.seoIntel.bankRefreshed.body",
+      cta: "notices.seoIntel.bankRefreshed.cta",
+    },
+    // An AUTONOMOUS run was aborted at delivery because the post's slug
+    // was already published on this site (activation + language), i.e. it
+    // would have shipped as `<slug>-2` and cannibalized the original —
+    // the defect big-talk.io (2026-08-11) and structurawp.com
+    // (2026-08-25) both hit. Manual runs are exempt and keep the suffix.
+    // Deduped per campaign until resolved.
+    // Spec: specs/keyword-bank-exhaustion.md §2.5.
+    // bodyParams: { campaignName: string, slug: string }
+    duplicateTopicSkipped: {
+      title: "notices.seoIntel.duplicateTopicSkipped.title",
+      body: "notices.seoIntel.duplicateTopicSkipped.body",
+      cta: "notices.seoIntel.duplicateTopicSkipped.cta",
+    },
     // Workspace approaching 80% of its monthly budget cap. One-shot
     // per workspace per month (dedups on the workspace dedup tuple).
     // bodyParams: none

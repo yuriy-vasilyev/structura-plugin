@@ -117,6 +117,8 @@ export const CAPTION_LIMITS = {
   shortsTitle: 100,
   tiktokHook: 100,
   reelsHook: 125,
+  /** YouTube Tags upload field — total characters across all tags. */
+  shortsTags: 500,
 } as const;
 
 /** Presentation role of one `\n\n` block inside a composed caption. */
@@ -163,6 +165,20 @@ export const parseCaptionBlocks = (
  */
 export const captionHook = (raw: string): string =>
   raw.split("\n\n").find((block) => block.trim() !== "") ?? "";
+
+/**
+ * The caption's hashtag run reshaped for YouTube's Tags upload field:
+ * bare comma-separated terms ("seoautomation, wordpressplugins") — the
+ * paste format that field expects ("Enter a comma after each tag").
+ * Empty string when the caption carries no hashtag block.
+ */
+export const uploadTags = (raw: string): string =>
+  parseCaptionBlocks(raw)
+    .filter((block) => block.kind === "hashtags")
+    .flatMap((block) => block.text.split(/\s+/))
+    .map((token) => token.replace(/^#+/, ""))
+    .filter((token) => token.length > 0)
+    .join(", ");
 
 /**
  * Shape guard for {@link VideoSocialPackages}: all three platforms present

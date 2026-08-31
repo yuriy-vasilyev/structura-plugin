@@ -57,7 +57,10 @@ import { useLocation, useNavigate } from "react-router";
 import { useLicense } from "@/features/settings";
 
 import { useWizardStateQuery } from "../api/useOnboardingState";
-import { isOnboardingDismissed } from "../utils/onboardingDismissal";
+import {
+  clearAllOnboardingStorage,
+  isOnboardingDismissed,
+} from "../utils/onboardingDismissal";
 
 export const useOnboardingAutoRedirect = () => {
   const navigate = useNavigate();
@@ -70,13 +73,40 @@ export const useOnboardingAutoRedirect = () => {
   // keyless install).
   const { data } = useWizardStateQuery({ enabled: hasWorkspace === true });
 
+  // Durable "the user has already engaged onboarding" seal. This is the fix
+  // for the wizard-keeps-reappearing bug (3rd occurrence): the old suppressor
+  // was a localStorage flag keyed by the activation id, so a workspace
+  // re-provision (new id) lost it and the wizard came back. The server-side
+  // `onboarding_dismissed` wp_option (localized synchronously at page load) is
+  // install-level and survives that drift, and — unlike the cloud
+  // `completedAt` — it also works for the anonymous/none tier, which has no
+  // license_key and so never gets a cloud wizard state. `completedAt` is kept
+  // as a secondary seal for licensed installs whose option hasn't been
+  // localized yet (self-heals on the next state read).
+  const onboardingDismissedServer =
+    (typeof window !== "undefined" &&
+      window.structuraConfig?.onboarding_dismissed === true) ||
+    Boolean(data?.state?.completedAt);
+
   // Single-shot guard. Without it, a React Query refetch (network
   // flake recovery) that returns the cached `justCreated: true` body
   // could re-trigger the navigate after the user had already exited.
   const hasRedirectedRef = useRef(false);
 
+  // Once the durable seal is set, the localStorage keys (dismissed flags +
+  // wizard drafts, including prior-install leftovers) are redundant — sweep
+  // them so the drifting keys can never resurrect the wizard again. Skipped
+  // on the wizard route so a manual re-run's in-progress draft is preserved.
+  useEffect(() => {
+    if (!onboardingDismissedServer) return;
+    if (location.pathname === "/onboarding") return;
+    clearAllOnboardingStorage();
+  }, [onboardingDismissedServer, location.pathname]);
+
   useEffect(() => {
     if (hasRedirectedRef.current) return;
+    // Durable seal wins over every trigger below.
+    if (onboardingDismissedServer) return;
     // The needs-positioning nudge respects a prior explicit Exit; the
     // justCreated path doesn't need to (it can only ever fire on the very
     // first state read, before an Exit could exist).
@@ -115,6 +145,7 @@ export const useOnboardingAutoRedirect = () => {
   }, [
     data?.justCreated,
     data?.activationNeedsPositioning,
+    onboardingDismissedServer,
     hasUsableLicense,
     isPaidLicense,
     location.pathname,

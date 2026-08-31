@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { __ } from "@wordpress/i18n";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@structura/ui";
 import { useRuns } from "../context/RunsContext";
 import { useCampaignRunQuery } from "../api/useCampaignRunQuery";
@@ -278,10 +273,7 @@ const CampaignRunProgressMatcher = ({
   // tracked as a follow-up.
   const { dismiss } = useRuns();
   useEffect(() => {
-    if (
-      (runStatus === "succeeded" || runStatus === "succeeded_with_warnings") &&
-      lingerExpired
-    ) {
+    if ((runStatus === "succeeded" || runStatus === "succeeded_with_warnings") && lingerExpired) {
       dismiss();
     }
   }, [runStatus, lingerExpired, dismiss]);
@@ -295,16 +287,13 @@ const CampaignRunProgressMatcher = ({
   const run = data?.run;
   if (!run) {
     // Pre-first-poll state. See `StartingStrip` below for why.
-    return (
-      <StartingStrip variant={variant} texture={texture} className={className} />
-    );
+    return <StartingStrip variant={variant} texture={texture} className={className} />;
   }
   if (run.campaignId !== campaignId) return null;
   if (runStatus === "succeeded" && lingerExpired) return null;
 
   const isPage = variant === "page";
-  const isSuccess =
-    runStatus === "succeeded" || runStatus === "succeeded_with_warnings";
+  const isSuccess = runStatus === "succeeded" || runStatus === "succeeded_with_warnings";
   const isFailure = runStatus === "failed" || runStatus === "cancelled";
   const isInFlight = IN_FLIGHT_STATUSES.has(runStatus ?? "");
   // Webhook-delivery fallback: the cloud finished but couldn't reach the site
@@ -354,9 +343,9 @@ const CampaignRunProgressMatcher = ({
       ? isAwaitingPull
         ? __(
             "Your site blocked direct delivery, so we're delivering this post another way. It may take a few minutes.",
-            "structura",
+            "structura"
           )
-        : milestoneSubtext(run.currentStep, postStatus) ?? run.subtext
+        : (milestoneSubtext(run.currentStep, postStatus) ?? run.subtext)
       : undefined;
 
   // Trailing metric on the right side. Percent while in flight; no glyph
@@ -366,8 +355,8 @@ const CampaignRunProgressMatcher = ({
       className={cn(
         "font-black tabular-nums",
         isPage
-          ? "text-[13px] text-brand-700 dark:text-brand-400"
-          : "text-xs text-brand-700 dark:text-brand-400",
+          ? "text-brand-700 dark:text-brand-400 text-[13px]"
+          : "text-brand-700 dark:text-brand-400 text-xs"
       )}
     >
       {percent}%
@@ -400,7 +389,7 @@ const CampaignRunProgressMatcher = ({
         // into the reveal panel below. Killing the bottom rounding here
         // makes the transition read as "one continuous surface".
         expandable && timelineExpanded && isPage && "rounded-b-none",
-        !expandable && className,
+        !expandable && className
       )}
       role="progressbar"
       aria-valuemin={0}
@@ -415,7 +404,7 @@ const CampaignRunProgressMatcher = ({
         aria-hidden
         className={cn(
           "absolute inset-y-0 left-0 z-10 transition-[width] duration-700 ease-out",
-          !isSuccess && !isFailure && "border-r",
+          !isSuccess && !isFailure && "border-r"
         )}
         style={{
           width: isSuccess || isFailure ? "100%" : `${percent}%`,
@@ -444,9 +433,7 @@ const CampaignRunProgressMatcher = ({
               key={step}
               className={cn(
                 "h-full flex-1 transition-all duration-1000",
-                isPassed
-                  ? "bg-brand-500"
-                  : "bg-neutral-300 dark:bg-neutral-700",
+                isPassed ? "bg-brand-500" : "bg-neutral-300 dark:bg-neutral-700"
               )}
             />
           );
@@ -461,7 +448,7 @@ const CampaignRunProgressMatcher = ({
       <div
         className={cn(
           "relative z-30 flex h-full items-center justify-between gap-3",
-          isPage ? "" : "px-4",
+          isPage ? "" : "px-4"
         )}
         aria-live="polite"
         aria-atomic="true"
@@ -475,20 +462,20 @@ const CampaignRunProgressMatcher = ({
                   ? "text-brand-500/70 dark:text-brand-400/70"
                   : isSuccess
                     ? "text-emerald-600 dark:text-emerald-500"
-                    : "text-red-600 dark:text-red-500",
+                    : "text-red-600 dark:text-red-500"
               )}
               aria-hidden
             />
             <h4
               key={`crp-label-${run.currentStep}-${runStatus}`}
               className={cn(
-                "m-0! animate-fade-in truncate font-bold leading-tight tracking-tight",
+                "animate-fade-in m-0! truncate leading-tight font-bold tracking-tight",
                 isPage ? "text-base" : "text-[12.5px]",
                 isFailure
                   ? "text-red-900 dark:text-red-300"
                   : isSuccess
                     ? "text-emerald-900 dark:text-emerald-300"
-                    : "text-neutral-900 dark:text-neutral-100",
+                    : "text-neutral-900 dark:text-neutral-100"
               )}
             >
               {label}
@@ -498,7 +485,7 @@ const CampaignRunProgressMatcher = ({
             <p
               key={`crp-subtext-${subtext}`}
               className={cn(
-                "m-0! mt-0.5 animate-fade-in truncate font-medium",
+                "mt-0.5!animate-fade-in mb-0! truncate font-medium",
                 // Dimmed per 2026-04-23 review: the subtext is ambient
                 // context ("Writing section 2 of 4"), not information the
                 // eye needs to race to. Keeping it the same weight as the
@@ -507,7 +494,7 @@ const CampaignRunProgressMatcher = ({
                 // intended.
                 isPage
                   ? "text-sm text-neutral-500 dark:text-neutral-400"
-                  : "hidden text-[11px] text-neutral-500 sm:block dark:text-neutral-400",
+                  : "hidden text-[11px] text-neutral-500 sm:block dark:text-neutral-400"
               )}
             >
               {subtext}
@@ -527,7 +514,7 @@ const CampaignRunProgressMatcher = ({
               <ChevronDown
                 className={cn(
                   "h-4 w-4 shrink-0 text-neutral-400 transition-transform duration-300 dark:text-neutral-500",
-                  timelineExpanded && "rotate-180",
+                  timelineExpanded && "rotate-180"
                 )}
                 aria-hidden
               />
@@ -575,10 +562,10 @@ const CampaignRunProgressMatcher = ({
           "cursor-pointer hover:shadow-md",
           // Keyboard focus ring — required per a11y spec since the
           // clickable surface is large and has no other focus treatment.
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950",
+          "focus-visible:ring-brand-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950",
           // Kill bottom rounding when expanded so the strip merges
           // visually into the reveal panel below.
-          timelineExpanded && "rounded-b-none",
+          timelineExpanded && "rounded-b-none"
         )}
       >
         {strip}
@@ -597,7 +584,7 @@ const CampaignRunProgressMatcher = ({
             "bg-neutral-900 text-[11px] font-semibold tracking-wide text-white shadow-lg",
             "opacity-0 transition-all duration-200 group-hover:opacity-100 group-focus-visible:opacity-100",
             "group-hover:-translate-y-0 group-focus-visible:-translate-y-0",
-            "dark:bg-neutral-50 dark:text-neutral-900",
+            "dark:bg-neutral-50 dark:text-neutral-900"
           )}
         >
           {timelineExpanded ? (
@@ -625,7 +612,7 @@ const CampaignRunProgressMatcher = ({
           id="crp-timeline-reveal"
           className={cn(
             "overflow-hidden rounded-b-xl border border-t-0 border-neutral-300/50 bg-white shadow-sm dark:border-neutral-800/40 dark:bg-neutral-900",
-            "animate-fade-in",
+            "animate-fade-in"
           )}
         >
           <div className="border-t border-neutral-200/60 px-5 pt-5 pb-5 dark:border-neutral-800/60">
@@ -647,11 +634,7 @@ const CampaignRunProgressMatcher = ({
  * main render flat and makes it trivial to assert-by-role in tests
  * (`data-testid` probes per branch below).
  */
-const TextureOverlay = ({
-  texture,
-}: {
-  texture: "lines" | "pulse" | "flow" | "grid";
-}) => {
+const TextureOverlay = ({ texture }: { texture: "lines" | "pulse" | "flow" | "grid" }) => {
   switch (texture) {
     case "grid":
       return (
@@ -668,7 +651,7 @@ const TextureOverlay = ({
       return (
         <div
           data-testid="crp-texture-pulse"
-          className="animate-pulse-subtle absolute inset-0 bg-brand-500/10"
+          className="animate-pulse-subtle bg-brand-500/10 absolute inset-0"
         />
       );
     case "flow":
@@ -726,7 +709,7 @@ const StartingStrip = ({
         isPage
           ? "h-auto rounded-xl border border-neutral-300/50 bg-white p-5 shadow-sm dark:border-neutral-800/40 dark:bg-neutral-900"
           : "h-11 border-t border-neutral-200/60 bg-neutral-50/40 dark:border-neutral-800/40 dark:bg-neutral-950",
-        className,
+        className
       )}
       role="progressbar"
       aria-valuemin={0}
@@ -748,15 +731,15 @@ const StartingStrip = ({
       <div
         className={cn(
           "relative z-30 flex h-full items-center justify-between gap-3",
-          isPage ? "" : "px-4",
+          isPage ? "" : "px-4"
         )}
         aria-live="polite"
         aria-atomic="true"
       >
         <p
           className={cn(
-            "m-0! animate-fade-in truncate font-bold tracking-tight text-neutral-900 dark:text-neutral-100",
-            isPage ? "text-base" : "text-[12.5px]",
+            "animate-fade-in m-0! truncate font-bold tracking-tight text-neutral-900 dark:text-neutral-100",
+            isPage ? "text-base" : "text-[12.5px]"
           )}
         >
           {__("Connecting to cloud — first run can take up to 30 seconds…", "structura")}

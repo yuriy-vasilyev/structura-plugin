@@ -84,13 +84,16 @@ export const useChannelConnectionMutations = () => {
   // the cloud requests the company-page scopes so the user can post on behalf
   // of a Page they administer. Personal-profile posting is the default.
   const initOAuthMutation = useMutation({
-    mutationFn: ({ integrationId, postAsOrg }: OAuthInitInput) =>
+    mutationFn: ({ integrationId, postAsOrg, returnHash }: OAuthInitInput) =>
       apiFetch<OAuthInitResponse>({
         path: "/structura/v1/channels/oauth/init",
         method: "POST",
         data: {
           integration_id: integrationId,
           ...(postAsOrg ? { post_as: "organization" } : {}),
+          // Optional post-bounce SPA hash route (see OAuthInitInput.returnHash).
+          // Omitted → the proxy's `#/channels/connections` default applies.
+          ...(returnHash ? { return_hash: returnHash } : {}),
         },
       }),
     onSuccess: (_data, input) => {

@@ -56,6 +56,7 @@ vi.mock("../api/useOnboardingState", () => ({
     isLoading: false,
   }),
   useResetWizardMutation: () => ({ mutateAsync: vi.fn() }),
+  useDismissOnboardingMutation: () => ({ mutateAsync: vi.fn() }),
 }));
 vi.mock("../api/useFinishWizard", () => ({
   useFinishWizard: () => ({ isPending: false, mutateAsync: vi.fn() }),

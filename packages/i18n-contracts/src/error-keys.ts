@@ -71,6 +71,17 @@ export const ERROR_KEYS = {
     licenseNotFound: "subscriptions.licenseNotFound",
     ltdMetadataMissing: "subscriptions.ltdMetadataMissing",
     ltdMetadataIncomplete: "subscriptions.ltdMetadataIncomplete",
+    // AppSumo lifetime-deal redemption (spec: appsumo-redemption.md §5).
+    // Every one of these is customer-facing — the buyer is standing on
+    // /redeem with a code they paid for, so the copy has to say what to
+    // do next, not just what went wrong.
+    appsumoCodeRequired: "subscriptions.appsumoCodeRequired",
+    appsumoCodeInvalid: "subscriptions.appsumoCodeInvalid",
+    appsumoCodeAlreadyRedeemed: "subscriptions.appsumoCodeAlreadyRedeemed",
+    appsumoCodeRefunded: "subscriptions.appsumoCodeRefunded",
+    appsumoRateLimited: "subscriptions.appsumoRateLimited",
+    appsumoStripeSubscriber: "subscriptions.appsumoStripeSubscriber",
+    appsumoRedemptionFailed: "subscriptions.appsumoRedemptionFailed",
   },
   billing: {
     noBillingProfile: "billing.noBillingProfile",
@@ -210,6 +221,26 @@ export const ERROR_KEYS = {
     // Portal "Run now" gates (campaigns/portal-run.ts).
     paused: "campaigns.paused",
     weeklyCapReached: "campaigns.weeklyCapReached",
+    /**
+     * Every seed in the campaign's keyword bank is covered by a published
+     * post and no unused long-tail slot remains. Running anyway would
+     * re-serve a covered keyword and publish a near-duplicate `-2` post.
+     * Spec: specs/keyword-bank-exhaustion.md §2.4.
+     */
+    keywordBankExhausted: "campaigns.keywordBankExhausted",
+  },
+  attachments: {
+    // Research attachments on single post generation
+    // (specs/design-brief-research-attachments.md). Reject reasons mirror
+    // AttachmentRejectReason in functions/src/attachments/extract.ts so the
+    // dropzone can render the specific inline error the handoff specifies.
+    unsupportedType: "attachments.unsupportedType",
+    tooLarge: "attachments.tooLarge",
+    // Parsed but no text (scanned/image-only PDF), or failed to parse at all.
+    unreadable: "attachments.unreadable",
+    // Paid-only feature — free/anonymous tiers get the locked teaser client-side;
+    // this key is the server-side backstop.
+    planRequired: "attachments.planRequired",
   },
   common: {
     internal: "common.internal",
@@ -232,6 +263,7 @@ export type ErrorKey =
   | (typeof ERROR_KEYS.account)[keyof typeof ERROR_KEYS.account]
   | (typeof ERROR_KEYS.sites)[keyof typeof ERROR_KEYS.sites]
   | (typeof ERROR_KEYS.campaigns)[keyof typeof ERROR_KEYS.campaigns]
+  | (typeof ERROR_KEYS.attachments)[keyof typeof ERROR_KEYS.attachments]
   | (typeof ERROR_KEYS.common)[keyof typeof ERROR_KEYS.common];
 
 /**
@@ -259,4 +291,5 @@ export interface ErrorParams {
   "sites.slotCommitted": { maxSites: number };
   "campaigns.limitReached": { limit: number };
   "campaigns.cadenceLimit": { maxPerWeek: number };
+  "subscriptions.appsumoRateLimited": { retryAfterSeconds: number };
 }

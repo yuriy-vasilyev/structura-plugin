@@ -23,6 +23,8 @@ import type { ComponentType, ReactNode } from "react";
 import { Plug, Webhook, type LucideProps } from "lucide-react";
 import { cn, VideoChannelGlyph } from "@structura/ui";
 import { VIDEO_INTEGRATION_ID } from "../videoChannel";
+import { GSC_INTEGRATION_ID } from "../types";
+import { GoogleGGlyph } from "./GscConnectFlow";
 
 interface IntegrationIconProps {
   integrationId: string;
@@ -131,6 +133,29 @@ export const IntegrationIcon = ({
         aria-hidden
       >
         <VideoChannelGlyph className="h-[55%] w-[55%]" />
+      </div>
+    );
+  }
+
+  // Google Search Console — the official four-color "G" (the one
+  // non-monochrome glyph exception, GSC connect-flow handoff Board 01).
+  // Local override rather than the catalog iconUrl so the mark matches the
+  // Google connect CTAs elsewhere and never renders as a recolored
+  // simple-icons silhouette. White tile keeps the brand colors readable in
+  // dark mode, mirroring the iconUrl branch below.
+  if (integrationId === GSC_INTEGRATION_ID) {
+    return (
+      <div
+        className={cn(
+          baseClass,
+          "flex items-center justify-center bg-white ring-1 ring-neutral-200 dark:ring-neutral-700",
+        )}
+        aria-hidden
+      >
+        {/* Class-based sizing overrides the svg's width/height attributes,
+            so the mark scales with whatever tile size the caller passed
+            (size-9 rows, size-10 cards) — 75% ≈ the handoff's 30px-in-40px. */}
+        <GoogleGGlyph className="h-[75%] w-[75%]" />
       </div>
     );
   }

@@ -430,3 +430,63 @@ describe("CatalogEntryCard — video channel premium card", () => {
     expect(screen.queryByText("Includes 40 videos/mo")).toBeNull();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Capability chips (wire `capabilities` array)
+// ---------------------------------------------------------------------------
+//
+// Only "insights" (Google Search Console — a read-only data source) maps to
+// a chip today; publish/notify/adapt map to nothing because the category
+// pill already carries that meaning. Unknown strings from a newer cloud
+// must degrade to "no chip" — this SPA ships to older sites for months, and
+// leaking a raw internal token into the Store grid would be a regression.
+
+describe("CatalogEntryCard — capability chips", () => {
+  const gscEntry = (
+    overrides: Partial<IntegrationCatalogEntry> = {},
+  ): IntegrationCatalogEntry =>
+    makeEntry({
+      id: "google-search-console",
+      name: "Google Search Console",
+      description: "See how every post performs in Google Search.",
+      category: "seo",
+      capabilities: ["insights"],
+      authType: "oauth2",
+      gating: { requiredPlan: "free", requiredAddon: null },
+      ...overrides,
+    });
+
+  it("renders the Read-only insights chip for an insights-capable entry", () => {
+    renderWithClient(<CatalogEntryCard entry={gscEntry()} />);
+    expect(screen.getByText("Read-only insights")).toBeInTheDocument();
+    // Free-plan gating → the green Free tier badge, no upgrade hint.
+    expect(screen.getByText("Free")).toBeInTheDocument();
+    expect(screen.queryByText(/requires/i)).toBeNull();
+  });
+
+  it("renders unknown capability strings harmlessly (no chip, no crash)", () => {
+    // A newer cloud may ship capability ids this SPA has never heard of —
+    // simulate one with a cast, exactly how it arrives over the wire.
+    renderWithClient(
+      <CatalogEntryCard
+        entry={gscEntry({
+          capabilities: [
+            "insights_v2",
+          ] as unknown as IntegrationCatalogEntry["capabilities"],
+        })}
+      />,
+    );
+    // Card still renders its primary metadata…
+    expect(screen.getByText("Google Search Console")).toBeInTheDocument();
+    // …and the raw token never leaks into the UI.
+    expect(screen.queryByText("insights_v2")).toBeNull();
+    expect(screen.queryByText("Read-only insights")).toBeNull();
+  });
+
+  it("keeps chips off entries whose capabilities have no display label", () => {
+    // The default Slack fixture advertises ["notify"] — no chip expected.
+    renderWithClient(<CatalogEntryCard entry={makeEntry()} />);
+    expect(screen.queryByText("Read-only insights")).toBeNull();
+    expect(screen.queryByText("notify")).toBeNull();
+  });
+});

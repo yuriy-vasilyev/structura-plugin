@@ -354,6 +354,76 @@ describe("InstallModal", () => {
   });
 
   // -------------------------------------------------------------------------
+  // Google Search Console connect panel
+  //
+  // GSC rides the generic oauth2 branch — no toggles, no target radios —
+  // plus one integration-specific line stating that access is read-only and
+  // free. The first `insights` (never-publishes) integration, so the note
+  // is what stops "will this post to Google?" hesitation at the CTA.
+  // -------------------------------------------------------------------------
+  describe("Google Search Console connect panel", () => {
+    const gscEntry = makeEntry("oauth2", {
+      id: "google-search-console",
+      name: "Google Search Console",
+      category: "seo",
+      capabilities: ["insights"],
+      gating: { requiredPlan: "free", requiredAddon: null },
+    });
+
+    it("uses the generic OAuth panel with the read-only + free note and no target radios", () => {
+      renderWithClient(
+        <InstallModal entry={gscEntry} open onClose={() => {}} />,
+      );
+
+      expect(
+        screen.getByText(
+          "Access is read-only and free on every plan — Structura only reads your search performance data and never posts or changes anything.",
+        ),
+      ).toBeInTheDocument();
+      // The LinkedIn-only posting-target choice must not leak onto GSC.
+      expect(screen.queryByRole("radiogroup")).toBeNull();
+      expect(
+        screen.getByRole("button", { name: /connect google search console/i }),
+      ).toBeInTheDocument();
+    });
+
+    it("initiates the standard oauth init flow (no post_as) on Connect", async () => {
+      apiFetchMock.mockResolvedValueOnce({
+        success: true,
+        authorizeUrl: "https://accounts.google.example/auth",
+      });
+      renderWithClient(
+        <InstallModal entry={gscEntry} open onClose={() => {}} />,
+      );
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /connect google search console/i }),
+      );
+
+      await waitFor(() => {
+        const call = apiFetchMock.mock.calls.find(
+          (c) =>
+            (c[0] as { path?: string })?.path ===
+            "/structura/v1/channels/oauth/init",
+        );
+        expect(call).toBeTruthy();
+        const data = (call![0] as { data: Record<string, unknown> }).data;
+        expect(data.integration_id).toBe("google-search-console");
+        expect(data.post_as).toBeUndefined();
+      });
+    });
+
+    it("keeps the note off other OAuth integrations", () => {
+      renderWithClient(
+        <InstallModal entry={makeEntry("oauth2")} open onClose={() => {}} />,
+      );
+      expect(
+        screen.queryByText(/read-only and free on every plan/),
+      ).toBeNull();
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // IndexNow visibility warning
   //
   // The warning is configuration-aware. Two distinct misconfigurations

@@ -1,15 +1,6 @@
 import { __, sprintf } from "@wordpress/i18n";
-import {
-  Activity,
-  AlertCircle,
-  Check,
-  ChevronRight,
-  Loader2,
-  Minus,
-  RefreshCw,
-  X,
-} from "lucide-react";
-import { Badge, Button, Card, PageLoader, cn } from "@structura/ui";
+import { Activity, AlertCircle, Check, ChevronRight, Loader2, Minus, RefreshCw, X, } from "lucide-react";
+import { Badge, Button, Card, cn, PageLoader } from "@structura/ui";
 import type { RunStatusSerialized } from "@structura/types";
 import { useCampaignRunsQuery } from "@/features/progress/api/useCampaignRunsQuery";
 import { formatDuration } from "@/features/progress/formatDuration";
@@ -32,8 +23,7 @@ import { formatDuration } from "@/features/progress/formatDuration";
  * together. Spec: `specs/progress-stream.md` §8 (surfaces inventory).
  */
 export const CampaignRunsTab = ({ campaignId }: { campaignId: string | number }) => {
-  const { data, isLoading, isError, refetch, isFetching } =
-    useCampaignRunsQuery(campaignId);
+  const { data, isLoading, isError, refetch, isFetching } = useCampaignRunsQuery(campaignId);
 
   if (isError) {
     // A genuine fetch failure — transport blip, plugin-bridge 5xx, or a
@@ -54,11 +44,8 @@ export const CampaignRunsTab = ({ campaignId }: { campaignId: string | number })
         <p className="m-0! text-sm font-semibold text-neutral-700 dark:text-neutral-300">
           {__("Couldn’t load run history", "structura")}
         </p>
-        <p className="m-0! mt-1 text-xs text-neutral-500 dark:text-neutral-500">
-          {__(
-            "Something went wrong reaching the cloud. Try again in a moment.",
-            "structura",
-          )}
+        <p className="mt-1! mb-0! text-xs text-neutral-500 dark:text-neutral-500">
+          {__("Something went wrong reaching the cloud. Try again in a moment.", "structura")}
         </p>
         <Button
           type="button"
@@ -70,11 +57,7 @@ export const CampaignRunsTab = ({ campaignId }: { campaignId: string | number })
           disabled={isFetching}
           className="mt-4"
         >
-          <RefreshCw
-            size={12}
-            className={cn("mr-1.5", isFetching && "animate-spin")}
-            aria-hidden
-          />
+          <RefreshCw size={12} className={cn("mr-1.5", isFetching && "animate-spin")} aria-hidden />
           {isFetching ? __("Retrying…", "structura") : __("Try again", "structura")}
         </Button>
       </Card>
@@ -90,11 +73,7 @@ export const CampaignRunsTab = ({ campaignId }: { campaignId: string | number })
     // 2026-04-22; this brings the Runs tab in line.
     return (
       <Card className="overflow-hidden border-neutral-200/60 p-0!">
-        <PageLoader
-          label={__("Loading runs…", "structura")}
-          size="lg"
-          padding="lg"
-        />
+        <PageLoader label={__("Loading runs…", "structura")} size="lg" padding="lg" />
       </Card>
     );
   }
@@ -120,15 +99,12 @@ export const CampaignRunsTab = ({ campaignId }: { campaignId: string | number })
             aria-hidden
           />
           <p className="m-0! text-sm text-neutral-400 dark:text-neutral-500">
-            {__(
-              "No runs recorded for this campaign yet.",
-              "structura",
-            )}
+            {__("No runs recorded for this campaign yet.", "structura")}
           </p>
-          <p className="m-0! mt-1 text-xs text-neutral-400 dark:text-neutral-500">
+          <p className="mt-1! mb-0! text-xs text-neutral-400 dark:text-neutral-500">
             {__(
               "A run will appear here the next time this campaign generates a post.",
-              "structura",
+              "structura"
             )}
           </p>
         </div>
@@ -165,17 +141,15 @@ const RunRow = ({ run }: { run: RunStatusSerialized }) => {
   // durationMs is missing (in-flight rows, or legacy docs written
   // before the field landed).
   const computedDurationMs =
-    run.durationMs ??
-    (endedAt ? endedAt.getTime() - startedAt.getTime() : undefined);
-  const isTerminal =
-    run.status !== "queued" && run.status !== "running";
+    run.durationMs ?? (endedAt ? endedAt.getTime() - startedAt.getTime() : undefined);
+  const isTerminal = run.status !== "queued" && run.status !== "running";
 
   return (
     <a
       href={`#/runs/${encodeURIComponent(run.runId)}`}
       className={cn(
         "group flex flex-col gap-1 px-5 py-3.5 transition-colors hover:bg-neutral-50/60 sm:px-6 dark:hover:bg-neutral-800/30",
-        "no-underline",
+        "no-underline"
       )}
     >
       <div className="flex items-center gap-4">
@@ -187,19 +161,13 @@ const RunRow = ({ run }: { run: RunStatusSerialized }) => {
           <p className="m-0! text-sm font-semibold text-neutral-800 dark:text-neutral-200">
             {formatAbsoluteTime(startedAt)}
           </p>
-          <p className="m-0! mt-0.5 text-[11px] text-neutral-400 dark:text-neutral-500">
+          <p className="mt-0.5! mb-0! text-[11px] text-neutral-400 dark:text-neutral-500">
             {isTerminal && computedDurationMs != null
               ? /* translators: %s is a duration like "3m 42s". */
-                sprintf(
-                  __("Completed in %s", "structura"),
-                  formatDuration(computedDurationMs),
-                )
+                sprintf(__("Completed in %s", "structura"), formatDuration(computedDurationMs))
               : !isTerminal
                 ? /* translators: %s is a human step name like "Generating images". */
-                  sprintf(
-                    __("In progress · %s", "structura"),
-                    humanizeStep(run.currentStep),
-                  )
+                  sprintf(__("In progress · %s", "structura"), humanizeStep(run.currentStep))
                 : __("Duration unavailable", "structura")}
           </p>
         </div>
@@ -243,11 +211,7 @@ const RunRow = ({ run }: { run: RunStatusSerialized }) => {
  * (see `getBadgeIntentByCampaignStatus`) so the product feels
  * coherent across tabs.
  */
-const RunStatusChip = ({
-  status,
-}: {
-  status: RunStatusSerialized["status"];
-}) => {
+const RunStatusChip = ({ status }: { status: RunStatusSerialized["status"] }) => {
   switch (status) {
     case "succeeded":
       return (

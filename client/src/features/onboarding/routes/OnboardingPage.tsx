@@ -44,6 +44,7 @@ import { WizardStep4Visuals } from "../components/WizardStep4Visuals";
 import { WizardStep5Persona } from "../components/WizardStep5Persona";
 import { WizardStep6Done } from "../components/WizardStep6Done";
 import { LockedStepCard } from "../components/LockedStepCard";
+import { buildMarketingPricingUrl } from "@/utils/portalLinks";
 import {
   useResetWizardMutation,
   useWizardStateQuery,
@@ -302,7 +303,14 @@ export const OnboardingPage = () => {
             "Paid plans pull live ranking + competitor data and suggest target keywords from what you do.",
             "structura",
           )}
-          upgradeHref="https://app.structurawp.com/pricing?intent=unlock_seo"
+          // 2026-08-27 prospect report: this used to hardcode
+          // app.structurawp.com/pricing — a route the portal never had, so
+          // the wizard's upsell dead-ended on the portal's 404 page.
+          upgradeHref={buildMarketingPricingUrl({
+            intent: "unlock_seo",
+            domain: typeof window !== "undefined" ? window.location.hostname : undefined,
+            plan: currentPlan ?? undefined,
+          })}
         />
       );
     }

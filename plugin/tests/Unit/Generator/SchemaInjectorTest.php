@@ -183,4 +183,29 @@ class SchemaInjectorTest extends TestCase
 
         $this->assertSame([], $this->emitted());
     }
+
+    public function test_a_script_terminator_inside_schema_data_cannot_close_the_json_ld_block(): void
+    {
+        // wp.org review 2026-08-27: with JSON_UNESCAPED_SLASHES a title like
+        // this was echoed verbatim and terminated the <script> element early.
+        // Escaping must hold even if upstream sanitisation is bypassed, so
+        // strip-tags is neutralised for this test.
+        Functions\when('wp_strip_all_tags')->returnArg();
+        $hostile = 'Pwned</script><img src=x onerror=alert(1)>';
+        Functions\when('get_the_title')->justReturn($hostile);
+
+        ob_start();
+        $this->injector->inject_schema_markup();
+        $html = (string) ob_get_clean();
+
+        $this->assertStringNotContainsString('</script><img', $html);
+        $this->assertSame(
+            substr_count($html, '<script type="application/ld+json">'),
+            substr_count($html, '</script>'),
+            'Nothing inside the data may close a JSON-LD block.'
+        );
+
+        $article = $this->nodeOfType($this->emitted(), 'BlogPosting');
+        $this->assertSame($hostile, $article['headline'], 'JSON readers must still see the original string.');
+    }
 }

@@ -4,7 +4,7 @@ import { __, sprintf } from "@wordpress/i18n";
 import { toast } from "@structura/ui";
 import { campaignKeys, jobKeys } from "./keys";
 import { progressKeys } from "@/features/progress/api/keys";
-import { BankKeyword, CampaignFormData, VettedAuthorityDomain } from "@/features/campaigns";
+import { BankKeyword, CampaignFormData, KeywordDiscoveryMeta, VettedAuthorityDomain } from "@/features/campaigns";
 import { capture } from "@/lib/posthog";
 import { buildPortalSignupUrl } from "@/utils/portalLinks";
 
@@ -121,11 +121,33 @@ const showCadenceLimitToast = (error: CadenceLimitReachedError) => {
 };
 
 /**
+ * Fallback schedule cluster for schedule-less snapshots.
+ *
+ * A single-post ("Generate post now") run stores an `inputSnapshot` with NO
+ * `schedule` cluster (a one-off has no cron / end-condition). "Run again"
+ * feeds that snapshot straight back through `flattenCampaign`, which used to
+ * dereference `schedule.cron` and throw `Cannot read properties of undefined
+ * (reading 'cron')` (2026-07-20). The `/post/generate` endpoint never reads
+ * these cron/end fields, so a harmless default keeps the ad-hoc replay working
+ * without affecting the create/update paths (which always carry a schedule).
+ */
+const SCHEDULE_FALLBACK: CampaignFormData["schedule"] = {
+  cron: "",
+  endCondition: { type: "infinite", value: 0 },
+  pregenerationEnabled: true,
+};
+
+/**
  * ARCHITECT'S UTILITY: Flattening Logic
  * Converts the nested Domain clusters back into flat API parameters.
+ *
+ * Exported for the schedule-less-snapshot regression test — the "Run again"
+ * path is the only caller that can pass a `CampaignFormData` with no schedule.
  */
-const flattenCampaign = (data: CampaignFormData) => {
-  const { identity, intelligence, structure, taxonomy, schedule, authority, keywords } = data;
+export const flattenCampaign = (data: CampaignFormData) => {
+  const { identity, intelligence, structure, taxonomy, authority, keywords, researchAttachments } =
+    data;
+  const schedule = data.schedule ?? SCHEDULE_FALLBACK;
 
   return {
     // Identity Cluster
@@ -144,6 +166,12 @@ const flattenCampaign = (data: CampaignFormData) => {
     provider: intelligence.textProvider, // Legacy field for older cloud functions
     text_model: intelligence.textModel,
     image_model: intelligence.imageModel,
+    // BYOK quality tier (top | mid) — sent ONLY when set so a tier-less
+    // campaign never writes one and a partial save can't wipe a stored tier
+    // (matches the plugin validator's omit-when-absent contract, §10). The
+    // cloud prefers the tier over text_model/image_model at generation time.
+    ...(intelligence.textTier ? { text_tier: intelligence.textTier } : {}),
+    ...(intelligence.imageTier ? { image_tier: intelligence.imageTier } : {}),
     // Optional fallback providers — null/undefined means "no fallback".
     // Server-side validator rejects same-as-primary; we still let the payload
     // carry whatever the form has (client can't know server plan rules for
@@ -197,6 +225,23 @@ const flattenCampaign = (data: CampaignFormData) => {
 
     // Keywords Cluster (optional — only present when keyword discovery has been run)
     ...(keywords?.bank?.length ? { keyword_bank: keywords.bank } : {}),
+    // Resolved discovery mode / KD ceiling / path (ranked keyword bank) —
+    // only when the SPA has one, so an older doc keeps what it holds.
+    ...(keywords?.discoveryMeta ? { keyword_discovery_meta: keywords.discoveryMeta } : {}),
+
+    // Research material (single-post flow only). Sent as snake_case refs the
+    // plugin's `generate_single_post` re-stamps on the ephemeral campaign as
+    // `researchAttachments` — which lands in the run's `inputSnapshot`, so a
+    // "Run again" replay flows the refs back through here unchanged. Mapped
+    // field-by-field to pin the wire shape (max 5, id+name only) even when a
+    // replayed snapshot carries extra keys.
+    ...(researchAttachments?.length
+      ? {
+          research_attachments: researchAttachments
+            .slice(0, 5)
+            .map(({ id, name }) => ({ id, name })),
+        }
+      : {}),
   };
 };
 
@@ -346,7 +391,7 @@ export const useCampaignMutations = () => {
     mutationFn: (id: string | number) =>
       apiFetch({ path: `/structura/v1/scheduler/campaign/${id}`, method: "DELETE" }),
     onSuccess: () => {
-      toast.success(__("Campaign archived successfully.", "structura"));
+      toast.success(__("Campaign deleted.", "structura"));
       invalidate();
     },
   });
@@ -435,6 +480,9 @@ export const useCampaignMutations = () => {
            * their bank.
            */
           path?: "provider" | "legacy";
+          /** Resolved difficulty mode + KD ceiling (provider path only). */
+          resolvedMode?: "winnable" | "balanced" | "authority";
+          kdCeiling?: number | null;
         };
         /**
          * Per-keyword enriched metrics (volume, difficulty, intent)
@@ -445,6 +493,8 @@ export const useCampaignMutations = () => {
           volumeNumber?: number;
           difficulty?: number;
           intent?: "informational" | "navigational" | "commercial" | "transactional";
+          /** Long-tail variants ready (server-computed "+N" signal). */
+          variantCount?: number;
         }>;
       }>({
         path: "/structura/v1/scheduler/discover-keywords",
@@ -455,11 +505,19 @@ export const useCampaignMutations = () => {
 
   // 10. Save Keyword Bank Mutation
   const saveKeywordsMutation = useMutation({
-    mutationFn: ({ campaignId, keywords }: { campaignId: string | number; keywords: BankKeyword[] }) =>
+    mutationFn: ({
+      campaignId,
+      keywords,
+      discoveryMeta,
+    }: {
+      campaignId: string | number;
+      keywords: BankKeyword[];
+      discoveryMeta?: KeywordDiscoveryMeta | null;
+    }) =>
       apiFetch({
         path: `/structura/v1/scheduler/campaign/${campaignId}/save-keywords`,
         method: "POST",
-        data: { keywords },
+        data: { keywords, ...(discoveryMeta ? { discoveryMeta } : {}) },
       }),
     onSuccess: () => {
       toast.success(__("Keyword bank saved.", "structura"));

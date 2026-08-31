@@ -324,7 +324,13 @@ class Task_Runner
         // forwarding it here, so by the time we see it we can trust
         // the user has a key for it. Null means "use the campaign's
         // configured provider" (the legacy behaviour).
-        ?string $override_image_provider = null
+        ?string $override_image_provider = null,
+        // Optional per-call quality tier (top|mid) from the post-editor's
+        // Top/Standard regen picker — the tier-based replacement for the
+        // concrete model override. When set, the cloud resolves the concrete
+        // image model from (provider, tier) and prefers it over the model.
+        // Null means "use the campaign / tier default".
+        ?string $override_image_tier = null
     ): void {
         try {
             $license_data   = License_Manager::get_license_data();
@@ -420,7 +426,8 @@ class Task_Runner
                 $image_data,
                 $license_data,
                 $image_type,
-                $override_image_model
+                $override_image_model,
+                $override_image_tier
             );
 
             if (is_wp_error($raw_pixels)) {
@@ -492,7 +499,8 @@ class Task_Runner
         array $image_data,
         array $license,
         ?string $slot = null,
-        ?string $override_model = null
+        ?string $override_model = null,
+        ?string $override_tier = null
     ) {
         $image_provider = $campaign['intelligence']['imageProvider'] ?? null;
 
@@ -573,6 +581,15 @@ class Task_Runner
 
         if ($fallback_image_provider) {
             $payload['fallbackImageProvider'] = $fallback_image_provider;
+        }
+
+        // Per-regen quality tier (top|mid) from the post-editor's Top/Standard
+        // picker. The cloud's `resolveImageProviderAndModel` resolves the
+        // concrete image model from (provider, tier) and PREFERS it over
+        // `model`; managed tiers ignore it. Forwarded only when a valid tier
+        // is present so a regen that carries only a model still works (§10).
+        if (in_array($override_tier, ['top', 'mid'], true)) {
+            $payload['imageTier'] = $override_tier;
         }
 
         // BYOK keys are no longer sent on the wire. The cloud's

@@ -15,10 +15,15 @@ use Structura\Tests\Unit\TestCase;
  * persona via the existing cloud `postPersona` endpoint, so the
  * Campaigns page never silently disables every generation button.
  *
- * These tests pin the three branches that matter for correctness:
- *   - Option flag bail (the O(1) fast path).
+ * These tests pin the branches that matter for correctness:
+ *   - Fingerprint bail (the fast path — flag matches THIS workspace).
+ *   - Stale/legacy flag re-seeds (a different workspace's fingerprint, or the
+ *     pre-2026-07-20 bare 'yes', must NOT block seeding the new workspace).
  *   - Cloud-said-personas-exist fallthrough (sets flag, never POSTs).
  *   - Clean seed (POSTs with the activating admin's user id, sets flag).
+ *
+ * The seed flag is a `sha256(api_token)` fingerprint so a workspace reset
+ * (new bearer) re-seeds instead of staying stuck at 'yes'.
  *
  * The TestCase pre-stubs `update_option`, so we re-bind it inline with
  * `Functions\when()->alias(...)` to capture writes into a tracker array
@@ -78,20 +83,82 @@ class LicenseManagerSeedPersonaTest extends TestCase
         parent::tearDown();
     }
 
-    // ── Branch 1: option flag bail ─────────────────────────────────────
+    // ── Branch 1: fingerprint bail (THIS workspace already seeded) ──────
 
     /** @test */
-    public function it_is_a_noop_when_the_seeded_flag_is_already_yes(): void
+    public function it_is_a_noop_when_the_flag_matches_this_workspace_fingerprint(): void
     {
-        $this->optionReads['structura_default_persona_seeded'] = 'yes';
+        // Flag holds the fingerprint of the CURRENT workspace bearer → bail.
+        $this->optionReads['structura_default_persona_seeded'] =
+            hash('sha256', 'bearer_token_for_seeding');
 
-        // Nothing else should run — no licence read, no cloud call.
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn([
+                'api_token' => 'bearer_token_for_seeding',
+                'plan'      => 'free',
+                'status'    => 'active',
+            ]);
+
+        // No cloud call — the workspace was already seeded.
         Mockery::mock('alias:Structura\Core\Cloud_Client')
             ->shouldNotReceive('post');
 
         License_Manager::seed_default_persona_if_needed();
 
         $this->assertSame([], $this->optionWrites, 'No options should be written on the fast-path bail.');
+    }
+
+    // ── Branch 1b: stale/legacy flag re-seeds a fresh workspace ────────
+
+    /**
+     * Regression (2026-07-20): a server-side shadow-workspace wipe left the
+     * WP option stuck at 'yes' (or a prior workspace's fingerprint), so the
+     * freshly-provisioned, empty workspace never got a House voice and
+     * onboarding dead-ended on "No personas yet". A flag that doesn't match
+     * the current bearer must NOT bail.
+     *
+     * @test
+     */
+    public function it_reseeds_when_the_stored_flag_is_from_a_different_workspace(): void
+    {
+        // Legacy bare 'yes' (or any other workspace's fingerprint) present.
+        $this->optionReads['structura_default_persona_seeded'] = 'yes';
+
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn([
+                'api_token' => 'fresh_workspace_bearer',
+                'plan'      => 'free',
+                'status'    => 'active',
+            ]);
+
+        Functions\when('wp_get_current_user')->justReturn((object) ['ID' => 1]);
+        Functions\when('get_userdata')->justReturn((object) ['ID' => 1]);
+        Mockery::mock('alias:Structura\Core\Log_Service')->shouldReceive('add');
+
+        $posted = false;
+        $cloud  = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->withArgs(function ($endpoint) { return $endpoint === '/listPersonas'; })
+            ->andReturn(['code' => 200, 'body' => ['personas' => []], 'raw' => null]);
+        $cloud->shouldReceive('post')
+            ->withArgs(function ($endpoint) use (&$posted) {
+                if ($endpoint === '/postPersona') {
+                    $posted = true;
+                }
+                return $endpoint === '/postPersona';
+            })
+            ->andReturn(['code' => 200, 'body' => ['persona' => ['personaId' => 'new_one']], 'raw' => null]);
+
+        License_Manager::seed_default_persona_if_needed();
+
+        $this->assertTrue($posted, 'A stale flag from another workspace must NOT block the seed.');
+        $this->assertSame(
+            hash('sha256', 'fresh_workspace_bearer'),
+            $this->optionWrites['structura_default_persona_seeded'] ?? null,
+            'Flag must be updated to the NEW workspace fingerprint.'
+        );
     }
 
     // ── Branch 2: defensive listPersonas fallthrough ───────────────────
@@ -131,9 +198,9 @@ class LicenseManagerSeedPersonaTest extends TestCase
         License_Manager::seed_default_persona_if_needed();
 
         $this->assertSame(
-            'yes',
+            hash('sha256', 'bearer_token_for_seeding'),
             $this->optionWrites['structura_default_persona_seeded'] ?? null,
-            'Flag must be set even when the seeder discovers existing personas.'
+            'Flag must be set to the workspace fingerprint even when the seeder discovers existing personas.'
         );
     }
 
@@ -202,9 +269,9 @@ class LicenseManagerSeedPersonaTest extends TestCase
         $this->assertNotSame('', trim((string) ($persona['systemPrompt'] ?? '')));
 
         $this->assertSame(
-            'yes',
+            hash('sha256', 'bearer_token_for_seeding'),
             $this->optionWrites['structura_default_persona_seeded'] ?? null,
-            'Flag must be set after a successful seed.'
+            'Flag must be set to the workspace fingerprint after a successful seed.'
         );
     }
 

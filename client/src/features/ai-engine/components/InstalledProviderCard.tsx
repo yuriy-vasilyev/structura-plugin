@@ -97,7 +97,10 @@ export const InstalledProviderCard = ({
                 "bg-neutral-100 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-500"
               )}
             >
-              {(() => { const Icon = providerVis.icon; return <Icon size={22} />; })()}
+              {(() => {
+                const Icon = providerVis.icon;
+                return <Icon size={22} />;
+              })()}
             </div>
 
             <div className="min-w-0 flex-1">
@@ -106,7 +109,13 @@ export const InstalledProviderCard = ({
                   {name}
                 </h3>
                 {incomplete ? (
-                  <Tooltip title={__("Setup incomplete — select models in the provider settings", "structura")} position="top">
+                  <Tooltip
+                    title={__(
+                      "Setup incomplete — select models in the provider settings",
+                      "structura"
+                    )}
+                    position="top"
+                  >
                     <span className="inline-flex shrink-0">
                       <AlertTriangle size={14} className="text-amber-500" />
                     </span>
@@ -115,7 +124,7 @@ export const InstalledProviderCard = ({
                   <CheckCircle2 size={14} className="shrink-0 text-emerald-500" />
                 )}
               </div>
-              <p className="m-0! mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-neutral-400 dark:text-neutral-500">
+              <p className="mt-0.5!line-clamp-2 mb-0! text-[11px] leading-relaxed text-neutral-400 dark:text-neutral-500">
                 {description}
               </p>
             </div>

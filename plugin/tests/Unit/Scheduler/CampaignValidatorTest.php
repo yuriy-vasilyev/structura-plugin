@@ -509,6 +509,44 @@ class CampaignValidatorTest extends TestCase
         $this->assertSame('imagen-3.0-generate-002', $result['image_model']);
     }
 
+    /** @test */
+    public function it_passes_a_valid_model_tier_through_to_clean(): void
+    {
+        $result = Campaign_Validator::validate($this->validPayload([
+            'text_tier'  => 'top',
+            'image_tier' => 'mid',
+        ]));
+
+        $this->assertIsArray($result);
+        $this->assertSame('top', $result['text_tier']);
+        $this->assertSame('mid', $result['image_tier']);
+    }
+
+    /** @test */
+    public function it_omits_the_model_tier_when_absent(): void
+    {
+        // §10: no tier in the payload → no key in $clean, so the transformer
+        // never forwards one and a PATCH can't wipe a stored tier.
+        $result = Campaign_Validator::validate($this->validPayload());
+
+        $this->assertIsArray($result);
+        $this->assertArrayNotHasKey('text_tier', $result);
+        $this->assertArrayNotHasKey('image_tier', $result);
+    }
+
+    /** @test */
+    public function it_drops_an_out_of_whitelist_model_tier(): void
+    {
+        $result = Campaign_Validator::validate($this->validPayload([
+            'text_tier'  => 'cheap',      // registry-only, never picker-selectable
+            'image_tier' => 'flagship',   // not a real tier
+        ]));
+
+        $this->assertIsArray($result);
+        $this->assertArrayNotHasKey('text_tier', $result);
+        $this->assertArrayNotHasKey('image_tier', $result);
+    }
+
     // ──────────────────────────────────────────────────────────────────────
     //  FIXTURE
     // ──────────────────────────────────────────────────────────────────────

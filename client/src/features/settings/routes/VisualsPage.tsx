@@ -35,10 +35,7 @@ import {
 import { AIProvider } from "@/features/campaigns/types";
 import { PageTitle } from "@/components/Layout/PageTitle";
 import { PageDescription } from "@/components/Layout/PageSubtitle";
-import {
-  buildMarketingPricingUrl,
-  buildPortalSignupUrl,
-} from "@/utils/portalLinks";
+import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
 import {
   ContextField,
@@ -51,10 +48,7 @@ import type {
 } from "@/features/settings/api/useVisualPresets";
 import { MEDIUM_OPTIONS } from "../visualMediumOptions";
 import { useVideoStylingEligibility } from "@/features/channels/hooks/useVideoStylingEligibility";
-import {
-  VideoPresetSection,
-  VideoStylingGateTeaser,
-} from "../components/VideoPresetSection";
+import { VideoPresetSection, VideoStylingGateTeaser } from "../components/VideoPresetSection";
 
 const aspectRatioOptions = [
   { value: "1:1", label: __("1:1 Square Format", "structura") },
@@ -127,9 +121,7 @@ export const VisualsPage = () => {
 
   const boundPreset = useMemo(() => {
     if (!presetsData) return null;
-    return (
-      presetsData.presets.find((p) => p.presetId === presetsData.boundPresetId) ?? null
-    );
+    return presetsData.presets.find((p) => p.presetId === presetsData.boundPresetId) ?? null;
   }, [presetsData]);
 
   const otherPresets = useMemo(() => {
@@ -212,12 +204,8 @@ export const VisualsPage = () => {
     // nothing — an untouched or plan-locked section must never overwrite
     // a preset's saved video styling. See VisualContent's docblock.
     ...(d.video_style !== undefined ? { video_style: d.video_style } : {}),
-    ...(d.video_art_direction !== undefined
-      ? { video_art_direction: d.video_art_direction }
-      : {}),
-    ...(d.caption_placement !== undefined
-      ? { caption_placement: d.caption_placement }
-      : {}),
+    ...(d.video_art_direction !== undefined ? { video_art_direction: d.video_art_direction } : {}),
+    ...(d.caption_placement !== undefined ? { caption_placement: d.caption_placement } : {}),
     ...(d.palette !== undefined ? { palette: d.palette } : {}),
   });
 
@@ -288,25 +276,20 @@ export const VisualsPage = () => {
    * on the draft. Fields already sanitized cloud-side.
    */
   const videoPatchFromSuggestion = (
-    data: { videoArtDirection?: unknown; palette?: unknown } | null,
+    data: { videoArtDirection?: unknown; palette?: unknown } | null
   ): Partial<DraftState> => {
     if (!data) return {};
     return {
       ...(typeof data.videoArtDirection === "string" && data.videoArtDirection
         ? { video_art_direction: data.videoArtDirection }
         : {}),
-      ...(Array.isArray(data.palette) &&
-      data.palette.every((c) => typeof c === "string")
+      ...(Array.isArray(data.palette) && data.palette.every((c) => typeof c === "string")
         ? { palette: data.palette as string[] }
         : {}),
     };
   };
 
-  const handleMagicStyle = async (
-    provider: string,
-    context: ContextField[],
-    medium?: string,
-  ) => {
+  const handleMagicStyle = async (provider: string, context: ContextField[], medium?: string) => {
     // Medium is picked from the Suggest dropdown — persist it (drives Save
     // + the "drafted as" badge) and draft the style in it.
     const picked = (medium as VisualMedium | undefined) ?? draft?.medium ?? "photography";
@@ -331,10 +314,7 @@ export const VisualsPage = () => {
    * affordance, but only the video-side fields land: the image prompt the
    * user already curated must survive a video-only redraft.
    */
-  const handleMagicVideoStyle = async (
-    provider: string,
-    context: ContextField[],
-  ) => {
+  const handleMagicVideoStyle = async (provider: string, context: ContextField[]) => {
     const data = await suggest("visual", {
       provider: provider as AIProvider,
       context,
@@ -390,7 +370,7 @@ export const VisualsPage = () => {
               ? sprintf(
                   /* translators: %s: preset label */
                   __("Active preset · %s", "structura"),
-                  boundPreset.label,
+                  boundPreset.label
                 )
               : __("Image Generation & Optimization Engine", "structura")}
           </PageDescription>
@@ -412,10 +392,10 @@ export const VisualsPage = () => {
             <p className="m-0! text-sm font-medium text-amber-900 dark:text-amber-300">
               {__("No visual preset bound to this site", "structura")}
             </p>
-            <p className="m-0! mt-1 text-xs leading-relaxed text-amber-900/80 dark:text-amber-300/80">
+            <p className="mt-1! mb-0! text-xs leading-relaxed text-amber-900/80 dark:text-amber-300/80">
               {__(
                 "Image generation will fail until a preset is bound. Configure one below or pick an existing preset from the workspace library.",
-                "structura",
+                "structura"
               )}
             </p>
           </div>
@@ -431,13 +411,13 @@ export const VisualsPage = () => {
               {sprintf(
                 /* translators: %d: number of other sites */
                 __("Used by %d other site(s) in this workspace", "structura"),
-                boundPreset.boundActivationCount - 1,
+                boundPreset.boundActivationCount - 1
               )}
             </p>
-            <p className="m-0! mt-1 text-xs leading-relaxed text-amber-900/80 dark:text-amber-300/80">
+            <p className="mt-1! mb-0! text-xs leading-relaxed text-amber-900/80 dark:text-amber-300/80">
               {__(
-                "Saving will update the preset for every site that uses it. Pick \"Save as new for this site only\" to fork into an independent preset bound to this site.",
-                "structura",
+                'Saving will update the preset for every site that uses it. Pick "Save as new for this site only" to fork into an independent preset bound to this site.',
+                "structura"
               )}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -445,7 +425,12 @@ export const VisualsPage = () => {
                 <Save className="size-4" />
                 <span className="ml-2">{__("Save (update for all sites)", "structura")}</span>
               </Button>
-              <Button onClick={handleSaveAsNew} disabled={isBusy} loading={isForking} variant="secondary">
+              <Button
+                onClick={handleSaveAsNew}
+                disabled={isBusy}
+                loading={isForking}
+                variant="secondary"
+              >
                 <Copy className="size-4" />
                 <span className="ml-2">{__("Save as new for this site only", "structura")}</span>
               </Button>
@@ -460,7 +445,7 @@ export const VisualsPage = () => {
           <Card>
             <div className="mb-6">
               <h3 className="m-0! mb-6! flex! items-center gap-2 text-sm font-bold tracking-wider text-gray-900 uppercase dark:text-white">
-                <Palette className="h-4 w-4 text-brand-500" />
+                <Palette className="text-brand-500 h-4 w-4" />
                 {__("Global Image Style", "structura")}
               </h3>
               <SuggestStrategySection
@@ -476,7 +461,7 @@ export const VisualsPage = () => {
                 toggleButtonLabel={__("Suggest Image Style", "structura")}
                 contextFieldLabel={__(
                   "Brand Resources (logo, guidelines, design system URL…)",
-                  "structura",
+                  "structura"
                 )}
                 addSourceLabel={__("Add Resource", "structura")}
                 ctaButtonLabel={__("Generate Image Style", "structura")}
@@ -501,22 +486,22 @@ export const VisualsPage = () => {
             />
 
             {/* Current medium — set via the "Suggest Image Style" dropdown
-              * above (it's a parameter of the suggestion, not a standalone
-              * setting). Shown so it's clear what the style was drafted as. */}
+             * above (it's a parameter of the suggestion, not a standalone
+             * setting). Shown so it's clear what the style was drafted as. */}
             <div className="mb-4 flex items-center gap-2">
               <span className="text-xs font-medium tracking-widest text-gray-400 uppercase dark:text-gray-500">
                 {__("Image medium", "structura")}
               </span>
               <Badge intent="secondary">
-                {MEDIUM_OPTIONS.find((o) => o.value === (draft.medium ?? "photography"))
-                  ?.label ?? __("Photography", "structura")}
+                {MEDIUM_OPTIONS.find((o) => o.value === (draft.medium ?? "photography"))?.label ??
+                  __("Photography", "structura")}
               </Badge>
             </div>
 
             <p className="mt-0! mb-4! text-xs font-medium tracking-widest text-gray-400 uppercase dark:text-gray-500">
               {__(
                 "Inject a consistent visual style into every image generated across this site.",
-                "structura",
+                "structura"
               )}
             </p>
 
@@ -530,27 +515,27 @@ export const VisualsPage = () => {
               hiddenLabel
             />
 
-            <div className="mt-6 flex items-start gap-3 rounded-xl border border-brand-100 bg-brand-50/50 p-4 dark:border-brand-900/30 dark:bg-brand-950/20">
-              <Info className="mt-0.5 h-4 w-4 text-brand-500" />
-              <p className="m-0! text-xs leading-relaxed text-brand-900 italic dark:text-brand-300">
+            <div className="border-brand-100 bg-brand-50/50 dark:border-brand-900/30 dark:bg-brand-950/20 mt-6 flex items-start gap-3 rounded-xl border p-4">
+              <Info className="text-brand-500 mt-0.5 h-4 w-4" />
+              <p className="text-brand-900 dark:text-brand-300 m-0! text-xs leading-relaxed italic">
                 {__(
                   "This directive is injected into the latent space of every generation to maintain a cohesive visual identity for this site.",
-                  "structura",
+                  "structura"
                 )}
               </p>
             </div>
 
             {/* VIDEO — preset-owned video styling (handoff §1). Anchor id +
-              * highlight make this the `?section=video` deep-link target;
-              * the teaser shares the wrapper so a locked plan's deep link
-              * lands on the upgrade row instead of dead space. */}
+             * highlight make this the `?section=video` deep-link target;
+             * the teaser shares the wrapper so a locked plan's deep link
+             * lands on the upgrade row instead of dead space. */}
             {videoEligibility !== "unknown" && (
               <div
                 id="video"
                 ref={videoSectionRef}
                 className={cn(
-                  "mt-6 border-t border-gray-200 pt-6 transition-shadow duration-normal dark:border-neutral-800",
-                  videoHighlight && "rounded-xl ring-2 ring-brand-400/60",
+                  "duration-normal mt-6 border-t border-gray-200 pt-6 transition-shadow dark:border-neutral-800",
+                  videoHighlight && "ring-brand-400/60 rounded-xl ring-2"
                 )}
               >
                 {videoEligibility === "eligible" ? (
@@ -559,9 +544,7 @@ export const VisualsPage = () => {
                     videoArtDirection={draft.video_art_direction}
                     captionPlacement={draft.caption_placement}
                     palette={draft.palette}
-                    onVideoStyleChange={(style) =>
-                      updateDraft({ video_style: style })
-                    }
+                    onVideoStyleChange={(style) => updateDraft({ video_style: style })}
                     onVideoArtDirectionChange={(value) =>
                       updateDraft({ video_art_direction: value })
                     }
@@ -577,7 +560,7 @@ export const VisualsPage = () => {
                         toggleButtonLabel={__("Suggest Video Style", "structura")}
                         contextFieldLabel={__(
                           "Brand Resources (logo, guidelines, design system URL…)",
-                          "structura",
+                          "structura"
                         )}
                         addSourceLabel={__("Add Resource", "structura")}
                         ctaButtonLabel={__("Generate Video Style", "structura")}
@@ -634,11 +617,11 @@ export const VisualsPage = () => {
                   {draft.aspect_ratio === "16:9"
                     ? __(
                         "OpenAI image models don't support 16:9 natively — your images will be rendered at 3:2 (1536×1024), the closest landscape size. For exact 16:9, switch the image provider to Gemini.",
-                        "structura",
+                        "structura"
                       )
                     : __(
                         "OpenAI image models don't support 9:16 natively — your images will be rendered at 2:3 (1024×1536), the closest portrait size. For exact 9:16, switch the image provider to Gemini.",
-                        "structura",
+                        "structura"
                       )}
                 </p>
               </div>
@@ -647,9 +630,9 @@ export const VisualsPage = () => {
 
           <Card
             className={cn(
-              "p-6! transition-all duration-normal",
+              "duration-normal p-6! transition-all",
               !isPaidLicense &&
-                "pointer-events-none border-dashed border-gray-300 opacity-60 grayscale-[0.5]",
+                "pointer-events-none border-dashed border-gray-300 opacity-60 grayscale-[0.5]"
             )}
           >
             <div className="mb-4 flex items-center justify-between">
@@ -681,16 +664,16 @@ export const VisualsPage = () => {
           </Card>
 
           {/* SEO automation is always on: alt-text and SEO-friendly
-            * filenames are written into the generation schema on every
-            * image (functions/src/ai/instruction-builder.ts), regardless
-            * of any setting. The old "Active Synthesis Meta" toggle wrote
-            * `optimize_on_upload`, which nothing in the pipeline reads —
-            * so we state the behaviour instead of shipping a dead toggle.
-            * The field stays on the draft/wire payload for back-compat. */}
+           * filenames are written into the generation schema on every
+           * image (functions/src/ai/instruction-builder.ts), regardless
+           * of any setting. The old "Active Synthesis Meta" toggle wrote
+           * `optimize_on_upload`, which nothing in the pipeline reads —
+           * so we state the behaviour instead of shipping a dead toggle.
+           * The field stays on the draft/wire payload for back-compat. */}
           <Card className="p-6!">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="m-0! flex! items-center gap-2 text-[10px] font-bold text-gray-400 uppercase dark:text-gray-500">
-                <SearchCheck className="h-3.5 w-3.5 text-brand-500" />
+                <SearchCheck className="text-brand-500 h-3.5 w-3.5" />
                 {__("SEO Automation", "structura")}
               </h3>
               <Badge intent="success" variant="solid" className="px-2 text-[8px]">
@@ -700,7 +683,7 @@ export const VisualsPage = () => {
             <p className="mt-0! mb-0! text-xs leading-relaxed text-gray-500 dark:text-gray-400">
               {__(
                 "Every generated image automatically gets accessible alt-text and a human-friendly, SEO-ready filename. No setup required.",
-                "structura",
+                "structura"
               )}
             </p>
           </Card>
@@ -711,16 +694,16 @@ export const VisualsPage = () => {
       {otherPresets.length > 0 && (
         <Card>
           <h3 className="m-0! mb-4! flex! items-center gap-2 text-sm font-bold tracking-wider text-gray-900 uppercase dark:text-white">
-            <Palette className="h-4 w-4 text-brand-500" />
+            <Palette className="text-brand-500 h-4 w-4" />
             {__("Other presets in this workspace", "structura")}
           </h3>
           <p className="m-0! mb-6! text-xs leading-relaxed text-gray-500 dark:text-gray-400">
             {__(
               "Use here binds this site to that preset (edits will propagate). Duplicate clones it into a new preset bound only to this site.",
-              "structura",
+              "structura"
             )}
           </p>
-          <ul className="space-y-3 list-none p-0">
+          <ul className="list-none space-y-3 p-0">
             {otherPresets.map((p) => (
               <li
                 key={p.presetId}
@@ -735,20 +718,16 @@ export const VisualsPage = () => {
                       {sprintf(
                         /* translators: %d: number of sites */
                         __("Used by %d site(s)", "structura"),
-                        p.boundActivationCount,
+                        p.boundActivationCount
                       )}
                     </Badge>
                   </div>
-                  <p className="m-0! mt-1 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                  <p className="mt-1!line-clamp-2 mb-0! text-xs text-gray-500 dark:text-gray-400">
                     {p.globalArtDirection || __("(no art direction)", "structura")}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => handleUseHere(p.presetId)}
-                    disabled={isBusy}
-                  >
+                  <Button size="sm" onClick={() => handleUseHere(p.presetId)} disabled={isBusy}>
                     {__("Use here", "structura")}
                   </Button>
                   <Button
@@ -786,11 +765,8 @@ export const VisualsPage = () => {
           confirmDelete
             ? sprintf(
                 /* translators: %s: preset label */
-                __(
-                  'Delete "%s"? This is only allowed when no site is bound to it.',
-                  "structura",
-                ),
-                confirmDelete.label,
+                __('Delete "%s"? This is only allowed when no site is bound to it.', "structura"),
+                confirmDelete.label
               )
             : ""
         }
@@ -807,8 +783,7 @@ export const VisualsPage = () => {
 
 const UnlicensedTeaser = () => {
   const { plan } = useLicense();
-  const domain =
-    typeof window !== "undefined" ? window.location.hostname : undefined;
+  const domain = typeof window !== "undefined" ? window.location.hostname : undefined;
   return (
     <div className="flex flex-col items-center justify-center gap-6 rounded-3xl border-2 border-dashed border-neutral-200 bg-neutral-50 px-8 py-20 text-center dark:border-neutral-700 dark:bg-neutral-900/50">
       <div className="bg-brand-100 text-brand-600 dark:bg-brand-950/30 dark:text-brand-400 flex size-16 items-center justify-center rounded-2xl">
@@ -821,7 +796,7 @@ const UnlicensedTeaser = () => {
         <p className="m-0! mx-auto max-w-sm text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
           {__(
             "Connect a free account to define a Global Art Direction that gets injected into every AI image generation across this site.",
-            "structura",
+            "structura"
           )}
         </p>
       </div>

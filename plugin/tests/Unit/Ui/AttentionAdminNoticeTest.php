@@ -273,4 +273,38 @@ class AttentionAdminNoticeTest extends TestCase
 
         $_POST = [];
     }
+
+    /** @test */
+    public function maybe_enqueue_assets_enqueues_style_and_script_only_when_the_card_will_render(): void
+    {
+        // wp.org review 2026-08-27 ("use wp_enqueue"): the card's CSS/JS
+        // used to be printed inline from render(); now they are enqueued
+        // from admin_enqueue_scripts, gated on the same predicate.
+        if ( ! defined('STRUCTURA_URL')) {
+            define('STRUCTURA_URL', 'https://example.test/wp-content/plugins/structura/');
+        }
+        if ( ! defined('STRUCTURA_VERSION')) {
+            define('STRUCTURA_VERSION', '0.0.0-test');
+        }
+        Functions\when('current_user_can')->justReturn(true);
+        Functions\when('get_current_user_id')->justReturn(7);
+        $styles  = [];
+        $scripts = [];
+        Functions\when('wp_enqueue_style')->alias(function (...$args) use (&$styles) {
+            $styles[] = $args[0];
+        });
+        Functions\when('wp_enqueue_script')->alias(function (...$args) use (&$scripts) {
+            $scripts[] = $args[0];
+        });
+
+        $this->transient = []; // cached "nothing needs attention"
+        Attention_Admin_Notice::maybe_enqueue_assets();
+        $this->assertSame([], $styles, 'No assets on pages where the card stays silent.');
+        $this->assertSame([], $scripts);
+
+        $this->transient = [['runId' => 'run-a', 'status' => 'failed']];
+        Attention_Admin_Notice::maybe_enqueue_assets();
+        $this->assertSame(['structura-attention-notice'], $styles);
+        $this->assertSame(['structura-admin-notices'], $scripts);
+    }
 }

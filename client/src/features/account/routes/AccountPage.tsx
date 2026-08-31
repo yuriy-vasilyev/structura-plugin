@@ -16,7 +16,7 @@ import {
 import { Badge, Button, Card, Checkbox, cn, ConfirmDialog, InputField, Tooltip } from "@structura/ui";
 import { useLicense } from "@/features/settings";
 import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
-import { formatPlanLabel } from "@/utils/planLabel";
+import { formatPlanName } from "@/utils/planLabel";
 import { PageContainer } from "@/components/Layout/PageContainer";
 import { AddonsSection } from "../components/AddonsSection";
 import { WorkspaceMembershipCard } from "../components/WorkspaceMembershipCard";
@@ -27,7 +27,6 @@ export const Account = () => {
   const {
     isLicensed,
     plan,
-    audience,
     license,
     cloudStatus,
     entitlements,
@@ -83,13 +82,13 @@ export const Account = () => {
       theme:
         "text-violet-600 bg-violet-50 ring-violet-100 dark:text-violet-400 dark:bg-violet-950/30 dark:ring-violet-900/50",
     },
-    // Agency: top-tier managed plan with per-post model swaps and bundled
-    // Channels. Uses amber to distinguish from Cloud's violet in the
-    // dashboard — see specs/design-guide.md on premium-tier accents.
-    agency: {
-      title: __("Agency Architect", "structura"),
+    // Cloud Pro: top-tier managed plan with per-post model swaps and
+    // bundled Channels. Uses amber to distinguish from Cloud's violet in
+    // the dashboard — see specs/design-guide.md on premium-tier accents.
+    cloud_pro: {
+      title: __("Cloud Pro Architect", "structura"),
       desc: __(
-        "Top-tier AI models, per-post model swaps, bundled Channels distribution, and volume pricing across your whole roster.",
+        "Top-tier managed AI models with per-post model swaps and bundled Channels distribution.",
         "structura"
       ),
       icon: <Award className="h-7 w-7" />,
@@ -98,18 +97,14 @@ export const Account = () => {
     },
   };
 
-  // Agency is a distinct hero card so subscribers see the tier they pay
-  // for reflected in-product; Cloud and Agency share the "managed" badge
-  // semantics elsewhere via isManagedPlan().
-  //
   // We branch on `plan` directly (same source the License Activation badge
   // and the nav use) rather than on `isPaidLicense`. `isPaidLicense` also
-  // requires a successful cloud heartbeat, so for Agency/Cloud sites where
-  // the heartbeat hasn't resolved yet — or where the locally stored
+  // requires a successful cloud heartbeat, so for Cloud Pro / Cloud sites
+  // where the heartbeat hasn't resolved yet — or where the locally stored
   // `license.is_pro` flag is stale after a recent upgrade — the hero would
-  // otherwise flash the free-tier "Registered Architect" copy with an
-  // "Upgrade to Pro" blurb while the badge already says AGENCY PLAN. Using
-  // `plan` keeps every surface on the account page telling the same story.
+  // otherwise flash the free-tier "Registered Architect" copy while the
+  // badge already says the paid tier. Using `plan` keeps every surface on
+  // the account page telling the same story.
   const paidPlan =
     (plan as PlanId) === "cloud_pro" ||
     (plan as PlanId) === "cloud" ||
@@ -117,7 +112,7 @@ export const Account = () => {
 
   const currentStatus =
     (plan as PlanId) === "cloud_pro"
-      ? statusConfig.agency
+      ? statusConfig.cloud_pro
       : (plan as PlanId) === "cloud"
         ? statusConfig.cloud
         : (plan as PlanId) === "byok"
@@ -254,7 +249,7 @@ export const Account = () => {
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-3">
                     <Badge variant="solid" intent="success">
-                      {formatPlanLabel(plan, audience)}
+                      {formatPlanName(plan)}
                     </Badge>
                     {cloudStatus?.valid && (
                       <Tooltip title={__("Cloud Connection Verified", "structura")}>

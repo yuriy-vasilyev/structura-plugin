@@ -45,6 +45,15 @@
  * window) the legacy per-connection style radio section still renders
  * and saves.
  *
+ * Google Search Console (integrationId === "google-search-console") is a
+ * READ-ONLY insights source (spec: specs/gsc-integration.md): the dispatcher
+ * never fans out to it, so none of this modal's dispatch-oriented controls
+ * apply. Its configure surface is the dedicated four-state connect flow
+ * (auto-matched confirm / property picker / verify guidance / permission
+ * error) in GscConnectFlow.tsx — this component delegates to it wholesale
+ * so both entry points (post-OAuth `?configure=` bounce and the row's
+ * Configure button) keep opening the same component they always did.
+ *
  * Spec: specs/integrations-store-spec.md §5.2 + the 2026-05-20 product
  * ask to give LinkedIn/X connections explicit per-campaign + cadence
  * control.
@@ -84,12 +93,14 @@ import type { VideoTtsProvider } from "@structura/types";
 import { useChannelConnectionMutations } from "../api/useChannelConnectionMutations";
 import { CadencePicker } from "./CadencePicker";
 import { CampaignBindingsPicker } from "./CampaignBindingsPicker";
-import type {
-  BoundVisualPresetSummary,
-  ConnectionSummary,
-  LinkedInMeta,
-  VideoQuota,
-  VideoTtsAvailability,
+import { GscConnectModal } from "./GscConnectFlow";
+import {
+  GSC_INTEGRATION_ID,
+  type BoundVisualPresetSummary,
+  type ConnectionSummary,
+  type LinkedInMeta,
+  type VideoQuota,
+  type VideoTtsAvailability,
 } from "../types";
 import {
   DEFAULT_VIDEO_STYLE,
@@ -150,7 +161,28 @@ interface ConfigureConnectionModalProps {
   videoTts?: VideoTtsAvailability;
 }
 
-export const ConfigureConnectionModal = ({
+export const ConfigureConnectionModal = (
+  props: ConfigureConnectionModalProps,
+) => {
+  // Google Search Console is a READ-ONLY insights source with its own
+  // four-state connect flow (GscConnectFlow.tsx, design handoff
+  // marketing/design_handoff_gsc_connect_flow) — none of the standard
+  // modal's dispatch settings apply, so delegate wholesale. Branching in
+  // this thin dispatcher (rather than an early return below) keeps the
+  // hook order of the standard modal unconditional.
+  if (props.connection.integrationId === GSC_INTEGRATION_ID) {
+    return (
+      <GscConnectModal
+        connection={props.connection}
+        open={props.open}
+        onClose={props.onClose}
+      />
+    );
+  }
+  return <StandardConfigureConnectionModal {...props} />;
+};
+
+const StandardConfigureConnectionModal = ({
   connection,
   open,
   onClose,
@@ -205,7 +237,7 @@ export const ConfigureConnectionModal = ({
   // (Slack/Discord/Telegram/email). A publishing channel like LinkedIn
   // renders the post in its own content language and ignores the field on the
   // cloud side ("notificationLocale is only meaningful on the webhook/notify
-  // side today"), and video is generative — so neither shows the control.
+  // side today") and video is generative — so neither shows the control.
   const supportsNotificationLocale =
     !isVideo && connection.integrationId !== "linkedin";
 
@@ -249,14 +281,14 @@ export const ConfigureConnectionModal = ({
         connection_id: connection.connectionId,
         // Video isn't a notifier — it never renders the locale select, so
         // sending the untouched default would be noise on the wire (and
-        // the cloud ignores it for video anyway). Omission = "leave
-        // untouched" per the settings endpoint contract.
+        // the cloud ignores it anyway). Omission = "leave untouched" per
+        // the settings endpoint contract.
         ...(isVideo ? {} : { notification_locale: notificationLocale }),
         // Pass the bindings array verbatim — including an empty list
         // (which the cloud normalizes back to `null` = unbound). The
-        // settings endpoint treats `undefined` as "leave untouched"
-        // and `null` / `[]` as "clear binding," so being explicit
-        // here makes the wire intent unambiguous.
+        // settings endpoint treats `undefined` as "leave untouched" and
+        // `null` / `[]` as "clear binding," so being explicit here makes
+        // the wire intent unambiguous.
         bound_campaign_ids: boundCampaignIds,
         post_cadence_n: postCadenceN,
         // Voice rides the wire ONLY for video connections — always the

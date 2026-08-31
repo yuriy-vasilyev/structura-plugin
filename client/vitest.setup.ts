@@ -14,6 +14,18 @@ import { afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 
+// jsdom ships no ResizeObserver, but Headless UI's Listbox/Menu (behind our
+// `@structura/ui` Select) reaches for it when opening/closing — without this
+// stub any test that opens a Select throws an uncaught "ResizeObserver is not
+// defined" during the close transition. A no-op observer is enough for jsdom.
+if (typeof globalThis.ResizeObserver === "undefined") {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+}
+
 afterEach(() => {
   cleanup();
 });

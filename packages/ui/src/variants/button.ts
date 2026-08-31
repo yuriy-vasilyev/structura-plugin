@@ -71,6 +71,12 @@ export const buttonVariants = cva(
           // Semantic Red. Locked white in light mode, red-tinted white in dark.
           "bg-red-600 text-white! visited:text-white! hover:text-white! focus:text-white! active:text-white! border border-transparent hover:bg-red-700 shadow-md shadow-red-600/20 dark:bg-red-900/50 dark:text-red-100! dark:visited:text-red-100! dark:hover:text-red-100! dark:focus:text-red-100! dark:active:text-red-100! dark:border-red-900 dark:hover:bg-red-900",
 
+        dangerGhost:
+          // Quiet destructive: red-tinted outline for actions that destroy
+          // something reversible (revoke a link, disconnect) — a solid red
+          // `danger` overweights those next to a primary CTA.
+          "bg-red-500/5 text-red-600! visited:text-red-600! hover:text-red-600! focus:text-red-600! active:text-red-600! border border-red-500/30 hover:bg-red-500/10 hover:border-red-500/50 dark:bg-red-500/10 dark:text-red-400! dark:visited:text-red-400! dark:hover:text-red-400! dark:focus:text-red-400! dark:active:text-red-400! dark:border-red-500/30 dark:hover:bg-red-500/15",
+
         link:
           // Link style: Brand text. Disable scale micro-interactions for
           // inline links; they should feel like text, not buttons.

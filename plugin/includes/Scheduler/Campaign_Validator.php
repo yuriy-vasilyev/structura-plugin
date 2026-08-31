@@ -73,6 +73,24 @@ class Campaign_Validator
         $clean['text_model']  = sanitize_text_field($params['text_model'] ?? '');
         $clean['image_model'] = sanitize_text_field($params['image_model'] ?? '');
 
+        // Model quality tier (top | mid) — the tier-based replacement for the
+        // concrete text_model / image_model. Additive and optional (rollout
+        // §10): when the SPA sends a tier, the cloud resolves the concrete
+        // model at generation time and prefers the tier over *_model. Anything
+        // outside the {top, mid} whitelist is dropped so a stray value can't
+        // pin a campaign to a non-existent tier, and an absent tier leaves the
+        // key OUT of $clean entirely — so a PATCH that omits it never wipes a
+        // stored tier and a campaign without one keeps resolving off *_model.
+        $allowed_tiers = ['top', 'mid'];
+        $raw_text_tier = sanitize_key($params['text_tier'] ?? '');
+        if (in_array($raw_text_tier, $allowed_tiers, true)) {
+            $clean['text_tier'] = $raw_text_tier;
+        }
+        $raw_image_tier = sanitize_key($params['image_tier'] ?? '');
+        if (in_array($raw_image_tier, $allowed_tiers, true)) {
+            $clean['image_tier'] = $raw_image_tier;
+        }
+
         // Fallback provider (OPTIONAL — per-campaign safety net for transient
         // errors like 429/5xx/timeouts on the primary provider).
         //
@@ -198,6 +216,11 @@ class Campaign_Validator
         // 7. Keyword Bank (pass-through — sanitized in Campaign_Repository)
         if (isset($params['keyword_bank']) && is_array($params['keyword_bank'])) {
             $clean['keyword_bank'] = $params['keyword_bank'];
+        }
+        // 7b. Resolved discovery meta (mode / KD ceiling / path) — pass-through,
+        // whitelisted in Campaign_Shape_Transformer::sanitize_discovery_meta.
+        if (isset($params['keyword_discovery_meta']) && is_array($params['keyword_discovery_meta'])) {
+            $clean['keyword_discovery_meta'] = $params['keyword_discovery_meta'];
         }
 
         // 8. Referral / partner links. Pass through here; the URL + free-text

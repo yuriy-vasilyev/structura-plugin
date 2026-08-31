@@ -44,10 +44,7 @@ interface WizardTarget {
  * the wizard's existing `hasImage` checks naturally hide those
  * fields without a tier-aware branch in every UI primitive.
  */
-function capsForTier(
-  capabilities: Array<"text" | "image">,
-  plan: string,
-): Array<"text" | "image"> {
+function capsForTier(capabilities: Array<"text" | "image">, plan: string): Array<"text" | "image"> {
   if (plan !== "none") return capabilities;
   return capabilities.filter((c) => c !== "image");
 }
@@ -124,16 +121,14 @@ export const AiEngine = () => {
 
   const connectedTextCount = useMemo(() => {
     if (!providers) return 0;
-    return Object.values(providers).filter(
-      (p) => p.connected && p.capabilities.includes("text")
-    ).length;
+    return Object.values(providers).filter((p) => p.connected && p.capabilities.includes("text"))
+      .length;
   }, [providers]);
 
   const connectedImageCount = useMemo(() => {
     if (!providers) return 0;
-    return Object.values(providers).filter(
-      (p) => p.connected && p.capabilities.includes("image")
-    ).length;
+    return Object.values(providers).filter((p) => p.connected && p.capabilities.includes("image"))
+      .length;
   }, [providers]);
 
   if (isLoading || !settings || !catalog || !providers || !defaults) {
@@ -270,11 +265,8 @@ export const AiEngine = () => {
                 <p className="m-0! text-sm font-medium text-neutral-500 dark:text-neutral-400">
                   {__("No providers connected yet", "structura")}
                 </p>
-                <p className="m-0! mt-1 text-xs text-neutral-400 dark:text-neutral-500">
-                  {__(
-                    "Set up a provider below to start generating content with AI.",
-                    "structura"
-                  )}
+                <p className="mt-1! mb-0! text-xs text-neutral-400 dark:text-neutral-500">
+                  {__("Set up a provider below to start generating content with AI.", "structura")}
                 </p>
               </div>
             </div>
@@ -309,8 +301,7 @@ export const AiEngine = () => {
                 // upgrade story explicitly. `capLockedIds` locks the
                 // extras up front (see the computation above) rather than
                 // only after the cap is physically consumed.
-                const isCapLocked =
-                  isAvailableForTier && capLockedIds.has(id);
+                const isCapLocked = isAvailableForTier && capLockedIds.has(id);
 
                 // The user-visible "available" flag flips to false on
                 // either path so the card renders in the locked
@@ -370,9 +361,7 @@ export const AiEngine = () => {
         <WorkspaceKeysPicker
           providerLabels={
             catalog
-              ? Object.fromEntries(
-                  Object.entries(catalog).map(([id, meta]) => [id, meta.name]),
-                )
+              ? Object.fromEntries(Object.entries(catalog).map(([id, meta]) => [id, meta.name]))
               : undefined
           }
         />

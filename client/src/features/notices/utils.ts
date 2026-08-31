@@ -90,6 +90,81 @@ function copyDict(): Record<string, string> {
       "structura",
     ),
     "notices.generation.failed.cta": __("View campaigns", "structura"),
+    "notices.pluginHealth.compat.title": __("Plugin compatibility check failed", "structura"),
+    "notices.pluginHealth.compat.body": __(
+      "Diagnostics on this site detected a compatibility issue with another plugin or theme that may affect Structura. Review the diagnostics report and apply the suggested fix.",
+      "structura",
+    ),
+    "notices.pluginHealth.compat.cta": __("Open diagnostics", "structura"),
+    "notices.pluginHealth.connectivity.title": __("Structura Cloud can't reach your site", "structura"),
+    "notices.pluginHealth.connectivity.body": __(
+      "Posts are generated in the cloud and delivered back over a webhook. The last connection check couldn't reach your site, so generated posts have nowhere to land. This usually means a local or staging URL, a private network address, or a firewall blocking incoming requests. Diagnostics has the details and a fix.",
+      "structura",
+    ),
+    "notices.pluginHealth.connectivity.cta": __("Open diagnostics", "structura"),
+    "notices.pluginHealth.scheduler.title": __("Scheduler isn't running on time", "structura"),
+    "notices.pluginHealth.scheduler.body": __(
+      "WordPress cron hasn't fired the scheduler heartbeat recently. Posts and images may be delayed. Diagnostics has the details and a fix.",
+      "structura",
+    ),
+    "notices.pluginHealth.scheduler.cta": __("Open diagnostics", "structura"),
+    "notices.pluginHealth.version.title": __("Update Structura", "structura"),
+    "notices.pluginHealth.version.body": __(
+      "This site is running an older Structura version that's missing fixes the cloud relies on. Update the plugin to keep everything working smoothly.",
+      "structura",
+    ),
+    "notices.pluginHealth.version.cta": __("Open Plugins", "structura"),
+    "notices.seoIntel.refreshed.title": __("Fresh keyword opportunities found", "structura"),
+    "notices.seoIntel.refreshed.body": __(
+      "The monthly keyword refresh for {{campaignName}} surfaced {{newCount}} new opportunities. They've been added to the campaign's keyword bank and will feed upcoming posts.",
+      "structura",
+    ),
+    "notices.seoIntel.refreshed.cta": __("View campaign", "structura"),
+    "notices.seoIntel.noKeywords.title": __("Campaign is running without keywords", "structura"),
+    "notices.seoIntel.noKeywords.body": __(
+      "{{campaignName}} has an empty keyword bank — new posts fall back to a generic topic instead of a targeted keyphrase. This usually happens after changing the campaign language. Re-run keyword discovery to fix it.",
+      "structura",
+    ),
+    "notices.seoIntel.noKeywords.cta": __("Re-discover keywords", "structura"),
+    "notices.seoIntel.bankExhausted.title": __(
+      "Campaign has covered every keyword",
+      "structura",
+    ),
+    "notices.seoIntel.bankExhausted.body": __(
+      "{{campaignName}} has already published a post for every keyword in its bank, so scheduled posts are paused rather than repeating a topic. Add or re-discover keywords to start it up again.",
+      "structura",
+    ),
+    "notices.seoIntel.bankExhausted.cta": __("Add keywords", "structura"),
+    "notices.seoIntel.bankRefreshed.title": __(
+      "We added new keywords to your campaign",
+      "structura",
+    ),
+    "notices.seoIntel.bankRefreshed.body": __(
+      "{{campaignName}} was running low on fresh topics, so we researched its niche and added {{newCount}} new keywords to its keyword bank. Upcoming posts will use them.",
+      "structura",
+    ),
+    "notices.seoIntel.bankRefreshed.cta": __("Review keywords", "structura"),
+    "notices.seoIntel.duplicateTopicSkipped.title": __(
+      "We skipped a duplicate post",
+      "structura",
+    ),
+    "notices.seoIntel.duplicateTopicSkipped.body": __(
+      "A scheduled post for {{campaignName}} would have used the web address “{{slug}}”, which you already publish under — so we stopped it instead of putting two near-identical pages in competition. Add or re-discover keywords so the next post covers something new.",
+      "structura",
+    ),
+    "notices.seoIntel.duplicateTopicSkipped.cta": __("Add keywords", "structura"),
+    "notices.seoIntel.budgetSoftLimit.title": __("Search data budget almost used up", "structura"),
+    "notices.seoIntel.budgetSoftLimit.body": __(
+      "This workspace has used 80% of its monthly search-data allowance. Keyword refreshes keep running until the cap is reached, then pause until next month.",
+      "structura",
+    ),
+    "notices.seoIntel.budgetSoftLimit.cta": __("Learn more", "structura"),
+    "notices.seoIntel.budgetHardLimit.title": __("Search data paused until next month", "structura"),
+    "notices.seoIntel.budgetHardLimit.body": __(
+      "This workspace has used its full monthly search-data allowance. Keyword refreshes continue with AI-only discovery, and enriched search data resumes at the start of next month.",
+      "structura",
+    ),
+    "notices.seoIntel.budgetHardLimit.cta": __("Learn more", "structura"),
   };
 }
 
@@ -115,6 +190,7 @@ export function categoryLabel(category: Notice["category"]): string {
     case "byok":          return __("AI key", "structura");
     case "generation":    return __("Generation", "structura");
     case "plugin-health": return __("Plugin health", "structura");
+    case "seo-intel":     return __("SEO intelligence", "structura");
   }
 }
 

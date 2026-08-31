@@ -1,27 +1,26 @@
 /**
- * Tests for the BYOK "image generation is on but no image model selected"
- * conflict warning in `<CampaignAiEngineSection>`.
+ * Tests for the BYOK model-TIER picker in `<CampaignAiEngineSection>`.
  *
- * Why this exists: a campaign created with defaults persisted
- * `imageModel: ""` while featured/body image generation was enabled. On
- * BYOK that produced "Model must be specified for BYOK users." and both
- * image slots failed silently at publish time (2026-05-27). The cloud now
- * backfills a default model so it no longer hard-fails, but we surface the
- * gap in the editor so the user picks the model they actually want instead
- * of inheriting a default they never saw.
+ * The campaign engine section shows a top/mid quality-TIER dropdown for
+ * non-managed (BYOK/free) plans — the tier-based replacement for the old
+ * concrete-model dropdown. The campaign stores the tier (`textTier`/`imageTier`)
+ * and the cloud resolves the concrete model at generation time; `textModel`/
+ * `imageModel` are kept as the concrete mirror for display/back-compat. Managed
+ * (Cloud) plans show no selector — the model is owned server-side.
  *
- * The condition is BYOK-only (`!isCloud`) AND image gen enabled
- * (`structure.featuredImage || structure.bodyImages`) AND no
- * `intelligence.imageModel`. These pin all three legs plus the managed
- * exclusion.
+ * These are REAL tests: the component runs against the REAL
+ * `@structura/model-catalog` registry (NOT mocked) — so the option labels and
+ * the mirrored model id are exactly what production resolves. Only the data
+ * edges (license / providers / settings / form context) are mocked.
  */
 
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
+
+import { getRegistryModel, getRegistryModelId } from "@structura/model-catalog";
 
 const useLicenseMock = vi.hoisted(() => vi.fn());
 const useDefaultProvidersMock = vi.hoisted(() => vi.fn());
-const useAvailableModelsQueryMock = vi.hoisted(() => vi.fn());
 const useAiSettingsQueryMock = vi.hoisted(() => vi.fn());
 const useCampaignFormMock = vi.hoisted(() => vi.fn());
 
@@ -32,32 +31,30 @@ vi.mock("@/features/settings", () => ({
 vi.mock("@/features/ai-engine", () => ({
   useAiSettingsQuery: useAiSettingsQueryMock,
 }));
-vi.mock("@/features/ai-engine/api/useAvailableModelsQuery", () => ({
-  useAvailableModelsQuery: useAvailableModelsQueryMock,
-}));
-vi.mock("@/features/ai-engine/helpers", () => ({
-  maybeGetModelWarning: () => undefined,
-}));
 vi.mock("@/features/campaigns/context/CampaignContext", () => ({
   useCampaignForm: useCampaignFormMock,
 }));
 
 import { CampaignAiEngineSection } from "../components/CampaignAiEngineSection";
 
-const WARNING = /no image model is selected/i;
+// Real registry labels, so the test breaks loudly if a model is retired/renamed.
+const GEMINI_TEXT_TOP = getRegistryModel("gemini", "text", "top")!.name; // "Gemini 3.1 Pro"
+const GEMINI_TEXT_MID = getRegistryModel("gemini", "text", "mid")!.name; // "Gemini 3.5 Flash"
+const GEMINI_IMAGE_TOP = getRegistryModel("gemini", "image", "top")!.name; // "Gemini 3 Pro Image"
+const GEMINI_TEXT_MID_ID = getRegistryModelId("gemini", "text", "mid")!; // "gemini-3.5-flash"
 
 function setup(opts: {
   isCloud?: boolean;
-  featuredImage?: boolean;
-  bodyImages?: boolean;
-  imageModel?: string;
+  textTier?: "top" | "mid";
+  imageTier?: "top" | "mid";
+  /**
+   * Legacy pre-tier campaign shape: NO `textTier`/`imageTier` on the doc,
+   * only the concrete stored models. Overrides `textTier`/`imageTier`.
+   */
+  legacyModels?: { textModel: string; imageModel: string };
 }) {
-  const {
-    isCloud = false,
-    featuredImage = true,
-    bodyImages = false,
-    imageModel = "",
-  } = opts;
+  const { isCloud = false, textTier = "top", imageTier = "top", legacyModels } = opts;
+  const updateForm = vi.fn();
 
   useLicenseMock.mockReturnValue({
     isLicensed: true,
@@ -66,19 +63,7 @@ function setup(opts: {
   });
   useDefaultProvidersMock.mockReturnValue({
     isCloud,
-    // Keep the settings-level "Model not selected" warning OFF so we
-    // isolate the new campaign-level conflict warning.
     isProviderIncomplete: () => false,
-  });
-  useAvailableModelsQueryMock.mockReturnValue({
-    data: {
-      defaults: {
-        gemini: { text: "gemini-text", fast: "gemini-fast", image: "gemini-image" },
-        openai: { text: "openai-text", fast: "openai-fast", image: "openai-image" },
-      },
-      text: [{ id: "gemini-text", name: "Gemini Text", provider: "gemini" }],
-      image: [{ id: "gemini-image", name: "Gemini Image", provider: "gemini" }],
-    },
   });
   useAiSettingsQueryMock.mockReturnValue({ data: { providers: {} } });
   useCampaignFormMock.mockReturnValue({
@@ -86,55 +71,111 @@ function setup(opts: {
       intelligence: {
         textProvider: "gemini",
         imageProvider: "gemini",
-        textModel: "gemini-text",
-        imageModel,
+        textModel: legacyModels?.textModel ?? getRegistryModelId("gemini", "text", textTier),
+        imageModel: legacyModels?.imageModel ?? getRegistryModelId("gemini", "image", imageTier),
+        ...(legacyModels ? {} : { textTier, imageTier }),
         fallbackTextProvider: null,
         fallbackImageProvider: null,
       },
       schedule: { pregenerationEnabled: true },
-      structure: { featuredImage, bodyImages },
+      structure: { featuredImage: true, bodyImages: false },
     },
-    updateForm: vi.fn(),
+    updateForm,
   });
-}
 
-function renderSection() {
-  return render(
+  render(
     <CampaignAiEngineSection
       availableTextProviders={["gemini", "openai"]}
       availableImageProviders={["gemini", "openai"]}
     />,
   );
+
+  return { updateForm };
 }
 
-describe("<CampaignAiEngineSection> image-model conflict warning", () => {
-  it("warns when BYOK has featured-image gen on but no image model", () => {
-    setup({ featuredImage: true, bodyImages: false, imageModel: "" });
-    renderSection();
-    expect(screen.getByText(WARNING)).toBeInTheDocument();
+describe("<CampaignAiEngineSection> model tier picker", () => {
+  it("renders top/mid tier options labeled with the real model names (BYOK)", () => {
+    setup({ textTier: "top", imageTier: "top" });
+
+    // The trigger button shows the selected tier's label, built from the real
+    // registry — "Top (Gemini 3.1 Pro)" for text, "Top (Gemini 3 Pro Image)"
+    // for image. This is what proves buildTierOptions is wired to the catalog.
+    expect(
+      screen.getByRole("button", { name: new RegExp(`Top \\(${GEMINI_TEXT_TOP}\\)`) }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: new RegExp(`Top \\(${GEMINI_IMAGE_TOP}\\)`) }),
+    ).toBeInTheDocument();
   });
 
-  it("warns when only body-image gen is on (no image model)", () => {
-    setup({ featuredImage: false, bodyImages: true, imageModel: "" });
-    renderSection();
-    expect(screen.getByText(WARNING)).toBeInTheDocument();
+  it("reflects a stored mid tier in the trigger label", () => {
+    setup({ textTier: "mid" });
+    expect(
+      screen.getByRole("button", { name: new RegExp(`Standard \\(${GEMINI_TEXT_MID}\\)`) }),
+    ).toBeInTheDocument();
   });
 
-  it("does NOT warn once an image model is selected", () => {
-    setup({ featuredImage: true, imageModel: "gemini-image" });
-    renderSection();
-    expect(screen.queryByText(WARNING)).not.toBeInTheDocument();
+  it("stores the chosen tier AND mirrors its concrete model", () => {
+    const { updateForm } = setup({ textTier: "top" });
+
+    // Open the text tier dropdown and pick Standard (mid).
+    const trigger = screen.getByRole("button", {
+      name: new RegExp(`Top \\(${GEMINI_TEXT_TOP}\\)`),
+    });
+    fireEvent.click(trigger);
+
+    const listbox = screen.getByRole("listbox");
+    const midOption = within(listbox).getByText(new RegExp(`Standard \\(${GEMINI_TEXT_MID}\\)`));
+    fireEvent.click(midOption);
+
+    // Stores the TIER (source of truth) and mirrors the concrete model id
+    // resolved from the real registry — not a hardcoded string.
+    expect(updateForm).toHaveBeenCalledWith("intelligence", {
+      textTier: "mid",
+      textModel: GEMINI_TEXT_MID_ID,
+    });
   });
 
-  it("does NOT warn when image generation is switched off", () => {
-    setup({ featuredImage: false, bodyImages: false, imageModel: "" });
-    renderSection();
-    expect(screen.queryByText(WARNING)).not.toBeInTheDocument();
+  it("legacy tier-less campaign opens on its STORED model's tier, not Top (2026-07-23)", () => {
+    // Regression: `intelligence.textTier ?? "top"` rendered "Top (Gemini 3.1
+    // Pro)" for a pre-tier campaign whose stored model is the mid Flash — the
+    // UI claimed Top while generation kept running Standard, and any save
+    // silently migrated the doc to Top.
+    setup({
+      legacyModels: {
+        textModel: getRegistryModelId("gemini", "text", "mid")!,
+        imageModel: getRegistryModelId("gemini", "image", "mid")!,
+      },
+    });
+
+    expect(
+      screen.getByRole("button", { name: new RegExp(`Standard \\(${GEMINI_TEXT_MID}\\)`) }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: new RegExp(`Top \\(${GEMINI_TEXT_TOP}\\)`) }),
+    ).not.toBeInTheDocument();
   });
 
-  it("does NOT warn on managed tier (model is resolved server-side)", () => {
-    setup({ isCloud: true, featuredImage: true, imageModel: "" });
-    renderSection();
-    expect(screen.queryByText(WARNING)).not.toBeInTheDocument();
+  it("legacy campaign with a retired stored model falls back to Standard, not Top", () => {
+    // A model id the live-confirmed bump removed from the registry — we can't
+    // know its tier, so the picker opens on the cheaper Standard tier.
+    setup({
+      legacyModels: {
+        textModel: "gemini-3-flash-preview",
+        imageModel: "gemini-3.1-flash-image-preview",
+      },
+    });
+
+    expect(
+      screen.getByRole("button", { name: new RegExp(`Standard \\(${GEMINI_TEXT_MID}\\)`) }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows NO tier/model selector on a managed (Cloud) plan", () => {
+    setup({ isCloud: true });
+    // Managed owns the model server-side — no tier trigger is rendered.
+    expect(
+      screen.queryByRole("button", { name: new RegExp(`\\(${GEMINI_TEXT_TOP}\\)`) }),
+    ).not.toBeInTheDocument();
   });
 });

@@ -101,6 +101,13 @@ export const DEFAULT_CAMPAIGN_FORM_DATA: CampaignFormData = {
     imageProvider: "gemini",
     textModel: "",
     imageModel: "",
+    // BYOK quality tier — new campaigns open on Standard (mid): the cost runs
+    // on the user's own key, so Top is an explicit opt-in, never a default
+    // (2026-07-23: the "top" default silently moved Anthropic campaigns from
+    // Sonnet to Opus). The model row mirrors the tier's concrete model.
+    // Managed tiers ignore this (model owned server-side).
+    textTier: "mid",
+    imageTier: "mid",
     // Fallback providers default to null ("off") — silently opting users
     // in would be surprising and costs money on transient failures; the UI
     // surfaces the choice explicitly in Advanced Settings → AI Engine.

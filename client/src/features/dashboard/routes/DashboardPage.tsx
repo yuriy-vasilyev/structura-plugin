@@ -7,6 +7,8 @@ import { useJobsQuery } from "@/features/campaigns/api/useJobsQuery";
 
 // Local Dashboard Components
 import { StatCard } from "../components/StatCard";
+import { GscSummaryCard } from "../components/GscSummaryCard";
+import { GscConnectBanner } from "../components/GscConnectBanner";
 import { IntelligenceUsage } from "../components/IntelligenceUsage";
 import { ActiveQueue } from "../components/ActiveQueue";
 import { RecentBlueprints } from "../components/RecentBlueprints";
@@ -85,6 +87,11 @@ export const DashboardPage = () => {
             in the steady state. */}
         <OnboardingResumeTile />
 
+        {/* Dismissable Search Console connect nudge — the relocated home for
+            the GSC prompt (was the onboarding SEO / Done steps). Self-gates on
+            paid + not-connected + not-dismissed. */}
+        <GscConnectBanner />
+
         {/* TOP STATS ROW */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <StatCard
@@ -93,6 +100,11 @@ export const DashboardPage = () => {
             subtext={sprintf(__("%d content blocks", "structura"), stats?.content.blocks ?? 0)}
             variant="brand"
           />
+          {/* GSC glance card (middle slot per the design handoff's Board
+              02). Self-gates: renders nothing while its query is disabled
+              (no usable license) or failed, keeping the row 3-up; when it
+              renders, the fourth tile simply wraps in the same grid. */}
+          <GscSummaryCard />
           <StatCard
             label={__("Images Generated", "structura")}
             value={stats?.visual.optimized ?? 0}

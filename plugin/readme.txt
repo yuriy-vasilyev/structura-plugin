@@ -1,7 +1,7 @@
 === Structura ===
-Contributors: xerx
+Contributors: xerx, yuriyvasilyev
 Tags: ai, content-generation, seo, automation, gutenberg
-Requires at least: 6.2
+Requires at least: 6.8
 Tested up to: 7.0
 Requires PHP: 7.4
 Stable tag: 2.14.0
@@ -41,7 +41,10 @@ keep editorial control; Structura handles the repetitive work.
 **You can use Structura without creating an account.** A freshly
 installed Structura starts in **Anonymous Mode** — connect your own
 OpenAI key (BYOK) and you can manually generate posts inside
-wp-admin. Anonymous Mode is intentionally limited:
+wp-admin. The plugin sends nothing anywhere until you choose
+**Connect to Structura Cloud** on its first screen; see *External
+services* below for exactly what is shared after that. Anonymous Mode
+is intentionally limited:
 
 * Paragraph blocks only (no headings, lists, callouts, or images).
 * A subset of the SEO protocol.
@@ -72,9 +75,12 @@ repository's README for reproducible build instructions.
 1. Upload the plugin ZIP via *Plugins → Add New → Upload Plugin*, or
    install directly from the WordPress.org plugin directory.
 2. Activate *Structura* through the *Plugins* menu.
-3. Open *Structura* in the admin sidebar. The plugin starts in
-   **Anonymous Mode**, which lets you connect an OpenAI key and
-   manually generate posts right away.
+3. Open *Structura* in the admin sidebar. The first screen explains
+   what the plugin shares with Structura Cloud and asks for your OK —
+   click **Connect to Structura Cloud** to continue (nothing is sent
+   before that). The plugin then starts in **Anonymous Mode**, which
+   lets you connect an OpenAI key and manually generate posts right
+   away.
 4. (Optional, recommended) To unlock the persona engine, more block
    types, image generation, and scheduled campaigns, click *Account &
    License* and connect to https://app.structurawp.com/. A free
@@ -91,11 +97,15 @@ images, no campaigns). A free license unlocks meaningfully more.
 
 = Does this plugin send data to external services? =
 
-Yes — the plugin is a client for **Structura Cloud** (the AI service
-that runs every generation). It also makes a small number of auxiliary
-calls (license verification, optional cache pings to the marketing
-site, the WordPress.org update check). Full disclosure of every
-endpoint and what is sent is in *External services* below.
+Yes — but only after you opt in. The plugin is a client for
+**Structura Cloud** (the AI service that runs every generation). The
+first time you open the Structura admin page it shows a consent screen
+listing what will be shared; until you click **Connect to Structura
+Cloud** (or enter a license key) no request leaves your site. After
+that it also makes a small number of auxiliary calls (license
+verification, optional cache pings to the marketing site). Full
+disclosure of every endpoint and what is sent is in *External
+services* below.
 
 = What languages can I generate content in? =
 
@@ -143,16 +153,30 @@ campaign scheduling, channel dispatch, and license verification.
 Hosted on Google Cloud Firebase Functions and operated by Xerx (the
 plugin author).
 
-What is sent and when:
+When it is first contacted: never on install or activation. The first
+time you open the Structura admin page, the plugin shows a consent
+screen that lists the data below and asks you to click **Connect to
+Structura Cloud**. Until you do, no request of any kind leaves your
+site. Entering a license key under *Account & License* counts as the
+same opt-in. You can disconnect at any time from *Account & License*.
 
+What is sent and when (all of it only after you opt in):
+
+* **Anonymous workspace bootstrap (once, right after you opt in):** a
+  random install ID generated locally by WordPress, your site's host
+  name, site title, WordPress version, plugin version, and the site
+  identity bundle (site title, tagline, language, logo URL, active
+  theme name). This creates the workspace that Anonymous Mode
+  generation runs in.
 * **License activation:** license key, site URL, site name, WordPress
-  version, plugin version, surface identifier (`wp`).
+  version, plugin version, surface identifier (`wp`), site identity
+  bundle.
 * **Daily license health check:** license key, site URL, plugin
   version, WordPress version. Used to detect lapsed subscriptions.
-* **Site identity sync (optional, opt-in):** site name, tagline, logo
-  URL, theme name. Used so generated content can refer to the brand
-  consistently. Disabled by default; you opt in from the plugin's
-  Settings page.
+* **Site identity sync:** the site identity bundle is re-sent when you
+  change your site title, tagline, language, or logo, so generated
+  content keeps referring to your brand correctly. Licensed installs
+  only.
 * **Campaign run trigger:** campaign settings (persona reference,
   topic / keyword inputs, schedule), plugin trace ID. The cloud
   service generates the post body and pushes it back to the plugin
@@ -163,12 +187,47 @@ What is sent and when:
 * **Run acknowledgement and uploads:** generated post artefacts and
   per-step diagnostic metadata, so the post is associated with the
   cloud-side run history.
+* **Generated images:** downloaded from Structura Cloud's storage
+  (`storage.googleapis.com`, time-limited signed URLs) into your Media
+  Library.
+* **Every request** carries the plugin version and, once one exists,
+  your activation's bearer token so the cloud can attribute the call to
+  your workspace.
 
 This service is provided by Xerx, the plugin author.
 
 * Customer portal: https://app.structurawp.com/
 * Terms of service: https://www.structurawp.com/terms
 * Privacy policy: https://www.structurawp.com/privacy
+
+**Channel destinations** — Slack, Discord, Telegram, LinkedIn, IndexNow,
+generic webhooks
+
+What it does: when you connect a channel under *Structura → Channels*,
+the webhook URL or OAuth grant you provide is sent to Structura Cloud,
+which stores it encrypted and delivers your post announcements to that
+destination on your behalf. The plugin itself never calls these
+third-party APIs directly; it only forwards what you typed into the
+connection form. No channel is connected by default.
+
+What is sent to the destination, and when: a short announcement of
+each post (title, link, channel-specific summary text and, where the
+destination supports it, the featured image) every time a post
+publishes through a campaign or manual run that has that channel
+enabled.
+
+* Slack — terms: https://slack.com/terms-of-service, privacy:
+  https://slack.com/privacy-policy
+* Discord — terms: https://discord.com/terms, privacy:
+  https://discord.com/privacy
+* Telegram — terms: https://telegram.org/tos, privacy:
+  https://telegram.org/privacy
+* LinkedIn — terms: https://www.linkedin.com/legal/user-agreement,
+  privacy: https://www.linkedin.com/legal/privacy-policy
+* IndexNow (operated by Microsoft Bing) — FAQ / terms:
+  https://www.indexnow.org/faq, privacy:
+  https://www.microsoft.com/privacy/privacystatement
+* Generic webhooks — a URL you own; its terms are yours.
 
 **Structura customer portal** — `app.structurawp.com`
 
@@ -223,6 +282,11 @@ data is transmitted.
 * Google privacy policy: https://policies.google.com/privacy
 
 == Privacy ==
+
+Nothing leaves your site until you accept the one-time **Connect to
+Structura Cloud** screen in wp-admin (or enter a license key). If you
+would rather not, deactivate the plugin — at that point it has sent
+nothing.
 
 The plugin defaults to **telemetry off**. Plugin behaviour analytics
 (if any) only fire after explicit opt-in from the *Settings → Privacy*

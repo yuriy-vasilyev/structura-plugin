@@ -40,41 +40,10 @@ function planName(planId: string): string {
   }
 }
 
-function audienceLabel(audience: string): string | null {
-  switch (audience) {
-    case "individual":
-      return __("Individual", "structura");
-    case "agency":
-      return __("Agency", "structura");
-    default:
-      return null;
-  }
-}
-
 /**
- * Plan-name only, no audience suffix. Use when the audience is
- * surfaced separately (e.g. its own badge); avoids visual duplication.
+ * Human-readable plan-badge label (tier only). The old Individual/Agency
+ * audience suffix has been retired — the badge shows the plan tier alone.
  */
 export function formatPlanName(planId: string): string {
   return planName(planId);
-}
-
-/**
- * Plan name + audience suffix, when both are known. Falls back to
- * name-only when audience is null / unknown — useful while the cloud
- * heartbeat is pending (PHP snapshot doesn't carry audience).
- *
- *   formatPlanLabel("byok", "agency")     → "BYOK Agency"
- *   formatPlanLabel("cloud_pro", "individual") → "Cloud Pro Individual"
- *   formatPlanLabel("byok", null)         → "BYOK"
- *   formatPlanLabel("free", "individual") → "Free"      // Free has no audience axis
- */
-export function formatPlanLabel(
-  planId: string,
-  audience: string | null | undefined,
-): string {
-  const name = planName(planId);
-  if (planId === "free" || !audience) return name;
-  const suffix = audienceLabel(audience);
-  return suffix ? `${name} ${suffix}` : name;
 }

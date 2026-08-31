@@ -53,6 +53,18 @@ class Cloud_Client
      */
     public static function post(string $endpoint, array $payload = [], array $args = [])
     {
+        // Hard stop in front of EVERY outbound cloud request: nothing
+        // leaves the site until the admin has opted in (wp.org
+        // guidelines 7 & 9 — see Anonymous_Bootstrap). Callers already
+        // treat a WP_Error as "cloud unreachable", so this degrades the
+        // same way a network failure would.
+        if ( ! Anonymous_Bootstrap::has_cloud_consent()) {
+            return new \WP_Error(
+                'structura_cloud_consent_required',
+                __('Structura Cloud is not connected yet. Open Structura in wp-admin and choose "Connect to Structura Cloud" first.', 'structura')
+            );
+        }
+
         // Auto-inject plugin version into every outbound payload
         $payload['pluginVersion'] = STRUCTURA_VERSION;
 
@@ -166,6 +178,7 @@ class Cloud_Client
             return $response;
         }
 
+        $code = (int) wp_remote_retrieve_response_code($response);
         $body = json_decode(wp_remote_retrieve_body($response), true);
 
         // Handle minimum version enforcement from the cloud
@@ -176,11 +189,124 @@ class Cloud_Client
             self::clear_update_required();
         }
 
+        // Self-heal a dead anonymous bearer (see method docblock). Runs
+        // for every response so the strike counter can both accrue on
+        // 401s and reset the moment the token authenticates again.
+        self::maybe_self_heal_anonymous_bearer($code, $stashed_api_token, $stashed_license_key);
+
         return [
-            'code' => wp_remote_retrieve_response_code($response),
+            'code' => $code,
             'body' => $body,
             'raw'  => $response,
         ];
+    }
+
+    /**
+     * WP option holding the count of consecutive 401s seen on an
+     * anonymous bearer. Autoload off — only the self-heal path reads it.
+     */
+    private const AUTH_401_STRIKES_OPTION = 'structura_anon_auth_401_strikes';
+
+    /**
+     * How many consecutive admin-load auth failures we tolerate before
+     * treating an anonymous bearer as permanently dead.
+     *
+     * Why not heal on the first 401: the cloud returns the SAME
+     * `401 {"success":false,"error":"Unauthorized."}` for a genuinely
+     * revoked/deleted token AND for a transient Firestore error during
+     * the token lookup (functions/src/auth/tokenMiddleware.ts wraps the
+     * lookup in try/catch and 401s on any throw). Re-bootstrapping on a
+     * single 401 would make every anonymous install discard its bearer
+     * and mint a new shadow workspace during any cloud hiccup — a
+     * thundering herd of re-bootstraps plus a pile of orphaned
+     * workspaces. Requiring consecutive failures across separate admin
+     * loads rules the blip out.
+     */
+    private const SELF_HEAL_401_THRESHOLD = 2;
+
+    /**
+     * Per-request guard so at most ONE auth verdict is recorded per WP
+     * request. A single admin page load can fire several authenticated
+     * cloud calls; without this, one transient-401 window would stack
+     * several strikes at once and defeat the consecutive-loads gate.
+     * Resets naturally per PHP request in production; tests reset it via
+     * reflection.
+     */
+    private static bool $authVerdictRecordedThisRequest = false;
+
+    /**
+     * Detect and recover from a dead anonymous bearer.
+     *
+     * Background: once an anonymous install has a bearer, the plugin
+     * historically treated it as "good until revoked" and never
+     * re-checked — so if the backing workspace/activation/token was
+     * deleted or revoked server-side (common when testing a local site
+     * against prod, or after a support teardown), every cloud call
+     * 401'd forever and the only fix was manually clearing wp_options.
+     *
+     * This clears the stale credentials after
+     * {@see self::SELF_HEAL_401_THRESHOLD} consecutive 401s so
+     * {@see Anonymous_Bootstrap::maybe_bootstrap()} re-mints a fresh
+     * shadow workspace on the next admin load. The stable install-id
+     * sticker is kept, so the cloud's idempotent re-bootstrap can reuse
+     * the same identity wherever the install record still exists.
+     *
+     * Scope: anonymous installs only (no license key). A licensed
+     * install's revoked token needs an explicit re-activation with the
+     * stored key — a different, non-silent flow — so we must never wipe
+     * it here.
+     *
+     * @param int    $code        HTTP status of the response just received.
+     * @param string $sent_token  The bearer we actually sent ('' if none).
+     * @param string $license_key The stashed license key ('' if anonymous).
+     */
+    private static function maybe_self_heal_anonymous_bearer(int $code, string $sent_token, string $license_key): void
+    {
+        // Only authenticated calls from an anonymous install are
+        // eligible. No bearer sent (e.g. the bootstrap handshake itself)
+        // means the response carries no verdict about our token; a
+        // license key present means this is a licensed install.
+        if ($sent_token === '' || $license_key !== '') {
+            return;
+        }
+
+        // Record at most one verdict per WP request — see the guard's
+        // docblock.
+        if (self::$authVerdictRecordedThisRequest) {
+            return;
+        }
+        self::$authVerdictRecordedThisRequest = true;
+
+        if ($code !== 401) {
+            // Any non-401 response proves the bearer authenticated — a
+            // 200, or even a 403 gate that only fires AFTER auth passes.
+            // Clear any strikes accrued from earlier transient 401s.
+            if ((int) get_option(self::AUTH_401_STRIKES_OPTION, 0) !== 0) {
+                delete_option(self::AUTH_401_STRIKES_OPTION);
+            }
+            return;
+        }
+
+        $strikes = (int) get_option(self::AUTH_401_STRIKES_OPTION, 0) + 1;
+
+        if ($strikes < self::SELF_HEAL_401_THRESHOLD) {
+            update_option(self::AUTH_401_STRIKES_OPTION, $strikes, false);
+            return;
+        }
+
+        // Threshold reached — the anonymous bearer is dead. Drop the
+        // credentials and the strike counter; the next admin load
+        // re-bootstraps.
+        delete_option(self::AUTH_401_STRIKES_OPTION);
+        Key_Manager::clear_license_payload();
+        Log_Service::add(
+            'warn',
+            'Cloud_Client: anonymous bearer rejected (401) '
+                . self::SELF_HEAL_401_THRESHOLD
+                . 'x in a row; cleared stale credentials, will re-bootstrap on next admin load.',
+            0,
+            'anonymous_bootstrap',
+        );
     }
 
     /**

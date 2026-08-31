@@ -19,6 +19,7 @@
     "makejson": "cd .. && node scripts/po-to-wp-json.mjs"
   },
   "dependencies": {
+    "@structura/model-catalog": "workspace:*",
     "@structura/tailwind-config": "workspace:*",
     "@structura/types": "workspace:*",
     "@structura/ui": "workspace:*",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
+    "@structura/i18n-contracts": "workspace:*",
     "@wordpress/api-fetch": "^7.37.0",
     "@wordpress/components": "^31.0.0",
     "@wordpress/element": "^6.37.0",

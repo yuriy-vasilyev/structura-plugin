@@ -2,6 +2,8 @@
 
 namespace Structura\Api;
 
+use Structura\Core\Anonymous_Bootstrap;
+use Structura\Core\Key_Manager;
 use Structura\Core\Log_Service;
 
 if ( ! defined('ABSPATH')) {
@@ -67,6 +69,63 @@ class Privacy_Rest_Api
                 'permission_callback' => [$this, 'check_admin_permission'],
             ],
         ]);
+
+        // Cloud opt-in (wp.org guidelines 7 & 9). Distinct from telemetry:
+        // telemetry is optional analytics, this is permission to create
+        // the anonymous workspace and talk to Structura Cloud at all.
+        // GET reports the current state; POST records consent and runs
+        // the bootstrap in the same request so the SPA can reload straight
+        // into a working workspace.
+        register_rest_route($this->namespace, '/privacy/cloud-consent', [
+            [
+                'methods'             => 'GET',
+                'callback'            => [$this, 'get_cloud_consent'],
+                'permission_callback' => [$this, 'check_admin_permission'],
+            ],
+            [
+                'methods'             => 'POST',
+                'callback'            => [$this, 'grant_cloud_consent'],
+                'permission_callback' => [$this, 'check_admin_permission'],
+            ],
+        ]);
+    }
+
+    /**
+     * Current cloud opt-in state.
+     *
+     * @return \WP_REST_Response|array{cloudConsent: bool, hasWorkspace: bool}
+     */
+    public function get_cloud_consent()
+    {
+        return rest_ensure_response([
+            'cloudConsent' => Anonymous_Bootstrap::has_cloud_consent(),
+            'hasWorkspace' => $this->has_workspace(),
+        ]);
+    }
+
+    /**
+     * Record the admin's opt-in and bootstrap the anonymous workspace
+     * immediately. `hasWorkspace` may still be false when the cloud is
+     * unreachable — consent is persisted regardless, and the next
+     * admin_init retries the bootstrap on its own.
+     *
+     * @return \WP_REST_Response|array{cloudConsent: bool, hasWorkspace: bool}
+     */
+    public function grant_cloud_consent()
+    {
+        Anonymous_Bootstrap::grant_cloud_consent();
+        $has_workspace = Anonymous_Bootstrap::bootstrap_now();
+
+        return rest_ensure_response([
+            'cloudConsent' => true,
+            'hasWorkspace' => $has_workspace,
+        ]);
+    }
+
+    private function has_workspace(): bool
+    {
+        $stashed = Key_Manager::get_license_payload();
+        return is_array($stashed) && ($stashed['api_token'] ?? '') !== '';
     }
 
     /**

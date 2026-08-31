@@ -28,7 +28,11 @@ class Admin_Dashboard
             'structura',
             [$this, 'render_app_container'],
             $svg_icon,
-            25,
+            // No explicit position: WordPress appends the entry after
+            // Settings. The old value (25) slotted Structura between
+            // Comments and Appearance, which the wp.org review
+            // (2026-08-27) called out as competing with core items.
+            null,
         );
     }
 
@@ -131,6 +135,15 @@ class Admin_Dashboard
             // documented at SiteNotConnectedBanner.tsx §"Fresh-install
             // suppression".
             'had_prior_activation'       => (bool)get_option('structura_had_prior_activation', false),
+            // Durable "user has finished or exited the setup wizard" flag.
+            // The SPA's onboarding auto-redirect reads this as its source of
+            // truth so the wizard never re-appears after a workspace
+            // re-provision (the old per-activation localStorage flag drifted
+            // with the activation id). Set via POST /onboarding/dismiss on
+            // Finish/Exit and self-healed from cloud `completedAt`; cleared on
+            // Disconnect/Forget. Works for anonymous installs too (no
+            // license_key, so no cloud wizard state exists).
+            'onboarding_dismissed'       => get_option('structura_onboarding_dismissed') === '1',
             // Phase 1.8 — surface the workspace-presence signals so
             // `useLicense().hasWorkspace` derivation has everything it
             // needs without an extra REST round-trip on first paint.
@@ -161,6 +174,10 @@ class Admin_Dashboard
             // Spec: `specs/v2/multi-tenant-and-public-api.md` §Phase 1.8.
             'has_workspace'              => self::has_anonymous_or_licensed_workspace(),
             'is_anonymous'               => self::is_anonymous_workspace(),
+            // wp.org guidelines 7 & 9 — the SPA renders a one-time consent
+            // screen instead of the app while this is false (fresh install,
+            // no cloud contact yet). Older SPA builds ignore the key.
+            'cloud_consent'              => \Structura\Core\Anonymous_Bootstrap::has_cloud_consent(),
             'provider_count_cap'         => \Structura\Core\License_Manager::get_provider_count_cap(),
             'activation_id'              => self::current_activation_id(),
             'plan'                       => \Structura\Core\License_Manager::get_plan(),

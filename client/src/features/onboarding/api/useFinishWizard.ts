@@ -35,7 +35,10 @@ import {
 import { useUpdateSiteSeoSettingsMutation } from "@/features/site/api/useSiteAnalysis";
 
 import { useSaveWizardPositioningMutation } from "./useWizardSeo";
-import { useSaveWizardStepMutation } from "./useOnboardingState";
+import {
+  useDismissOnboardingMutation,
+  useSaveWizardStepMutation,
+} from "./useOnboardingState";
 import { useWizardStore } from "../state/wizardStore";
 import { clearOnboardingDismissed } from "../utils/onboardingDismissal";
 
@@ -48,6 +51,7 @@ export function useFinishWizard() {
   const { create: createPreset, update: updatePreset } = useVisualPresetMutations();
   const { data: presetsData } = useVisualPresetsQuery();
   const markStepComplete = useSaveWizardStepMutation();
+  const dismissOnboarding = useDismissOnboardingMutation();
 
   return useMutation<void, Error, void>({
     mutationFn: async () => {
@@ -166,15 +170,26 @@ export function useFinishWizard() {
       // persisted. Re-saving here would duplicate them.
 
       // ── Mark wizard complete (dashboard banner + tier tracking) ─
+      // Cloud-side workspace state + growth event. No-ops for anonymous (no
+      // license_key) — the durable local seal below is what actually stops
+      // the auto-redirect for every tier.
       try {
         await markStepComplete.mutateAsync(6);
       } catch (e) {
         console.warn("Wizard finish: completion flag failed", e);
       }
 
-      // A finished site no longer needs the per-site onboarding nudge —
-      // drop any earlier Exit dismissal so the flag can't linger into a
-      // future re-onboarding of this activation.
+      // Durable server-side seal (wp_option) so the wizard never auto-opens
+      // again — install-level, so it survives the activation-id drift that
+      // kept resurrecting it. This is the source of truth now.
+      try {
+        await dismissOnboarding.mutateAsync();
+      } catch (e) {
+        console.warn("Wizard finish: dismiss flag failed", e);
+      }
+
+      // Legacy localStorage dismissal is superseded by the server flag; drop
+      // any stale value so it can't linger into a future re-onboarding.
       clearOnboardingDismissed();
     },
   });

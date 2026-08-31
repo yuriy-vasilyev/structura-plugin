@@ -20,7 +20,7 @@ import {
   buildMarketingPricingUrl,
   buildPortalSignupUrl,
 } from "@/utils/portalLinks";
-import { formatPlanLabel } from "@/utils/planLabel";
+import { formatPlanName } from "@/utils/planLabel";
 import { buildPrimaryNavLinks, getAccountMenuModel } from "./headerNav";
 
 interface MobileLinkProps {
@@ -31,16 +31,14 @@ interface MobileLinkProps {
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
-  const { isLicensed, plan, audience, loading } = useLicense();
+  const { isLicensed, plan, loading } = useLicense();
   const channelsVisible = useChannelsVisibility();
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     `nav-item ${isActive ? "nav-item-active" : ""}`;
 
-  // Intent is plan-keyed (not affected by the audience axis) — Agency
-  // and Individual variants of the same tier share the same accent
-  // color. Label composes plan + audience via the shared helper so the
-  // wp-admin badge tells the same story as the portal subscription
-  // cards.
+  // The badge shows the plan TIER only (byok / cloud / cloud pro). The old
+  // Individual/Agency audience suffix is gone — "CLOUD PRO AGENCY" wrongly
+  // read as a distinct tier, and the audience split has been retired.
   const getPlanBadgeConfig = (): { label: string; intent: BadgeProps["intent"] } => {
     if (loading) return { label: "---", intent: "default" };
 
@@ -61,7 +59,7 @@ const Header = () => {
             ? "info"
             : "default";
 
-    return { label: formatPlanLabel(plan, audience), intent };
+    return { label: formatPlanName(plan), intent };
   };
 
   const badge = getPlanBadgeConfig();

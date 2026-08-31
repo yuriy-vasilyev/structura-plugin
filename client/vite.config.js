@@ -45,15 +45,20 @@ const wpExternalsDevPlugin = () => {
       const source = id.slice(PREFIX.length);
       const globalPath = globals[source];
 
-      // jsx-runtime needs a shim: wp.element has createElement but not jsx/jsxs
+      // jsx-runtime needs a shim: wp.element has createElement but not jsx/jsxs.
+      // The automatic runtime's `jsx(type, props, key)` keeps children IN props
+      // and passes `key` as the THIRD arg — whereas createElement's 3rd arg is a
+      // CHILD. Aliasing jsx→createElement turned the key into children and
+      // crashed keyed @structura/ui renders (React #130). Wrap correctly:
+      // children stay in props, key is hoisted into the config. Mirrors the
+      // production shim in src/index.tsx.
       if (source === "react/jsx-runtime" || source === "react/jsx-dev-runtime") {
         return [
           `const el = window.wp.element;`,
+          `const jsx = (type, props, key) => el.createElement(type, key === undefined ? props : { ...props, key });`,
           `export const Fragment = el.Fragment;`,
-          `export const jsx = el.createElement;`,
-          `export const jsxs = el.createElement;`,
-          `export const jsxDEV = el.createElement;`,
-          `export default { jsx: el.createElement, jsxs: el.createElement, jsxDEV: el.createElement, Fragment: el.Fragment };`,
+          `export { jsx, jsx as jsxs, jsx as jsxDEV };`,
+          `export default { jsx, jsxs: jsx, jsxDEV: jsx, Fragment: el.Fragment };`,
         ].join("\n");
       }
 

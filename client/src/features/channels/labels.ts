@@ -27,3 +27,28 @@ export const connectionStatusLabel = (status: ConnectionStatus | string): string
       return String(status);
   }
 };
+
+/**
+ * Chip label for an integration capability, or `null` when the capability
+ * shouldn't render a chip at all.
+ *
+ * Only `insights` gets a chip today: it's the one capability whose meaning
+ * ("this channel never publishes — it only reads data") isn't already
+ * conveyed by the card's category pill, and hiding that distinction would
+ * make a read-only source look like yet another posting channel. `publish`
+ * / `notify` / `adapt` deliberately map to `null` — chipping every card
+ * with its mechanics would add noise without adding information.
+ *
+ * Unknown strings also return `null`: the cloud ships new capabilities
+ * ahead of plugin releases (this SPA runs on older sites for months), and
+ * a raw internal token like `"insights_v2"` leaking into the UI would be
+ * worse than no chip. Callers must treat `null` as "render nothing".
+ */
+export const capabilityLabel = (capability: string): string | null => {
+  switch (capability) {
+    case "insights":
+      return __("Read-only insights", "structura");
+    default:
+      return null;
+  }
+};

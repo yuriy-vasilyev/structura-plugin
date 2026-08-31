@@ -71,29 +71,6 @@ class LicenseManagerLicenseDataTest extends TestCase
         $this->assertSame('byok', $data['plan']);
         $this->assertSame(3, $data['provider_count_cap']);
         $this->assertFalse($data['is_anonymous']);
-        // Payload predates the audience cache → surfaced as null so
-        // the SPA falls back to the cloud heartbeat.
-        $this->assertNull($data['audience']);
-    }
-
-    /** @test */
-    public function cached_workspace_audience_is_surfaced_alongside_the_plan(): void
-    {
-        // Cached at activation / heartbeat time (2026-06-07) so the
-        // SPA's plan badge renders "Cloud Individual" on first paint
-        // instead of flashing the name-only label until the heartbeat.
-        $this->mock_payload([
-            'key'       => 'ST-TEST-5678',
-            'api_token' => 'tok_cloud',
-            'status'    => 'active',
-            'plan'      => 'cloud',
-            'audience'  => 'individual',
-        ]);
-
-        $data = License_Manager::get_license_data();
-
-        $this->assertSame('cloud', $data['plan']);
-        $this->assertSame('individual', $data['audience']);
     }
 
     /** @test */

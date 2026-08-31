@@ -185,6 +185,30 @@ interface WizardStore {
   setPersonaSeeded: (seeded: boolean) => void;
 
   /**
+   * The user pressed "Skip for now" on step 3's Google Search Console
+   * connect card — collapses the card to its one-line skipped row
+   * (reversible via Undo, which flips this back). Never feeds step
+   * validity: the card is Optional in every state. Persisted so the
+   * choice survives reloads and the OAuth round-trips other steps make;
+   * cleared by reset() with the rest of the wizard.
+   */
+  gscSkipped: boolean;
+  setGscSkipped: (skipped: boolean) => void;
+
+  /**
+   * A GSC OAuth round-trip is in flight: set right before the connect
+   * card redirects to Google, cleared once the connections query
+   * resolves after re-entry (with or without a new connection — a user
+   * who cancels at Google's consent screen must land back on the
+   * not-connected card, not a forever-spinner). Persisted because the
+   * redirect unloads the SPA — localStorage is what carries "we were
+   * mid-connect" across the bounce so re-entry renders the connecting
+   * state until the result is known.
+   */
+  gscConnectPending: boolean;
+  setGscConnectPending: (pending: boolean) => void;
+
+  /**
    * Positioning pre-warmed by step 1's description auto-draft
    * (2026-06-07): the same homepage-read call answers both the site
    * description AND the step-3 positioning, so step 1 stashes the
@@ -259,6 +283,12 @@ export const useWizardStore = create<WizardStore>()(
       personaSeeded: false,
       setPersonaSeeded: (seeded) => set({ personaSeeded: seeded }),
 
+      gscSkipped: false,
+      setGscSkipped: (skipped) => set({ gscSkipped: skipped }),
+
+      gscConnectPending: false,
+      setGscConnectPending: (pending) => set({ gscConnectPending: pending }),
+
       prewarmedPositioning: null,
       setPrewarmedPositioning: (p) => set({ prewarmedPositioning: p }),
 
@@ -270,6 +300,8 @@ export const useWizardStore = create<WizardStore>()(
           visitedSteps: [1],
           licenseGateSkipped: false,
           personaSeeded: false,
+          gscSkipped: false,
+          gscConnectPending: false,
           prewarmedPositioning: null,
         }),
     }),
@@ -315,6 +347,8 @@ export const useWizardStore = create<WizardStore>()(
         visitedSteps: state.visitedSteps,
         stepValidity: state.stepValidity,
         licenseGateSkipped: state.licenseGateSkipped,
+        gscSkipped: state.gscSkipped,
+        gscConnectPending: state.gscConnectPending,
         prewarmedPositioning: state.prewarmedPositioning,
       }),
     },

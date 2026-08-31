@@ -133,3 +133,45 @@ export function useUpdatePrivacyConsent() {
     },
   });
 }
+
+/**
+ * Cloud opt-in state (wp.org guidelines 7 & 9, review of 2026-08-27).
+ * Distinct from telemetry consent above: telemetry is optional
+ * analytics, this is permission for the plugin to talk to Structura
+ * Cloud at all. Mirrors `Privacy_Rest_Api::get_cloud_consent()`.
+ */
+export interface CloudConsentState {
+  /** True once the admin has accepted the consent screen (or entered a key). */
+  cloudConsent: boolean;
+  /**
+   * True when an activation bearer exists after the bootstrap ran.
+   * Can be false right after a grant if the cloud was unreachable —
+   * consent is still recorded and PHP retries on the next admin load.
+   */
+  hasWorkspace: boolean;
+}
+
+async function postCloudConsent(): Promise<CloudConsentState> {
+  const { restUrl, nonce } = getRestConfig();
+  const response = await fetch(`${restUrl}/structura/v1/privacy/cloud-consent`, {
+    method: "POST",
+    headers: {
+      "X-WP-Nonce": nonce,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  return (await response.json()) as CloudConsentState;
+}
+
+/**
+ * Records the cloud opt-in and runs the anonymous-workspace bootstrap in
+ * the same request. The caller reloads the page on success: every other
+ * gate in the SPA reads the page-render snapshot in
+ * `window.structuraConfig`, which only a fresh render can refresh.
+ */
+export function useGrantCloudConsent() {
+  return useMutation({ mutationFn: postCloudConsent });
+}

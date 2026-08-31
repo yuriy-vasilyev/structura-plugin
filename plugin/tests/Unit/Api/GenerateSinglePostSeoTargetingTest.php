@@ -108,6 +108,41 @@ class GenerateSinglePostSeoTargetingTest extends TestCase
         $this->assertArrayNotHasKey('authorityDomains', $campaign);
     }
 
+    /** @test */
+    public function it_maps_a_valid_model_tier_onto_the_inline_campaign(): void
+    {
+        // The single post-gen picker sends text_tier/image_tier; they must ride
+        // on the ephemeral campaign's intelligence block so the cloud resolves
+        // the concrete model at gen time (preferring the tier over *_model).
+        $campaign = $this->run_and_capture_campaign([
+            'topic'         => 'A practical guide to headless WordPress',
+            'text_provider' => 'gemini',
+            'persona_id'    => 'p1',
+            'text_tier'     => 'top',
+            'image_tier'    => 'mid',
+        ]);
+
+        $this->assertSame('top', $campaign['intelligence']['textTier'] ?? null);
+        $this->assertSame('mid', $campaign['intelligence']['imageTier'] ?? null);
+    }
+
+    /** @test */
+    public function it_leaves_the_model_tier_null_when_none_is_picked(): void
+    {
+        // No tier picked → null on the inline campaign, so the cloud falls back
+        // to the concrete textModel/imageModel exactly as before the picker.
+        $campaign = $this->run_and_capture_campaign([
+            'topic'         => 'A practical guide to headless WordPress',
+            'text_provider' => 'gemini',
+            'persona_id'    => 'p1',
+        ]);
+
+        $this->assertArrayHasKey('textTier', $campaign['intelligence']);
+        $this->assertNull($campaign['intelligence']['textTier']);
+        $this->assertArrayHasKey('imageTier', $campaign['intelligence']);
+        $this->assertNull($campaign['intelligence']['imageTier']);
+    }
+
     /**
      * Minimal `WP_REST_Request` stand-in exposing `get_json_params()`.
      * PHP 7.4-compatible (the CI matrix still parses 7.4).

@@ -20,6 +20,7 @@ import { Check, ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
 import { Link } from "react-router";
 
 import type { WizardStepId } from "../api/types";
+import { useDismissOnboardingMutation } from "../api/useOnboardingState";
 import { markOnboardingDismissed } from "../utils/onboardingDismissal";
 
 /**
@@ -185,6 +186,15 @@ export const WizardShell = ({
     steps.findIndex((s) => s.id === activeStep),
   );
   useFullScreenLockBody();
+  const dismissOnboarding = useDismissOnboardingMutation();
+
+  // Exit records the dismissal durably (server wp_option) so the auto-redirect
+  // can't re-yank the user in on the next load, plus the legacy localStorage
+  // flag as an instant, offline-safe fallback before the server round-trip.
+  const handleExit = () => {
+    markOnboardingDismissed();
+    void dismissOnboarding.mutateAsync().catch(() => {});
+  };
 
   // Portal target is `document.body`. We render the entire overlay
   // here so wp-admin chrome (top bar + left nav) sits BEHIND the
@@ -235,7 +245,7 @@ export const WizardShell = ({
             the next page load (the resume tile stays as the way in). */}
         <Link
           to="/"
-          onClick={markOnboardingDismissed}
+          onClick={handleExit}
           className="flex items-center gap-1 justify-self-end text-xs text-neutral-500! hover:text-neutral-700! dark:text-neutral-400! dark:hover:text-neutral-200!"
           aria-label={__("Exit setup wizard", "structura")}
         >

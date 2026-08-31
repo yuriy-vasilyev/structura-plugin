@@ -92,8 +92,10 @@ class Headless_Onboarding_Notice
         $nonce    = wp_create_nonce(self::AJAX_ACTION);
         $action   = self::AJAX_ACTION;
 
+        Admin_Notice_Assets::enqueue_dismiss_script();
+
         ?>
-        <div class="notice notice-info is-dismissible" id="structura-headless-onboarding-notice">
+        <div class="notice notice-info is-dismissible" id="structura-headless-onboarding-notice" data-structura-dismiss-action="<?php echo esc_attr($action); ?>" data-structura-dismiss-nonce="<?php echo esc_attr($nonce); ?>" data-structura-dismiss-url="<?php echo esc_url($ajax_url); ?>">
             <p>
                 <strong><?php echo esc_html__('Is this a headless WordPress install?', 'structura'); ?></strong>
                 <?php echo esc_html__(
@@ -109,26 +111,6 @@ class Headless_Onboarding_Notice
                 </a>
             </p>
         </div>
-        <script>
-        (function () {
-            var notice = document.getElementById('structura-headless-onboarding-notice');
-            if (!notice) return;
-            notice.addEventListener('click', function (e) {
-                var target = e.target;
-                if (!target || !target.classList || !target.classList.contains('notice-dismiss')) {
-                    return;
-                }
-                var body = new FormData();
-                body.append('action', <?php echo wp_json_encode($action); ?>);
-                body.append('_wpnonce', <?php echo wp_json_encode($nonce); ?>);
-                fetch(<?php echo wp_json_encode($ajax_url); ?>, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    body: body
-                });
-            });
-        })();
-        </script>
         <?php
     }
 

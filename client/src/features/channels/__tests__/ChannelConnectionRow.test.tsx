@@ -393,3 +393,43 @@ describe("ChannelConnectionRow — video channel", () => {
     expect(screen.queryByText("Quota reached")).toBeNull();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Google Search Console — read-only meta line
+// ---------------------------------------------------------------------------
+
+describe("ChannelConnectionRow — Google Search Console", () => {
+  it("shows the read-only insights meta line instead of a notification locale", () => {
+    // GSC never notifies or publishes; "Notifications in …" on its row
+    // would wrongly imply outbound behaviour.
+    const gscConnection: ConnectionSummary = {
+      ...baseConnection,
+      integrationId: "google-search-console",
+      displayName: "owner@example.com",
+      externalAccountId: "https://example.com/",
+    };
+    const gscCatalogEntry: IntegrationCatalogEntry = {
+      ...slackCatalogEntry,
+      id: "google-search-console",
+      name: "Google Search Console",
+      category: "seo",
+      capabilities: ["insights"],
+      authType: "oauth2",
+      gating: { requiredPlan: "free", requiredAddon: null },
+    };
+    render(
+      <ul>
+        <ChannelConnectionRow
+          connection={gscConnection}
+          catalogEntry={gscCatalogEntry}
+          onDelete={() => {}}
+        />
+      </ul>,
+    );
+    expect(screen.getByText("Read-only insights")).toBeInTheDocument();
+    expect(screen.queryByText(/Notifications in/)).toBeNull();
+    // The selected property (externalAccountId) still renders as the
+    // destination line.
+    expect(screen.getByText("https://example.com/")).toBeInTheDocument();
+  });
+});

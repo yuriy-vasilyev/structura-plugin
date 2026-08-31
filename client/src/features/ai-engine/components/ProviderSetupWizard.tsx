@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { __ } from "@wordpress/i18n";
+import { __, sprintf } from "@wordpress/i18n";
 import {
   ArrowLeft,
   ArrowRight,
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button, cn, Dialog, InputField, Select, Switch } from "@structura/ui";
 import { getProviderVisual } from "@/features/campaigns/constants";
+import { looksLikeUrlNotApiKey } from "@/utils/providerMeta";
 import { useSaveKey } from "../api/useSaveKey";
 import { useProviderPulse } from "../api/useProviderPulse";
 import { useAvailableModelsQuery } from "../api/useAvailableModelsQuery";
@@ -123,6 +124,9 @@ export const ProviderSetupWizard = ({
   const [step, setStep] = useState<WizardStep>(isConnected ? "models" : "intro");
   const [keyInput, setKeyInput] = useState("");
   const [keySubmitted, setKeySubmitted] = useState(isConnected);
+  // Pre-check before saving: a pasted URL can never be a key, and the
+  // masked input means the user can't see that's what they did.
+  const urlPasted = looksLikeUrlNotApiKey(keyInput);
   const [selectedTextModel, setSelectedTextModel] = useState(currentTextModel ?? "");
   const [selectedImageModel, setSelectedImageModel] = useState(currentImageModel ?? "");
   // When the tier forces defaults, the toggles are always on and
@@ -227,7 +231,7 @@ export const ProviderSetupWizard = ({
 
   /* ── Handlers ─────────────────────────────────────────────────── */
   const handleSubmitKey = useCallback(() => {
-    if (!keyInput.trim()) return;
+    if (!keyInput.trim() || urlPasted) return;
     saveKey(
       { provider: providerId, key: keyInput.trim() },
       {
@@ -238,7 +242,7 @@ export const ProviderSetupWizard = ({
         },
       }
     );
-  }, [keyInput, providerId, saveKey]);
+  }, [keyInput, urlPasted, providerId, saveKey]);
 
   const handleTestConnection = useCallback(() => {
     checkPulse();
@@ -374,7 +378,7 @@ export const ProviderSetupWizard = ({
                     className={cn(
                       "mx-auto flex size-16 items-center justify-center rounded-2xl shadow-sm",
                       "bg-neutral-100 dark:bg-neutral-800",
-                      visual.color,
+                      visual.color
                     )}
                   >
                     <Icon size={32} />
@@ -406,7 +410,7 @@ export const ProviderSetupWizard = ({
                         <p className="m-0! text-xs font-bold text-neutral-900 dark:text-neutral-100">
                           {capMeta.label}
                         </p>
-                        <p className="m-0! mt-1 text-[11px] leading-relaxed text-neutral-400">
+                        <p className="mt-1! mb-0! text-[11px] leading-relaxed text-neutral-400">
                           {capMeta.description}
                         </p>
                       </div>
@@ -427,7 +431,7 @@ export const ProviderSetupWizard = ({
                 <h2 className="m-0! text-lg font-bold text-neutral-900 dark:text-white">
                   {__("Enter your API key", "structura")}
                 </h2>
-                <p className="m-0! mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+                <p className="mt-2! mb-0! text-sm text-neutral-500 dark:text-neutral-400">
                   {__(
                     "Your key is encrypted with AES-256-CBC and never leaves your server.",
                     "structura"
@@ -445,6 +449,23 @@ export const ProviderSetupWizard = ({
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSubmitKey();
                 }}
+                error={
+                  urlPasted
+                    ? keyPrefix
+                      ? sprintf(
+                          /* translators: %s: the provider's API key prefix, e.g. "sk-" */
+                          __(
+                            'That looks like a web address, not an API key. Paste the key itself — it starts with "%s".',
+                            "structura"
+                          ),
+                          keyPrefix
+                        )
+                      : __(
+                          "That looks like a web address, not an API key. Paste the key itself from your provider's dashboard.",
+                          "structura"
+                        )
+                    : undefined
+                }
               />
 
               <a
@@ -485,7 +506,7 @@ export const ProviderSetupWizard = ({
                     plugin path; a future cloud-side probe will populate
                     it again. */}
                 {isOnline && latency !== null && (
-                  <p className="m-0! mt-2 text-sm text-neutral-500">
+                  <p className="mt-2! mb-0! text-sm text-neutral-500">
                     {__("Response time:", "structura")}{" "}
                     <span className="font-mono font-bold text-emerald-600">{latency}ms</span>
                   </p>
@@ -522,7 +543,7 @@ export const ProviderSetupWizard = ({
                 <h2 className="m-0! text-lg font-bold text-neutral-900 dark:text-white">
                   {__("Configure provider", "structura")}
                 </h2>
-                <p className="m-0! mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+                <p className="mt-2! mb-0! text-sm text-neutral-500 dark:text-neutral-400">
                   {__("Pick models and set this provider as your default.", "structura")}
                 </p>
               </div>
@@ -685,7 +706,7 @@ export const ProviderSetupWizard = ({
                   variant="accent"
                   onClick={handleSubmitKey}
                   loading={isSavingKey}
-                  disabled={!keyInput.trim()}
+                  disabled={!keyInput.trim() || urlPasted}
                 >
                   {__("Save & Test", "structura")}
                   <ArrowRight size={14} className="ml-1.5" />

@@ -1,15 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { __, sprintf } from "@wordpress/i18n";
 import { ExternalLink, Globe, Loader2, Save, Sparkles } from "lucide-react";
-import {
-  Button,
-  Card,
-  InputField,
-  Select,
-  Switch,
-  TextArea,
-  toast,
-} from "@structura/ui";
+import { Button, Card, InputField, Select, Switch, TextArea, toast } from "@structura/ui";
 
 import { docsUrl } from "@/utils/docsUrl";
 import {
@@ -316,10 +308,7 @@ export const PublicSiteCard = () => {
               onChange={(e) => handleChange("publicUrl", e.target.value)}
             />
             <p className="mt-1.5 mb-0! text-xs text-gray-500 dark:text-gray-400">
-              {__(
-                "The URL readers actually visit. No trailing slash needed.",
-                "structura"
-              )}
+              {__("The URL readers actually visit. No trailing slash needed.", "structura")}
             </p>
             {urlSuggestions.length > 0 && (
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -331,11 +320,11 @@ export const PublicSiteCard = () => {
                     key={suggestion}
                     type="button"
                     onClick={() => handleChange("publicUrl", suggestion)}
-                    className="inline-flex items-center rounded-full border border-gray-300 bg-white px-2.5 py-0.5 text-xs text-gray-700 hover:border-brand-500 hover:bg-brand-50 hover:text-brand-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-brand-400 dark:hover:bg-brand-900/20 dark:hover:text-brand-300"
+                    className="hover:border-brand-500 hover:bg-brand-50 hover:text-brand-700 dark:hover:border-brand-400 dark:hover:bg-brand-900/20 dark:hover:text-brand-300 inline-flex items-center rounded-full border border-gray-300 bg-white px-2.5 py-0.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                     aria-label={sprintf(
                       // translators: %s is a public-URL suggestion (e.g. "xerx.io")
                       __("Use %s", "structura"),
-                      chipLabel(suggestion),
+                      chipLabel(suggestion)
                     )}
                   >
                     {chipLabel(suggestion)}
@@ -366,9 +355,7 @@ export const PublicSiteCard = () => {
                 variant="secondary"
                 size="sm"
                 onClick={handleQuickSetupClick}
-                disabled={
-                  quickSetup.isPending || draft.publicUrl.trim() === ""
-                }
+                disabled={quickSetup.isPending || draft.publicUrl.trim() === ""}
               >
                 {quickSetup.isPending ? (
                   <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
@@ -384,10 +371,7 @@ export const PublicSiteCard = () => {
           <div>
             <TextArea
               label={__("Description", "structura")}
-              placeholder={__(
-                "A short paragraph describing what your site is for…",
-                "structura"
-              )}
+              placeholder={__("A short paragraph describing what your site is for…", "structura")}
               rows={3}
               maxLength={600}
               value={draft.description}
@@ -403,7 +387,7 @@ export const PublicSiteCard = () => {
 
           {/* Key pages */}
           <div>
-            <p className="m-0! mb-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <p className="mt-0! mb-1.5! text-sm font-medium text-gray-700 dark:text-gray-300">
               {__("Key pages", "structura")}
             </p>
             <p className="m-0! mb-3 text-xs text-gray-500 dark:text-gray-400">
@@ -428,9 +412,7 @@ export const PublicSiteCard = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               {(() => {
-                const visibleOptions = STRATEGY_OPTIONS.filter(
-                  (opt) => opt.value !== "inherit",
-                );
+                const visibleOptions = STRATEGY_OPTIONS.filter((opt) => opt.value !== "inherit");
                 return (
                   <Select
                     value={draft.permalinkStrategy}

@@ -13,4 +13,13 @@ export const channelKeys = {
    * connection) and refetching once per InstallModal mount is plenty.
    */
   indexnowKey: () => [...channelKeys.all, "indexnow-key"] as const,
+  /**
+   * Per-post GSC mirror stats, keyed by the post's permalink so two run
+   * receipts pointing at the same post share one cache entry.
+   */
+  gscPostStats: (pageUrl: string) =>
+    [...channelKeys.all, "gsc-post-stats", pageUrl] as const,
+  /** Site-level GSC overview in summary mode (dashboard glance card). */
+  gscOverviewSummary: () =>
+    [...channelKeys.all, "gsc-overview-summary"] as const,
 };

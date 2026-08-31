@@ -31,8 +31,22 @@ export type IntegrationAuthType = "oauth2" | "webhook" | "apikey" | "none";
 /**
  * Capabilities an integration advertises. Keep in lockstep with
  * `IntegrationCapability` on the cloud side.
+ *
+ * `insights` (2026-07, Google Search Console) marks a READ-ONLY inbound
+ * data source: the dispatcher never fans out to it and no dispatch
+ * settings (bindings, cadence, locale) apply. The cloud may ship new
+ * capability strings before the plugin updates, so render surfaces must
+ * treat unknown values defensively (see `capabilityLabel` in labels.ts).
  */
-export type IntegrationCapability = "adapt" | "publish" | "notify";
+export type IntegrationCapability = "adapt" | "publish" | "notify" | "insights";
+
+/**
+ * Integration id of the Google Search Console channel. Exported (like
+ * `VIDEO_INTEGRATION_ID` in videoChannel.ts) because three surfaces
+ * branch on it: the install modal's read-only note, the configure
+ * modal's property picker, and the connection row's meta line.
+ */
+export const GSC_INTEGRATION_ID = "google-search-console";
 
 /**
  * Connection-scoped add-on tier. Only one exists today ("channels"); "growth"
@@ -212,7 +226,11 @@ export interface ConnectionSummary {
    *
    * Spec: `specs/site-identity-headless.md` §6.
    */
-  externalAccountMeta?: IndexNowMeta | LinkedInMeta | Record<string, unknown>;
+  externalAccountMeta?:
+    | IndexNowMeta
+    | LinkedInMeta
+    | GoogleSearchConsoleMeta
+    | Record<string, unknown>;
   /**
    * Video-channel voiceover voice. Canonical `provider:id` form
    * (`"openai:nova"`, `"gemini:Zephyr"`) post voice-picker-v2; legacy
@@ -258,6 +276,140 @@ export interface LinkedInMeta {
   organizationUrn?: string;
   organizationName?: string;
   availableOrganizations?: LinkedInOrganization[];
+}
+
+/**
+ * A verified Search Console property the connected Google account can read,
+ * as captured at connect time from the GSC `sites` lookup.
+ *
+ * `siteUrl` is the property id in Google's two shapes:
+ *   - URL-prefix: `"https://example.com/"` — rendered verbatim.
+ *   - Domain property: `"sc-domain:example.com"` — rendered as the bare
+ *     domain with a "Domain property" tag (the prefix is Google-internal).
+ *
+ * `permissionLevel` is Google's access string — `siteOwner` /
+ * `siteFullUser` / `siteRestrictedUser` / `siteUnverifiedUser`. The connect
+ * modal renders it as a permission badge and treats ONLY
+ * `siteUnverifiedUser` as unusable (Search Analytics rejects it; Restricted
+ * is enough for Structura's read-only pulls). Typed as `string` (not a
+ * union) so a new Google level degrades gracefully on older plugins.
+ */
+export interface GoogleSearchConsoleProperty {
+  siteUrl: string;
+  permissionLevel: string;
+}
+
+/**
+ * Google Search Console connection metadata persisted on the connection
+ * summary. Drives the four-state connect modal (design handoff:
+ * marketing/design_handoff_gsc_connect_flow): auto-matched confirm,
+ * property picker, no-property guidance, insufficient-permission error.
+ *
+ *   - `googleEmail` — the connected Google account (also the connection's
+ *     `displayName`); `null` when the userinfo lookup failed at connect.
+ *   - `property` — the active property id (`externalAccountId` mirrors it);
+ *     `null` when the connect flow couldn't auto-match one to this site.
+ *   - `availableProperties` — every property the account can SEE, including
+ *     `siteUnverifiedUser` entries (that presence is how the
+ *     insufficient-permission state renders). Empty means the account has
+ *     no property at all → guidance state. Derive through
+ *     `deriveGscConnectView` / `usableGscProperties` in `gscConnect.ts`.
+ *
+ * Mirrors the cloud's `externalAccountMeta` block (spec:
+ * specs/gsc-integration.md §4).
+ */
+export interface GoogleSearchConsoleMeta {
+  googleEmail?: string | null;
+  property?: string | null;
+  availableProperties?: GoogleSearchConsoleProperty[];
+}
+
+/**
+ * Mirror-connection state carried on every GSC read response.
+ *
+ *   - `not_connected` — no GSC connection on this activation.
+ *   - `expired`       — connection needs a re-auth; last-known page data
+ *                       is still returned so surfaces can show history.
+ *   - `pulling`       — first mirror pull is running; poll until `ready`.
+ *   - `ready`         — mirror is fresh through `freshThrough`.
+ *
+ * Spec: specs/gsc-integration.md §5.
+ */
+export type GscMirrorState =
+  | "not_connected"
+  /** OAuth done but no property chosen — send to the Configure picker. */
+  | "property_pending"
+  | "expired"
+  | "pulling"
+  | "ready";
+
+/**
+ * One 28-day metric window (current or previous) for a page.
+ *
+ * `ctr` is the wire's 0..1 fraction — format via
+ * `formatCtr` from `@structura/ui/search-perf`, never `* 100` by hand,
+ * so the plugin and portal always agree on rounding.
+ */
+export interface GscMetricTotals {
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  position: number;
+}
+
+/** One day of the ≤90-day ascending daily series. `d` is `YYYY-MM-DD`. */
+export interface GscSeriesPoint {
+  d: string;
+  clicks: number;
+  impressions: number;
+  position: number;
+}
+
+/** One row of `topQueries` (≤25, ordered by impressions on the wire). */
+export interface GscTopQuery {
+  q: string;
+  clicks: number;
+  impressions: number;
+  position: number;
+}
+
+/**
+ * Per-page stats block of the post-stats response. `null` at the
+ * envelope level means GSC has no rows for this URL yet (collecting /
+ * zero states — the caller branches on publish recency).
+ */
+export interface GscPageStats {
+  url: string;
+  last28: GscMetricTotals;
+  prev28: GscMetricTotals;
+  series: GscSeriesPoint[];
+  topQueries: GscTopQuery[];
+  /**
+   * URL Inspection verdict. Only `"unknown"` is emitted this slice —
+   * surfaces omit the index badge entirely until real verdicts land,
+   * so keep reads defensive (`indexed` / `not_indexed` arrive later).
+   */
+  indexState?: string;
+}
+
+/**
+ * Response from GET `/gsc/post-stats?page_url=…` (WP proxy → cloud GSC
+ * mirror). `page` may be non-null even when `state === "expired"` —
+ * last-known data survives a dead connection.
+ */
+export interface GscPostStatsResponse {
+  success: true;
+  state: GscMirrorState;
+  /**
+   * Connection doc id when a connection exists — used to deep-link the
+   * channels Configure modal for `property_pending`.
+   */
+  connectionId?: string;
+  /** Connected property id (e.g. `sc-domain:example.com`). */
+  property?: string;
+  /** `YYYY-MM-DD` the mirror is fresh through (GSC lags ~2 days). */
+  freshThrough?: string;
+  page: GscPageStats | null;
 }
 
 /**
@@ -611,6 +763,16 @@ export interface UpdateConnectionSettingsInput {
    */
   selected_organization_urn?: string;
   /**
+   * Google Search Console-only property switch. Must be one of the
+   * connection's `externalAccountMeta.availableProperties[].siteUrl`
+   * values — the cloud validates and 400s with a user-facing message
+   * otherwise, so a tampered client can't point the connection at an
+   * arbitrary property. Omit to leave the property untouched. Unlike
+   * `selected_organization_urn` there is NO empty-string sentinel — the
+   * WP proxy drops empty values instead of forwarding them.
+   */
+  selected_gsc_property?: string;
+  /**
    * Video-only voiceover voice — canonical `provider:id` from
    * `VIDEO_VOICE_CATALOG` (`@structura/types`). The picker always writes
    * the canonical form; the cloud also accepts (and canonicalizes)
@@ -624,6 +786,30 @@ export interface UpdateConnectionSettingsInput {
    * send-only-for-video rule as {@link video_voice}.
    */
   video_style?: string;
+}
+
+/**
+ * Response from POST `/gsc/refresh-properties` (WP proxy → cloud
+ * `gscRefreshProperties`). Re-lists the account's Search Console
+ * properties on the STORED token — no OAuth round-trip — and powers the
+ * connect modal's "I've verified — check again" / "Try again" actions.
+ *
+ *   - `ok: true`  — the re-list ran; `properties` is the fresh list and
+ *     `selected` is the server's auto-selection (it auto-selects a fresh
+ *     match when none was chosen yet), or `null` when nothing matched.
+ *   - `ok: false` — the re-list failed (dead token, Google 5xx …);
+ *     `error` carries the user-facing message.
+ *
+ * The server persists any auto-selection itself, so the client only
+ * re-derives its view state and invalidates the connections cache.
+ */
+export interface GscRefreshPropertiesResponse {
+  success: boolean;
+  ok: boolean;
+  properties: GoogleSearchConsoleProperty[];
+  selected: string | null;
+  googleEmail: string | null;
+  error?: string;
 }
 
 /**
@@ -644,4 +830,59 @@ export interface VideoRetryResponse {
 export interface OAuthInitInput {
   integrationId: string;
   postAsOrg?: boolean;
+  /**
+   * SPA hash route to land on after the OAuth bounce (wire: `return_hash`).
+   * The WP proxy whitelists it to hash-route shape (`#/...`) and defaults to
+   * `#/channels/connections` when absent — only the onboarding wizard's GSC
+   * connect card passes `"#/onboarding"` so the round-trip re-enters the
+   * wizard instead of dumping the user on the Channels page.
+   */
+  returnHash?: string;
+}
+
+/**
+ * The dashboard glance card's one highlighted post — biggest positive
+ * 28-day clicks gainer. Mirrors `GscTopMover` in
+ * `functions/src/gsc/state.ts` (`deltaPercent` is always positive).
+ */
+export interface GscTopMover {
+  title: string | null;
+  url: string;
+  postId: string | null;
+  /** Rounded percent clicks change vs the prior 28 days (positive only). */
+  deltaPercent: number;
+}
+
+/**
+ * Response from GET `/gsc/overview?summary=1` (WP proxy → cloud
+ * `gscSiteOverview` in summary mode) — the wp-admin dashboard glance
+ * card's wire. Summary mode carries totals + top mover only (no series,
+ * no page table); `totals28`/`prev28` may be non-null even when
+ * `state === "expired"` (last-known data survives a dead connection).
+ */
+export interface GscOverviewSummaryResponse {
+  success: true;
+  state: GscMirrorState;
+  /** Connected property id (e.g. `sc-domain:example.com`). */
+  property?: string;
+  /** `YYYY-MM-DD` the mirror is fresh through (GSC lags ~2 days). */
+  freshThrough?: string;
+  /**
+   * Connection doc id when a connection exists — used to deep-link the
+   * channels Configure modal for `property_pending`.
+   */
+  connectionId?: string;
+  /** 28-day totals; `null` when the mirror has no rows in the window. */
+  totals28: GscMetricTotals | null;
+  /** The prior 28-day window — delta baseline. */
+  prev28: GscMetricTotals | null;
+  /** Open (non-dismissed) opportunities. */
+  opportunityCount: number;
+  /** Highlighted gainer; `null`/absent when nothing moved up meaningfully. */
+  topMover?: GscTopMover | null;
+  /**
+   * Deep link to the customer portal's Search performance page. Built
+   * cloud-side (wp-admin has no portal ids of its own).
+   */
+  portalReportUrl: string;
 }

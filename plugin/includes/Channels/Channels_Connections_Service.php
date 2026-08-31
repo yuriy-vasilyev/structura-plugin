@@ -40,6 +40,9 @@ class Channels_Connections_Service implements Channels_Connections_Service_Inter
     private const ENDPOINT_UPDATE_SETTINGS = '/channelsUpdateConnectionSettings';
     private const ENDPOINT_CATALOG         = '/channelsListCatalog';
     private const ENDPOINT_OAUTH_INIT      = '/channelsOAuthInit';
+    private const ENDPOINT_GSC_POST_STATS  = '/gscPostStats';
+    private const ENDPOINT_GSC_OVERVIEW    = '/gscSiteOverview';
+    private const ENDPOINT_GSC_REFRESH     = '/gscRefreshProperties';
 
     /**
      * Default `wp_remote_post` overrides. Connection management is interactive
@@ -151,7 +154,8 @@ class Channels_Connections_Service implements Channels_Connections_Service_Inter
         ?bool $attach_featured_image = null,
         ?string $selected_organization_urn = null,
         ?string $video_voice = null,
-        ?string $video_style = null
+        ?string $video_style = null,
+        ?string $selected_gsc_property = null
     ) {
         if ($connection_id === '') {
             return new \WP_Error(
@@ -211,8 +215,76 @@ class Channels_Connections_Service implements Channels_Connections_Service_Inter
         if ($video_style !== null && $video_style !== '') {
             $payload['video_style'] = $video_style;
         }
+        // Google Search Console property switch. Unlike the LinkedIn URN,
+        // the empty string is NOT a meaningful sentinel here — the cloud
+        // rejects anything outside the properties captured at connect — so
+        // only a non-empty value rides the wire (`null`/`''` = untouched).
+        if ($selected_gsc_property !== null && $selected_gsc_property !== '') {
+            $payload['selected_gsc_property'] = $selected_gsc_property;
+        }
 
         return $this->call(self::ENDPOINT_UPDATE_SETTINGS, $payload, 'update_settings');
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * Lives in this service (not a new one) for the same reason as the
+     * catalog read: shared auth envelope, transport wrapper, and error
+     * logging channel. The GSC mirror is cloud-owned; the plugin only
+     * proxies reads.
+     */
+    public function get_gsc_post_stats(string $page_url)
+    {
+        if ($page_url === '') {
+            return new \WP_Error(
+                'channels_invalid_input',
+                __('Post URL is required.', 'structura'),
+                ['status' => 400]
+            );
+        }
+
+        $envelope = $this->build_auth_envelope();
+        if (is_wp_error($envelope)) {
+            return $envelope;
+        }
+
+        $payload             = $envelope;
+        $payload['page_url'] = $page_url;
+
+        return $this->call(self::ENDPOINT_GSC_POST_STATS, $payload, 'gsc_post_stats');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function get_gsc_site_overview(bool $summary = false)
+    {
+        $envelope = $this->build_auth_envelope();
+        if (is_wp_error($envelope)) {
+            return $envelope;
+        }
+
+        $payload = $envelope;
+        if ($summary) {
+            // Glance-card mode: totals + top mover only, no series/table.
+            $payload['summary'] = true;
+        }
+
+        return $this->call(self::ENDPOINT_GSC_OVERVIEW, $payload, 'gsc_overview');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function refresh_gsc_properties()
+    {
+        $envelope = $this->build_auth_envelope();
+        if (is_wp_error($envelope)) {
+            return $envelope;
+        }
+
+        return $this->call(self::ENDPOINT_GSC_REFRESH, $envelope, 'gsc_refresh');
     }
 
     /**

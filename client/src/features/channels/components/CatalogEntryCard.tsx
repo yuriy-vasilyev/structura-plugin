@@ -27,6 +27,7 @@ import { __ } from "@wordpress/i18n";
 import { Lock, Sparkles } from "lucide-react";
 import { Badge, Button, Card, cn } from "@structura/ui";
 import type { IntegrationCatalogEntry, IntegrationCategory } from "../types";
+import { capabilityLabel } from "../labels";
 import { VIDEO_INTEGRATION_ID } from "../videoChannel";
 import { IntegrationIcon } from "./IntegrationIcon";
 import { InstallModal } from "./InstallModal";
@@ -66,6 +67,16 @@ export const CatalogEntryCard = ({ entry }: CatalogEntryCardProps) => {
   const { entitlement } = entry;
   const [installOpen, setInstallOpen] = useState(false);
   const isVideo = entry.id === VIDEO_INTEGRATION_ID;
+
+  // Capability chips derived from the catalog entry. `capabilityLabel`
+  // returns null for capabilities that don't warrant a chip AND for
+  // unknown strings a newer cloud might send — either way the chip is
+  // simply not rendered, so this SPA stays safe on older sites during a
+  // capability-schema rollout window. Today only "insights" (Google
+  // Search Console) yields a chip.
+  const capabilityChips = entry.capabilities
+    .map(capabilityLabel)
+    .filter((label): label is string => label !== null);
 
   // ---- Tier badge (top-right overlay) --------------------------------------
   const tierBadge = renderTierBadge(entry);
@@ -109,6 +120,20 @@ export const CatalogEntryCard = ({ entry }: CatalogEntryCardProps) => {
       {isVideo && (
         <div className="flex flex-wrap gap-1.5">
           {VIDEO_CAPABILITY_CHIPS().map((label) => (
+            <Badge key={label} size="sm">
+              {label}
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      {/* Capability chips from the wire `capabilities` array — currently
+          only "insights" resolves to one ("Read-only insights" on the
+          Google Search Console card). Rendered on every entitlement state,
+          same rationale as the video chips above. */}
+      {capabilityChips.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {capabilityChips.map((label) => (
             <Badge key={label} size="sm">
               {label}
             </Badge>

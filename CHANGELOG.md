@@ -1,5 +1,294 @@
 # Changelog
 
+## [2.22.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.21.0...v2.22.0) (2026-08-31)
+
+
+### Features
+
+* **appsumo:** code pool, grant math, and the generator script ([603f514](https://github.com/yuriy-vasilyev/structura-core/commit/603f51489717f9223df929b9653def05e330acbf))
+* **appsumo:** portal /redeem page + billing stacking entry ([5b44947](https://github.com/yuriy-vasilyev/structura-core/commit/5b449476a435d9e4d584ec929a5a7aff218b3bff))
+* **appsumo:** redeemAppsumoCode callable — validate, grant, stack ([9d03c75](https://github.com/yuriy-vasilyev/structura-core/commit/9d03c7520840d3bdc88ded0d08896a9d295ed2aa))
+* **appsumo:** refund claw-back script ([e5b1ea9](https://github.com/yuriy-vasilyev/structura-core/commit/e5b1ea9083a01b7f6574fa70afda3251f7efc58e))
+* **client:** ranked keyword bank on the wizard's Keywords step + discovery meta round-trip ([b8666a4](https://github.com/yuriy-vasilyev/structura-core/commit/b8666a4025af08fde6eda56b27ea1a4688bd4933))
+* **functions:** DFS Backlinks rank as domain authority + cold-start discovery mode ([4a8b321](https://github.com/yuriy-vasilyev/structura-core/commit/4a8b321c40b133e75731f87ea4f09a34441014a7))
+* **functions:** expose resolved discovery mode, KD ceiling and per-keyword variant counts ([ded5a98](https://github.com/yuriy-vasilyev/structura-core/commit/ded5a9818185f787fd6e00a65110dfc617d97bf6))
+* **functions:** informational-first keyword scoring + volume-among-winnable bank order ([c545e58](https://github.com/yuriy-vasilyev/structura-core/commit/c545e584640b53a5ba5d45c096b6cb4b820f1521))
+* **functions:** keyword ledger + exhaustion-aware picking + bank auto-refresh ([26d7e13](https://github.com/yuriy-vasilyev/structura-core/commit/26d7e13c1d9e634df7adb3ae8759db7bcb4dbebd))
+* **functions:** two-stage duplicate-topic gate + title-shape variety ([978ea54](https://github.com/yuriy-vasilyev/structura-core/commit/978ea54f004bc73930d8009c14997123e1e6508f))
+* **plugin:** require an explicit opt-in before any Structura Cloud contact ([eefbaff](https://github.com/yuriy-vasilyev/structura-core/commit/eefbaffed4a693ae6a9bf21d8cf0ab8c62ab4ed9))
+* **portal:** reusable login tokens for the AppSumo reviewer account ([55cf112](https://github.com/yuriy-vasilyev/structura-core/commit/55cf112f3616ee225a5df5248aaa2e4c9fc4783a))
+* **stock:** consume-time finalize chain + persisted pickedKeyword ([7e066a6](https://github.com/yuriy-vasilyev/structura-core/commit/7e066a644e0e9f578d3ec95ce2d7f3b732da19bd))
+* **stock:** fallback-provider resubmission for failed image batches ([2e5b69d](https://github.com/yuriy-vasilyev/structura-core/commit/2e5b69d72b441061cd97462c2917d86c4e2c12f3))
+* **stock:** persona rotation on random campaigns + per-entry persona provenance ([9e89389](https://github.com/yuriy-vasilyev/structura-core/commit/9e89389fc76cea9662d916aae06453d68366cd45))
+* **stock:** stock WP serve rides the shared delivery body + closes wire gaps ([b5a4454](https://github.com/yuriy-vasilyev/structura-core/commit/b5a44548d4f7165d2f26873537eded6ecdfbfb36))
+* **ui:** KeywordRow, MetricChip and KeywordBankList primitives for the ranked keyword bank ([c67680c](https://github.com/yuriy-vasilyev/structura-core/commit/c67680c4291a054d2cd8ad676b08e928a18a2739))
+* **web,www,functions:** first-touch attribution on sign_up + referrer-host capture ([508709d](https://github.com/yuriy-vasilyev/structura-core/commit/508709df83a77589cc6bc8bff88ed6f113083e94))
+* **web:** keyword-bank runway prediction + thin-bank warning in the campaign keyword step ([0a67d8f](https://github.com/yuriy-vasilyev/structura-core/commit/0a67d8faafd0956e0697418515dc588d53535c67))
+* **web:** ranked keyword bank on the campaign Discovery step + edit page ([dd73eb7](https://github.com/yuriy-vasilyev/structura-core/commit/dd73eb7eb876886ca314c8cd0adfa1bb6d0198e7))
+* **web:** Support link in the portal account menu ([9b2f89a](https://github.com/yuriy-vasilyev/structura-core/commit/9b2f89ae9525fe9e6adecfe3523efe8f43681ab4))
+* **www:** /ai-humanizer analyzer tool + detector retitled onto local head terms ([5b1e83a](https://github.com/yuriy-vasilyev/structura-core/commit/5b1e83a4ad6d73ad50313d868526221e53e5276f))
+* **www:** /ai-seo selling page for the AI SEO money cluster, all four locales ([3363e1a](https://github.com/yuriy-vasilyev/structura-core/commit/3363e1a88efab97e5966ee8da41b84620230f2e0))
+* **www:** /autoblogging definition block with stable anchor + DefinedTerm schema ([ab62265](https://github.com/yuriy-vasilyev/structura-core/commit/ab6226563e80eda0632d55381175496a041106d3))
+* **www:** /for-developers — API-first CMS page for the headless cluster ([27a6009](https://github.com/yuriy-vasilyev/structura-core/commit/27a6009d6c5461564eb06b07f44e4205150d84f6))
+* **www:** /vs/autoblogging-ai meta on the review + pricing brand queries ([a5ecfc2](https://github.com/yuriy-vasilyev/structura-core/commit/a5ecfc2340aab0fef3b4ae471e84d8104aa15d4a))
+* **www:** AI Directories badge in the footer badge row ([624bb39](https://github.com/yuriy-vasilyev/structura-core/commit/624bb39f8efdd30f461260bcabbb6dc2aabfccfa))
+* **www:** auto-link blog bodies into the learn hub ([70e861b](https://github.com/yuriy-vasilyev/structura-core/commit/70e861bc7fa89e9b1035d1efb2f5b938478392b3))
+* **www:** Fazier [#1](https://github.com/yuriy-vasilyev/structura-core/issues/1) Product of the Day award badge in the footer ([0ffb76e](https://github.com/yuriy-vasilyev/structura-core/commit/0ffb76ed9b715e636735dd6b076ca0b270535921))
+* **www:** Fazier launch badge in the footer ([d5a8421](https://github.com/yuriy-vasilyev/structura-core/commit/d5a84210e5ed75765951538ce0272ace9998f652))
+* **www:** followed LaunchKiwi badge in the footer badge row ([4cc3cb5](https://github.com/yuriy-vasilyev/structura-core/commit/4cc3cb5e46168d47a65aaf9fea6bc2edbb7b9607))
+* **www:** footer badges on their own row + SmolSaaS badge ([aa06222](https://github.com/yuriy-vasilyev/structura-core/commit/aa0622216044585cebb0b710a5348cf55d12cc31))
+* **www:** learn hub — headless WordPress body + Next.js CMS comparison ([156f038](https://github.com/yuriy-vasilyev/structura-core/commit/156f038c75820a6c5e521bb90906bd517b26d157))
+* **www:** learn hub content loader, schema builders, and auto-linker ([e9677e8](https://github.com/yuriy-vasilyev/structura-core/commit/e9677e87b75221ffdb9947e4e823305737648016))
+* **www:** learn hub routes, blocks, and the 25-term shortlist ([780d1ea](https://github.com/yuriy-vasilyev/structura-core/commit/780d1ea97245b8c229ffe56978f873a409b24197))
+* **www:** learn terms — blog-seo, content-decay, generative-engine-optimization, content-hub, content-velocity ([64ba0b6](https://github.com/yuriy-vasilyev/structura-core/commit/64ba0b6438c564d3cc307cbd201bddbb420c52c9))
+* **www:** learn terms — evergreen-content, search-intent, ai-search-optimization, topical-authority ([e2ed891](https://github.com/yuriy-vasilyev/structura-core/commit/e2ed891708b8fc45a2d69e6cef39d1f9970ec600))
+* **www:** learn terms — pillar-page, content-pillars, blog-automation, content-marketing-automation ([c755001](https://github.com/yuriy-vasilyev/structura-core/commit/c75500130a093466b827737e8acc299de1694d63))
+* **www:** learn terms — seo-content-writing, content-brief, content-operations, content-pruning ([16b605b](https://github.com/yuriy-vasilyev/structura-core/commit/16b605b4881e01ae940ddd5f41fc59dbe067fd91))
+* **www:** learn terms — seo-copywriting, llm-seo, ai-visibility, content-automation ([a0ee6e8](https://github.com/yuriy-vasilyev/structura-core/commit/a0ee6e8e52c7bc50a6b24334fe5e99c79ff195a8))
+* **www:** publish learn terms — blog-seo, content-decay, generative-engine-optimization, content-hub, content-velocity ([71bef47](https://github.com/yuriy-vasilyev/structura-core/commit/71bef47445925a7b1481197378152024ac40304a))
+* **www:** publish learn terms — evergreen-content, search-intent, ai-search-optimization, topical-authority ([437759e](https://github.com/yuriy-vasilyev/structura-core/commit/437759e785714b180ee3f666bb53b272329d3587))
+* **www:** publish learn terms — pillar-page, content-pillars, blog-automation, content-marketing-automation ([4d54f5f](https://github.com/yuriy-vasilyev/structura-core/commit/4d54f5f8cf73e37a51ffbf42ee1d558cb4af69a5))
+* **www:** publish learn terms — seo-content-writing, content-brief, content-operations, content-pruning ([6185fcc](https://github.com/yuriy-vasilyev/structura-core/commit/6185fcca78b68dbcea0636b9dca0ec9394b7645b))
+* **www:** publish learn terms — seo-copywriting, llm-seo, ai-visibility, content-automation, headless-wordpress, nextjs-cms ([210f3f6](https://github.com/yuriy-vasilyev/structura-core/commit/210f3f637b9cd06764a72ce89a63df0d4b0ac9aa))
+* **www:** publish the first two Learn terms — programmatic SEO, internal linking ([b318971](https://github.com/yuriy-vasilyev/structura-core/commit/b3189718757e38189f41bb7e28d73712b518d134))
+* **www:** retitle home, grow-with-content, for-agencies per the Ahrefs pass ([f8242d2](https://github.com/yuriy-vasilyev/structura-core/commit/f8242d2840c728bef637f37ece5f24293c1ceecc))
+* **www:** retitle selling pages onto researched keywords, all four locales ([ccf9228](https://github.com/yuriy-vasilyev/structura-core/commit/ccf9228fdb425b0d2861d07c1eaa968ec2daab96))
+* **www:** TAAFT featured badge in the footer badge row ([f39bd41](https://github.com/yuriy-vasilyev/structura-core/commit/f39bd41bf34c0a9a54688a217e8f847dde37bf08))
+* **www:** ToolFame + Good AI Tools badges in the footer badge row ([ac32d3c](https://github.com/yuriy-vasilyev/structura-core/commit/ac32d3c2544576ca9ea6f04f9247c4ee129b081b))
+
+
+### Bug Fixes
+
+* **ai:** give tags the reuse-first governance categories already had ([9210f6e](https://github.com/yuriy-vasilyev/structura-core/commit/9210f6e3a960098228e4ae1697c9a4f5aa8c2d5d))
+* **billing:** send welcome/dunning emails only on status or plan transition ([036762a](https://github.com/yuriy-vasilyev/structura-core/commit/036762a5c414f57415a29f2c16f815e1b81b1144))
+* **blog:** a slug from another locale's corpus must 404, not render ([d72edc0](https://github.com/yuriy-vasilyev/structura-core/commit/d72edc0c0b2aceb771b41af705bb0c57fa6578da))
+* **channels:** flip connection to expired on auth_expired publish ([d03699a](https://github.com/yuriy-vasilyev/structura-core/commit/d03699a6b0ee24ba182e0f83f9945212996672f6))
+* **client:** "Campaign deleted." toast after a delete, not "archived" ([76f6d04](https://github.com/yuriy-vasilyev/structura-core/commit/76f6d04606457975686984c2114e66f9ceb3a82b))
+* **docs:** declare @anthropic-ai/sdk + deterministic locale asset-path rewrite ([43c7bc7](https://github.com/yuriy-vasilyev/structura-core/commit/43c7bc7d5b723577701af7ff1e270952b226ba10))
+* **docs:** the generated-posts section link had no page to land on ([ec94ab2](https://github.com/yuriy-vasilyev/structura-core/commit/ec94ab210723566c3d942cd4d2beab4f4402e4c6))
+* **functions:** 150 suggestions per seed + stopword/plural-aware bank dedupe ([8e0d471](https://github.com/yuriy-vasilyev/structura-core/commit/8e0d471462e32e85a338add98d9d746a68cdb632))
+* **functions:** close two discovery gate leaks seen on the first real run ([e2785b3](https://github.com/yuriy-vasilyev/structura-core/commit/e2785b3bf08c393babad939847143ce3714dd346))
+* **functions:** DFS keyword_suggestions rows were never ingested — flat item shape ([9e38855](https://github.com/yuriy-vasilyev/structura-core/commit/9e38855ae7634d22daaa59bce51d93b435bccda0))
+* **functions:** drop hire-out / transactional keywords from blog banks instead of demoting them ([6cba353](https://github.com/yuriy-vasilyev/structura-core/commit/6cba3536a2ab355bad1d56f02786b99e27c77657))
+* **functions:** long-tail anchor splits hyphens/umlauts; bank collapses same-token-set rewordings ([3be8050](https://github.com/yuriy-vasilyev/structura-core/commit/3be80503ba2a2ffe797a830d26064c62f4400994))
+* **functions:** long-tail keyphrase pool was starved to 0–2 entries ([6c08f73](https://github.com/yuriy-vasilyev/structura-core/commit/6c08f73c0631ff16d7706cc1fb5a6b1d0f17fe06))
+* **functions:** mount BYOK_MASTER_KEY on portal credential endpoints ([8d94a06](https://github.com/yuriy-vasilyev/structura-core/commit/8d94a06ffec825c12017e74b720acb11a9fc15e9))
+* **functions:** mount BYOK_MASTER_KEY on three more BYOK-decrypting functions ([f262275](https://github.com/yuriy-vasilyev/structura-core/commit/f26227503c1b0e4d5516edfbd1f0cf0f8ad8589a))
+* **functions:** seed keyword discovery on the topic space, not buyer intent ([9fd5244](https://github.com/yuriy-vasilyev/structura-core/commit/9fd5244f8775f44a38740f117145f3f4f1e8b9da))
+* **i18n:** DE www speaks du-form everywhere — detector + contact-sales converted ([39ab053](https://github.com/yuriy-vasilyev/structura-core/commit/39ab053dba70aca15bb953187e3316b0e58aa950))
+* **keyword-bank:** align partial-metric rows, label volumes, badge legacy live banks ([95283d2](https://github.com/yuriy-vasilyev/structura-core/commit/95283d2998bbb9ecdceb01ea15227d2695d2679d))
+* **plugin:** append the Structura admin menu after Settings instead of position 25 ([f1c8bd4](https://github.com/yuriy-vasilyev/structura-core/commit/f1c8bd47a1dff56350c3a3b0f80ab178537f5930))
+* **plugin:** enqueue admin-notice scripts and styles instead of printing them inline ([28ce120](https://github.com/yuriy-vasilyev/structura-core/commit/28ce1207e99963d62978d05b21eee45a954d8b87))
+* **plugin:** escape slashes in JSON-LD output so schema data cannot close the script element ([4c861e4](https://github.com/yuriy-vasilyev/structura-core/commit/4c861e4884d9d4411c851c83a8debc9b7ca6393d))
+* **plugin:** forward per-keyword metrics from keyword discovery to the SPA ([3ea995c](https://github.com/yuriy-vasilyev/structura-core/commit/3ea995ce6dff6ca457915772fcd6557d97b65240))
+* **pricing:** retire the founding offer automatically when its 25 seats fill ([623d057](https://github.com/yuriy-vasilyev/structura-core/commit/623d05743e8470987f8c793afd57c2bfcbf06fec))
+* **scripts:** xerx retitle must move metaTitle with title ([2eb94cb](https://github.com/yuriy-vasilyev/structura-core/commit/2eb94cbaed78d35a54cbde67747562714ef4c9ad))
+* **stock:** persist imageProvider on stock entries — writer dropped it since 2026-05-01 ([ef19732](https://github.com/yuriy-vasilyev/structura-core/commit/ef197321f4d4ab7c6004cbae32c86a67e6dbe1fc))
+* **stock:** single-source research-stage secrets — stock cron gains DataForSEO ([76ebff3](https://github.com/yuriy-vasilyev/structura-core/commit/76ebff345df34a0614aad488dfe515e8d9adda97))
+* **stock:** trigger refills mount the research bundle too — DataForSEO gap ([aad44bf](https://github.com/yuriy-vasilyev/structura-core/commit/aad44bfa615043697abb348527d7752caa1624a3))
+* **video:** one render per instance — concurrency:1 on runVideoSynthesis ([433cfdc](https://github.com/yuriy-vasilyev/structura-core/commit/433cfdcee1321e34e488bdc3f4ee1b0cec198d71))
+* **web,client:** dead app.structurawp.com/pricing upsell links → real funnels ([a7336ed](https://github.com/yuriy-vasilyev/structura-core/commit/a7336edb6f4a8aba2613a381b5f610214dc8709c))
+* **web:** canonicalise /login and noindex all other portal routes ([37fe124](https://github.com/yuriy-vasilyev/structura-core/commit/37fe124cba5b200b5505181e2bf9bf06b997b328))
+* **www:** 308s for wrap-around duplicate blog posts + CMS repair script ([d88047b](https://github.com/yuriy-vasilyev/structura-core/commit/d88047bb073a3be963b99d88fb2b13c5de7b10f6))
+* **www:** allow launchbuff.com to iframe the site via CSP frame-ancestors ([81c1bc1](https://github.com/yuriy-vasilyev/structura-core/commit/81c1bc1689637c5b45626c0a28add34366c60b64))
+* **www:** decode every HTML entity in FAQ text before it reaches FAQPage JSON-LD ([d071be6](https://github.com/yuriy-vasilyev/structura-core/commit/d071be66f59e4575b74d17a7e1d1dadb40892cf7))
+* **www:** decode German and French quotation entities in FAQ text too ([191ea8a](https://github.com/yuriy-vasilyev/structura-core/commit/191ea8a2db32febb3e09de9dd60d77a601581d91))
+* **www:** drop the changelog's GitHub commit links — the repo is private ([3132ce5](https://github.com/yuriy-vasilyev/structura-core/commit/3132ce588ffcd7f81d28bff1e1922cc7e67a09c6))
+* **www:** hreflang must name locales that actually serve the slug ([27a69ef](https://github.com/yuriy-vasilyev/structura-core/commit/27a69ef56c5dbf4c5e6f1090b31ad0d30c1ced7c))
+* **www:** keep learn's generateStaticParams out of the dev prerender manifest ([e3144e8](https://github.com/yuriy-vasilyev/structura-core/commit/e3144e8f1618004d483115f705f685f248e81fc4))
+* **www:** learn hub — apply the Ahrefs pre-deploy validation pass ([9e0bd25](https://github.com/yuriy-vasilyev/structura-core/commit/9e0bd258e1d8a80782a9801f228abc9f8252743d))
+* **www:** learn kit builds site-relative hrefs through the adapter's localePath ([cacf987](https://github.com/yuriy-vasilyev/structura-core/commit/cacf9879f9fe3a0d9f738b2092d7a387e317eb87))
+* **www:** learn term titles drop the " — Structura" template suffix ([6488623](https://github.com/yuriy-vasilyev/structura-core/commit/6488623c7ec31cc7f7358038b06e65528c299f81))
+* **www:** legal-page autolinks swallowed the sentence's full stop ([fe7fd17](https://github.com/yuriy-vasilyev/structura-core/commit/fe7fd177a0f3a9a1ba82ad7de577759b9e2cb3a6))
+* **www:** LocaleSwitcher sends cross-locale blog links to the blog index ([e5476cd](https://github.com/yuriy-vasilyev/structura-core/commit/e5476cd6f54ca9af59648997c785223dc2245718))
+* **www:** put metadata in &lt;head&gt; for crawlers + canonicalize in-body links ([45df5a9](https://github.com/yuriy-vasilyev/structura-core/commit/45df5a9846a653b71f408ed74591347dd4598ce3))
+* **www:** strip inline issue refs from changelog bullet text ([1c16b5c](https://github.com/yuriy-vasilyev/structura-core/commit/1c16b5c4f739937b8b29a4100bc7d8cdc8c1ea0b))
+* **www:** submit every locale's blog posts, not just the first one's ([0e0622a](https://github.com/yuriy-vasilyev/structura-core/commit/0e0622a8ca8ff87a7f1294a6cbf37e59831d2cde))
+* **www:** swap AI Directories badge variants — file names describe artwork color, not theme ([324a580](https://github.com/yuriy-vasilyev/structura-core/commit/324a5806f970694d68d7f15d3db86ef52fe6ea05))
+* **www:** the features comparison teaser pointed at a route we never had ([6083e0d](https://github.com/yuriy-vasilyev/structura-core/commit/6083e0d1e09995a8873926e2de79428340b7bc3a))
+* **www:** the sitemap advertised term URLs in locales that never had them ([9d78088](https://github.com/yuriy-vasilyev/structura-core/commit/9d7808870bd87cb2a31c21da8c3aa1f8ac1f2879))
+
+
+### Reverts
+
+* **www:** remove LaunchKiwi footer badge ([83c0cec](https://github.com/yuriy-vasilyev/structura-core/commit/83c0ceceae5d58f1db30e8c960f41c94fcd7f14a))
+* **www:** remove ToolFame footer badge ([60b4208](https://github.com/yuriy-vasilyev/structura-core/commit/60b420814576d1089c7a7c511ac924100ec067a8))
+
+## [2.21.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.20.0...v2.21.0) (2026-08-01)
+
+
+### Features
+
+* **ai:** inject attached research documents into the synthesis prompt ([9b5c3d3](https://github.com/yuriy-vasilyev/structura-core/commit/9b5c3d33379f8775db5921df32cd2523901c0bb6))
+* **ai:** tier picker for every BYOK-family tier, Standard default, provider gating ([56f0022](https://github.com/yuriy-vasilyev/structura-core/commit/56f00224eb49a907363b0e0797591f19709eb228))
+* **attachments:** research-attachment upload core — extract (PDF/DOCX/TXT/MD/HTML), store, portal callable + plugin bearer twin ([f493560](https://github.com/yuriy-vasilyev/structura-core/commit/f493560c49a5a1c4c4d0fadebc66ea6f63bdaf69))
+* **campaigns:** widen the ephemeral single-post contract — content options + research attachments on the wire ([c94c6d0](https://github.com/yuriy-vasilyev/structura-core/commit/c94c6d01086218a9288c927ebd23cff7cba844ae))
+* **client:** Research material section on Generate Post + attachment refs on the wire ([cd4299b](https://github.com/yuriy-vasilyev/structura-core/commit/cd4299b5fcfceb5e45c23dbc1713025e2cd9d4f3))
+* **headless:** surface image-rehost failures on run receipt, incidents, and ops Telegram ([0c38770](https://github.com/yuriy-vasilyev/structura-core/commit/0c38770385efe057015c0461e4a7acf9b5871f17))
+* **i18n:** Austrian and Swiss German campaign languages with variant prompt guidance ([5c072e1](https://github.com/yuriy-vasilyev/structura-core/commit/5c072e1e16d0d3a5b1ac9f665243f3658a54a790))
+* **plugin:** research-doc upload proxy + attachments on the single-post wire ([d9f8bcd](https://github.com/yuriy-vasilyev/structura-core/commit/d9f8bcd25430741cb8a6b02c6e618745d77c0219))
+* **pricing:** gate the founding seat counter behind a reveal threshold ([ea2716d](https://github.com/yuriy-vasilyev/structura-core/commit/ea2716d452bb112c5129c0d3fb0a20dc8a9a2db5))
+* **ui:** OptionCardGroup primitive — one selectable-card control for all campaign-mode grids ([cf932d6](https://github.com/yuriy-vasilyev/structura-core/commit/cf932d64d7cf84cffa53444e465170b4131af66d))
+* **ui:** ResearchAttachments multi-file primitive per design handoff ([7fa44a8](https://github.com/yuriy-vasilyev/structura-core/commit/7fa44a8ac74c35071dfaee50517b6ff57cb9289d))
+* **video:** comma-separated Tags field on the Shorts caption package ([4de9b97](https://github.com/yuriy-vasilyev/structura-core/commit/4de9b974645706e44306b67745a9b4e233a9648b))
+* **web:** single post generation is one full page — popup removed, full wire contract, research attachments ([a38a92c](https://github.com/yuriy-vasilyev/structura-core/commit/a38a92c6a021f33e4f4fd978f713012d5390d69e))
+
+
+### Bug Fixes
+
+* **campaigns:** empty keyword bank falls back to campaign name, warns, and regional geo reaches DataForSEO ([8c54444](https://github.com/yuriy-vasilyev/structura-core/commit/8c54444ea02e64e5fcbd3b7d610b47aa91a72f8a))
+* **functions:** pin @firebase/database-compat to 2.1.4 — 2.1.5 breaks cold starts ([5baa8e7](https://github.com/yuriy-vasilyev/structura-core/commit/5baa8e7298ff22958334793441f156702963cb1a))
+* **stock:** stop bucket lifecycle rule from deleting live stock images ([f28f616](https://github.com/yuriy-vasilyev/structura-core/commit/f28f6169207cd0cc1a052f36771c57b803d3d7cc))
+* **web:** GSC modal wraps overflowing footers and adds a reconnect state for expired connections ([83052b1](https://github.com/yuriy-vasilyev/structura-core/commit/83052b1840b85feb8fc83ffe018b8f2f8d7d0ff5))
+
+## [2.20.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.19.0...v2.20.0) (2026-07-22)
+
+
+### Features
+
+* **ai:** accept a BYOK model tier on the generation path (rollout-tolerant) ([82bca3a](https://github.com/yuriy-vasilyev/structura-core/commit/82bca3a2e250b79cd20d34506c58dae857b2ab9c))
+* **ai:** extract shared @structura/model-catalog with tier-based resolution ([daf3de4](https://github.com/yuriy-vasilyev/structura-core/commit/daf3de40f4846a9304b8291be03505df1b8271e1))
+* **campaigns:** persist + thread the BYOK model tier through generation ([c9c7a11](https://github.com/yuriy-vasilyev/structura-core/commit/c9c7a11d6acba325b2747afcb3e8a648224006de))
+* **client:** move GSC prompt to a dismissable dashboard banner; scroll the property picker ([8f00a5c](https://github.com/yuriy-vasilyev/structura-core/commit/8f00a5ca192d49f2fcbeee2990b7f7bd8535a81e))
+* **client:** Top/Standard tier picker on campaign create/edit ([6c325d6](https://github.com/yuriy-vasilyev/structura-core/commit/6c325d683b2191796f36dac93d8ae56058ba85ee))
+* **client:** Top/Standard tier picker on single-post-gen + create steps ([308da8f](https://github.com/yuriy-vasilyev/structura-core/commit/308da8fe8db346ee475e387a38e17c7884256aec))
+* **functions:** prime inputSnapshot on portal single-post runs ([4019d47](https://github.com/yuriy-vasilyev/structura-core/commit/4019d47f60271bb85fd8edcd2ed69d907ab83182))
+* **model-catalog:** add live provider model-sync script ([c86178b](https://github.com/yuriy-vasilyev/structura-core/commit/c86178b0d3b24d5313d6ea22ca988f60abea9d33))
+* **model-catalog:** bump models to live-confirmed ids ([57db590](https://github.com/yuriy-vasilyev/structura-core/commit/57db5908fc34fa3e699fd8ab942983a59854bb73))
+* **plugin:** forward model tier (top|mid) on campaign + single-gen ([49e13ba](https://github.com/yuriy-vasilyev/structura-core/commit/49e13ba433f0d9276a5fc53159ee678516a0ce34))
+* **runs,web:** add provider/model rows to the Run-again modal ([972e41b](https://github.com/yuriy-vasilyev/structura-core/commit/972e41b3484da70f6a123c410aaaa058ea2af0e5))
+* **runs:** confirm before "Run again" with a run summary ([8f71ccd](https://github.com/yuriy-vasilyev/structura-core/commit/8f71ccd542d3e24376b53ce47771635f1934a0da))
+* **runs:** rebuild the Run-again modal to the design handoff ([fc5bf36](https://github.com/yuriy-vasilyev/structura-core/commit/fc5bf36ae5146aee997710a904d21409eb687896))
+* Top/Standard tier picker for image regeneration ([c6242f3](https://github.com/yuriy-vasilyev/structura-core/commit/c6242f35131dbf77f7d133fd9b946f8456ae7d71))
+* **web:** "Run again" on the portal run receipt ([4af6030](https://github.com/yuriy-vasilyev/structura-core/commit/4af6030e8f1aee30a467bd560ddf8dc9f6cbf058))
+* **web:** tier-based BYOK model picker (Top/Standard) on campaigns ([2041e8e](https://github.com/yuriy-vasilyev/structura-core/commit/2041e8e8bc25439df28ada744e2fb6dc4bd28d2c))
+
+
+### Bug Fixes
+
+* **billing:** guard against a duplicate active product shadowing a plan ([afcd195](https://github.com/yuriy-vasilyev/structura-core/commit/afcd1955704cc68386e0f9747e1dbe1fb9f907ce))
+* **campaigns:** stop "Run again" crashing on a schedule-less snapshot ([a741783](https://github.com/yuriy-vasilyev/structura-core/commit/a741783d900234f4e7deea8bb2e6342503bec56e))
+* **client:** correct the wp.element JSX-runtime shim (React [#130](https://github.com/yuriy-vasilyev/structura-core/issues/130) crash) ([f9ea0f7](https://github.com/yuriy-vasilyev/structura-core/commit/f9ea0f76205b34addd4603f912b133671fb7434c))
+* **client:** scope the wp-admin Personas page to this site's bound voices ([2301075](https://github.com/yuriy-vasilyev/structura-core/commit/23010754a936af62b04f0f21372d16eea022a107))
+* **client:** tier badge shows the plan only, not the retired audience suffix ([af00e17](https://github.com/yuriy-vasilyev/structura-core/commit/af00e174ec4eec4d04681ff8dde89a1218c7bea5))
+* **onboarding:** bind seeded House voice for non-AI tiers + workspace-aware seed flag ([495c58d](https://github.com/yuriy-vasilyev/structura-core/commit/495c58d11476eafc5720ec2bff9a044f6b6c50cd))
+* **onboarding:** durable server-backed onboarding-dismissed flag ([9dc0353](https://github.com/yuriy-vasilyev/structura-core/commit/9dc035377f2f019a76a8f34b381c67b40747c8a2))
+* **plugin:** self-heal a revoked anonymous bearer instead of 401-looping forever ([5537d73](https://github.com/yuriy-vasilyev/structura-core/commit/5537d73ce543ac1c1045671f2c2a6ebca91abf94))
+* **runs:** show draft-aware label on the single-post run header ([633502e](https://github.com/yuriy-vasilyev/structura-core/commit/633502ed49d0128aa5cb6c897e654caf63f54fe1))
+* **web:** draft-aware run receipt label for WP posts ([a7f7e6f](https://github.com/yuriy-vasilyev/structura-core/commit/a7f7e6ff008530ae27b0c96b189e3b1b3b9d758b))
+
+## [2.19.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.18.0...v2.19.0) (2026-07-19)
+
+
+### Features
+
+* **gsc:** cap the weekly digest length for agencies ([8b2dee8](https://github.com/yuriy-vasilyev/structura-core/commit/8b2dee884a82f4fc8efc020867cdddde3afec1bf))
+* **gsc:** value-gate the weekly digest — no email without a story ([e834b09](https://github.com/yuriy-vasilyev/structura-core/commit/e834b0992595783c04017d4b1cd4c3ba84e588d9))
+* **www:** add Search Console differentiator to vs pages + home ([7abf203](https://github.com/yuriy-vasilyev/structura-core/commit/7abf20372c74b7924de97a3df28bd00f357f6661))
+* **www:** announce Search Console analytics across the marketing site ([d722b52](https://github.com/yuriy-vasilyev/structura-core/commit/d722b52df4c7bd92b959a5a1965c3afd5e6fa37e))
+
+## [2.18.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.17.0...v2.18.0) (2026-07-19)
+
+
+### Features
+
+* **gsc:** designed connect flow — four-state modal on both surfaces ([150abbb](https://github.com/yuriy-vasilyev/structura-core/commit/150abbb9e29afc905583ace92a95c76e7a3f04be))
+* **gsc:** opportunity engine + URL inspection drip (slice 3 backend) ([1fd7174](https://github.com/yuriy-vasilyev/structura-core/commit/1fd717455937224fe8e7c8870fb2b162e410e207))
+* **gsc:** range support + per-post table on the site overview ([aeacf33](https://github.com/yuriy-vasilyev/structura-core/commit/aeacf3349001d4e7db6a3271234c24cba2467563))
+* **gsc:** Search performance page — trends, opportunity queue, post table ([4585b1d](https://github.com/yuriy-vasilyev/structura-core/commit/4585b1d665abfb50ce0c542117cb5e071544ed3a))
+* **gsc:** uncovered-query rule, impact tiers, competing titles, row sparklines ([b4ddce5](https://github.com/yuriy-vasilyev/structura-core/commit/b4ddce578765164c51be675758fb566a640fc40c))
+* **gsc:** weekly search digest email — slice 4 complete ([032af39](https://github.com/yuriy-vasilyev/structura-core/commit/032af39aeabba0ca691572006399b38b6b5b5ee7))
+* **gsc:** wizard connect cards + wp-admin dashboard glance card ([edfb614](https://github.com/yuriy-vasilyev/structura-core/commit/edfb6144a97dc00e7d8bb77b15ed42dc1b925d99))
+
+
+### Bug Fixes
+
+* **gsc:** route property-less connections to the Configure picker ([4cce557](https://github.com/yuriy-vasilyev/structura-core/commit/4cce557fc1499962e0b735792bceee16c478a132))
+* **headless:** enforce WP-style per-site slug uniqueness at delivery ([4434fd5](https://github.com/yuriy-vasilyev/structura-core/commit/4434fd51071eb5b23104414f831c8785d5ac7af4))
+
+## [2.17.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.16.0...v2.17.0) (2026-07-18)
+
+
+### Features
+
+* **billing:** founding member offer across portal, www, and seat counter ([cf099c3](https://github.com/yuriy-vasilyev/structura-core/commit/cf099c33cc2df7c1f86dd79017c81ddef591efc1))
+* **gsc:** Google Search Console integration — connection + post performance ([8b64bb9](https://github.com/yuriy-vasilyev/structura-core/commit/8b64bb99ae7e359bfaa97d5f1823551876eeb6e0))
+* **web:** show translated render-stage progress on video cards ([eb49e0e](https://github.com/yuriy-vasilyev/structura-core/commit/eb49e0e0fb122aadf9c73add324fefed33c50750))
+* **www:** add /rank-higher paid-ad landing page ([0f1eb1f](https://github.com/yuriy-vasilyev/structura-core/commit/0f1eb1f54a280f2a16c11e155f1bb81b821d0ad8))
+
+
+### Bug Fixes
+
+* **functions:** count delivered live posts in the headless terms cache ([045dc5d](https://github.com/yuriy-vasilyev/structura-core/commit/045dc5df64b22fdf62f2a729949bab20f89a4dc7))
+* **functions:** default missing slug arrays in delivery term deltas ([c6d7b59](https://github.com/yuriy-vasilyev/structura-core/commit/c6d7b59d9f21534a385f37f177b32291f0099bd3))
+* **functions:** portal run cancel no longer 500s ([70739e4](https://github.com/yuriy-vasilyev/structura-core/commit/70739e4a4417230150363e990ae271f1c3548f2d))
+* **notices:** render translated copy instead of raw i18n keys ([8bcb52a](https://github.com/yuriy-vasilyev/structura-core/commit/8bcb52a331463b9308823d4d2403105e3c9813b8))
+* refuse URL-shaped input in API key fields before the live test ([e59480a](https://github.com/yuriy-vasilyev/structura-core/commit/e59480a340255c7b190fb7b35818045bff1fb387))
+* **ui:** resolve pricing/search-perf subpaths for CommonJS consumers ([d22a25d](https://github.com/yuriy-vasilyev/structura-core/commit/d22a25dbd95407d5412f03160d666169fa88b47c))
+
+## [2.16.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.15.0...v2.16.0) (2026-07-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **video:** the "assembly" video pipeline id and the Shotstack integration are removed from the cloud renderer.
+
+### Features
+
+* **functions:** public share links for headless posts + SEO/AI provenance stamps ([77d318a](https://github.com/yuriy-vasilyev/structura-core/commit/77d318afff3e750b01bdeaea92a8251e74cc75f1))
+* **headless:** release the Headless surface to everyone — remove the dogfood gate ([723f1ec](https://github.com/yuriy-vasilyev/structura-core/commit/723f1ecbe876e9e47fb6a6b3e2a78e8e9274dfce))
+* **portal:** real Xerx mark + wider integration-help dialog ([e91ad9f](https://github.com/yuriy-vasilyev/structura-core/commit/e91ad9fc220b108e2c7647cf9a074929312457ae))
+* **portal:** track outbound xerx.io clicks from the integration-help surfaces ([43f7296](https://github.com/yuriy-vasilyev/structura-core/commit/43f729661fa6661900c614a2e5ffec3356f82f09))
+* **portal:** Xerx integration-help banner + lead dialog on the Headless surface ([2bafb2f](https://github.com/yuriy-vasilyev/structura-core/commit/2bafb2f99f2c229f7e4e0e5f844affb9092d3c5b))
+* **video:** year-long video retention with self-healing download links ([3e161ea](https://github.com/yuriy-vasilyev/structura-core/commit/3e161ea315f2aaf1b013ec316d01cf2d768404bc))
+* **web+www:** share links live on the vanity host share.structurawp.com ([947da4d](https://github.com/yuriy-vasilyev/structura-core/commit/947da4d18eaf1a59ef0f161f7aec61e99002e185))
+* **web:** post export (MD/HTML/DOCX) + Share-preview dialog for headless posts ([528feef](https://github.com/yuriy-vasilyev/structura-core/commit/528feef7bcc3a4aa37de67b11bbcbb458735f223))
+* **wporg:** plugin directory listing assets — icon + banner ([ad540ca](https://github.com/yuriy-vasilyev/structura-core/commit/ad540ca197e7aabed4c72d6cdeb883b491791cf4))
+* **www:** "Works with your stack" platforms band + Content API feature card ([e903914](https://github.com/yuriy-vasilyev/structura-core/commit/e903914c282f3e82711859ad6e28f9c3c1cffc64))
+* **www:** drop "WordPress sites" from the Xerx builtBy credit ([f3d4005](https://github.com/yuriy-vasilyev/structura-core/commit/f3d40050f80e6f7e6587e28cc8de7f2d21a665e0))
+* **www:** footer bottom-bar cleanup — cookies to Legal, Xerx credit ([f7c2039](https://github.com/yuriy-vasilyev/structura-core/commit/f7c20395b64ffac56ac5b6dbe98e5c64572053c4))
+* **www:** platform-neutral copy across EN landing pages ([e75d5f4](https://github.com/yuriy-vasilyev/structura-core/commit/e75d5f44bcc2532ed260c145dafcf18be695d0d1))
+* **www:** port the multi-platform reposition to de/es/fr ([e510ae8](https://github.com/yuriy-vasilyev/structura-core/commit/e510ae822e6e2abf99e4565363b9b52851c7e4a8))
+* **www:** public share-preview page at /p/{token} ([99ac174](https://github.com/yuriy-vasilyev/structura-core/commit/99ac174d9c8b0000cde92faea873a10f7011b1bc))
+* **www:** rename the product descriptor to "autonomous blog engine" ([5a84288](https://github.com/yuriy-vasilyev/structura-core/commit/5a84288b90646b839d5b5983b076997443f1a9e3))
+* **www:** reposition homepage copy to two-paths (WordPress or Content API) ([359a831](https://github.com/yuriy-vasilyev/structura-core/commit/359a8317d27afed855c057c65860d88e7c9851d3))
+* **www:** scrub "WordPress-only" concessions from EN vs pages ([2e32254](https://github.com/yuriy-vasilyev/structura-core/commit/2e32254d245dbbd8d157f2723630f89fa8effc44))
+* **www:** two-paths copy for features, pricing, and channels pages ([e601d70](https://github.com/yuriy-vasilyev/structura-core/commit/e601d70b180785fda3d89accba892f38233d5ed6))
+
+
+### Bug Fixes
+
+* **billing:** free-tier weekly and monthly post caps never blocked ([2b2291e](https://github.com/yuriy-vasilyev/structura-core/commit/2b2291e1d10f5e77dc37b2edb2ebcd660e28daab))
+* **functions:** managed AI derives from the plan, not the stored license flag ([a1021f6](https://github.com/yuriy-vasilyev/structura-core/commit/a1021f63f702dbb96be54fc9234a137ae91cd690))
+* **functions:** page ops when the Serper account rejects all SERP calls ([758f5dc](https://github.com/yuriy-vasilyev/structura-core/commit/758f5dc01d9528882ef7c6c02eb629516be66ce8))
+* **functions:** temporal anchor in generation prompts + competitor guard on citations ([58d437b](https://github.com/yuriy-vasilyev/structura-core/commit/58d437b9339db2cba0e1662715fb19a742959c23))
+* **functions:** tolerate trailing commas in AI blueprint JSON ([0e77a02](https://github.com/yuriy-vasilyev/structura-core/commit/0e77a02300aa1d4aef1955797a916e35499eda79))
+* **functions:** trigger-driven stock refills thread isManagedAi too ([a8da14b](https://github.com/yuriy-vasilyev/structura-core/commit/a8da14b50afcac7a72c1184db4cbab4270ae07a5))
+* **functions:** video renders can no longer strand at 'rendering' ([0225122](https://github.com/yuriy-vasilyev/structura-core/commit/022512203cbeeaeb6a11c2e079512329265e0c50))
+* **licenses:** entitlement bundle never matched WP sites — consolidate site-host normalizers ([bebee3b](https://github.com/yuriy-vasilyev/structura-core/commit/bebee3b63d7e7825b23a8a984786d994facae070))
+* **licenses:** grace-period revokes wrote to the retired activations path, aborting every revoke ([3274511](https://github.com/yuriy-vasilyev/structura-core/commit/327451166c7947df6efa421dd14ade0ecf944b6f))
+* **onboarding:** AI competitor suggestions survive wizard step remounts ([38c4a89](https://github.com/yuriy-vasilyev/structura-core/commit/38c4a8918e266e8b78ebd08d9669693671528579))
+* **plugin:** campaign Posts tab shows drafts — recent-blueprints queries set post_status ([e9a26e4](https://github.com/yuriy-vasilyev/structura-core/commit/e9a26e48910eceb0ca16c20d2ea8cdaa2546d6fe))
+* **portal:** land invite acceptances in the invited workspace + lock member roster to owner/admin ([7498022](https://github.com/yuriy-vasilyev/structura-core/commit/74980221e5297796617c0bee0d714c0b363c683d))
+* **web+client:** model pickers are BYOK-only; managed campaigns store no model ([d11f431](https://github.com/yuriy-vasilyev/structura-core/commit/d11f431b90a0f00b41941d02f8e15422e24775d1))
+* **web+docs:** align portal and docs welcome with the two-paths positioning ([79aab2c](https://github.com/yuriy-vasilyev/structura-core/commit/79aab2cc6c87113c7daff3436965fc213e281a97))
+* **web:** campaign config card falls back to the provider name when no model is stored ([e277470](https://github.com/yuriy-vasilyev/structura-core/commit/e277470ce2150bda732c146ce6d3fad17a23c19f))
+* **web:** drop stale pre-parity headless channel strings ([9bbd5f7](https://github.com/yuriy-vasilyev/structura-core/commit/9bbd5f7cb4f2d3bbcb1e8ec679f51261db738be2))
+* **web:** Share dialog close button + surface the active share link on the post view ([f6bc227](https://github.com/yuriy-vasilyev/structura-core/commit/f6bc22769f1fa77a48646030f6819befec83cbdb))
+* **web:** show the wizard smart loader from first paint on Visuals + Persona steps ([ba73a94](https://github.com/yuriy-vasilyev/structura-core/commit/ba73a9406eec883927a34ee53b6a0f7df9e482e8))
+* **web:** wizard logo commits live at upload; suggested competitors auto-add ([e9122c3](https://github.com/yuriy-vasilyev/structura-core/commit/e9122c3dea4afbedc33b1c83e3c2e71d471b13c1))
+* **workspaces:** enforce the plan-tier provider gate on the plugin credential transport ([b9f301c](https://github.com/yuriy-vasilyev/structura-core/commit/b9f301c915370f5b5af4a77f872a564c2e0d818b))
+* **wporg-zip:** clamp 'Tested up to' to major.minor ([ded16d4](https://github.com/yuriy-vasilyev/structura-core/commit/ded16d46cb9a20121155f707864c36f9016814ef))
+* **www+functions:** share-page identity tile prefers the square favicon over the logo ([16e4075](https://github.com/yuriy-vasilyev/structura-core/commit/16e407524f14419658e5115a644a7f5b5ff74b53))
+* **www:** mark Cloud as Most Popular on landing and vs pages, not BYOK ([489e59b](https://github.com/yuriy-vasilyev/structura-core/commit/489e59b4904093e030540154f0ecf1a654a5883a))
+* **www:** remove false WordPress-only claims after headless GA ([9dc51d7](https://github.com/yuriy-vasilyev/structura-core/commit/9dc51d7c886f717110723a5d99627671aabf1590))
+
+
+### Miscellaneous Chores
+
+* pin next release to 2.16.0 ([23ab942](https://github.com/yuriy-vasilyev/structura-core/commit/23ab94253d0251c0699cee1ce47d8273701f1cdc))
+* **video:** retire the Shotstack renderer ([e1ccab5](https://github.com/yuriy-vasilyev/structura-core/commit/e1ccab568ba66c6080e04b564dbc49edf0e5b491))
+
 ## [2.15.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.14.1...v2.15.0) (2026-07-09)
 
 

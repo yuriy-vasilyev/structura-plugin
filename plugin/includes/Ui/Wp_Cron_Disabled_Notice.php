@@ -93,8 +93,10 @@ class Wp_Cron_Disabled_Notice
         $ajax_url = admin_url('admin-ajax.php');
         $nonce    = wp_create_nonce(self::AJAX_ACTION);
         $action   = self::AJAX_ACTION;
+        Admin_Notice_Assets::enqueue_dismiss_script();
+
         ?>
-        <div class="notice notice-error" id="structura-wp-cron-notice">
+        <div class="notice notice-error" id="structura-wp-cron-notice" data-structura-dismiss-action="<?php echo esc_attr($action); ?>" data-structura-dismiss-nonce="<?php echo esc_attr($nonce); ?>" data-structura-dismiss-url="<?php echo esc_url($ajax_url); ?>">
             <p style="margin: 0.5em 0;">
                 <strong><?php echo esc_html__('Structura: WordPress cron is disabled', 'structura'); ?></strong>
             </p>
@@ -112,35 +114,13 @@ class Wp_Cron_Disabled_Notice
                     type="button"
                     class="button-link"
                     id="structura-wp-cron-notice-dismiss"
+                    data-structura-dismiss-trigger
                     style="color: #646970; text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0;"
                 >
                     <?php echo esc_html__('I have a system cron configured', 'structura'); ?>
                 </button>
             </p>
         </div>
-        <script>
-        (function () {
-            var btn = document.getElementById('structura-wp-cron-notice-dismiss');
-            var notice = document.getElementById('structura-wp-cron-notice');
-            if ( ! btn || ! notice) return;
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                var body = new FormData();
-                body.append('action', <?php echo wp_json_encode($action); ?>);
-                body.append('_wpnonce', <?php echo wp_json_encode($nonce); ?>);
-                // Optimistic hide — the POST reconciles server-side. If
-                // the POST fails, the worst case is the banner reappears
-                // on the next page load, which is an acceptable
-                // degradation.
-                notice.style.display = 'none';
-                fetch(<?php echo wp_json_encode($ajax_url); ?>, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    body: body
-                });
-            });
-        })();
-        </script>
         <?php
     }
 

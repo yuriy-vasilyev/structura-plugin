@@ -15,6 +15,12 @@ class License_Manager
      */
     public static function activate($key): array
     {
+        // Entering a license key is an explicit, informed action — it
+        // doubles as the cloud opt-in so Cloud_Client::post() below is
+        // allowed through on installs that never saw the consent screen
+        // (e.g. the admin went straight to Account & License).
+        Anonymous_Bootstrap::grant_cloud_consent();
+
         // TODO(siteUrl-scheme): we send the bare HOST (no scheme). The cloud
         // stores it verbatim as `activation.surfaceMetadata.siteUrl`, which is
         // therefore host-only despite the name — so cloud URL consumers
@@ -112,14 +118,6 @@ class License_Manager
                 // every subsequent cloud call sends `activation_id`.
                 'activation_id' => $body['activationId'] ?? null,
                 'plan'          => $body['plan'],
-                // Workspace audience ("individual" / "agency") cached
-                // next to the plan so the SPA's badge composes its full
-                // label ("Cloud Individual") on first paint instead of
-                // flashing the name-only "Cloud" until the cloud
-                // heartbeat lands. Null on responses from clouds
-                // predating the field (2026-06-07) — the SPA falls back
-                // to heartbeat-only in that case.
-                'audience'      => $body['audience'] ?? null,
                 'status'        => 'active',
             ];
             // Per-activation campaign cap, resolved cloud-side from the
@@ -392,11 +390,6 @@ class License_Manager
             'is_pro'        => self::is_pro(),
             'is_licensed'   => self::is_licensed(),
             'plan'          => $plan,
-            // Workspace audience cached at activation / heartbeat time
-            // (2026-06-07). Lets the SPA's plan badge render its full
-            // "Cloud Individual"-style label on first paint; the cloud
-            // heartbeat stays authoritative and overrides client-side.
-            'audience'      => $data['audience'] ?? null,
             'license_key'   => $data['key'] ?? '',
             'upgrade_url'   => 'https://app.structurawp.com/billing',
             // Per-activation campaign cap surfaced to the SPA so the
@@ -462,18 +455,6 @@ class License_Manager
             }
         }
 
-        // Same sync for the workspace audience — the badge label's
-        // second axis. Cached locally (like plan) so first paint
-        // doesn't flash the name-only label; the cloud heartbeat
-        // remains authoritative client-side.
-        $audience_dirty = false;
-        if (array_key_exists('audience', $body)
-            && ($body['audience'] ?? null) !== ($data['audience'] ?? null)
-        ) {
-            $data['audience'] = $body['audience'];
-            $audience_dirty = true;
-        }
-
         // If the status is anything other than 'active', we update the local record
         if ($status !== 'active') {
             $data['status'] = $status; // 'past_due', 'expired', 'canceled'
@@ -492,7 +473,7 @@ class License_Manager
         if ($plan_dirty) {
             $data['plan'] = $plan;
         }
-        if ($plan_dirty || $cap_dirty || $audience_dirty) {
+        if ($plan_dirty || $cap_dirty) {
             Key_Manager::save_license_payload($data);
         }
 
@@ -617,6 +598,11 @@ class License_Manager
         // exist.
         delete_option('structura_default_persona_seeded');
 
+        // Drop the onboarding-dismissed flag so a reconnect (to a different
+        // license / fresh workspace) re-onboards instead of silently skipping
+        // the wizard the previous connection dismissed.
+        delete_option('structura_onboarding_dismissed');
+
         // A hard remove returns the site to true fresh-install state — so
         // the "site not connected" banner self-hides and a re-activation
         // re-seeds defaults (mirrors forget_site()).
@@ -694,6 +680,7 @@ class License_Manager
         delete_option('structura_license_data');
         delete_option('structura_had_prior_activation');
         delete_option('structura_default_persona_seeded');
+        delete_option('structura_onboarding_dismissed');
 
         Log_Service::add('success', "Site forgotten — local activation state cleared.", 0, 'license_activation');
 
@@ -739,7 +726,9 @@ class License_Manager
      *
      * Three layers of idempotency:
      *
-     *   1. Option flag `structura_default_persona_seeded` — O(1) bail.
+     *   1. Option flag `structura_default_persona_seeded` — a fingerprint of
+     *      the seeded workspace's bearer, so the bail is scoped to THIS
+     *      workspace (see below), not the WP install.
      *   2. 5-minute cooldown transient — prevents wp-admin pageloads from
      *      hammering /listPersonas while the cloud is unreachable on a
      *      brand-new install. Cleared on first success.
@@ -753,10 +742,6 @@ class License_Manager
      */
     public static function seed_default_persona_if_needed(): void
     {
-        if (get_option('structura_default_persona_seeded') === 'yes') {
-            return;
-        }
-
         // Phase 1.8 §1.8.4 — gate on workspace presence (api_token bound)
         // rather than license presence. `is_licensed()` keys off the
         // `key` field which anonymous workspaces deliberately don't carry,
@@ -768,6 +753,23 @@ class License_Manager
         $payload   = Key_Manager::get_license_payload();
         $api_token = is_array($payload) ? ($payload['api_token'] ?? '') : '';
         if ( ! $api_token) {
+            return;
+        }
+
+        // Idempotency layer 1 — bail only when THIS workspace was already
+        // seeded. The House voice lives in the CLOUD workspace, so the flag
+        // must track which workspace it was written to, not merely "seeded
+        // once on this WP install". Storing a bare 'yes' (pre-2026-07-20)
+        // meant a workspace reset — a server-side shadow-workspace wipe that
+        // never runs the plugin's disconnect flow — left the option stuck at
+        // 'yes' while the freshly-provisioned workspace stayed empty, so
+        // onboarding landed on "No personas yet". Key on a hash of the bearer
+        // instead: a new workspace mints a new token → new fingerprint →
+        // re-seed. Hashed so a bearer secret never sits in wp_options in the
+        // clear; the defensive listPersonas check below still blocks any
+        // double-seed within a single workspace.
+        $fingerprint = hash('sha256', $api_token);
+        if (get_option('structura_default_persona_seeded') === $fingerprint) {
             return;
         }
 
@@ -792,7 +794,7 @@ class License_Manager
 
         $existing = $list['body']['personas'] ?? [];
         if (is_array($existing) && count($existing) > 0) {
-            update_option('structura_default_persona_seeded', 'yes');
+            update_option('structura_default_persona_seeded', $fingerprint);
             delete_transient('structura_default_persona_seed_cooldown');
             return;
         }
@@ -837,7 +839,7 @@ class License_Manager
             return;
         }
 
-        update_option('structura_default_persona_seeded', 'yes');
+        update_option('structura_default_persona_seeded', $fingerprint);
         delete_transient('structura_default_persona_seed_cooldown');
         Log_Service::add(
             'info',

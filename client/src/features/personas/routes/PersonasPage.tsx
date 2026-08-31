@@ -7,12 +7,22 @@ import {
   PersonaManager,
   usePersonaLibraryControls,
 } from "../components/PersonaManager";
+import { useMemberPersonaIdsQuery } from "../api/usePersonasQuery";
+import { usePersonaMutations } from "../api/usePersonaMutations";
 
 export const PersonasPage = () => {
   // Controlled mode: the New/Templates buttons live in the page header,
   // but the grid + dialogs are the shared PersonaManager (also used by
   // the setup wizard).
   const controls = usePersonaLibraryControls();
+
+  // Per-site mode (same as the wizard): the grid shows only the voices
+  // BOUND to this site, and the rest of the workspace library drops into an
+  // "Available in your workspace" row with Bind buttons. Before this, the
+  // page rendered the whole workspace library in one flat grid, making every
+  // voice from every site look like it was writing for THIS one.
+  const memberIds = useMemberPersonaIdsQuery().data ?? [];
+  const { addMembership, removeMembership, isBinding } = usePersonaMutations();
 
   return (
     <div className="space-y-10">
@@ -31,7 +41,14 @@ export const PersonasPage = () => {
         </div>
       </header>
 
-      <PersonaManager controls={controls} hideActions />
+      <PersonaManager
+        controls={controls}
+        hideActions
+        memberIds={memberIds}
+        onBind={(id) => void addMembership(id)}
+        onUnbind={(id) => void removeMembership(id)}
+        binding={isBinding}
+      />
 
       {/* SYSTEM ARCHITECTURE FOOTER */}
       <div className="mt-12 flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">

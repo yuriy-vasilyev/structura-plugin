@@ -340,6 +340,20 @@ class Rest_Api
             'callback'            => [$this, 'reset_wizard_state'],
             'permission_callback' => [$this, 'check_permission'],
         ]);
+        // Durable "user has engaged onboarding" flag. Set on wizard
+        // Finish/Exit; read by the SPA auto-redirect gate. Plugin-LOCAL (no
+        // cloud round-trip) on purpose: the anonymous/none tier has no
+        // license_key, so it never reaches the cloud wizard-state endpoints
+        // and had no server completion signal at all — the old per-activation
+        // localStorage flag was the only seal, and its key (the activation id)
+        // changed on every re-provision, resurrecting the wizard. A wp_option
+        // is install-level and survives that drift. Cleared on Disconnect /
+        // Forget so a fresh connection re-onboards.
+        register_rest_route($this->namespace, '/onboarding/dismiss', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'mark_onboarding_dismissed'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
         // W-B: AI connection test (blocking gate on wizard step 2).
         register_rest_route($this->namespace, '/wizard/test-ai', [
             'methods'             => 'POST',
@@ -516,6 +530,16 @@ class Rest_Api
         register_rest_route($this->namespace, '/suggest', [
             'methods'             => 'POST',
             'callback'            => [$this, 'handle_unified_suggestion'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+
+        // Research attachments for single post generation — multipart upload
+        // proxied to the cloud extractor as base64 JSON (the plugin has no
+        // Firebase SDK; bearer JSON is its only binary transport). Spec:
+        // specs/design-brief-research-attachments.md.
+        register_rest_route($this->namespace, '/research-docs', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'upload_research_doc'],
             'permission_callback' => [$this, 'check_permission'],
         ]);
 
@@ -723,6 +747,29 @@ class Rest_Api
         register_rest_route($this->namespace, '/channels/connections', [
             'methods'             => 'GET',
             'callback'            => [$this, 'channels_list_connections'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+
+        // GSC mirror reads — pure cloud proxies (spec: gsc-integration.md
+        // §4.6). GET because they're cacheable-read semantics; the page URL
+        // rides as a query arg.
+        register_rest_route($this->namespace, '/gsc/post-stats', [
+            'methods'             => 'GET',
+            'callback'            => [$this, 'gsc_post_stats'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+
+        register_rest_route($this->namespace, '/gsc/overview', [
+            'methods'             => 'GET',
+            'callback'            => [$this, 'gsc_site_overview'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+
+        // POST: it mutates the connection summary (fresh property list,
+        // possibly an auto-selected match).
+        register_rest_route($this->namespace, '/gsc/refresh-properties', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'gsc_refresh_properties'],
             'permission_callback' => [$this, 'check_permission'],
         ]);
 
@@ -1875,6 +1922,129 @@ class Rest_Api
     }
 
     /**
+     * Extensions the research-doc extractor accepts. Mirrors
+     * SUPPORTED_ATTACHMENT_EXTENSIONS in functions/src/attachments/extract.ts
+     * (.htm normalizes to html cloud-side).
+     */
+    private const RESEARCH_DOC_EXTENSIONS = ['pdf', 'docx', 'txt', 'md', 'html', 'htm'];
+
+    /** Mirrors MAX_ATTACHMENT_BYTES cloud-side (10 MB). */
+    private const RESEARCH_DOC_MAX_BYTES = 10485760;
+
+    /**
+     * Validate one multipart file entry for the research-doc proxy.
+     *
+     * Pure (no filesystem access) so PHPUnit can pin the rejection matrix
+     * without staging real uploads. Returns a sanitized file name, or a
+     * WP_Error whose code matches the cloud's typed `attachments.*` reject
+     * keys so the SPA renders the same inline message for local and cloud
+     * rejections.
+     *
+     * @param array $file One entry from `$request->get_file_params()`.
+     * @return string|\WP_Error Sanitized file name, or the rejection.
+     */
+    public static function validate_research_doc_file($file)
+    {
+        if ( ! is_array($file) || empty($file['name']) || ! is_string($file['name'])) {
+            return new \WP_Error('attachments_missing_file', __('No file was uploaded.', 'structura'), ['status' => 400]);
+        }
+
+        $name = sanitize_file_name(wp_basename($file['name']));
+        $ext  = strtolower((string) pathinfo($name, PATHINFO_EXTENSION));
+        if ($name === '' || ! in_array($ext, self::RESEARCH_DOC_EXTENSIONS, true)) {
+            return new \WP_Error(
+                'attachments_unsupported_type',
+                /* translators: the supported research attachment formats. */
+                __('This file type isn\'t supported — use PDF, DOCX, TXT, MD or HTML.', 'structura'),
+                ['status' => 400, 'message_key' => 'attachments.unsupportedType']
+            );
+        }
+
+        $size = isset($file['size']) ? (int) $file['size'] : 0;
+        if ($size <= 0 || $size > self::RESEARCH_DOC_MAX_BYTES) {
+            return new \WP_Error(
+                'attachments_too_large',
+                __('This file is too large — files can be up to 10 MB.', 'structura'),
+                ['status' => 400, 'message_key' => 'attachments.tooLarge']
+            );
+        }
+
+        if (( ! empty($file['error']) && (int) $file['error'] !== UPLOAD_ERR_OK)) {
+            return new \WP_Error('attachments_upload_failed', __('The upload failed — please try again.', 'structura'), ['status' => 400]);
+        }
+
+        return $name;
+    }
+
+    /**
+     * Proxies one research attachment to the cloud extractor.
+     *
+     * The SPA posts multipart (`file`); we validate locally (cheap, and the
+     * audit log reaches further when the plugin sanitizes too), then forward
+     * base64 JSON to the bearer-authed `executeCloudAttachmentUpload`
+     * endpoint, which extracts the text and stores the attachment under the
+     * workspace. The cloud's typed `messageKey` is relayed verbatim so the
+     * dropzone can render the specific inline error.
+     */
+    public function upload_research_doc($request)
+    {
+        $files = $request->get_file_params();
+        $file  = isset($files['file']) ? $files['file'] : null;
+
+        $name = self::validate_research_doc_file($file);
+        if (is_wp_error($name)) {
+            return $name;
+        }
+
+        $tmp = isset($file['tmp_name']) && is_string($file['tmp_name']) ? $file['tmp_name'] : '';
+        if ($tmp === '' || ! is_uploaded_file($tmp)) {
+            return new \WP_Error('attachments_upload_failed', __('The upload failed — please try again.', 'structura'), ['status' => 400]);
+        }
+
+        $bytes = file_get_contents($tmp);
+        if ($bytes === false || $bytes === '') {
+            return new \WP_Error('attachments_upload_failed', __('The upload failed — please try again.', 'structura'), ['status' => 400]);
+        }
+
+        $mime     = isset($file['type']) && is_string($file['type']) && $file['type'] !== ''
+            ? sanitize_text_field($file['type'])
+            : 'application/octet-stream';
+        $data_uri = 'data:' . $mime . ';base64,' . base64_encode($bytes);
+
+        // Extraction of a 10 MB PDF can take a while on a cold cloud
+        // instance; the endpoint's own ceiling is 120s.
+        $result = Cloud_Client::post('/executeCloudAttachmentUpload', [
+            'fileName' => $name,
+            'dataUri'  => $data_uri,
+        ], ['timeout' => 120]);
+
+        if (is_wp_error($result)) {
+            return new \WP_Error('attachments_cloud_unreachable', __('The upload failed — please try again.', 'structura'), ['status' => 502]);
+        }
+
+        $body = is_array($result['body']) ? $result['body'] : [];
+        if ((int) $result['code'] !== 200 || empty($body['success'])) {
+            return new \WP_Error(
+                'attachments_rejected',
+                isset($body['error']) && is_string($body['error'])
+                    ? $body['error']
+                    : __('The upload failed — please try again.', 'structura'),
+                [
+                    'status'      => (int) $result['code'] >= 400 ? (int) $result['code'] : 400,
+                    'message_key' => isset($body['messageKey']) && is_string($body['messageKey'])
+                        ? $body['messageKey']
+                        : null,
+                ]
+            );
+        }
+
+        return rest_ensure_response([
+            'success'    => true,
+            'attachment' => isset($body['attachment']) && is_array($body['attachment']) ? $body['attachment'] : [],
+        ]);
+    }
+
+    /**
      * Enqueues a one-time post generation without creating a campaign record.
      */
     public function generate_single_post($request)
@@ -2007,6 +2177,18 @@ class Rest_Api
                 'imageProvider'         => $image_provider,
                 'textModel'             => sanitize_text_field($params['text_model'] ?? ''),
                 'imageModel'            => sanitize_text_field($params['image_model'] ?? ''),
+                // Model quality tier (top|mid) for the one-shot run. When the
+                // picker sends one the cloud resolves the concrete model at
+                // gen time and prefers it over *_model; null (no tier sent)
+                // falls back to the concrete model. This inline campaign is
+                // ephemeral and shipped in full every run, so null here can't
+                // clobber a stored value the way a PATCH could.
+                'textTier'              => in_array($params['text_tier'] ?? null, ['top', 'mid'], true)
+                    ? sanitize_key($params['text_tier'])
+                    : null,
+                'imageTier'             => in_array($params['image_tier'] ?? null, ['top', 'mid'], true)
+                    ? sanitize_key($params['image_tier'])
+                    : null,
                 // Optional campaign-level fallback providers — Task_Runner
                 // stamps these on the cloud payload so transient errors on
                 // the primary are recovered from automatically. Null when
@@ -2072,6 +2254,31 @@ class Rest_Api
         )));
         if ( ! empty($authority_domains)) {
             $campaign['authorityDomains'] = $authority_domains;
+        }
+
+        // Research attachments (paid-only; uploaded via /research-docs, which
+        // returned these ids). Stamped on the inline cluster in camelCase —
+        // the shape the cloud's synthesis worker reads
+        // (`campaign.researchAttachments`, functions/src/types/functions.ts).
+        // Capped at 5 to mirror the cloud-side normalizer. Absent → the run
+        // grounds on the objective alone, exactly as before (back-compat).
+        $research_attachments = [];
+        foreach ((array) ($params['research_attachments'] ?? []) as $ref) {
+            if ( ! is_array($ref) || empty($ref['id']) || ! is_string($ref['id'])) {
+                continue;
+            }
+            $research_attachments[] = [
+                'id'   => substr(sanitize_text_field($ref['id']), 0, 64),
+                'name' => isset($ref['name']) && is_string($ref['name'])
+                    ? substr(sanitize_text_field($ref['name']), 0, 120)
+                    : '',
+            ];
+            if (count($research_attachments) === 5) {
+                break;
+            }
+        }
+        if ( ! empty($research_attachments)) {
+            $campaign['researchAttachments'] = $research_attachments;
         }
 
         // Mint the run id upfront so the SPA can navigate immediately
@@ -2564,11 +2771,21 @@ class Rest_Api
                 'sample' => array_slice(array_map(fn($k) => $k['keyword'] ?? '', $keywords), 0, 5),
             ]);
 
-            return rest_ensure_response([
+            $response = [
                 'success'  => true,
                 'keywords' => $keywords,
                 'meta'     => $meta,
-            ]);
+            ];
+            // Per-keyword metrics (volume / KD / intent / variantCount), keyed
+            // by keyword — what the ranked keyword-bank rows render. Provider
+            // path only; absent on legacy (AI-estimated) runs, and then the key
+            // stays absent. Was silently dropped here until 2026-08-28: every
+            // live-data bank in wp-admin rendered without a single metric.
+            if (isset($body['metrics']) && is_array($body['metrics'])) {
+                $response['metrics'] = $body['metrics'];
+            }
+
+            return rest_ensure_response($response);
         } catch (\Exception $e) {
             Log_Service::add('error', sprintf(
                 /* translators: %s: error message from the keyword-discovery service. */
@@ -2771,7 +2988,28 @@ class Rest_Api
         if (is_wp_error($result)) {
             return $result;
         }
-        return rest_ensure_response($result['body']);
+        $body = is_array($result['body'] ?? null) ? $result['body'] : [];
+        // Self-heal: a workspace that finished the wizard (server-stamped
+        // `completedAt`) durably suppresses the auto-redirect even on installs
+        // that completed before the local flag shipped, or that completed on
+        // another machine sharing the workspace.
+        if ( ! empty($body['state']['completedAt'])) {
+            update_option('structura_onboarding_dismissed', '1');
+        }
+        return rest_ensure_response($body);
+    }
+
+    /**
+     * POST /structura/v1/onboarding/dismiss
+     *
+     * Records that the user has finished or exited the setup wizard on this
+     * install, so the SPA auto-redirect never resurrects it. Purely local —
+     * see the route registration for why this can't depend on the cloud.
+     */
+    public function mark_onboarding_dismissed($request)
+    {
+        update_option('structura_onboarding_dismissed', '1');
+        return rest_ensure_response(['success' => true]);
     }
 
     /**
@@ -3108,10 +3346,17 @@ class Rest_Api
             }
         }
 
-        $patched = Campaign_Cloud_Reader::patch_campaign($id, [
+        $patch = [
             'keywordBank'          => $keywords,
             'keywordsDiscoveredAt' => current_time('mysql'),
-        ]);
+        ];
+        // Resolved discovery mode / KD ceiling / path, when the SPA has one
+        // (fresh discovery). Left untouched on the doc otherwise.
+        $meta = Campaign_Shape_Transformer::sanitize_discovery_meta($params['discoveryMeta'] ?? null);
+        if ($meta !== null) {
+            $patch['keywordDiscoveryMeta'] = $meta;
+        }
+        $patched = Campaign_Cloud_Reader::patch_campaign($id, $patch);
 
         if ( ! $patched) {
             return new \WP_Error(
@@ -4719,8 +4964,17 @@ class Rest_Api
             ];
         }
 
+        // Campaign runs insert posts as `draft` unless the campaign opts
+        // into direct publishing, and WP_Query defaults to publish-only
+        // when `post_status` is omitted — which made this endpoint (and
+        // the Posts tab's "N posts" badge) report 0 for review-first
+        // campaigns even though their drafts existed (agency report
+        // 2026-07-15). Enumerate every status a campaign post can occupy.
+        $post_status = ['publish', 'draft', 'pending', 'private', 'future'];
+
         $count_query = new \WP_Query([
             'post_type'           => 'any',
+            'post_status'         => $post_status,
             'ignore_sticky_posts' => true,
             'posts_per_page'      => -1,
             'fields'              => 'ids',
@@ -4732,6 +4986,7 @@ class Rest_Api
 
         $args = [
             'post_type'           => 'any',
+            'post_status'         => $post_status,
             'ignore_sticky_posts' => true,
             'posts_per_page'      => $per_page,
             'paged'               => $page,
@@ -4804,6 +5059,61 @@ class Rest_Api
     public function channels_list_connections($request)
     {
         $result = $this->channels_connections()->list_connections();
+        if (is_wp_error($result)) {
+            return $result;
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * GET /gsc/post-stats?page_url=… — one post's Search Console stats.
+     *
+     * `esc_url_raw` at the boundary: the value is a permalink the SPA read
+     * from the run doc, but the audit trail is stronger when the plugin
+     * sanitizes too (house rule: sanitize at the REST boundary).
+     *
+     * @param \WP_REST_Request $request Request.
+     * @return \WP_REST_Response|\WP_Error
+     */
+    public function gsc_post_stats($request)
+    {
+        $page_url = esc_url_raw((string) $request->get_param('page_url'));
+        $result   = $this->channels_connections()->get_gsc_post_stats($page_url);
+        if (is_wp_error($result)) {
+            return $result;
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * GET /gsc/overview — site-level Search Console overview.
+     *
+     * @param \WP_REST_Request $request Request.
+     * @return \WP_REST_Response|\WP_Error
+     */
+    public function gsc_site_overview($request)
+    {
+        $summary = $request->get_param('summary') === '1';
+        $result  = $this->channels_connections()->get_gsc_site_overview($summary);
+        if (is_wp_error($result)) {
+            return $result;
+        }
+
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * POST /gsc/refresh-properties — re-list Search Console properties on
+     * the stored token (the connect modal's "check again" action).
+     *
+     * @param \WP_REST_Request $request Request.
+     * @return \WP_REST_Response|\WP_Error
+     */
+    public function gsc_refresh_properties($request)
+    {
+        $result = $this->channels_connections()->refresh_gsc_properties();
         if (is_wp_error($result)) {
             return $result;
         }
@@ -4989,6 +5299,17 @@ class Rest_Api
         $video_voice = $this->sanitize_video_choice($request->get_param('video_voice'));
         $video_style = $this->sanitize_video_choice($request->get_param('video_style'));
 
+        // Google Search Console property switch. `null` (absent) means
+        // "leave untouched"; unlike the LinkedIn URN there is no empty-
+        // string sentinel — the service drops '' and the cloud validates
+        // any non-empty value against the properties captured at connect.
+        // Read with `is_string` so this whitelist handler can't silently
+        // strip the field (the attach_featured_image bug class above).
+        $gsc_property_param    = $request->get_param('selected_gsc_property');
+        $selected_gsc_property = is_string($gsc_property_param)
+            ? sanitize_text_field($gsc_property_param)
+            : null;
+
         $result = $this->channels_connections()->update_connection_settings(
             $connection_id,
             $notification_locale,
@@ -4998,6 +5319,7 @@ class Rest_Api
             $selected_organization_urn,
             $video_voice,
             $video_style,
+            $selected_gsc_property,
         );
         if (is_wp_error($result)) {
             return $result;
@@ -5669,7 +5991,18 @@ class Rest_Api
         // surface is an SPA route under hash routing, so we append
         // `#/channels/connections` to land directly on the
         // connections list when the callback redirects back.
-        $return_url = admin_url('admin.php?page=structura') . '#/channels/connections';
+        // Optional SPA hash route to land on after the OAuth bounce. The
+        // onboarding wizard passes `#/onboarding` so the connect card can
+        // resolve in place (GSC wizard card, 2026-07); everything else
+        // defaults to the Channels page. Whitelisted to hash-route shape so
+        // a tampered client can't smuggle an absolute URL or markup into
+        // the cloud-signed state.
+        $return_hash_param = (string) ($request->get_param('return_hash') ?? '');
+        $return_hash       = preg_match('/^#\/[A-Za-z0-9\/_-]*$/', $return_hash_param) === 1
+            ? $return_hash_param
+            : '#/channels/connections';
+
+        $return_url = admin_url('admin.php?page=structura') . $return_hash;
 
         // Posting target — LinkedIn only. The React install modal sends
         // `post_as: "organization"` when the user picks "A company page I

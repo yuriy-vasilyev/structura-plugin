@@ -20,10 +20,18 @@ const memberIdsMock = vi.hoisted(() => ({ current: [] as string[] }));
 const suggestMock = vi.hoisted(() => ({ fn: vi.fn() }));
 const savePersonaMock = vi.hoisted(() => ({ fn: vi.fn() }));
 const addMembershipMock = vi.hoisted(() => ({ fn: vi.fn() }));
+// Tier is varied per test: paid + provider = AI draft; non-AI tiers
+// (none/free/BYOK-no-provider) bind the seeded House voice instead.
+const licenseMock = vi.hoisted(() => ({
+  current: { plan: "cloud", isPaidLicense: true } as Record<string, unknown>,
+}));
+const providersMock = vi.hoisted(() => ({
+  current: { defaultTextProvider: "openai" } as Record<string, unknown>,
+}));
 
 vi.mock("@/features/settings", () => ({
-  useLicense: () => ({ plan: "cloud", isPaidLicense: true }),
-  useDefaultProviders: () => ({ defaultTextProvider: "openai" }),
+  useLicense: () => licenseMock.current,
+  useDefaultProviders: () => providersMock.current,
 }));
 vi.mock("@/hooks/useMagicSuggest", () => ({
   useMagicSuggest: () => ({ suggest: suggestMock.fn, isSuggesting: false }),
@@ -55,6 +63,8 @@ import { useWizardStore } from "../state/wizardStore";
 beforeEach(() => {
   useWizardStore.getState().reset();
   memberIdsMock.current = [];
+  licenseMock.current = { plan: "cloud", isPaidLicense: true };
+  providersMock.current = { defaultTextProvider: "openai" };
   suggestMock.fn.mockReset();
   savePersonaMock.fn.mockReset();
   addMembershipMock.fn.mockReset();
@@ -145,5 +155,84 @@ describe("WizardStep5Persona — auto-draft gating", () => {
     await waitFor(() =>
       expect(addMembershipMock.fn).toHaveBeenCalledWith("seed1"),
     );
+  });
+});
+
+describe("WizardStep5Persona — non-AI tier House-voice binding", () => {
+  // Regression (2026-07-20): on none/free tiers the plugin-seeded "House
+  // voice" landed in the workspace library UNBOUND, leaving an empty "no
+  // voice writing for this site" dropzone next to a lone bindable card — and
+  // blocking Finish (validity = a bound member). Bind it automatically.
+  it("binds the seeded House voice on a none tier (no AI draft)", async () => {
+    licenseMock.current = { plan: "none", isPaidLicense: false };
+    providersMock.current = { defaultTextProvider: null };
+    personasQueryMock.current = {
+      data: [{ id: "hv1", name: "House voice" }],
+      isLoading: false,
+      isSuccess: true,
+    };
+    memberIdsMock.current = [];
+    render(<WizardStep5Persona />);
+
+    await waitFor(() =>
+      expect(addMembershipMock.fn).toHaveBeenCalledWith("hv1"),
+    );
+    // A non-AI tier never drafts a voice.
+    expect(suggestMock.fn).not.toHaveBeenCalled();
+    expect(savePersonaMock.fn).not.toHaveBeenCalled();
+  });
+
+  it("binds the seeded House voice on the free tier too", async () => {
+    licenseMock.current = { plan: "free", isPaidLicense: false };
+    providersMock.current = { defaultTextProvider: null };
+    personasQueryMock.current = {
+      data: [{ id: "hv9", name: "House voice" }],
+      isLoading: false,
+      isSuccess: true,
+    };
+    memberIdsMock.current = [];
+    render(<WizardStep5Persona />);
+
+    await waitFor(() =>
+      expect(addMembershipMock.fn).toHaveBeenCalledWith("hv9"),
+    );
+    expect(suggestMock.fn).not.toHaveBeenCalled();
+  });
+
+  it("does NOT re-bind when a voice already writes for this site", async () => {
+    // The user (or an earlier auto-bind) already bound one — respect it.
+    licenseMock.current = { plan: "free", isPaidLicense: false };
+    providersMock.current = { defaultTextProvider: null };
+    personasQueryMock.current = {
+      data: [{ id: "hv1", name: "House voice" }],
+      isLoading: false,
+      isSuccess: true,
+    };
+    memberIdsMock.current = ["hv1"];
+    render(<WizardStep5Persona />);
+
+    await waitFor(() =>
+      expect(screen.getByText("persona-manager")).toBeInTheDocument(),
+    );
+    expect(addMembershipMock.fn).not.toHaveBeenCalled();
+  });
+
+  it("does not bind before the async seed lands (empty library)", async () => {
+    // License_Manager POSTs the House voice to the cloud asynchronously; the
+    // library can be momentarily empty. Don't bind nothing — wait for it.
+    licenseMock.current = { plan: "none", isPaidLicense: false };
+    providersMock.current = { defaultTextProvider: null };
+    personasQueryMock.current = {
+      data: [],
+      isLoading: false,
+      isSuccess: true,
+    };
+    memberIdsMock.current = [];
+    render(<WizardStep5Persona />);
+
+    await waitFor(() =>
+      expect(screen.getByText("persona-manager")).toBeInTheDocument(),
+    );
+    expect(addMembershipMock.fn).not.toHaveBeenCalled();
   });
 });

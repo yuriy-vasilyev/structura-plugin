@@ -16,10 +16,7 @@ import dayjs from "@/libs/dayjs";
 import { useDefaultProviders } from "@/features/settings";
 import type { Campaign, CampaignFormData } from "@/features/campaigns/types";
 import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutations";
-import {
-  useStockListQuery,
-  type StockEntryView,
-} from "@/features/campaigns/api/useStockListQuery";
+import { type StockEntryView, useStockListQuery } from "@/features/campaigns/api/useStockListQuery";
 import { useStockMutations } from "@/features/campaigns/api/useStockMutations";
 import { normalizePostStatus } from "@/features/campaigns/helpers";
 
@@ -109,18 +106,13 @@ const StockBanner: FC<{ campaign: Campaign }> = ({ campaign }) => {
             <p className="m-0! text-sm font-bold text-neutral-800 dark:text-neutral-200">
               {__("Pre-generation is off for this campaign", "structura")}
             </p>
-            <p className="m-0! mt-1 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+            <p className="mt-1! mb-0! text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
               {__(
                 "Stock is a buffer of posts written ahead of your schedule using your AI provider's discounted batch tier. With it on, scheduled posts cost up to 50% less and publish in under a second — without it, every run generates fresh at full price. We highly recommend enabling it.",
-                "structura",
+                "structura"
               )}
             </p>
-            <Button
-              size="sm"
-              className="mt-3"
-              onClick={enablePregeneration}
-              disabled={isUpdating}
-            >
+            <Button size="sm" className="mt-3" onClick={enablePregeneration} disabled={isUpdating}>
               {isUpdating ? (
                 <Loader2 size={14} className="mr-1.5 animate-spin" />
               ) : (
@@ -142,15 +134,12 @@ const StockBanner: FC<{ campaign: Campaign }> = ({ campaign }) => {
           <p className="m-0! text-sm font-bold text-neutral-800 dark:text-neutral-200">
             {__("What is stock?", "structura")}
           </p>
-          <p className="m-0! mt-1 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+          <p className="mt-1! mb-0! text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
             {__(
               "Stock is a small buffer of posts written ahead of your schedule on the AI provider's discounted batch tier. When a scheduled run fires, it publishes a stocked post instantly and a replacement is generated in the background. These are drafts held in the cloud — they only become real posts on your site when their scheduled run consumes them. Editing the campaign discards outdated stock automatically.",
-              "structura",
+              "structura"
             )}
-            {isCloud
-              ? " " +
-                __("Pre-generation is always on for managed plans.", "structura")
-              : ""}
+            {isCloud ? " " + __("Pre-generation is always on for managed plans.", "structura") : ""}
           </p>
         </div>
       </div>
@@ -179,8 +168,7 @@ const GeneratingStrip: FC<{
   // one. Past 60 min we switch the strip to a "looks stuck" tone so
   // the Cancel & regenerate CTA suggests itself — exactly the signal
   // that was invisible during the 2026-06-04 wedged-batch incident.
-  const looksStuck =
-    !!oldest && Date.now() - new Date(oldest).getTime() > 60 * 60_000;
+  const looksStuck = !!oldest && Date.now() - new Date(oldest).getTime() > 60 * 60_000;
 
   return (
     <Card
@@ -188,14 +176,17 @@ const GeneratingStrip: FC<{
         "p-4",
         looksStuck
           ? "border-amber-200/60 bg-amber-50/40 dark:border-amber-900/30 dark:bg-amber-950/10"
-          : "border-neutral-200/60",
+          : "border-neutral-200/60"
       )}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <RefreshCw
             size={16}
-            className={cn("shrink-0 animate-spin", looksStuck ? "text-amber-500" : "text-brand-500")}
+            className={cn(
+              "shrink-0 animate-spin",
+              looksStuck ? "text-amber-500" : "text-brand-500"
+            )}
             style={{ animationDuration: "2.5s" }}
           />
           <div>
@@ -203,22 +194,22 @@ const GeneratingStrip: FC<{
               {sprintf(
                 /* translators: %d: number of posts being generated. */
                 __("Generating %d post(s)…", "structura"),
-                inFlight.length,
+                inFlight.length
               )}
               {age
                 ? " " +
                   sprintf(
                     /* translators: %s: elapsed time like "26 min". */
                     __("(started %s ago)", "structura"),
-                    age,
+                    age
                   )
                 : ""}
             </p>
             {looksStuck && (
-              <p className="m-0! mt-0.5 text-xs text-amber-700 dark:text-amber-400">
+              <p className="mt-0.5! mb-0! text-xs text-amber-700 dark:text-amber-400">
                 {__(
                   "This is taking longer than usual — the provider's batch queue may be slow. You can cancel and start over.",
-                  "structura",
+                  "structura"
                 )}
               </p>
             )}
@@ -266,17 +257,17 @@ const StockEntryRow: FC<{
             : __("Writing this post…", "structura"))}
       </p>
       {entry.excerpt && (
-        <p className="m-0! mt-0.5 line-clamp-2 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+        <p className="mt-0.5!line-clamp-2 mb-0! text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
           {entry.excerpt}
         </p>
       )}
       {entry.entryStatus === "failed" && entry.failureReason && (
-        <p className="m-0! mt-0.5 flex items-start gap-1 text-xs text-red-600 dark:text-red-400">
+        <p className="mt-0.5!flex mb-0! items-start gap-1 text-xs text-red-600 dark:text-red-400">
           <AlertTriangle size={12} className="mt-0.5 shrink-0" />
           <span>{entry.failureReason}</span>
         </p>
       )}
-      <p className="m-0! mt-1 text-[11px] text-neutral-400 dark:text-neutral-500">
+      <p className="mt-1! mb-0! text-[11px] text-neutral-400 dark:text-neutral-500">
         {entry.createdAt ? dayjs(entry.createdAt).fromNow() : null}
         {entry.textModel ? <span> · {entry.textModel}</span> : null}
       </p>
@@ -329,9 +320,7 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
     useStockMutations(campaign.id);
 
   const [confirm, setConfirm] = useState<
-    | { type: "delete"; stockId: string }
-    | { type: "clear" }
-    | null
+    { type: "delete"; stockId: string } | { type: "clear" } | null
   >(null);
 
   const readyCount = entries.filter((e) => e.entryStatus === "ready").length;
@@ -362,28 +351,28 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
               <p className="m-0! text-sm font-bold text-neutral-800 dark:text-neutral-200">
                 {__("Pre-generation paused — provider errors", "structura")}
               </p>
-              <p className="m-0! mt-1 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+              <p className="mt-1! mb-0! text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
                 {sprintf(
                   /* translators: %d: number of failed generation attempts today. */
                   __(
                     "We hit %d failed generation attempts today, so new pre-generated posts are paused to avoid wasting your AI credits. Your scheduled posts still publish normally — they just generate fresh at run time until stock recovers.",
-                    "structura",
+                    "structura"
                   ),
-                  pregen.failureCount,
+                  pregen.failureCount
                 )}
                 {pregen.resetsAt
                   ? " " +
                     sprintf(
                       /* translators: %s: date/time when pre-generation resumes. */
                       __("It resumes automatically around %s.", "structura"),
-                      dayjs(pregen.resetsAt).format("MMM D, HH:mm"),
+                      dayjs(pregen.resetsAt).format("MMM D, HH:mm")
                     )
                   : ""}
               </p>
-              <p className="m-0! mt-1 text-xs leading-relaxed text-amber-700 dark:text-amber-400">
+              <p className="mt-1! mb-0! text-xs leading-relaxed text-amber-700 dark:text-amber-400">
                 {__(
                   "If this keeps happening, try switching this campaign's AI provider in AI Engine settings.",
-                  "structura",
+                  "structura"
                 )}
               </p>
             </div>
@@ -406,7 +395,7 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
                 {sprintf(
                   /* translators: %d: number of ready pre-generated posts. */
                   __("%d ready in stock", "structura"),
-                  readyCount,
+                  readyCount
                 )}
               </span>
               <div className="flex items-center gap-2">
@@ -446,7 +435,10 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
                   className="mx-auto mb-3 text-neutral-200 dark:text-neutral-700"
                 />
                 <p className="text-sm text-neutral-400 dark:text-neutral-500">
-                  {__("Stock is empty — posts are pre-generated automatically ahead of your schedule.", "structura")}
+                  {__(
+                    "Stock is empty — posts are pre-generated automatically ahead of your schedule.",
+                    "structura"
+                  )}
                 </p>
                 <Button
                   variant="secondary"
@@ -495,18 +487,16 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
           confirm?.type === "clear"
             ? __(
                 "All pre-generated posts for this campaign will be discarded, including any still generating. While pre-generation stays on, fresh posts are written automatically.",
-                "structura",
+                "structura"
               )
             : __(
                 "This pre-generated post will be discarded. A replacement is written automatically while pre-generation stays on.",
-                "structura",
+                "structura"
               )
         }
         confirmButtonProps={{
           label:
-            confirm?.type === "clear"
-              ? __("Empty stock", "structura")
-              : __("Discard", "structura"),
+            confirm?.type === "clear" ? __("Empty stock", "structura") : __("Discard", "structura"),
         }}
       />
     </div>

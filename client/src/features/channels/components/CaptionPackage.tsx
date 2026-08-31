@@ -27,6 +27,7 @@ import {
   CAPTION_LIMITS,
   captionHook,
   parseCaptionBlocks,
+  uploadTags,
   type CaptionBlockKind,
 } from "../videoChannel";
 
@@ -100,13 +101,19 @@ export const CaptionPackage = ({ packages }: CaptionPackageProps) => {
 // ---------------------------------------------------------------------------
 
 function ShortsBody({ shorts }: { shorts: VideoSocialPackages["shorts"] }) {
-  // "Copy all" = both upload fields labeled with the same translated
+  // The description's hashtag run duplicated in YouTube's Tags upload
+  // format ("Enter a comma after each tag") — pastes straight into the
+  // Tags field without hand-editing the # run.
+  const tags = uploadTags(shorts.description);
+
+  // "Copy all" = every upload field labeled with the same translated
   // labels the UI shows (handoff package.js `text('yt_all')`) — YouTube's
-  // upload form has two fields, so per-field copy stays primary.
-  const copyAll = `${__("Title", "structura")}:\n${shorts.title}\n\n${__(
-    "Description",
-    "structura"
-  )}:\n${shorts.description}`;
+  // upload form has separate fields, so per-field copy stays primary.
+  const copyAll = [
+    `${__("Title", "structura")}:\n${shorts.title}`,
+    `${__("Description", "structura")}:\n${shorts.description}`,
+    ...(tags ? [`${__("Tags", "structura")}:\n${tags}`] : []),
+  ].join("\n\n");
 
   return (
     <div className="space-y-3">
@@ -125,6 +132,16 @@ function ShortsBody({ shorts }: { shorts: VideoSocialPackages["shorts"] }) {
       >
         <CaptionValue raw={shorts.description} />
       </Field>
+      {tags.length > 0 && (
+        <Field
+          label={__("Tags", "structura")}
+          meta={<Counter count={tags.length} max={CAPTION_LIMITS.shortsTags} />}
+          copyText={tags}
+          copyAria={__("Copy tags", "structura")}
+        >
+          {tags}
+        </Field>
+      )}
       <InfoRow>
         {__(
           "Links in Shorts descriptions aren’t clickable — the URL still helps search and viewers can copy it.",
@@ -135,7 +152,7 @@ function ShortsBody({ shorts }: { shorts: VideoSocialPackages["shorts"] }) {
         <CopyButton
           text={copyAll}
           label={__("Copy all", "structura")}
-          ariaLabel={__("Copy title and description", "structura")}
+          ariaLabel={__("Copy all fields", "structura")}
         />
       </div>
     </div>

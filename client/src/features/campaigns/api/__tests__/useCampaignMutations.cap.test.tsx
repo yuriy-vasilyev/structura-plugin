@@ -200,3 +200,25 @@ describe("useCampaignMutations — cadence_limit_reached (Free weekly cap)", () 
     expect(options.action.label).toBe("Go Pro");
   });
 });
+
+describe("useCampaignMutations.deleteCampaign — success copy", () => {
+  beforeEach(() => {
+    mockApiFetch.mockReset();
+    toastSuccess.mockReset();
+    toastError.mockReset();
+  });
+
+  it("confirms a DELETE as deleted, not 'archived' (live QA 2026-08-28: the confirm says it cannot be undone)", async () => {
+    mockApiFetch.mockResolvedValueOnce({ success: true });
+    const { result } = renderMutationsHook();
+
+    await result.current.deleteCampaign("camp-1");
+
+    await waitFor(() => expect(toastSuccess).toHaveBeenCalled());
+    expect(mockApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({ path: "/structura/v1/scheduler/campaign/camp-1", method: "DELETE" })
+    );
+    expect(String(toastSuccess.mock.calls[0][0])).toMatch(/deleted/i);
+    expect(String(toastSuccess.mock.calls[0][0])).not.toMatch(/archived/i);
+  });
+});

@@ -1,35 +1,56 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { __ } from "@wordpress/i18n";
-import { ArrowLeft, ArrowRight, Crown, Image, Layout, Lock, Sparkles, Zap } from "lucide-react";
-import { Badge, Button, cn, InputField, Select, Switch, TextArea } from "@structura/ui";
+import { __, _n, sprintf } from "@wordpress/i18n";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  Crown,
+  Image,
+  Layout,
+  Lock,
+  Sparkles,
+  Zap,
+} from "lucide-react";
+import {
+  Badge,
+  Button,
+  cn,
+  InputField,
+  OptionCardGroup,
+  ResearchAttachments,
+  SectionGateTeaser,
+  Select,
+  Switch,
+  TextArea,
+  type ResearchAttachmentFile,
+  type ResearchAttachmentsLabels,
+} from "@structura/ui";
 import { PageTitle } from "@/components/Layout/PageTitle";
 import { PageDescription } from "@/components/Layout/PageSubtitle";
 import { DefaultPersonaAdvisory } from "@/components/Shared/DefaultPersonaAdvisory";
 import { NoPersonasBlocker } from "@/components/Shared/NoPersonasBlocker";
 import { ProviderToggle } from "@/features/campaigns/components/ProviderToggle";
+import { mirrorModelForTier } from "@/features/campaigns/modelTier";
 import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutations";
+import {
+  researchRejectSizeMessage,
+  researchRejectTypeMessage,
+  uploadResearchDoc,
+} from "@/features/campaigns/api/uploadResearchDoc";
 import { SeoTargetingSection } from "@/features/campaigns/components/SeoTargetingSection";
 import { MagicSuggestButton } from "@/features/campaigns/components/MagicSuggestButton";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
-import type { AIProvider } from "@/features/campaigns/types";
+import type { AIProvider, CampaignFormData, CampaignMode, CampaignPostStatus, } from "@/features/campaigns/types";
 import { usePersonasQuery } from "@/features/personas";
 import { useAiConnections, useDefaultProviders, useLicense } from "@/features/settings";
 import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
-import {
-  buildMarketingPricingUrl,
-  buildPortalSignupUrl,
-} from "@/utils/portalLinks";
+import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
 import type { SUPPORTED_BLOCK_TYPE } from "@/features/settings/types";
 import { useAiSettingsQuery } from "@/features/ai-engine";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
 import { getCampaignFormDataForLicense } from "@/features/campaigns/helpers";
 import { getCampaignModeMeta } from "@/utils/campaignModeMeta";
-import type {
-  CampaignFormData,
-  CampaignMode,
-  CampaignPostStatus,
-} from "@/features/campaigns/types";
 import { isManagedPlan, type PlanId } from "@structura/types";
 
 const POST_STATUS_OPTIONS: Array<{ value: CampaignPostStatus; label: string }> = [
@@ -48,48 +69,6 @@ const MODE_DESCRIPTIONS: Record<CampaignMode, string> = {
   conversion: __("Content designed to convert readers to customers", "structura"),
   authority: __("Build topical authority with comprehensive coverage", "structura"),
 };
-
-const ModeSelector = ({
-  value,
-  onChange,
-}: {
-  value: CampaignMode;
-  onChange: (mode: CampaignMode) => void;
-}) => (
-  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-    {MODES.map((mode) => {
-      const meta = getCampaignModeMeta(mode);
-      const isActive = value === mode;
-      return (
-        <button
-          key={mode}
-          type="button"
-          onClick={() => onChange(mode)}
-          className={cn(
-            "flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-3 text-center transition-all",
-            isActive
-              ? "border-brand-500 bg-brand-50/50 dark:border-brand-400 dark:bg-brand-950/20 shadow-sm"
-              : "border-transparent bg-neutral-50 hover:border-neutral-200 hover:bg-neutral-100 dark:bg-neutral-800 dark:hover:border-neutral-600 dark:hover:bg-neutral-700"
-          )}
-        >
-          <span
-            className={cn(
-              "text-xs font-bold",
-              isActive
-                ? "text-brand-600 dark:text-brand-400"
-                : "text-neutral-600 dark:text-neutral-400"
-            )}
-          >
-            {meta.label}
-          </span>
-          <span className="text-[10px] leading-snug text-neutral-400 dark:text-neutral-500">
-            {MODE_DESCRIPTIONS[mode]}
-          </span>
-        </button>
-      );
-    })}
-  </div>
-);
 
 // ─── Section wrapper ─────────────────────────────────────────────────
 
@@ -129,6 +108,85 @@ const LockedFeature = ({ label, tier = "Pro" }: { label: string; tier?: string }
   </div>
 );
 
+// ─── Research material labels ────────────────────────────────────────
+
+/**
+ * All copy for the `ResearchAttachments` section, from the design handoff's
+ * microcopy table (`marketing/design_handoff_research_attachments/README.md`
+ * §Microcopy). The component carries zero copy of its own so each surface
+ * localizes with its native stack — here `@wordpress/i18n`.
+ */
+const RESEARCH_ATTACHMENTS_LABELS: ResearchAttachmentsLabels = {
+  title: __("Research material", "structura"),
+  optionalTag: __("Optional", "structura"),
+  valueLine: __(
+    "Attach research, briefs or notes — the post will draw on them.",
+    "structura"
+  ),
+  dropCtaBold: __("Click to upload", "structura"),
+  dropCta: __("or drag and drop", "structura"),
+  dropHint: __(
+    "PDF, DOCX, TXT, MD or HTML · up to 10 MB each · up to 5 files",
+    "structura"
+  ),
+  dropActive: __("Drop to attach", "structura"),
+  busy: __("Uploading & reading…", "structura"),
+  readPages: (n) =>
+    sprintf(
+      /* translators: %d: number of pages extracted from the document */
+      _n("%d page read", "%d pages read", n, "structura"),
+      n
+    ),
+  readWords: (n) =>
+    sprintf(
+      /* translators: %s: approximate number of words extracted */
+      __("≈%s words read", "structura"),
+      n.toLocaleString()
+    ),
+  partialNote: (n, unit) =>
+    unit === "pages"
+      ? sprintf(
+          /* translators: %d: number of pages that will be used */
+          __("Long document — we'll use the first ~%d pages.", "structura"),
+          n
+        )
+      : sprintf(
+          /* translators: %s: number of words that will be used */
+          __("Long document — we'll use the first ~%s words.", "structura"),
+          n.toLocaleString()
+        ),
+  failedNote: __(
+    "We couldn't read this file — it may be corrupt or image-only.",
+    "structura"
+  ),
+  retry: __("Retry", "structura"),
+  remove: (name) =>
+    sprintf(
+      /* translators: %s: file name */
+      __("Remove %s", "structura"),
+      name
+    ),
+  cancel: __("Cancel upload", "structura"),
+  rejectType: researchRejectTypeMessage,
+  rejectSize: researchRejectSizeMessage,
+  addMore: (n, max) =>
+    sprintf(
+      /* translators: 1: number of files attached, 2: maximum number of files */
+      __("Add more files · %1$d of %2$d", "structura"),
+      n,
+      max
+    ),
+  capStrip: __("5 of 5 files attached — remove one to add another.", "structura"),
+  counter: (n, max) =>
+    sprintf(
+      /* translators: 1: number of files attached, 2: maximum number of files */
+      __("%1$d of %2$d", "structura"),
+      n,
+      max
+    ),
+  srReady: __("Ready", "structura"),
+};
+
 // ─── Page ────────────────────────────────────────────────────────────
 
 const GeneratePostPage = () => {
@@ -165,25 +223,34 @@ const GeneratePostPage = () => {
   };
 
   const isManagedAiPlan = isManagedPlan(plan as PlanId);
-  // Agency users get a per-post model picker even though they're on a
-  // managed plan — that's the headline differentiator vs Cloud (see
-  // marketing/PRICING-PAGE-COPY-V2.md "Swap to Claude Sonnet or Imagen 4
-  // Ultra per post"). Cloud stays fully managed: defaults only.
-  const showPerPostModelPicker = !isManagedAiPlan || plan === "cloud_pro";
+  // Managed tiers never pick models — the cloud curates the pin from
+  // (plan, provider) and ignores a client-sent model, so a picker here is
+  // a no-op that misleads (2026-07-14 decision; supersedes the earlier
+  // "Cloud Pro gets a per-post picker" differentiator, which the server
+  // stopped honoring in b682d66bd). Only BYOK-style plans choose models.
+  const showPerPostModelPicker = !isManagedAiPlan;
 
-  // Initialize form with license-aware defaults
+  // Initialize form with license-aware defaults. The one-off "Generate a Post"
+  // flow uses the SAME top/mid tier picker as the campaign form (BYOK/free),
+  // so it carries `textTier`/`imageTier` from the defaults; `flattenCampaign`
+  // forwards them and the cloud resolves the concrete model at gen time.
   const [formData, setFormData] = useState<CampaignFormData>(() =>
     getCampaignFormDataForLicense({ isPaidLicense, isLicensed })
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  // Research material rows (paid only). Held OUTSIDE formData: rows carry
+  // transient UI state (busy/failed, error copy) that must never leak into
+  // the wire payload — only the ready refs are merged in at submit time.
+  const [researchFiles, setResearchFiles] = useState<ResearchAttachmentFile[]>([]);
+
   // Snap providers to the resolved defaults once useAiSettingsQuery
   // hydrates. Without this, the form keeps the static "gemini" fallback
-  // baked into DEFAULT_CAMPAIGN_FORM_DATA, and ProviderToggle's auto-fill
-  // effect picks Gemini's default models (Gemini 3.1 Pro / Flash Image)
-  // even when the only connected provider is OpenAI. Mirrors the seeding
-  // the wizard's CampaignProvider already does (CampaignContext.tsx).
-  // Models are cleared so the auto-fill re-runs against the new provider.
+  // baked into DEFAULT_CAMPAIGN_FORM_DATA even when the only connected
+  // provider is OpenAI. Mirrors the seeding the wizard's CampaignProvider
+  // already does (CampaignContext.tsx). The concrete model is mirrored from
+  // the current tier for the new provider so the doc stays self-consistent
+  // (the tier remains the source of truth; the cloud resolves it at gen time).
   const hasSyncedProviders = useRef(false);
   useEffect(() => {
     if (hasSyncedProviders.current) return;
@@ -195,8 +262,10 @@ const GeneratePostPage = () => {
         ...prev.intelligence,
         textProvider: defaultTextProvider,
         imageProvider: defaultImageProvider,
-        textModel: "",
-        imageModel: "",
+        textModel:
+          mirrorModelForTier(defaultTextProvider, "text", prev.intelligence.textTier ?? "mid") ?? "",
+        imageModel:
+          mirrorModelForTier(defaultImageProvider, "image", prev.intelligence.imageTier ?? "mid") ?? "",
       },
     }));
   }, [aiSettings, defaultTextProvider, defaultImageProvider]);
@@ -221,7 +290,7 @@ const GeneratePostPage = () => {
               personaId: String(personas[0].id),
             },
           }
-        : prev,
+        : prev
     );
   }, [loadingPersonas, personas]);
 
@@ -237,8 +306,7 @@ const GeneratePostPage = () => {
 
   // Top-level cluster patch — the SEO Targeting section replaces whole
   // clusters (identity/authority/competitors) rather than merging field-wise.
-  const patch = (p: Partial<CampaignFormData>) =>
-    setFormData((prev) => ({ ...prev, ...p }));
+  const patch = (p: Partial<CampaignFormData>) => setFormData((prev) => ({ ...prev, ...p }));
 
   const updateSeoRule = (key: string, value: boolean) =>
     update("intelligence", {
@@ -277,11 +345,17 @@ const GeneratePostPage = () => {
   // missing preset no longer blocks — a site upgraded from "none" (which
   // skipped the Visuals wizard step) can still generate images. The
   // `VisualStyleFallbackNotice` below just makes the user aware.
-  const wantsAnyImage =
-    formData.structure.featuredImage || formData.structure.bodyImages;
+  const wantsAnyImage = formData.structure.featuredImage || formData.structure.bodyImages;
 
   const handleGenerate = async () => {
     if (!isValid || !isEngineReady || hasNoPersonas) return;
+    // Only ready rows are submitted (handoff §State Management): busy rows
+    // haven't produced a server ref yet and failed rows never will. The
+    // refs ride at the campaign's TOP level so the run's inputSnapshot
+    // carries them and "Run again" replays them for free.
+    const researchAttachments = researchFiles
+      .filter((f) => f.status === "ready" && f.attachmentId)
+      .map((f) => ({ id: f.attachmentId as string, name: f.name }));
     try {
       // The mutation returns the run_id the plugin minted upfront.
       // Navigate to the run-detail surface in-place so the user sees
@@ -289,7 +363,7 @@ const GeneratePostPage = () => {
       // disappearing form (the pre-2026-05-01 UX, where users had no
       // idea whether their submission was queued, dispatched, failed,
       // or done).
-      const result = await generatePost({ data: formData });
+      const result = await generatePost({ data: { ...formData, researchAttachments } });
       const runId = (result as { run_id?: string })?.run_id;
       if (runId) {
         navigate(`/generate/runs/${runId}`);
@@ -317,9 +391,7 @@ const GeneratePostPage = () => {
   // between; with a single persona it's noise (and that persona is
   // auto-pinned above), so omit it.
   const personaOptions = [
-    ...(personas.length > 1
-      ? [{ value: "random", label: __("Random persona", "structura") }]
-      : []),
+    ...(personas.length > 1 ? [{ value: "random", label: __("Random persona", "structura") }] : []),
     ...personas.map((p) => ({ value: String(p.id), label: p.name })),
   ];
 
@@ -377,10 +449,7 @@ const GeneratePostPage = () => {
           isLoading={isSuggesting}
           onTrigger={generateStrategy}
           ctaLabel={__("Generate post strategy", "structura")}
-          subLabel={__(
-            "We'll study your site and draft a focused objective.",
-            "structura",
-          )}
+          subLabel={__("We'll study your site and draft a focused objective.", "structura")}
           className="mb-4"
         />
         <TextArea
@@ -405,12 +474,58 @@ const GeneratePostPage = () => {
           <label className="mb-2 block text-xs font-bold text-neutral-500 dark:text-neutral-400">
             {__("Writing approach", "structura")}
           </label>
-          <ModeSelector
+          <OptionCardGroup
+            options={MODES.map((mode) => ({
+              value: mode,
+              label: getCampaignModeMeta(mode).label,
+              description: MODE_DESCRIPTIONS[mode],
+            }))}
             value={formData.identity.campaignMode ?? "traffic_magnet"}
             onChange={(mode) => update("identity", { campaignMode: mode })}
+            ariaLabel={__("Writing approach", "structura")}
           />
         </div>
       </Section>
+
+      {/* ── 1.2 Research material ────────────────────────────── */}
+      {/* Placement per handoff: directly after the topic section, before
+          SEO Targeting. Paid gets the dropzone; None/Free get the shipped
+          SectionGateTeaser (same gate pattern as SEO Targeting below —
+          gated fields are neither rendered nor fetched behind it). */}
+      {isPaidLicense ? (
+        <ResearchAttachments
+          files={researchFiles}
+          onFilesChange={setResearchFiles}
+          onUpload={uploadResearchDoc}
+          labels={RESEARCH_ATTACHMENTS_LABELS}
+          disabled={isGenerating}
+        />
+      ) : (
+        <SectionGateTeaser
+          title={__("Research material", "structura")}
+          badge={__("Pro", "structura")}
+          line={__(
+            "Ground posts in your own PDFs, briefs and interview notes — attach up to 5 files per post.",
+            "structura"
+          )}
+          cta={
+            <Button asChild variant="secondary" size="sm">
+              <a
+                href={buildMarketingPricingUrl({
+                  intent: "general_upgrade",
+                  domain: typeof window !== "undefined" ? window.location.hostname : undefined,
+                  plan,
+                })}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {__("Upgrade plan", "structura")}
+                <ArrowUpRight size={14} className="ml-1.5" />
+              </a>
+            </Button>
+          }
+        />
+      )}
 
       {/* ── 1.5 SEO Targeting ────────────────────────────────── */}
       <Section title={__("SEO Targeting", "structura")}>
@@ -429,18 +544,39 @@ const GeneratePostPage = () => {
           textProvider={formData.intelligence.textProvider}
           imageProvider={formData.intelligence.imageProvider}
           onTextProviderChange={(p) =>
-            update("intelligence", { textProvider: p, textModel: "" })
+            update("intelligence", {
+              textProvider: p,
+              textModel: mirrorModelForTier(p, "text", formData.intelligence.textTier ?? "mid") ?? "",
+            })
           }
           onImageProviderChange={(p) =>
-            update("intelligence", { imageProvider: p, imageModel: "" })
+            update("intelligence", {
+              imageProvider: p,
+              imageModel:
+                mirrorModelForTier(p, "image", formData.intelligence.imageTier ?? "mid") ?? "",
+            })
           }
-          availableTextProviders={isManagedAiPlan ? ["gemini", "openai", "anthropic"] : activeProviders}
+          availableTextProviders={
+            isManagedAiPlan ? ["gemini", "openai", "anthropic"] : activeProviders
+          }
           availableImageProviders={isManagedAiPlan ? ["gemini", "openai"] : activeProviders}
-          showModelSelectors={showPerPostModelPicker}
-          textModel={formData.intelligence.textModel}
-          imageModel={formData.intelligence.imageModel}
-          onTextModelChange={(m) => update("intelligence", { textModel: m })}
-          onImageModelChange={(m) => update("intelligence", { imageModel: m })}
+          showTierSelectors={showPerPostModelPicker}
+          textTier={formData.intelligence.textTier ?? "mid"}
+          imageTier={formData.intelligence.imageTier ?? "mid"}
+          onTextTierChange={(t) =>
+            update("intelligence", {
+              textTier: t,
+              textModel:
+                mirrorModelForTier(formData.intelligence.textProvider, "text", t) ?? "",
+            })
+          }
+          onImageTierChange={(t) =>
+            update("intelligence", {
+              imageTier: t,
+              imageModel:
+                mirrorModelForTier(formData.intelligence.imageProvider, "image", t) ?? "",
+            })
+          }
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -561,9 +697,7 @@ const GeneratePostPage = () => {
           <Select
             options={POST_STATUS_OPTIONS}
             value={formData.structure.postStatus}
-            onValueChange={(val) =>
-              update("structure", { postStatus: val as CampaignPostStatus })
-            }
+            onValueChange={(val) => update("structure", { postStatus: val as CampaignPostStatus })}
           >
             <Select.Label>{__("Post Status", "structura")}</Select.Label>
             <Select.Trigger placeholder={__("Select…", "structura")} />
@@ -733,11 +867,7 @@ const GeneratePostPage = () => {
                 <LockedFeature
                   key={block.name}
                   label={block.label}
-                  tier={
-                    isFreeLocked
-                      ? __("Free License", "structura")
-                      : __("Pro", "structura")
-                  }
+                  tier={isFreeLocked ? __("Free License", "structura") : __("Pro", "structura")}
                 />
               );
             }
@@ -845,7 +975,7 @@ const GeneratePostPage = () => {
               <p className="m-0! text-xs font-semibold text-neutral-600 dark:text-neutral-400">
                 {__("Unlock full SEO optimisation with Pro", "structura")}
               </p>
-              <p className="m-0! mt-0.5 text-[11px] text-neutral-500 dark:text-neutral-500">
+              <p className="mt-0.5! mb-0! text-[11px] text-neutral-500 dark:text-neutral-500">
                 {__(
                   "Readability tuning, keyphrase placement, SERP-aware writing, and link validation.",
                   "structura"
@@ -856,10 +986,7 @@ const GeneratePostPage = () => {
               <a
                 href={buildMarketingPricingUrl({
                   intent: "general_upgrade",
-                  domain:
-                    typeof window !== "undefined"
-                      ? window.location.hostname
-                      : undefined,
+                  domain: typeof window !== "undefined" ? window.location.hostname : undefined,
                   plan,
                 })}
                 target="_blank"
@@ -884,7 +1011,7 @@ const GeneratePostPage = () => {
               <h3 className="m-0! text-sm font-bold text-neutral-900 dark:text-white">
                 {__("Want to automate this?", "structura")}
               </h3>
-              <p className="m-0! mt-1 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+              <p className="mt-1! mb-0! text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
                 {__(
                   "Create a free account to set up campaigns that automatically generate and publish posts on a schedule. No more manual work.",
                   "structura"
@@ -895,10 +1022,7 @@ const GeneratePostPage = () => {
                   <a
                     href={buildPortalSignupUrl({
                       intent: "general_upgrade",
-                      domain:
-                        typeof window !== "undefined"
-                          ? window.location.hostname
-                          : undefined,
+                      domain: typeof window !== "undefined" ? window.location.hostname : undefined,
                       plan,
                     })}
                     target="_blank"
@@ -913,10 +1037,7 @@ const GeneratePostPage = () => {
                   <a
                     href={buildMarketingPricingUrl({
                       intent: "general_upgrade",
-                      domain:
-                        typeof window !== "undefined"
-                          ? window.location.hostname
-                          : undefined,
+                      domain: typeof window !== "undefined" ? window.location.hostname : undefined,
                       plan,
                     })}
                     target="_blank"

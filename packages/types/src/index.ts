@@ -43,6 +43,19 @@ export interface User {
    */
   attribution?: UserAttribution;
   /**
+   * Small per-user UI preferences the portal persists across devices by
+   * mirroring them onto the user doc (written client-side with a merge —
+   * the Firestore rules allow users to update their own doc).
+   *
+   * `xerxBanner` — per-site state of the "integration help from Xerx"
+   * banner on the Headless surface: `"dismissed"` collapses it to a text
+   * link, `"sent"` (set after a lead is submitted) swaps it to the quiet
+   * confirmation row. Absent = banner visible.
+   */
+  portalPrefs?: {
+    xerxBanner?: Record<string, "dismissed" | "sent">;
+  };
+  /**
    * First-occurrence stamps for the deep funnel milestones (`growth/events.ts`).
    * Each key is a `GrowthEventKind`; the ISO value is when it first fired.
    * Presence is the idempotency signal that gates the once-per-account
@@ -86,34 +99,11 @@ export interface UserAttribution {
  *
  * `byok` (Bring Your Own Key) replaces `pro` — clearer label for the
  * "user supplies the AI key" tier. `cloud_pro` is a new top-tier above
- * `cloud`; today's `agency` is conceptually replaced by
- * `cloud_pro × WorkspaceAudience.agency` (see {@link WorkspaceAudience}
- * below).
- *
- * Audience (Individual vs Agency) is a separate orthogonal axis carried
- * on the workspace doc, not encoded in `PlanId`. The two grids on the
- * pricing page (Individual / Agency) are filtered views of the same
- * tier ladder differentiated by audience.
+ * `cloud`. The old `agency` tier and the Individual/Agency audience axis
+ * that briefly succeeded it are both retired — the ladder is now exactly
+ * the four plans above, with no separate audience dimension.
  */
 export type PlanId = "free" | "byok" | "cloud" | "cloud_pro";
-
-/**
- * Audience discriminator for the two-grid pricing layout.
- *
- *   - `individual` — solo creator / single-site owner / small business.
- *     Free tier is Individual-only; the paid Individual tiers (BYOK,
- *     Cloud, Cloud Pro) are flat per-site.
- *   - `agency` — multi-site operator. Agency variants of the paid tiers
- *     bundle the Channels add-on; Cloud Agency and Cloud Pro Agency use
- *     graduated volume pricing.
- *
- * Lives on the workspace doc (Phase 3 of the v2 roadmap will introduce
- * the workspace collection — until then, infer/default to
- * `"individual"` for any read site that doesn't already have an
- * audience). Spec: `specs/v2/multi-tenant-and-public-api.md` §Product
- * Decisions, `specs/pricing-v2-implementation.md` §1.
- */
-export type WorkspaceAudience = "individual" | "agency";
 
 /**
  * Plans where Structura runs the AI infrastructure (no API keys required
@@ -168,15 +158,9 @@ export type LicenseTier = PlanId | "none";
  *               feel artificially constrained.
  *   - `byok`/`cloud`/`cloud_pro` — paid; everything we ship.
  *
- * Audience (Wave-2 rename, 2026-05-04): the helpers below take an
- * optional `audience` parameter, but the matrix itself is keyed only
- * on `LicenseTier` because today's policy is identical for both
- * audiences at every tier. If a future product decision wants
- * `cloud_pro_agency` to allow a different provider set from
- * `cloud_pro_individual`, widen the matrix shape to
- * `Record<LicenseTier, Record<WorkspaceAudience, readonly AIProvider[]>>`
- * — the helper signatures already accept `audience` so call sites won't
- * need updating.
+ * The matrix is keyed only on `LicenseTier`. (It briefly carried an
+ * orthogonal Individual/Agency audience axis; that was retired, so policy
+ * is a plain per-tier lookup again.)
  *
  * Server-side enforcement lives in
  * `functions/src/policy/tier-policy.ts::validateProviderForTier`;
@@ -197,16 +181,9 @@ export const PROVIDERS_FOR_TIER: Record<LicenseTier, readonly AIProvider[]> = {
  * `PROVIDERS_FOR_TIER[plan] ?? PROVIDERS_FOR_TIER.none` fallback so
  * unknown / future plans default to the safest possible policy
  * (most-restrictive) rather than silently allowing everything.
- *
- * `audience` is accepted for forward-compat (per-(plan, audience)
- * policy split) but currently ignored — both audiences resolve to
- * identical provider sets at every tier. Defaults to `"individual"` so
- * call sites without workspace context keep working unchanged.
  */
 export const getProvidersForTier = (
   plan: LicenseTier | string | null | undefined,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  audience: WorkspaceAudience = "individual",
 ): readonly AIProvider[] => {
   if (plan && (plan as LicenseTier) in PROVIDERS_FOR_TIER) {
     return PROVIDERS_FOR_TIER[plan as LicenseTier];
@@ -218,14 +195,11 @@ export const getProvidersForTier = (
  * True iff the given AI provider is permitted under the given tier.
  * Use at every server-side validation site (campaign create / update /
  * run time) and as a hint in the SPA's provider picker filter.
- *
- * `audience` is accepted for forward-compat (see {@link getProvidersForTier}).
  */
 export const isProviderAllowedForTier = (
   plan: LicenseTier | string | null | undefined,
   provider: AIProvider,
-  audience: WorkspaceAudience = "individual",
-): boolean => getProvidersForTier(plan, audience).includes(provider);
+): boolean => getProvidersForTier(plan).includes(provider);
 
 /**
  * Maximum number of campaigns a single activation may hold per tier.
@@ -246,13 +220,6 @@ export const isProviderAllowedForTier = (
  * model (campaigns are stored under each activation) and avoids
  * collection-group queries on every create.
  *
- * Audience (Wave-2 rename, 2026-05-04): the helpers below take an
- * optional `audience` parameter, but the matrix itself is keyed only
- * on `LicenseTier` because today's policy is identical for both
- * audiences at every tier. Widen the matrix shape to
- * `Record<LicenseTier, Record<WorkspaceAudience, number | null>>` if a
- * future product reason emerges to differ caps by audience.
- *
  * Spec: `specs/v2/cloud-pregeneration-and-model-catalog.md` Phase 1.0l.
  * Server-side enforcement lives in
  * `functions/src/policy/tier-policy.ts::validateCampaignCountForTier`;
@@ -272,15 +239,9 @@ export const MAX_CAMPAIGNS_FOR_TIER: Record<LicenseTier, number | null> = {
  * unlimited. Centralises the unknown-tier fallback so a future plan id
  * the matrix doesn't know yet defaults to the most-restrictive tier
  * (`none`) rather than silently allowing everything.
- *
- * `audience` is accepted for forward-compat (per-(plan, audience)
- * policy split) but currently ignored — both audiences resolve to
- * identical caps at every tier. Defaults to `"individual"`.
  */
 export const getMaxCampaignsForTier = (
   plan: LicenseTier | string | null | undefined,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  audience: WorkspaceAudience = "individual",
 ): number | null => {
   if (plan && (plan as LicenseTier) in MAX_CAMPAIGNS_FOR_TIER) {
     return MAX_CAMPAIGNS_FOR_TIER[plan as LicenseTier];
@@ -293,15 +254,12 @@ export const getMaxCampaignsForTier = (
  * `currentCount` is the existing campaign count for the activation.
  * `null` cap (unlimited tier) always returns true without consulting
  * the count.
- *
- * `audience` is accepted for forward-compat (see {@link getMaxCampaignsForTier}).
  */
 export const isCampaignCountAllowedForTier = (
   plan: LicenseTier | string | null | undefined,
   currentCount: number,
-  audience: WorkspaceAudience = "individual",
 ): boolean => {
-  const cap = getMaxCampaignsForTier(plan, audience);
+  const cap = getMaxCampaignsForTier(plan);
   return cap === null || currentCount < cap;
 };
 
@@ -329,12 +287,11 @@ export const resolveCampaignLimit = (
     | null
     | undefined,
   tier: LicenseTier | string | null | undefined,
-  audience: WorkspaceAudience = "individual",
 ): number | null => {
   if (license && license.maxCampaigns !== undefined) {
     return license.maxCampaigns;
   }
-  return getMaxCampaignsForTier(tier, audience);
+  return getMaxCampaignsForTier(tier);
 };
 
 /**
@@ -379,15 +336,9 @@ export const MAX_POSTS_PER_WEEK_FOR_TIER: Record<LicenseTier, number | null> = {
  * Returns the per-campaign weekly post cap for a tier, or `null` for
  * uncapped. Centralises the unknown-tier fallback to the most-restrictive
  * tier (`none`), matching {@link getMaxCampaignsForTier}.
- *
- * `audience` is accepted for forward-compat (per-(plan, audience) policy
- * split) but currently ignored — both audiences resolve to identical caps
- * at every tier.
  */
 export const getMaxPostsPerWeekForTier = (
   plan: LicenseTier | string | null | undefined,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  audience: WorkspaceAudience = "individual",
 ): number | null => {
   if (plan && (plan as LicenseTier) in MAX_POSTS_PER_WEEK_FOR_TIER) {
     return MAX_POSTS_PER_WEEK_FOR_TIER[plan as LicenseTier];
@@ -475,15 +426,13 @@ export const weeklyPublishCountForCron = (
  * rejected on any capped tier.
  *
  * Used at the cloud trust boundary (campaign create / update) and as a
- * hint for the SPA's cadence picker. `audience` is accepted for
- * forward-compat (see {@link getMaxPostsPerWeekForTier}).
+ * hint for the SPA's cadence picker.
  */
 export const isCadenceAllowedForTier = (
   plan: LicenseTier | string | null | undefined,
   cron: string | null | undefined,
-  audience: WorkspaceAudience = "individual",
 ): boolean => {
-  const cap = getMaxPostsPerWeekForTier(plan, audience);
+  const cap = getMaxPostsPerWeekForTier(plan);
   if (cap === null) return true;
   const count = weeklyPublishCountForCron(cron);
   if (count === null) return false;
@@ -601,15 +550,6 @@ export interface License {
   ownerEmail: string;
   ownerName: string | null;
   planId: PlanId;
-  /**
-   * @deprecated Audience is retired as of the agency merge (2026-07-05 —
-   * spec `specs/pricing-restructure.md` §10 "Slice 2"). The webhook no
-   * longer writes this field; team-seat capability now derives from site
-   * quantity (`maxSites`), not audience. Kept optional for back-compat
-   * with existing Firestore docs written before the merge; readers must
-   * tolerate its absence and will be dropped once no legacy docs remain.
-   */
-  audience?: WorkspaceAudience;
   maxSites: number;
   createdAt: Timestamp;
   updatedAt: Timestamp | null;
@@ -807,15 +747,6 @@ export interface Workspace {
   id: string;
   /** Human-readable label, e.g. "Yurii's workspace". User-renameable. */
   name: string;
-  /**
-   * @deprecated Audience is retired as of the agency merge (2026-07-05 —
-   * spec `specs/pricing-restructure.md` §10 "Slice 2"). No longer written
-   * by the subscription webhook; team-seat capability now derives from
-   * site quantity (`License.maxSites`), not audience. Kept optional for
-   * back-compat with existing workspace docs; readers must tolerate its
-   * absence and will be dropped once no legacy docs remain.
-   */
-  audienceType?: WorkspaceAudience;
   /**
    * 1:1 reference to the License doc this workspace was created from.
    * Optional because Phase 1.8 introduces anonymous shadow workspaces
@@ -2419,9 +2350,11 @@ const ADMIN_CAPS: ReadonlyArray<Capability> = CAPABILITIES.filter(
 );
 
 const EDITOR_CAPS: ReadonlyArray<Capability> = [
-  // Read scope
+  // Read scope. No members.read — the member roster (names + emails)
+  // is owner/admin-only: the portal sidebar already hides Members for
+  // editors/viewers, and a site-scoped invitee must not see the full
+  // team list (2026-07-11 invite incident).
   "workspace.read",
-  "members.read",
   "campaigns.read",
   "runs.read",
   "personas.read",
@@ -2438,12 +2371,12 @@ const EDITOR_CAPS: ReadonlyArray<Capability> = [
 
 const VIEWER_CAPS: ReadonlyArray<Capability> = [
   "workspace.read",
-  "members.read",
   "campaigns.read",
   "runs.read",
   "personas.read",
   // No credentials.read — encrypted BYOK keys are sensitive even at read.
   // No billing.* — viewers shouldn't see invoices either.
+  // No members.read — same rationale as EDITOR_CAPS above.
 ];
 
 export const ROLE_CAPABILITIES: Readonly<Record<WorkspaceRole, ReadonlySet<Capability>>> = {

@@ -10,9 +10,15 @@
  * fresh site. Campaign rotation reads this site's bound set
  * (scheduler/helpers.ts), so binding here is what scopes a voice to the site.
  *
- * On a fresh site we auto-generate one persona from the positioning and bind
- * it, so the step lands with a tailored voice instead of empty (or the whole
- * library). One loader covers persona load + membership load + the draft.
+ * A fresh site always lands with exactly one voice already writing for it:
+ *   - AI-capable tiers (paid + a text provider) draft one tailored to the
+ *     site's positioning and bind it.
+ *   - Non-AI tiers (none / free / BYOK with no text provider) never draft, so
+ *     we bind the plugin-seeded "House voice" (License_Manager) instead. Doing
+ *     the bind here — not at seed time — keeps the paid path's tailored voice
+ *     as the site default; binding House voice for everyone at seed would
+ *     demote that tailored voice to a non-default member.
+ * One loader covers persona load + membership load + the draft/bind.
  *
  * Validity (gates Finish): at least one voice is bound to this site.
  */
@@ -54,6 +60,12 @@ export const WizardStep5Persona = () => {
   const setPersonaSeeded = useWizardStore((s) => s.setPersonaSeeded);
 
   const [autoDrafting, setAutoDrafting] = useState(false);
+  const [autoBinding, setAutoBinding] = useState(false);
+
+  // AI-capable = a paid license AND a resolved text provider. Non-AI tiers
+  // (none / free / BYOK before a provider is configured) never draft a voice,
+  // so they get the plugin-seeded House voice bound instead.
+  const canAiDraft = isPaidLicense && Boolean(defaultTextProvider);
 
   // Validity = at least one voice writing for THIS site (a member), not
   // merely something in the shared library. Updates live as the seed binds.
@@ -61,7 +73,9 @@ export const WizardStep5Persona = () => {
     setStepValid(5, memberIds.length > 0);
   }, [memberIds.length, setStepValid]);
 
-  // Auto-generate the first persona on a true first run (zero existing).
+  // Land the step with exactly one voice writing for this site, on a true
+  // first run (once per onboarding, gated by `personaSeeded` so a mid-wizard
+  // reload can't duplicate it).
   const autoFiredRef = useRef(false);
   useEffect(() => {
     if (autoFiredRef.current) return;
@@ -72,59 +86,89 @@ export const WizardStep5Persona = () => {
     // library (seen 2026-06-07: "Drafting your first persona" on a
     // workspace that already had two).
     if (!personasQuery.isSuccess) return;
-    if (!isPaidLicense || !defaultTextProvider) return;
-    // Personas are workspace-shared: a fresh site in a populated workspace
-    // would inherit the whole library with no voice of its own. Draft one
-    // tailored to THIS site regardless of the library — once per onboarding
-    // (gated by `personaSeeded`) so a mid-wizard reload can't duplicate it.
     if (personaSeeded) {
       autoFiredRef.current = true; // already seeded this onboarding
       return;
     }
+
+    if (canAiDraft) {
+      // Personas are workspace-shared: a fresh site in a populated workspace
+      // would inherit the whole library with no voice of its own. Draft one
+      // tailored to THIS site regardless of the library.
+      autoFiredRef.current = true;
+      setPersonaSeeded(true);
+      const p = positioningData?.positioning;
+      const context =
+        p && (p.what || p.who || p.problem)
+          ? { what: p.what, who: p.who, problem: p.problem }
+          : undefined;
+      setAutoDrafting(true);
+      void (async () => {
+        try {
+          const data = (await suggest("persona", {
+            provider: defaultTextProvider,
+            context,
+          })) as Partial<{
+            name: string;
+            system_prompt: string;
+            tone: string;
+            reading_level: string;
+          }> | null;
+          if (data && (data.name || data.system_prompt)) {
+            // Live create, then bind to THIS site so the seeded voice is a
+            // member (and joins campaign rotation) — not just another row in
+            // the shared library.
+            const res = (await savePersona({
+              id: "",
+              name: data.name ?? __("Your first persona", "structura"),
+              system_prompt: data.system_prompt ?? "",
+              tone: (data.tone ?? "professional") as never,
+              reading_level: (data.reading_level ?? "grade_8") as never,
+              author_id: wpUsers[0]?.id ?? 0,
+            })) as { id?: number | string } | undefined;
+            if (res?.id != null && String(res.id) !== "0") {
+              await addMembership(String(res.id));
+            }
+          }
+        } catch {
+          // Auto-draft is best-effort; the PersonaManager empty-state CTA
+          // is the fallback (the user creates one manually).
+        } finally {
+          setAutoDrafting(false);
+        }
+      })();
+      return;
+    }
+
+    // Non-AI tiers: bind the plugin-seeded "House voice" so the step lands
+    // with one voice writing for this site (and Finish is satisfied) instead
+    // of an empty dropzone beside a lone "Available in your workspace" card
+    // — the confusing fresh-install state reported 2026-07-20.
+    if (memberIds.length > 0) {
+      // A voice is already bound (e.g. the user bound one by hand, or an
+      // earlier auto-bind already ran) — respect it, don't double-bind.
+      autoFiredRef.current = true;
+      return;
+    }
+    // The seed POSTs to the cloud asynchronously (License_Manager); until it
+    // lands the library is empty. Don't latch `autoFiredRef` — retry once the
+    // personas query repopulates. On a fresh install `personas[0]` is the
+    // seeded House voice.
+    const seeded = personas[0];
+    if (!seeded) return;
     autoFiredRef.current = true;
     setPersonaSeeded(true);
-    const p = positioningData?.positioning;
-    const context =
-      p && (p.what || p.who || p.problem)
-        ? { what: p.what, who: p.who, problem: p.problem }
-        : undefined;
-    setAutoDrafting(true);
-    void (async () => {
-      try {
-        const data = (await suggest("persona", {
-          provider: defaultTextProvider,
-          context,
-        })) as Partial<{
-          name: string;
-          system_prompt: string;
-          tone: string;
-          reading_level: string;
-        }> | null;
-        if (data && (data.name || data.system_prompt)) {
-          // Live create, then bind to THIS site so the seeded voice is a
-          // member (and joins campaign rotation) — not just another row in
-          // the shared library.
-          const res = (await savePersona({
-            id: "",
-            name: data.name ?? __("Your first persona", "structura"),
-            system_prompt: data.system_prompt ?? "",
-            tone: (data.tone ?? "professional") as never,
-            reading_level: (data.reading_level ?? "grade_8") as never,
-            author_id: wpUsers[0]?.id ?? 0,
-          })) as { id?: number | string } | undefined;
-          if (res?.id != null && String(res.id) !== "0") {
-            await addMembership(String(res.id));
-          }
-        }
-      } catch {
-        // Auto-draft is best-effort; the PersonaManager empty-state CTA
-        // is the fallback (the user creates one manually).
-      } finally {
-        setAutoDrafting(false);
-      }
-    })();
+    setAutoBinding(true);
+    void addMembership(String(seeded.id)).finally(() => setAutoBinding(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [personasQuery.isSuccess, isPaidLicense, defaultTextProvider, personaSeeded]);
+  }, [
+    personasQuery.isSuccess,
+    canAiDraft,
+    defaultTextProvider,
+    personaSeeded,
+    memberIds.length,
+    personas,
+  ]);
 
   const stages = useMemo(
     () => [
@@ -136,7 +180,8 @@ export const WizardStep5Persona = () => {
     [],
   );
 
-  const showLoader = personasLoading || membersQuery.isLoading || autoDrafting;
+  const showLoader =
+    personasLoading || membersQuery.isLoading || autoDrafting || autoBinding;
 
   return (
     <div className="flex flex-col gap-8">
@@ -145,10 +190,15 @@ export const WizardStep5Persona = () => {
           {__("Your personas", "structura")}
         </h1>
         <p className="m-0! text-base text-neutral-600 dark:text-neutral-400">
-          {__(
-            "Personas are the voices that write your posts. We draft one tailored to this site to start you off. Bind more from your workspace library, pull from templates, or add new ones — campaigns rotate through the voices writing for this site.",
-            "structura",
-          )}
+          {canAiDraft
+            ? __(
+                "Personas are the voices that write your posts. We draft one tailored to this site to start you off. Bind more from your workspace library, pull from templates, or add new ones — campaigns rotate through the voices writing for this site.",
+                "structura",
+              )
+            : __(
+                "Personas are the voices that write your posts. We've set you up with a House voice to start. Tailor it, pull more from templates, or add your own — campaigns rotate through the voices writing for this site.",
+                "structura",
+              )}
         </p>
       </header>
 
@@ -159,7 +209,9 @@ export const WizardStep5Persona = () => {
             title={
               autoDrafting
                 ? __("Drafting your first persona", "structura")
-                : __("Loading your personas", "structura")
+                : autoBinding
+                  ? __("Setting up your House voice", "structura")
+                  : __("Loading your personas", "structura")
             }
             stages={stages}
           />

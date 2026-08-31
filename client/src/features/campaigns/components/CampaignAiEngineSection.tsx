@@ -27,19 +27,19 @@
  *   where the wide button group pulls double duty as a primary CTA.
  */
 
-import { FC, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { AlertTriangle, Image as ImageIcon, Lock, Sparkles, Type, Zap } from "lucide-react";
-import { Select, Switch, Tooltip, cn } from "@structura/ui";
+import { Select, Switch, Tooltip } from "@structura/ui";
 import { isManagedPlan, type PlanId } from "@structura/types";
+import { getRegistryModelId } from "@structura/model-catalog";
 
 import { useAiSettingsQuery } from "@/features/ai-engine";
-import { useAvailableModelsQuery } from "@/features/ai-engine/api/useAvailableModelsQuery";
-import { maybeGetModelWarning } from "@/features/ai-engine/helpers";
 import { useDefaultProviders, useLicense } from "@/features/settings";
 import { useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { AIProvider } from "@/features/campaigns/types";
 import { getProviderVisual } from "@/features/campaigns/constants";
+import { type ModelTier, buildTierOptions, effectiveTier } from "@/features/campaigns/modelTier";
 
 /** Text-only providers cannot be selected as image providers or image fallbacks. */
 const TEXT_ONLY_PROVIDERS: AIProvider[] = ["anthropic"];
@@ -74,10 +74,10 @@ const PregenerationStrip: FC<{ enabled: boolean; onChange: (next: boolean) => vo
           <p className="text-brand-700 dark:text-brand-300 m-0! text-xs font-bold">
             {__("Instant publishes are on", "structura")}
           </p>
-          <p className="text-brand-600/80 dark:text-brand-400/80 m-0! mt-0.5 text-[11px] leading-snug">
+          <p className="text-brand-600/80 dark:text-brand-400/80 mt-0.5! mb-0! text-[11px] leading-snug">
             {__(
               "Your scheduled posts are pre-generated so they publish instantly. Run Now still generates fresh on demand for one-off posts.",
-              "structura",
+              "structura"
             )}
           </p>
         </div>
@@ -108,10 +108,10 @@ const PregenerationStrip: FC<{ enabled: boolean; onChange: (next: boolean) => vo
               {__("Pro", "structura")}
             </span>
           </div>
-          <p className="m-0! mt-0.5 text-[11px] leading-snug text-neutral-400 dark:text-neutral-500">
+          <p className="mt-0.5! mb-0! text-[11px] leading-snug text-neutral-400 dark:text-neutral-500">
             {__(
               "Upgrade to Pro to pre-generate scheduled posts ahead of time. Scheduled posts publish in under a second instead of waiting on AI synthesis.",
-              "structura",
+              "structura"
             )}
           </p>
         </div>
@@ -129,7 +129,7 @@ const PregenerationStrip: FC<{ enabled: boolean; onChange: (next: boolean) => vo
         label={__("Pre-generate posts ahead of schedule", "structura")}
         description={__(
           "Save up to 50% on AI costs and publish in under a second. Scheduled posts are written ahead of time; Run Now still generates fresh on demand.",
-          "structura",
+          "structura"
         )}
         checked={enabled}
         onChange={onChange}
@@ -156,14 +156,16 @@ interface CapabilityRowProps {
   /** Currently selected fallback (or null = disabled). */
   fallback: AIProvider | null;
   onFallbackChange: (next: AIProvider | null) => void;
-  /** Currently selected model id (BYOK only — empty for managed). */
-  model: string;
-  onModelChange: (next: string) => void;
+  /** Currently selected quality tier (BYOK only — unused for managed). */
+  tier: ModelTier;
+  onTierChange: (next: ModelTier) => void;
+  /** Tier options for the chosen primary, labeled with the model name. */
+  tierOptions: { value: string; label: string }[];
   /** Providers available as primary picks. */
   primaryCandidates: AIProvider[];
   /** Providers eligible to act as fallback (subset of primaryCandidates). */
   fallbackCandidates: AIProvider[];
-  /** Whether to render the model selector (false for managed/Cloud). */
+  /** Whether to render the tier (model) selector (false for managed/Cloud). */
   showModelSelector: boolean;
   /** Whether the user can select a fallback at all (Free → locked). */
   fallbackLocked: boolean;
@@ -171,20 +173,8 @@ interface CapabilityRowProps {
   fallbackLockedReason?: string;
   /** Eligibility check per fallback candidate (Pro BYOK gates). */
   isFallbackEligible: (p: AIProvider) => boolean;
-  /** Filtered models for the chosen primary (BYOK only). */
-  modelOptions: { id: string; name: string }[];
-  /** Lookup table for warning copy on model items. */
-  allModels: { id: string; name: string; provider: string }[];
   /** Whether the primary provider is incomplete (no key / no model). */
   primaryIncomplete: boolean;
-  /**
-   * Campaign-level conflict notice, rendered as an inline amber warning
-   * below the row. Distinct from `primaryIncomplete` (which reflects the
-   * AI-Engine *settings*-level provider config): this one reflects this
-   * campaign's own form state — e.g. image generation is switched on but
-   * no image model is selected. Undefined renders nothing.
-   */
-  conflictWarning?: string;
 }
 
 const CapabilityRow: FC<CapabilityRowProps> = ({
@@ -193,18 +183,16 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
   onPrimaryChange,
   fallback,
   onFallbackChange,
-  model,
-  onModelChange,
+  tier,
+  onTierChange,
+  tierOptions,
   primaryCandidates,
   fallbackCandidates,
   showModelSelector,
   fallbackLocked,
   fallbackLockedReason,
   isFallbackEligible,
-  modelOptions,
-  allModels,
   primaryIncomplete,
-  conflictWarning,
 }) => {
   const icon =
     capability === "text" ? (
@@ -273,7 +261,10 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
           )}
         </div>
 
-        {/* Model (BYOK only) */}
+        {/* Model quality tier (BYOK only). Managed tiers own the model
+            server-side, so no selector is shown. The concrete model is
+            resolved from the tier at generation time; the campaign stores the
+            tier (and mirrors the concrete model for display / back-compat). */}
         {showModelSelector && (
           <div className="flex min-w-[180px] flex-1 items-center gap-2">
             <span className="text-[9px] font-bold tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
@@ -282,19 +273,15 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
             <Select
               className="flex-1"
               size="sm"
-              options={modelOptions.map((m) => ({ value: m.id, label: m.name }))}
-              value={model}
-              onValueChange={(v) => onModelChange(v as string)}
+              options={tierOptions}
+              value={tier}
+              onValueChange={(v) => onTierChange(v as ModelTier)}
             >
               <Select.Trigger placeholder={__("Select model...", "structura")} />
               <Select.Content className="w-(--button-width)">
-                {modelOptions.map((m) => (
-                  <Select.Item
-                    key={m.id}
-                    value={m.id}
-                    description={maybeGetModelWarning({ model: m.id, models: allModels })}
-                  >
-                    {m.name}
+                {tierOptions.map((o) => (
+                  <Select.Item key={o.value} value={o.value}>
+                    {o.label}
                   </Select.Item>
                 ))}
               </Select.Content>
@@ -309,7 +296,10 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
           </span>
           {fallbackLocked ? (
             <Tooltip
-              title={fallbackLockedReason ?? __("Upgrade to Pro to unlock provider fallback.", "structura")}
+              title={
+                fallbackLockedReason ??
+                __("Upgrade to Pro to unlock provider fallback.", "structura")
+              }
               position="top"
             >
               <span className="flex flex-1 items-center justify-between gap-2 rounded-lg border border-neutral-200 bg-neutral-50/60 px-3 py-1.5 text-[11px] font-medium text-neutral-400 dark:border-neutral-800 dark:bg-neutral-800/50 dark:text-neutral-500">
@@ -349,13 +339,6 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
           {__("Model not selected — complete setup in AI Engine settings", "structura")}
         </div>
       )}
-
-      {conflictWarning && (
-        <div className="flex items-center gap-1.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
-          <AlertTriangle size={11} />
-          {conflictWarning}
-        </div>
-      )}
     </div>
   );
 };
@@ -376,7 +359,6 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
   const { formData, updateForm } = useCampaignForm();
   const { isCloud, isProviderIncomplete } = useDefaultProviders();
   const { isLicensed } = useLicense();
-  const { data: availableModels } = useAvailableModelsQuery();
   const { data: ai } = useAiSettingsQuery();
 
   const showModelSelector = !isCloud;
@@ -384,27 +366,44 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
 
   const intelligence = formData.intelligence;
   const schedule = formData.schedule;
-  const structure = formData.structure;
 
-  // Empty model fields are backfilled at the form-provider level
-  // (`useModelBackfill` in CampaignContext.tsx) — NOT here. This
-  // component sits inside the collapsed Advanced Settings group, so a
-  // mount effect only fired for users who expanded it; everyone else
-  // persisted `textModel: ""` and leaned on the cloud's silent fallback
-  // (engine.ts "[engine] Empty textModel on campaign", 2026-06-04).
+  // BYOK campaigns store a quality TIER (top | mid), resolved to a concrete
+  // model at generation time. The tier is the source of truth; `textModel` /
+  // `imageModel` are kept as the concrete mirror (display + back-compat) so
+  // the campaign doc stays self-consistent. Pre-tier campaigns derive the
+  // display tier from their stored model — never assume Top for them.
+  const textTier: ModelTier = effectiveTier(
+    intelligence.textProvider, "text", intelligence.textTier, intelligence.textModel
+  );
+  const imageTier: ModelTier = effectiveTier(
+    intelligence.imageProvider, "image", intelligence.imageTier, intelligence.imageModel
+  );
 
-  const filteredTextModels = useMemo(
-    () => availableModels?.text?.filter((m) => m.provider === intelligence.textProvider) ?? [],
-    [availableModels, intelligence.textProvider],
-  );
-  const filteredImageModels = useMemo(
-    () => availableModels?.image?.filter((m) => m.provider === intelligence.imageProvider) ?? [],
-    [availableModels, intelligence.imageProvider],
-  );
-  const allModels = useMemo(
-    () => [...(availableModels?.text ?? []), ...(availableModels?.image ?? [])],
-    [availableModels],
-  );
+  // Provider change: managed keeps the model EMPTY (the cloud resolves it from
+  // plan+provider). BYOK re-mirrors the current tier's concrete model for the
+  // newly-picked provider so the stored model tracks the tier.
+  const changeProvider = (capability: "text" | "image", p: AIProvider) => {
+    const tier = capability === "text" ? textTier : imageTier;
+    const mirroredModel = showModelSelector ? (getRegistryModelId(p, capability, tier) ?? "") : "";
+    updateForm(
+      "intelligence",
+      capability === "text"
+        ? { textProvider: p, textModel: mirroredModel }
+        : { imageProvider: p, imageModel: mirroredModel }
+    );
+  };
+
+  // Tier change: store the tier and mirror its concrete model for display.
+  const changeTier = (capability: "text" | "image", tier: ModelTier) => {
+    const provider = capability === "text" ? intelligence.textProvider : intelligence.imageProvider;
+    const mirroredModel = getRegistryModelId(provider, capability, tier);
+    updateForm(
+      "intelligence",
+      capability === "text"
+        ? { textTier: tier, textModel: mirroredModel ?? intelligence.textModel }
+        : { imageTier: tier, imageModel: mirroredModel ?? intelligence.imageModel }
+    );
+  };
 
   // Fallback eligibility — see FallbackProviderRow for the full
   // rationale. Short version: Cloud has master keys so any other
@@ -412,8 +411,7 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
   // and to have a model selected for this capability; Free is locked
   // entirely.
   const isFallbackEligibleFor = (capability: "text" | "image") => (p: AIProvider) => {
-    const primary =
-      capability === "text" ? intelligence.textProvider : intelligence.imageProvider;
+    const primary = capability === "text" ? intelligence.textProvider : intelligence.imageProvider;
     if (p === primary) return false;
     if (isFree) return false;
     if (isCloud) return true;
@@ -426,20 +424,8 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
   // text-only providers from the image row.
   const textFallbackCandidates = availableTextProviders;
   const imageFallbackCandidates = availableImageProviders.filter(
-    (p) => !TEXT_ONLY_PROVIDERS.includes(p),
+    (p) => !TEXT_ONLY_PROVIDERS.includes(p)
   );
-
-  // Campaign-level conflict: image generation is switched on but this
-  // campaign carries no image model. BYOK only — `showModelSelector` is
-  // `!isCloud`, and managed runs resolve an empty model server-side from
-  // curated per-plan defaults, so it's never a user-actionable gap there.
-  // The cloud now backfills the provider's default image model rather
-  // than failing the run (image-resolver.ts), so this is advisory: we
-  // surface it so the user picks the model they actually want instead of
-  // silently inheriting the default.
-  const imageGenEnabled = structure.featuredImage || structure.bodyImages;
-  const imageGenWithoutModel =
-    showModelSelector && imageGenEnabled && !intelligence.imageModel;
 
   return (
     <div className="space-y-3">
@@ -453,21 +439,18 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
       <CapabilityRow
         capability="text"
         primary={intelligence.textProvider}
-        onPrimaryChange={(p) =>
-          updateForm("intelligence", { textProvider: p, textModel: "" })
-        }
+        onPrimaryChange={(p) => changeProvider("text", p)}
         fallback={intelligence.fallbackTextProvider ?? null}
         onFallbackChange={(p) => updateForm("intelligence", { fallbackTextProvider: p })}
-        model={intelligence.textModel}
-        onModelChange={(v) => updateForm("intelligence", { textModel: v })}
+        tier={textTier}
+        onTierChange={(t) => changeTier("text", t)}
+        tierOptions={buildTierOptions(intelligence.textProvider, "text")}
         primaryCandidates={availableTextProviders}
         fallbackCandidates={textFallbackCandidates}
         showModelSelector={showModelSelector}
         fallbackLocked={isFree}
         fallbackLockedReason={__("Upgrade to Pro to unlock provider fallback.", "structura")}
         isFallbackEligible={isFallbackEligibleFor("text")}
-        modelOptions={filteredTextModels}
-        allModels={allModels}
         primaryIncomplete={isProviderIncomplete(intelligence.textProvider)}
       />
 
@@ -477,29 +460,18 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
         <CapabilityRow
           capability="image"
           primary={intelligence.imageProvider}
-          onPrimaryChange={(p) =>
-            updateForm("intelligence", { imageProvider: p, imageModel: "" })
-          }
+          onPrimaryChange={(p) => changeProvider("image", p)}
           fallback={intelligence.fallbackImageProvider ?? null}
           onFallbackChange={(p) => updateForm("intelligence", { fallbackImageProvider: p })}
-          model={intelligence.imageModel}
-          onModelChange={(v) => updateForm("intelligence", { imageModel: v })}
+          tier={imageTier}
+          onTierChange={(t) => changeTier("image", t)}
+          tierOptions={buildTierOptions(intelligence.imageProvider, "image")}
           primaryCandidates={availableImageProviders}
           fallbackCandidates={imageFallbackCandidates}
           showModelSelector={showModelSelector}
           fallbackLocked={false}
           isFallbackEligible={isFallbackEligibleFor("image")}
-          modelOptions={filteredImageModels}
-          allModels={allModels}
           primaryIncomplete={isProviderIncomplete(intelligence.imageProvider)}
-          conflictWarning={
-            imageGenWithoutModel
-              ? __(
-                  "Image generation is on but no image model is selected — pick one above, or we'll fall back to your provider's default.",
-                  "structura",
-                )
-              : undefined
-          }
         />
       )}
 
@@ -509,7 +481,7 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
         <p className="m-0! px-1 text-[10px] leading-snug text-neutral-400 dark:text-neutral-500">
           {__(
             "If the primary provider is temporarily unavailable (rate-limit, timeout, or 5xx), we'll retry once through the fallback before failing the run.",
-            "structura",
+            "structura"
           )}
         </p>
       )}

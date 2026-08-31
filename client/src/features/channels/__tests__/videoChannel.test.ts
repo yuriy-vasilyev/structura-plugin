@@ -26,6 +26,7 @@ import {
   isSocialPackages,
   parseCaptionBlocks,
   resolveVideoRowState,
+  uploadTags,
   videoStyleById,
 } from "../videoChannel";
 import type { VideoJob, VideoSocialPackages } from "../types";
@@ -156,11 +157,25 @@ describe("caption package helpers", () => {
     expect(captionHook("")).toBe("");
   });
 
-  it("pins the advisory limits: Shorts title /100, TikTok hook /100, Reels hook /125", () => {
+  it("uploadTags reshapes the hashtag run into YouTube's comma-separated Tags format", () => {
+    expect(uploadTags(caption)).toBe("programmaticseo, saas");
+    // Case is preserved; extra whitespace and repeated # tolerated.
+    expect(uploadTags("Body.\n\n#SeoAutomation   ##WordPressPlugins\n#SEO")).toBe(
+      "SeoAutomation, WordPressPlugins, SEO",
+    );
+  });
+
+  it("uploadTags returns an empty string when there is no hashtag block", () => {
+    expect(uploadTags("Body only.\n\nFull article: https://acme.io/p")).toBe("");
+    expect(uploadTags("")).toBe("");
+  });
+
+  it("pins the advisory limits: Shorts title /100, TikTok hook /100, Reels hook /125, tags /500", () => {
     expect(CAPTION_LIMITS).toEqual({
       shortsTitle: 100,
       tiktokHook: 100,
       reelsHook: 125,
+      shortsTags: 500,
     });
   });
 });

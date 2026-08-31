@@ -574,7 +574,7 @@ const OverviewTab = ({ campaign }: { campaign: Campaign }) => {
             <p className="m-0! text-[10px] font-bold tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
               {__("Ends On", "structura")}
             </p>
-            <p className="m-0! mt-0.5 text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+            <p className="mt-0.5! mb-0! text-sm font-semibold text-neutral-700 dark:text-neutral-300">
               {dayjs(schedule.endCondition.value as string).format("LL")}
             </p>
           </div>
@@ -596,7 +596,7 @@ const OverviewTab = ({ campaign }: { campaign: Campaign }) => {
             (stats.postsCreated ?? stats.postsPublished) > stats.postsPublished
               ? sprintf(
                   __("%s created", "structura"),
-                  (stats.postsCreated ?? stats.postsPublished).toString(),
+                  (stats.postsCreated ?? stats.postsPublished).toString()
                 )
               : undefined
           }
@@ -781,7 +781,7 @@ const StatCard = ({
       {value}
     </p>
     {detail && (
-      <p className="m-0! mt-0.5 text-[11px] text-neutral-400 dark:text-neutral-500">{detail}</p>
+      <p className="mt-0.5! mb-0! text-[11px] text-neutral-400 dark:text-neutral-500">{detail}</p>
     )}
   </div>
 );
@@ -812,9 +812,8 @@ const ProviderLine = ({
   // shared ["models"] key, so the two ProviderLines share one fetch.
   const { data: models } = useAvailableModelsQuery();
   const modelLabel = model
-    ? ([...(models?.text ?? []), ...(models?.image ?? [])].find(
-        (m) => m.id === model,
-      )?.name ?? model)
+    ? ([...(models?.text ?? []), ...(models?.image ?? [])].find((m) => m.id === model)?.name ??
+      model)
     : undefined;
 
   if (!providerId) {
@@ -962,7 +961,7 @@ const PostRow = ({ post, compact }: { post: ArchitectedPost; compact?: boolean }
       <p className="m-0! truncate text-sm font-semibold text-neutral-800 dark:text-neutral-200">
         {post.title || __("Untitled", "structura")}
       </p>
-      <p className="m-0! mt-0.5 text-[11px] text-neutral-400 dark:text-neutral-500">
+      <p className="mt-0.5! mb-0! text-[11px] text-neutral-400 dark:text-neutral-500">
         {post.date}
         {!compact && post.author && <span> · {post.author}</span>}
       </p>

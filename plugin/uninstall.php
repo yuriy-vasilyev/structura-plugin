@@ -105,6 +105,9 @@ if ($should_wipe) {
         // §1.8.1 Storage table.
         'structura_install_id',
         'structura_install_bootstrapped_at',
+        // Cloud opt-in. A wipe-all reinstall must re-ask before it
+        // contacts Structura Cloud again.
+        'structura_cloud_consent',
     ];
 
     foreach ($options as $option) {

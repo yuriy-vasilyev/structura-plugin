@@ -10,7 +10,18 @@ if ( ! defined('ABSPATH')) {
  * Anonymous shadow workspace bootstrap — Phase 1.8 §1.8.1 + §1.8.3 of
  * `specs/v2/multi-tenant-and-public-api.md`.
  *
- * On every wp-admin page load, fires a one-shot check:
+ * Nothing here (or anywhere else in the plugin — see
+ * {@see Cloud_Client::post()}) contacts Structura Cloud until the admin
+ * has explicitly opted in. wp.org plugin guidelines 7 & 9 forbid
+ * "phoning home" without consent, and the 2026-08-27 review flagged
+ * the original unconditional admin_init bootstrap for exactly that. The
+ * SPA shows a one-time consent screen on first open that spells out
+ * what is sent; accepting it calls `POST /structura/v1/privacy/cloud-consent`,
+ * which records {@see OPTION_CLOUD_CONSENT} and runs
+ * {@see bootstrap_now()} in the same request. Typing a license key into
+ * Account & License counts as consent too ({@see License_Manager::activate()}).
+ *
+ * Once consent is on record, every wp-admin page load fires a one-shot check:
  *   - If the install already has a bound license (license_data.api_token
  *     is set + status === 'active'), no-op. The licensed activation
  *     bearer is what every cloud call uses; the anonymous bootstrap
@@ -54,6 +65,14 @@ class Anonymous_Bootstrap
      * "tried + failed mid-flight" (flag missing but install_id set).
      */
     public const OPTION_BOOTSTRAPPED_AT = 'structura_install_bootstrapped_at';
+
+    /**
+     * `'yes'` once the admin has agreed to connect this site to Structura
+     * Cloud. Absent on a fresh install. Read by {@see has_cloud_consent()}
+     * — which is the gate in front of every outbound cloud request —
+     * and cleared only by the wipe-all uninstall branch.
+     */
+    public const OPTION_CLOUD_CONSENT = 'structura_cloud_consent';
 
     /**
      * Per-process re-entry guard. WP fires `admin_init` more than once
@@ -122,12 +141,22 @@ class Anonymous_Bootstrap
         if ($existing_token !== '') {
             // We already have an anonymous bearer (or a stale licensed
             // one — caller is_licensed() check above already filtered
-            // the licensed-with-active-status case). Don't re-mint;
-            // the bearer is good until revoked.
+            // the licensed-with-active-status case). Don't re-mint here.
+            // The bearer is treated as valid until the cloud rejects it:
+            // Cloud_Client::maybe_self_heal_anonymous_bearer() clears the
+            // stashed credentials after consecutive 401s, which drops us
+            // back into the re-mint branch below on a later admin load.
             return;
         }
 
-        // No bearer yet → bootstrap (first contact OR retry).
+        // No bearer yet. Before first contact, make sure the admin has
+        // opted in — a fresh wp.org install must stay completely silent
+        // until the consent screen in the SPA has been accepted.
+        if ( ! self::has_cloud_consent()) {
+            return;
+        }
+
+        // → bootstrap (first contact OR retry).
         $install_id = self::get_or_generate_install_id();
         if ($install_id === '') {
             return;
@@ -223,6 +252,67 @@ class Anonymous_Bootstrap
             'Anonymous_Bootstrap: shadow workspace minted (' .
                 ($body['idempotent'] ?? false ? 're-bootstrap' : 'fresh') . ').',
             0, 'anonymous_bootstrap');
+    }
+
+    /**
+     * Has the admin agreed to connect this site to Structura Cloud?
+     *
+     * True when {@see OPTION_CLOUD_CONSENT} is `'yes'`. Installs that
+     * predate the consent gate (2.22) and were already talking to the
+     * cloud — a minted anonymous bearer, a typed-in license key, or the
+     * bootstrapped-at sentinel — are treated as consented and the
+     * option is backfilled so later checks are a single autoloaded
+     * option read. Those installs all came through the customer portal
+     * (where the account itself was the opt-in); wp.org installs are
+     * always fresh and never hit the backfill branch.
+     */
+    public static function has_cloud_consent(): bool
+    {
+        if (get_option(self::OPTION_CLOUD_CONSENT, '') === 'yes') {
+            return true;
+        }
+
+        $stashed  = Key_Manager::get_license_payload();
+        $has_cred = is_array($stashed)
+            && (($stashed['api_token'] ?? '') !== '' || ($stashed['key'] ?? '') !== '');
+
+        if ($has_cred || get_option(self::OPTION_BOOTSTRAPPED_AT, 0)) {
+            update_option(self::OPTION_CLOUD_CONSENT, 'yes', true);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Record the admin's opt-in. Called by the consent REST endpoint and
+     * by {@see License_Manager::activate()} (entering a key is consent).
+     * Idempotent.
+     */
+    public static function grant_cloud_consent(): void
+    {
+        if (get_option(self::OPTION_CLOUD_CONSENT, '') === 'yes') {
+            return;
+        }
+        update_option(self::OPTION_CLOUD_CONSENT, 'yes', true);
+        Log_Service::add('info',
+            'Anonymous_Bootstrap: cloud consent granted by user ' . get_current_user_id() . '.',
+            0, 'anonymous_bootstrap');
+    }
+
+    /**
+     * Run the bootstrap immediately, ignoring the per-request re-entry
+     * guard. Used by the consent endpoint so the SPA gets a workspace in
+     * the same round-trip instead of waiting for the next admin_init.
+     * Returns whether a bearer is in place afterwards.
+     */
+    public static function bootstrap_now(): bool
+    {
+        self::$ranThisRequest = false;
+        self::maybe_bootstrap();
+
+        $stashed = Key_Manager::get_license_payload();
+        return is_array($stashed) && ($stashed['api_token'] ?? '') !== '';
     }
 
     /**

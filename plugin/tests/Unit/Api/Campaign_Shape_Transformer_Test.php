@@ -533,4 +533,175 @@ class Campaign_Shape_Transformer_Test extends TestCase
         $this->assertCount(1, $cloud['referralLinks']);
         $this->assertSame('https://acme.example/go?ref=1', $cloud['referralLinks'][0]['url']);
     }
+
+    /**
+     * Test: a valid top|mid model tier survives SPA → cloud as textTier/imageTier.
+     *
+     * The tier is the tier-based replacement for the concrete text_model /
+     * image_model; the cloud resolves the concrete model at gen time and
+     * prefers the tier when present (rollout §10).
+     */
+    public function test_wp_input_to_cloud_forwards_valid_model_tier()
+    {
+        $cloud = Campaign_Shape_Transformer::wp_input_to_cloud([
+            'name'       => 'Tiered campaign',
+            'text_tier'  => 'top',
+            'image_tier' => 'mid',
+        ]);
+
+        $this->assertSame('top', $cloud['textTier']);
+        $this->assertSame('mid', $cloud['imageTier']);
+    }
+
+    /**
+     * Test: an absent tier leaves the keys OUT of the cloud shape entirely.
+     *
+     * This is the §10 back-compat contract: /patchCampaign merges only the
+     * keys present in the body, so omitting textTier/imageTier on a save that
+     * carries no tier can never wipe a tier the campaign already stored, and a
+     * tier-less campaign keeps resolving off textModel/imageModel.
+     */
+    public function test_wp_input_to_cloud_omits_absent_model_tier()
+    {
+        $cloud = Campaign_Shape_Transformer::wp_input_to_cloud([
+            'name'       => 'No tier',
+            'text_model' => 'gpt-5.2-2025-12-11',
+        ]);
+
+        $this->assertArrayNotHasKey('textTier', $cloud);
+        $this->assertArrayNotHasKey('imageTier', $cloud);
+    }
+
+    /**
+     * Test: a tier value outside the {top, mid} whitelist is dropped, not
+     * forwarded — a stray "cheap"/"flagship"/typo can't pin a campaign to a
+     * tier the picker never offers.
+     */
+    public function test_wp_input_to_cloud_drops_out_of_whitelist_tier()
+    {
+        $cloud = Campaign_Shape_Transformer::wp_input_to_cloud([
+            'name'       => 'Bad tier',
+            'text_tier'  => 'cheap',
+            'image_tier' => 'flagship',
+        ]);
+
+        $this->assertArrayNotHasKey('textTier', $cloud);
+        $this->assertArrayNotHasKey('imageTier', $cloud);
+    }
+
+    /**
+     * Test: cloud_to_wp exposes the stored tier back to the SPA so the picker
+     * hydrates it, and yields null on campaigns saved before the tier shipped.
+     */
+    public function test_cloud_to_wp_exposes_model_tier()
+    {
+        $withTier = Campaign_Shape_Transformer::cloud_to_wp([
+            'campaignId' => 'c1',
+            'textTier'   => 'top',
+            'imageTier'  => 'mid',
+        ]);
+        $this->assertSame('top', $withTier['intelligence']['textTier']);
+        $this->assertSame('mid', $withTier['intelligence']['imageTier']);
+
+        // Legacy doc with no tier → null (picker opens on the concrete model).
+        $legacy = Campaign_Shape_Transformer::cloud_to_wp(['campaignId' => 'c2']);
+        $this->assertNull($legacy['intelligence']['textTier']);
+        $this->assertNull($legacy['intelligence']['imageTier']);
+    }
+
+    /**
+     * Test: a model tier survives the full cloud → wp → cloud round-trip, and
+     * a legacy tier-less doc never gains a spurious tier key along the way.
+     */
+    public function test_model_tier_survives_round_trip()
+    {
+        $cloud = [
+            'campaignId'  => 'rt-tier',
+            'textProvider' => 'anthropic',
+            'textTier'    => 'top',
+            'imageProvider' => 'gemini',
+            'imageTier'   => 'mid',
+        ];
+
+        $wp        = Campaign_Shape_Transformer::cloud_to_wp($cloud);
+        $recovered = Campaign_Shape_Transformer::wp_cluster_to_cloud([
+            'id'           => $wp['id'],
+            'intelligence' => $wp['intelligence'],
+        ]);
+
+        $this->assertSame('top', $recovered['textTier']);
+        $this->assertSame('mid', $recovered['imageTier']);
+
+        // Round-tripping a tier-less doc must not synthesize a tier.
+        $wpLegacy = Campaign_Shape_Transformer::cloud_to_wp(['campaignId' => 'rt-legacy']);
+        $recoveredLegacy = Campaign_Shape_Transformer::wp_cluster_to_cloud([
+            'id'           => $wpLegacy['id'],
+            'intelligence' => $wpLegacy['intelligence'],
+        ]);
+        $this->assertArrayNotHasKey('textTier', $recoveredLegacy);
+        $this->assertArrayNotHasKey('imageTier', $recoveredLegacy);
+    }
+
+    /**
+     * Ranked keyword bank (design handoff slice 4): the resolved discovery
+     * meta (mode / KD ceiling / path) round-trips cloud → SPA cluster → cloud
+     * and SPA flat input → cloud, and is OMITTED (never nulled) when absent so
+     * a save without a fresh discovery keeps what the doc holds.
+     */
+    public function test_keyword_discovery_meta_round_trips_and_is_optional()
+    {
+        $meta = ['resolvedMode' => 'balanced', 'kdCeiling' => 65, 'path' => 'provider'];
+
+        $wp = Campaign_Shape_Transformer::cloud_to_wp([
+            'campaignId'           => 'c1',
+            'keywordBank'          => ['a'],
+            'keywordDiscoveryMeta' => $meta,
+        ]);
+        $this->assertSame($meta, $wp['keywords']['discoveryMeta']);
+
+        $cloud = Campaign_Shape_Transformer::wp_cluster_to_cloud($wp);
+        $this->assertSame($meta, $cloud['keywordDiscoveryMeta']);
+
+        $flat = Campaign_Shape_Transformer::wp_input_to_cloud([
+            'name'                   => 'x',
+            'keyword_bank'           => ['a'],
+            'keyword_discovery_meta' => ['resolvedMode' => 'authority', 'kdCeiling' => null, 'path' => 'legacy'],
+        ]);
+        $this->assertSame(
+            ['resolvedMode' => 'authority', 'kdCeiling' => null, 'path' => 'legacy'],
+            $flat['keywordDiscoveryMeta']
+        );
+
+        // Absent → key omitted on the way to the cloud, null in the cluster.
+        $legacy = Campaign_Shape_Transformer::cloud_to_wp(['campaignId' => 'c2', 'keywordBank' => []]);
+        $this->assertNull($legacy['keywords']['discoveryMeta']);
+        $this->assertArrayNotHasKey(
+            'keywordDiscoveryMeta',
+            Campaign_Shape_Transformer::wp_cluster_to_cloud($legacy)
+        );
+        $this->assertArrayNotHasKey(
+            'keywordDiscoveryMeta',
+            Campaign_Shape_Transformer::wp_input_to_cloud(['name' => 'x'])
+        );
+    }
+
+    /**
+     * A malformed meta (unknown mode / path, non-array) never reaches the doc.
+     */
+    public function test_keyword_discovery_meta_rejects_malformed_values()
+    {
+        $this->assertNull(Campaign_Shape_Transformer::sanitize_discovery_meta('balanced'));
+        $this->assertNull(Campaign_Shape_Transformer::sanitize_discovery_meta(
+            ['resolvedMode' => 'impossible', 'kdCeiling' => 65, 'path' => 'provider']
+        ));
+        $this->assertNull(Campaign_Shape_Transformer::sanitize_discovery_meta(
+            ['resolvedMode' => 'winnable', 'kdCeiling' => 40, 'path' => 'guess']
+        ));
+        $this->assertSame(
+            ['resolvedMode' => 'winnable', 'kdCeiling' => 40, 'path' => 'provider'],
+            Campaign_Shape_Transformer::sanitize_discovery_meta(
+                ['resolvedMode' => 'winnable', 'kdCeiling' => '40', 'path' => 'provider', 'extra' => 'dropped']
+            )
+        );
+    }
 }

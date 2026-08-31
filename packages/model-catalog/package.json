@@ -1,0 +1,17 @@
+{
+  "name": "@structura/model-catalog",
+  "version": "1.0.0",
+  "description": "Single source of truth for the AI model catalog — model ids, display names, per-model batch pricing, capability manifest, per-role defaults, and managed-tier plan pins. Consumed as a workspace dependency by web/www/client and mirrored into functions/ (which cannot follow pnpm symlinks at deploy) via `pnpm sync:model-catalog`.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@structura/types": "workspace:*",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.9"
+  }
+}

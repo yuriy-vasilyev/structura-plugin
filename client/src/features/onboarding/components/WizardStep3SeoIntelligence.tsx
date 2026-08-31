@@ -48,9 +48,8 @@ import { useLicense } from "@/features/settings";
 import { buildReferralLabels } from "@/utils/referralLabels";
 
 import {
-  useSuggestWizardCompetitorsMutation,
   useSuggestWizardPositioningMutation,
-  type SuggestedCompetitor,
+  useWizardAiCompetitorsQuery,
 } from "../api/useWizardSeo";
 import { useWizardStore } from "../state/wizardStore";
 import { WizardMagicLoader } from "./WizardMagicLoader";
@@ -219,42 +218,34 @@ export const WizardStep3SeoIntelligence = () => {
   // nothing. Mirror the Site → Competitors ladder: when DFS is empty and
   // positioning carries signals, ask the AI for likely peers and label
   // them with their rationale.
-  const suggestCompetitorsAi = useSuggestWizardCompetitorsMutation();
-  const [aiCompetitors, setAiCompetitors] = useState<SuggestedCompetitor[]>([]);
-
-  const fetchAiCompetitors = async (p: PositioningDraft) => {
-    try {
-      const res = await suggestCompetitorsAi.mutateAsync({
-        positioning: { what: p.what, who: p.who, problem: p.problem },
-        excludeDomains: savedCompetitors
-          .map((c) => hostnameOf(c))
-          .filter(Boolean) as string[],
-      });
-      setAiCompetitors(res.suggestions);
-    } catch {
-      // Best-effort — manual add remains.
-    }
-  };
-
-  // One-shot fallback for the non-orchestrated paths (pre-warmed
-  // positioning from step 1, or a user typing by hand). Gated on a
-  // COMPLETE positioning — firing on the first keystroke of `what`
-  // would burn the call on a fragment.
+  //
+  // Cached query, NOT a mount-scoped mutation. The pre-2026-07-16 shape
+  // (one-shot ref + useState + mutateAsync) re-fired the AI call and
+  // dropped its results on EVERY remount of this step, so any churn
+  // that remounted the wizard turned the row into a permanent
+  // "Looking for likely competitors…" loop. The query's session cache
+  // makes remounts free; `enabled` carries the same gates the one-shot
+  // effect enforced (paid, DFS empty, positioning complete — firing on
+  // the first keystroke of `what` would burn the call on a fragment).
   const positioningComplete =
     positioning.what.trim().length > 0 &&
     positioning.who.trim().length > 0 &&
     positioning.problem.trim().length > 0;
-  const aiCompetitorsTriedRef = useRef(false);
-  useEffect(() => {
-    if (aiCompetitorsTriedRef.current) return;
-    if (!isPaidLicense) return;
-    if (suggestedCompetitors.length > 0) return; // DFS has data
-    if (aiCompetitors.length > 0) return;
-    if (!positioningComplete) return;
-    aiCompetitorsTriedRef.current = true;
-    void fetchAiCompetitors(positioning);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPaidLicense, suggestedCompetitors.length, positioningComplete]);
+  const aiCompetitorsQuery = useWizardAiCompetitorsQuery({
+    positioning: {
+      what: positioning.what,
+      who: positioning.who,
+      problem: positioning.problem,
+    },
+    excludeDomains: savedCompetitors
+      .map((c) => hostnameOf(c))
+      .filter(Boolean) as string[],
+    enabled:
+      isPaidLicense &&
+      suggestedCompetitors.length === 0 &&
+      positioningComplete,
+  });
+  const aiCompetitors = aiCompetitorsQuery.data?.suggestions ?? [];
 
   const aiCompetitorsNotAdopted = useMemo(() => {
     const savedHosts = new Set(
@@ -308,12 +299,11 @@ export const WizardStep3SeoIntelligence = () => {
           problem: p.problem,
         };
         patch({ positioning: next, positioningSource: "ai_draft" });
-        // The orchestrator owns this run — pre-arm the one-shot watcher so
-        // it doesn't double-fire on the patched positioning.
-        aiCompetitorsTriedRef.current = true;
-        if (suggestedCompetitors.length === 0) {
-          await fetchAiCompetitors(next);
-        }
+        // Competitors are NOT awaited here: patching the positioning
+        // flips the cached query's `enabled` gate and it fetches on its
+        // own, showing the row-level spinner. Holding the full-screen
+        // loader for it doubled the blocking time and re-crashed into
+        // the remount-refire loop this component used to have.
       } catch {
         // Reveal the manual form; the per-section buttons remain.
       } finally {
@@ -485,18 +475,19 @@ export const WizardStep3SeoIntelligence = () => {
           onRemove={removeCompetitor}
           onAddAll={competitorChips.length > 0 ? addAllCompetitorChips : undefined}
           onDiscover={() => {
-            aiCompetitorsTriedRef.current = true;
-            void fetchAiCompetitors(positioning);
+            // Bypasses staleTime and re-reads the CURRENT positioning +
+            // exclude list (query options refresh every render).
+            void aiCompetitorsQuery.refetch();
           }}
           discoverLabel={__("Suggest competitors", "structura")}
-          discovering={suggestCompetitorsAi.isPending}
+          discovering={aiCompetitorsQuery.isFetching}
           suggestedLabel={
             competitorSuggested.length > 0
               ? __("Auto-detected from your site", "structura")
               : __("AI-suggested — tap to add", "structura")
           }
           suggestedNotice={
-            suggestCompetitorsAi.isPending && competitorChips.length === 0 ? (
+            aiCompetitorsQuery.isFetching && competitorChips.length === 0 ? (
               <span className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
                 <Loader2 size={12} className="animate-spin" />
                 {__("Looking for likely competitors…", "structura")}

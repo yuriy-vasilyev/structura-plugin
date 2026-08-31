@@ -108,5 +108,9 @@ class LicenseManagerDeactivateTest extends TestCase
         // a fresh workspace's default persona — the headline regression.
         $this->assertContains('structura_default_persona_seeded', $this->deleted_options);
         $this->assertContains('structura_license_data', $this->deleted_options);
+        // The onboarding-dismissed flag MUST be cleared too so a reconnect to
+        // a fresh workspace re-runs the setup wizard instead of silently
+        // skipping it (2026-07-20 durable-onboarding fix).
+        $this->assertContains('structura_onboarding_dismissed', $this->deleted_options);
     }
 }

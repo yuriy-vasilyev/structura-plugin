@@ -14,7 +14,8 @@
     },
     "./pricing": {
       "types": "./src/pricing/index.ts",
-      "import": "./src/pricing/index.ts"
+      "import": "./src/pricing/index.ts",
+      "default": "./src/pricing/index.ts"
     },
     "./logos": {
       "types": "./src/logos/index.ts",
@@ -64,7 +65,12 @@
       "types": "./src/components/Stepper.tsx",
       "import": "./src/components/Stepper.tsx"
     },
-    "./style.css": "./dist/style.css"
+    "./style.css": "./dist/style.css",
+    "./search-perf": {
+      "types": "./src/search-perf/index.ts",
+      "import": "./src/search-perf/index.ts",
+      "default": "./src/search-perf/index.ts"
+    }
   },
   "scripts": {
     "build": "vite build",

@@ -112,10 +112,10 @@ export const CampaignsPage = () => {
           /* translators: 1: campaigns currently used, 2: plan limit */
           __(
             "You're using %1$d of %2$d campaigns on your plan. Pause or delete one, or contact us for more.",
-            "structura",
+            "structura"
           ),
           usedCampaigns,
-          campaignCap,
+          campaignCap
         )
       : undefined
     : engineBlockedReason;
@@ -309,7 +309,7 @@ export const CampaignsPage = () => {
           <p className="m-0! text-sm font-semibold text-neutral-600 dark:text-neutral-400">
             {__("Want more from your campaigns?", "structura")}
           </p>
-          <p className="m-0! mt-1 text-xs text-neutral-400 dark:text-neutral-500">
+          <p className="mt-1! mb-0! text-xs text-neutral-400 dark:text-neutral-500">
             {__(
               "Upgrade to Pro for keyword research, authority domains, pre-generated publishes, more active campaigns, and more.",
               "structura"
@@ -329,10 +329,7 @@ export const CampaignsPage = () => {
             <a
               href={buildPortalSignupUrl({
                 intent: "general_upgrade",
-                domain:
-                  typeof window !== "undefined"
-                    ? window.location.hostname
-                    : undefined,
+                domain: typeof window !== "undefined" ? window.location.hostname : undefined,
                 plan,
               })}
               target="_blank"
@@ -488,7 +485,7 @@ export const CampaignCard = ({
                 )}
               </div>
               {identity.objective && (
-                <p className="m-0! mt-1 line-clamp-1 text-[13px] text-neutral-400 dark:text-neutral-500">
+                <p className="mt-1!line-clamp-1 mb-0! text-[13px] text-neutral-400 dark:text-neutral-500">
                   {identity.objective}
                 </p>
               )}
@@ -657,7 +654,7 @@ const getPersonaLabel = (
   // doesn't drop nanoids on the floor (the symptom would be every
   // campaign card showing "Unknown persona" post-cloud-migration).
   personaId: string | number | "random",
-  personaMap: Map<string | number, string>,
+  personaMap: Map<string | number, string>
 ): string => {
   if (personaId === "random") return __("Random persona", "structura");
   return personaMap.get(personaId) ?? __("Unknown persona", "structura");
@@ -675,58 +672,57 @@ const UnlicensedTeaser = ({
   onGenerate: () => void;
 }) => {
   const { plan } = useLicense();
-  const domain =
-    typeof window !== "undefined" ? window.location.hostname : undefined;
+  const domain = typeof window !== "undefined" ? window.location.hostname : undefined;
   return (
-  // Lower-key than the previous full-page locked card. Anonymous users
-  // CAN generate posts one-off via the AI Engine; campaigns (scheduling)
-  // are the gated bit. So the primary CTA is "Generate Post" (an action
-  // they can do right now) and "Get Free License" sits behind it as the
-  // upgrade path, instead of fronting a giant Lock icon that reads as
-  // "you can't use this app yet."
-  <div className="flex flex-col items-start justify-between gap-5 rounded-2xl border border-neutral-200 bg-white px-6 py-6 sm:flex-row sm:items-center dark:border-neutral-700 dark:bg-neutral-900/30">
-    <div className="flex items-start gap-4">
-      <div className="bg-brand-50 text-brand-600 dark:bg-brand-950/30 dark:text-brand-400 flex size-10 shrink-0 items-center justify-center rounded-xl">
-        <Zap size={18} />
+    // Lower-key than the previous full-page locked card. Anonymous users
+    // CAN generate posts one-off via the AI Engine; campaigns (scheduling)
+    // are the gated bit. So the primary CTA is "Generate Post" (an action
+    // they can do right now) and "Get Free License" sits behind it as the
+    // upgrade path, instead of fronting a giant Lock icon that reads as
+    // "you can't use this app yet."
+    <div className="flex flex-col items-start justify-between gap-5 rounded-2xl border border-neutral-200 bg-white px-6 py-6 sm:flex-row sm:items-center dark:border-neutral-700 dark:bg-neutral-900/30">
+      <div className="flex items-start gap-4">
+        <div className="bg-brand-50 text-brand-600 dark:bg-brand-950/30 dark:text-brand-400 flex size-10 shrink-0 items-center justify-center rounded-xl">
+          <Zap size={18} />
+        </div>
+        <div className="space-y-1">
+          <h3 className="m-0! text-sm font-bold text-neutral-900 dark:text-white">
+            {__("Generate a post now — automate later", "structura")}
+          </h3>
+          <p className="m-0! max-w-xl text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+            {__(
+              "Anonymous installs can generate posts one at a time. Claim a free license to unlock campaigns that publish on a schedule.",
+              "structura"
+            )}
+          </p>
+        </div>
       </div>
-      <div className="space-y-1">
-        <h3 className="m-0! text-sm font-bold text-neutral-900 dark:text-white">
-          {__("Generate a post now — automate later", "structura")}
-        </h3>
-        <p className="m-0! max-w-xl text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
-          {__(
-            "Anonymous installs can generate posts one at a time. Claim a free license to unlock campaigns that publish on a schedule.",
-            "structura"
-          )}
-        </p>
-      </div>
-    </div>
-    <div className="flex shrink-0 items-center gap-2">
-      <Button
-        size="sm"
-        onClick={onGenerate}
-        disabled={!isEngineReady}
-        title={engineBlockedReason}
-      >
-        <Zap size={14} className="mr-1.5" />
-        {__("Generate Post", "structura")}
-      </Button>
-      <Button asChild size="sm" variant="secondary">
-        <a
-          href={buildPortalSignupUrl({
-            intent: "general_upgrade",
-            domain,
-            plan,
-          })}
-          target="_blank"
-          rel="noreferrer"
+      <div className="flex shrink-0 items-center gap-2">
+        <Button
+          size="sm"
+          onClick={onGenerate}
+          disabled={!isEngineReady}
+          title={engineBlockedReason}
         >
-          {__("Get Free License", "structura")}
-          <ArrowRight size={14} className="ml-1.5" />
-        </a>
-      </Button>
+          <Zap size={14} className="mr-1.5" />
+          {__("Generate Post", "structura")}
+        </Button>
+        <Button asChild size="sm" variant="secondary">
+          <a
+            href={buildPortalSignupUrl({
+              intent: "general_upgrade",
+              domain,
+              plan,
+            })}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {__("Get Free License", "structura")}
+            <ArrowRight size={14} className="ml-1.5" />
+          </a>
+        </Button>
+      </div>
     </div>
-  </div>
   );
 };
 

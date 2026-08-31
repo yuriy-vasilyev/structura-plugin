@@ -416,6 +416,101 @@ class Post_Meta_Box
         return null;
     }
 
+    /**
+     * Validate a per-regen image quality tier before forwarding it to the
+     * cloud. Only the two picker-selectable tiers pass; anything else (a typo,
+     * a retired `cheap` tag, an injected value) returns null so the regen falls
+     * back to the campaign / concrete-model default rather than pinning to a
+     * tier the picker never offers.
+     *
+     * @param mixed $raw Raw `image_tier` value from the regen request.
+     * @return string|null 'top' | 'mid', or null when absent/invalid.
+     */
+    private static function sanitize_image_tier_override($raw): ?string
+    {
+        if ( ! is_string($raw)) {
+            return null;
+        }
+        $candidate = sanitize_key($raw);
+        return in_array($candidate, ['top', 'mid'], true) ? $candidate : null;
+    }
+
+    /**
+     * Build the per-provider Top/Standard tier catalog the regen modal renders.
+     *
+     * For each connected image-capable provider we surface at most two rows —
+     * a `top` and a `mid` — so the modal offers a quality tier, never a raw
+     * model list. The concrete model NAME is carried only as the human label;
+     * the cloud resolves the actual model from (provider, tier) at generation
+     * time.
+     *
+     * Derivation: image models are intentionally exactly top + mid per provider
+     * (see `@structura/model-catalog` model-data), and the served catalog marks
+     * the MID model with `default: true` (what `getDefaultModel(_,'image')`
+     * returns). So mid = the `default` image model; top = the other (non-
+     * default) one. We deliberately do NOT key top off `recommended` — for
+     * Gemini the recommended flag sits on the *mid* Flash-Image (the cost
+     * default), so "top = recommended" would hide Pro-Image entirely. A
+     * provider exposing only one image model yields only the tier we can place.
+     *
+     * Extracted from the enqueue path so the derivation is unit-testable
+     * without standing up admin enqueue.
+     *
+     * @param string $tier License plan id — scopes the connected-provider set.
+     * @return array<int, array{provider:string, providerName:string, tier:string, modelName:string}>
+     */
+    private static function build_image_tier_catalog(string $tier): array
+    {
+        if ( ! class_exists(\Structura\Core\Provider_Registry::class)) {
+            return [];
+        }
+
+        $rows      = [];
+        $connected = \Structura\Core\Provider_Registry::get_connected_providers($tier);
+        foreach ($connected as $provider) {
+            $provider_id = (string) ($provider['id'] ?? '');
+            $caps        = (array) ($provider['capabilities'] ?? []);
+            if ($provider_id === '' || ! in_array('image', $caps, true)) {
+                continue;
+            }
+            $provider_name = (string) ($provider['name'] ?? $provider_id);
+            $catalog       = \Structura\Core\Provider_Registry::get_models($provider_id, 'image');
+
+            $top = null;
+            $mid = null;
+            foreach ($catalog as $m) {
+                if ( ! empty($m['default'])) {
+                    // The `default`-flagged image model is the mid pin.
+                    if ($mid === null) {
+                        $mid = $m;
+                    }
+                } elseif ($top === null) {
+                    // Any non-default image model is the top pin.
+                    $top = $m;
+                }
+            }
+
+            if ($top !== null) {
+                $rows[] = [
+                    'provider'     => $provider_id,
+                    'providerName' => $provider_name,
+                    'tier'         => 'top',
+                    'modelName'    => (string) ($top['name'] ?? $top['id'] ?? ''),
+                ];
+            }
+            if ($mid !== null) {
+                $rows[] = [
+                    'provider'     => $provider_id,
+                    'providerName' => $provider_name,
+                    'tier'         => 'mid',
+                    'modelName'    => (string) ($mid['name'] ?? $mid['id'] ?? ''),
+                ];
+            }
+        }
+
+        return $rows;
+    }
+
     public static function post_is_structura_generated(int $post_id): bool
     {
         if (get_post_meta($post_id, '_structura_campaign_id', true)) {
@@ -473,50 +568,21 @@ class Post_Meta_Box
         $license_data = License_Manager::get_license_data();
         $tier         = $license_data['plan'] ?? 'free';
 
-        // 2026-05-07 — the picker now lists models from EVERY connected
-        // image-capable provider, not just the post's stamped one.
-        // Pre-fix the picker was scoped to `_structura_image_provider`
-        // (the campaign's provider at insert time), which made the
-        // dropdown stale the moment the user changed their default
-        // provider in the AI Engine settings — they'd see only the
-        // original provider's models with no obvious way to switch
-        // even though they had another provider connected. Now we
-        // enumerate `get_connected_providers()` and build a flat
-        // catalog tagged with `provider`/`providerName` so the JS
-        // can group models by provider in `<optgroup>`s. The post's
-        // stamped provider (or the tier-managed default) is still
-        // surfaced as `preferredProvider` so the JS can put its
-        // mid-tier model at the top of the list as the implicit
-        // "Use default" entry — preserving the no-click happy path
-        // while giving multi-provider users real choice.
+        // 2026-07 — the picker offers a quality TIER (Top / Standard), never a
+        // raw model list. For each connected image-capable provider we surface
+        // its top (`recommended`) + mid (`default`) image models as the two
+        // tiers, labeled with the model NAME so the user sees "Top (Gemini 3
+        // Pro Image)". The cloud resolves the concrete model from (provider,
+        // tier) at gen time, so a model bump auto-applies without a re-pick.
+        // The stamped provider (or the tier-managed default) rides along as
+        // `preferredProvider` so the JS can pin it first / drive the implicit
+        // "Use default" entry.
         $stamped_image_provider = (string) get_post_meta($post->ID, '_structura_image_provider', true);
         $preferred_provider     = $stamped_image_provider !== ''
             ? $stamped_image_provider
             : (self::get_managed_image_default_safe($tier) ?? '');
 
-        $image_models_catalog = [];
-        if (class_exists(\Structura\Core\Provider_Registry::class)) {
-            $connected = \Structura\Core\Provider_Registry::get_connected_providers($tier);
-            foreach ($connected as $provider) {
-                $provider_id = (string) ($provider['id'] ?? '');
-                $caps        = $provider['capabilities'] ?? [];
-                if ($provider_id === '' || ! in_array('image', (array) $caps, true)) {
-                    continue;
-                }
-                $catalog = \Structura\Core\Provider_Registry::get_models($provider_id, 'image');
-                foreach ($catalog as $m) {
-                    $image_models_catalog[] = [
-                        'id'           => $m['id'] ?? '',
-                        'name'         => $m['name'] ?? ($m['id'] ?? ''),
-                        'provider'     => $provider_id,
-                        'providerName' => (string) ($provider['name'] ?? $provider_id),
-                        'fast'         => ! empty($m['fast']),
-                        'recommended'  => ! empty($m['recommended']),
-                        'default'      => ! empty($m['default']),
-                    ];
-                }
-            }
-        }
+        $image_tiers_catalog = self::build_image_tier_catalog($tier);
 
         wp_localize_script('structura-post-meta-box', 'structuraMetaBox', [
                 'ajaxUrl'           => admin_url('admin-ajax.php'),
@@ -527,7 +593,7 @@ class Post_Meta_Box
                 // reads `imageProvider` off the localized object.
                 'imageProvider'     => $preferred_provider,
                 'preferredProvider' => $preferred_provider,
-                'imageModels'       => $image_models_catalog,
+                'imageTiers'        => $image_tiers_catalog,
         ]);
 
         wp_enqueue_style(
@@ -1163,6 +1229,14 @@ class Post_Meta_Box
                 isset($_POST['image_provider']) ? sanitize_text_field(wp_unslash($_POST['image_provider'])) : null
             );
 
+            // Per-regen quality tier (top|mid) from the modal's Top/Standard
+            // picker — the tier-based replacement for the concrete model
+            // override. The cloud resolves the concrete image model from
+            // (provider, tier) and prefers it over the model.
+            $override_tier = self::sanitize_image_tier_override(
+                isset($_POST['image_tier']) ? sanitize_text_field(wp_unslash($_POST['image_tier'])) : null
+            );
+
             $task_runner = new \Structura\Scheduler\Task_Runner();
             $task_runner->generate_post_images(
                 $post_id,
@@ -1170,7 +1244,8 @@ class Post_Meta_Box
                 $image_data,
                 $campaign,
                 $override_model !== '' ? $override_model : null,
-                $override_provider
+                $override_provider,
+                $override_tier
             );
 
             remove_filter('update_post_metadata', $block_thumb, 10);
@@ -1394,6 +1469,14 @@ class Post_Meta_Box
                 isset($_POST['image_provider']) ? sanitize_text_field(wp_unslash($_POST['image_provider'])) : null
             );
 
+            // Per-regen quality tier (top|mid) from the modal's Top/Standard
+            // picker — the tier-based replacement for the concrete model
+            // override. The cloud resolves the concrete image model from
+            // (provider, tier) and prefers it over the model.
+            $override_tier = self::sanitize_image_tier_override(
+                isset($_POST['image_tier']) ? sanitize_text_field(wp_unslash($_POST['image_tier'])) : null
+            );
+
             $task_runner = new \Structura\Scheduler\Task_Runner();
             $task_runner->generate_post_images(
                 $post_id,
@@ -1401,7 +1484,8 @@ class Post_Meta_Box
                 $image_data,
                 $campaign,
                 $override_model !== '' ? $override_model : null,
-                $override_provider
+                $override_provider,
+                $override_tier
             );
 
             remove_filter('update_post_metadata', $block_thumb, 10);

@@ -669,4 +669,169 @@ class ChannelsConnectionsServiceTest extends TestCase
         // No 6th arg → null → field omitted (target untouched).
         $service->update_connection_settings('conn-1', 'en');
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    //  SETTINGS — GSC property switch. null OR '' = "leave untouched"
+    //  (field omitted — unlike the LinkedIn URN there is no empty-string
+    //  sentinel); a non-empty property id rides the wire verbatim so the
+    //  cloud can validate it against the properties captured at connect.
+    //  Guards the silent-drop bug class: a whitelist proxy that doesn't
+    //  read the field makes Save a no-op (attach_featured_image, 2026-05-22).
+    // ──────────────────────────────────────────────────────────────────────
+
+    /** @test */
+    public function gsc_post_stats_forwards_the_page_url_with_the_auth_envelope(): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['key' => 'live_xxx', 'secret' => 'sek_yyy']);
+
+        $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->once()
+            ->withArgs(function ($endpoint, $payload, $args) {
+                return $endpoint === '/gscPostStats'
+                    && ($payload['page_url'] ?? null) === 'https://example.com/post-1'
+                    && ($payload['license_key'] ?? null) === 'live_xxx';
+            })
+            ->andReturn(['code' => 200, 'body' => ['success' => true, 'state' => 'ready'], 'raw' => null]);
+
+        $service = new Channels_Connections_Service();
+        $service->get_gsc_post_stats('https://example.com/post-1');
+    }
+
+    /** @test */
+    public function gsc_post_stats_rejects_an_empty_url_without_a_cloud_call(): void
+    {
+        $service = new Channels_Connections_Service();
+        $result  = $service->get_gsc_post_stats('');
+        $this->assertInstanceOf(\WP_Error::class, $result);
+    }
+
+    /** @test */
+    public function gsc_site_overview_summary_mode_rides_the_wire(): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['key' => 'live_xxx', 'secret' => 'sek_yyy']);
+
+        $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->twice()
+            ->withArgs(function ($endpoint, $payload, $args) {
+                static $call = 0;
+                $call++;
+                // First call: default → no summary flag. Second: summary true.
+                return $endpoint === '/gscSiteOverview'
+                    && ($call === 1
+                        ? ! array_key_exists('summary', $payload)
+                        : ($payload['summary'] ?? null) === true);
+            })
+            ->andReturn(['code' => 200, 'body' => ['success' => true, 'state' => 'ready'], 'raw' => null]);
+
+        $service = new Channels_Connections_Service();
+        $service->get_gsc_site_overview();
+        $service->get_gsc_site_overview(true);
+    }
+
+    /** @test */
+    public function gsc_refresh_properties_calls_the_refresh_endpoint(): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['key' => 'live_xxx', 'secret' => 'sek_yyy']);
+
+        $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->once()
+            ->withArgs(function ($endpoint, $payload, $args) {
+                return $endpoint === '/gscRefreshProperties'
+                    && ($payload['license_key'] ?? null) === 'live_xxx';
+            })
+            ->andReturn(['code' => 200, 'body' => ['success' => true, 'ok' => true], 'raw' => null]);
+
+        $service = new Channels_Connections_Service();
+        $service->refresh_gsc_properties();
+    }
+
+    /** @test */
+    public function gsc_site_overview_calls_the_overview_endpoint(): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['key' => 'live_xxx', 'secret' => 'sek_yyy']);
+
+        $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->once()
+            ->withArgs(function ($endpoint, $payload, $args) {
+                return $endpoint === '/gscSiteOverview';
+            })
+            ->andReturn(['code' => 200, 'body' => ['success' => true, 'state' => 'ready'], 'raw' => null]);
+
+        $service = new Channels_Connections_Service();
+        $service->get_gsc_site_overview();
+    }
+
+    /** @test */
+    public function update_settings_forwards_selected_gsc_property(): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['key' => 'live_xxx', 'secret' => 'sek_yyy']);
+
+        $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->once()
+            ->withArgs(function ($endpoint, $payload, $args) {
+                return $endpoint === '/channelsUpdateConnectionSettings'
+                    && ($payload['selected_gsc_property'] ?? null) === 'sc-domain:example.com';
+            })
+            ->andReturn(['code' => 200, 'body' => ['success' => true, 'connection' => []], 'raw' => null]);
+
+        $service = new Channels_Connections_Service();
+        $service->update_connection_settings(
+            'conn-1',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'sc-domain:example.com',
+        );
+    }
+
+    /** @test */
+    public function update_settings_omits_selected_gsc_property_when_null_or_empty(): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['key' => 'live_xxx', 'secret' => 'sek_yyy']);
+
+        $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->twice()
+            ->withArgs(function ($endpoint, $payload, $args) {
+                return ! array_key_exists('selected_gsc_property', $payload);
+            })
+            ->andReturn(['code' => 200, 'body' => ['success' => true, 'connection' => []], 'raw' => null]);
+
+        $service = new Channels_Connections_Service();
+        // Absent → null → omitted.
+        $service->update_connection_settings('conn-1', 'en');
+        // Explicit '' → also omitted (no empty-string sentinel for GSC).
+        $service->update_connection_settings(
+            'conn-1',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            '',
+        );
+    }
 }

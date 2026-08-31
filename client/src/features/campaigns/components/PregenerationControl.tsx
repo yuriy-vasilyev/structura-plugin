@@ -2,7 +2,7 @@ import { FC } from "react";
 import { __ } from "@wordpress/i18n";
 import { Lock, Sparkles, Zap } from "lucide-react";
 import { isManagedPlan, type PlanId } from "@structura/types";
-import { Switch, cn } from "@structura/ui";
+import { cn, Switch } from "@structura/ui";
 
 import { useLicense } from "@/features/settings";
 
@@ -64,7 +64,7 @@ const ByokToggle: FC<PregenerationControlProps> = ({ enabled, onChange, classNam
   <div
     className={cn(
       "flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900",
-      className,
+      className
     )}
   >
     <div className="bg-brand-50 dark:bg-brand-950/40 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
@@ -75,7 +75,7 @@ const ByokToggle: FC<PregenerationControlProps> = ({ enabled, onChange, classNam
       label={__("Pre-generate posts ahead of schedule", "structura")}
       description={__(
         "Save up to 50% on AI costs and publish in under a second. Scheduled posts are written ahead of time; Run Now still generates fresh on demand.",
-        "structura",
+        "structura"
       )}
       checked={enabled}
       onChange={onChange}
@@ -87,7 +87,7 @@ const FreeTierLock: FC<{ className?: string }> = ({ className }) => (
   <div
     className={cn(
       "flex items-start gap-3 rounded-xl border border-dashed border-neutral-200 bg-neutral-50/40 p-4 dark:border-neutral-700 dark:bg-neutral-900/40",
-      className,
+      className
     )}
   >
     <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800">
@@ -103,10 +103,10 @@ const FreeTierLock: FC<{ className?: string }> = ({ className }) => (
           {__("Pro", "structura")}
         </span>
       </div>
-      <p className="m-0! mt-1 text-xs leading-relaxed text-neutral-400 dark:text-neutral-500">
+      <p className="mt-1! mb-0! text-xs leading-relaxed text-neutral-400 dark:text-neutral-500">
         {__(
           "Upgrade to Pro to pre-generate scheduled posts ahead of time. Scheduled posts publish in under a second instead of waiting on AI synthesis.",
-          "structura",
+          "structura"
         )}
       </p>
     </div>
@@ -117,20 +117,20 @@ const ManagedTierBanner: FC<{ className?: string }> = ({ className }) => (
   <div
     className={cn(
       "border-brand-200 bg-brand-50/50 dark:border-brand-800 dark:bg-brand-950/30 flex items-start gap-3 rounded-xl border px-4 py-3",
-      className,
+      className
     )}
   >
     <div className="from-brand-500 shadow-brand-500/20 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br to-purple-500 shadow-sm">
       <Sparkles size={13} className="text-white" />
     </div>
     <div className="min-w-0 flex-1">
-      <p className="m-0! text-xs font-bold text-brand-700 dark:text-brand-300">
+      <p className="text-brand-700 dark:text-brand-300 m-0! text-xs font-bold">
         {__("Instant publishes are on", "structura")}
       </p>
-      <p className="m-0! mt-1 text-xs leading-relaxed text-brand-600/80 dark:text-brand-400/80">
+      <p className="text-brand-600/80 dark:text-brand-400/80 mt-1! mb-0! text-xs leading-relaxed">
         {__(
           "Your scheduled posts are pre-generated so they publish instantly. Run Now still generates fresh on demand for one-off posts.",
-          "structura",
+          "structura"
         )}
       </p>
     </div>

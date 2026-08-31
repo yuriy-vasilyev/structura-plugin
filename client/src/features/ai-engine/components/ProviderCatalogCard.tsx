@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { __ } from "@wordpress/i18n";
 import {
+  CheckCircle2,
+  ExternalLink,
+  Image,
   Key,
+  Lock,
   RefreshCw,
   Trash2,
   Type,
-  Image,
-  Lock,
-  ExternalLink,
-  CheckCircle2,
 } from "lucide-react";
-import { Badge, Button, ConfirmDialog, InputField, cn } from "@structura/ui";
+import { Badge, Button, cn, ConfirmDialog, InputField } from "@structura/ui";
 
 import { useSaveKey } from "../api/useSaveKey";
 import { useProviderPulse } from "../api/useProviderPulse";
@@ -53,7 +53,8 @@ const CAPABILITY_META: Record<
   text: {
     labelKey: "text",
     icon: Type,
-    color: "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800",
+    color:
+      "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800",
   },
   image: {
     labelKey: "image",
@@ -125,8 +126,7 @@ export const ProviderCatalogCard = ({
             <div className="flex items-center gap-2 rounded-full bg-neutral-100 px-4 py-2 dark:bg-neutral-800">
               <Lock size={14} className="text-neutral-500" />
               <span className="text-[10px] font-black tracking-widest text-neutral-500 uppercase">
-                {__("Requires", "structura")} {tierLabel(minTier)}{" "}
-                {__("Plan", "structura")}
+                {__("Requires", "structura")} {tierLabel(minTier)} {__("Plan", "structura")}
               </span>
             </div>
           </div>
@@ -152,11 +152,9 @@ export const ProviderCatalogCard = ({
                   <h3 className="m-0! text-lg leading-none font-black tracking-tight text-neutral-900 uppercase dark:text-neutral-100">
                     {name}
                   </h3>
-                  {connected && (
-                    <CheckCircle2 size={14} className="text-emerald-500" />
-                  )}
+                  {connected && <CheckCircle2 size={14} className="text-emerald-500" />}
                 </div>
-                <p className="m-0! mt-1 text-[11px] leading-relaxed text-neutral-400 dark:text-neutral-500">
+                <p className="mt-1! mb-0! text-[11px] leading-relaxed text-neutral-400 dark:text-neutral-500">
                   {description}
                 </p>
               </div>
@@ -165,11 +163,7 @@ export const ProviderCatalogCard = ({
             {/* Latency + actions */}
             <div className="flex items-center gap-2">
               {latency !== null && (
-                <Badge
-                  variant="outline"
-                  intent="secondary"
-                  className="py-0 font-mono text-[9px]"
-                >
+                <Badge variant="outline" intent="secondary" className="py-0 font-mono text-[9px]">
                   {latency}ms
                 </Badge>
               )}
@@ -228,7 +222,9 @@ export const ProviderCatalogCard = ({
               type="password"
               value={keyInput}
               onChange={(e) => setKeyInput(e.target.value)}
-              placeholder={connected ? maskedKey : (keyPrefix ?? __("Enter API key...", "structura"))}
+              placeholder={
+                connected ? maskedKey : (keyPrefix ?? __("Enter API key...", "structura"))
+              }
               autoComplete="off"
               rightAdornment={
                 <Button
@@ -250,7 +246,7 @@ export const ProviderCatalogCard = ({
               href={keyUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[10px] font-medium text-neutral-400 no-underline transition-colors hover:text-brand-600 dark:text-neutral-500"
+              className="hover:text-brand-600 inline-flex items-center gap-1 text-[10px] font-medium text-neutral-400 no-underline transition-colors dark:text-neutral-500"
             >
               <ExternalLink size={10} />
               {__("Get API Key", "structura")}
@@ -260,7 +256,7 @@ export const ProviderCatalogCard = ({
 
         {/* Cloud users see a compact "managed" indicator */}
         {isCloud && connected && (
-          <div className="px-6 pb-5 pt-4">
+          <div className="px-6 pt-4 pb-5">
             <div className="flex items-center gap-2 rounded-lg bg-emerald-50/60 px-3 py-2 dark:bg-emerald-950/20">
               <CheckCircle2 size={13} className="text-emerald-500" />
               <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">

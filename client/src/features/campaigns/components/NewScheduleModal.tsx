@@ -203,6 +203,7 @@ const ModalInner = ({
           language={formData.intelligence.language}
           provider={formData.intelligence.textProvider}
           existingKeywords={snapshotted?.length ? snapshotted : initial}
+          existingDiscoveryMeta={formData.keywords?.discoveryMeta ?? editCampaign?.keywords?.discoveryMeta}
           onKeywordsChange={setKeywordCount}
         />
       );
@@ -290,6 +291,7 @@ const ModalInner = ({
       const bank = keywordsRef.current.getKeywords();
       updateForm("keywords", {
         bank,
+        discoveryMeta: keywordsRef.current.getDiscoveryMeta(),
         discoveredAt: bank.length > 0 ? new Date().toISOString() : null,
       });
     }

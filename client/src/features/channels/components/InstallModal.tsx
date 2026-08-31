@@ -29,7 +29,11 @@ import { __, sprintf } from "@wordpress/i18n";
 import { useNavigate } from "react-router";
 import { Alert, Button, Dialog, cn, toast } from "@structura/ui";
 import { EyeOff, ExternalLink, Loader2, X } from "lucide-react";
-import type { ConnectionSummary, IntegrationCatalogEntry } from "../types";
+import {
+  GSC_INTEGRATION_ID,
+  type ConnectionSummary,
+  type IntegrationCatalogEntry,
+} from "../types";
 import { useChannelConnectionMutations } from "../api/useChannelConnectionMutations";
 import { useSiteIndexingStatusQuery } from "../../settings/api/useSiteIndexingStatusQuery";
 import { usePublicSiteProfile } from "../../settings/api/usePublicSiteProfile";
@@ -302,6 +306,11 @@ function OAuthConnectPanel({
   // `supportsFeaturedImage` pattern in ConfigureConnectionModal.
   const supportsCompanyPage = entry.id === "linkedin";
   const [postAsOrg, setPostAsOrg] = useState(false);
+  // Google Search Console is a read-only data source — the OAuth scopes are
+  // readonly and the dispatcher never posts through it. Saying so up front
+  // pre-empts the "will this post to Google?!" hesitation the generic
+  // connect copy would otherwise leave open.
+  const isReadOnlySource = entry.id === GSC_INTEGRATION_ID;
 
   const handleConnect = async () => {
     setIsConnecting(true);
@@ -340,6 +349,15 @@ function OAuthConnectPanel({
           entry.name,
         )}
       </p>
+
+      {isReadOnlySource && (
+        <p className="text-sm text-neutral-600 dark:text-neutral-300">
+          {__(
+            "Access is read-only and free on every plan — Structura only reads your search performance data and never posts or changes anything.",
+            "structura",
+          )}
+        </p>
+      )}
 
       {supportsCompanyPage && (
         // Explicit choice rather than a single opt-in toggle: posting as a

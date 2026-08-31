@@ -3,6 +3,7 @@
 namespace Structura\Tests\Unit\Api;
 
 use Brain\Monkey\Functions;
+use Mockery;
 use Structura\Api\Privacy_Rest_Api;
 use Structura\Tests\Unit\TestCase;
 
@@ -27,9 +28,18 @@ use Structura\Tests\Unit\TestCase;
  * watch what the handler reads and writes without a real WP database.
  *
  * @covers \Structura\Api\Privacy_Rest_Api
+ *
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 class PrivacyRestApiTest extends TestCase
 {
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -273,5 +283,39 @@ class PrivacyRestApiTest extends TestCase
                 return $this->body;
             }
         };
+    }
+
+    /** @test */
+    public function cloud_consent_get_reports_state_without_contacting_the_cloud(): void
+    {
+        // wp.org review 2026-08-27 (guidelines 7 & 9) — the SPA's consent
+        // screen reads this; it must be a pure local read.
+        Mockery::mock('alias:Structura\Core\Anonymous_Bootstrap')
+            ->shouldReceive('has_cloud_consent')->once()->andReturn(false);
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')->andReturn(null);
+
+        $api = new Privacy_Rest_Api();
+
+        $this->assertSame(
+            ['cloudConsent' => false, 'hasWorkspace' => false],
+            $api->get_cloud_consent()
+        );
+    }
+
+    /** @test */
+    public function cloud_consent_post_records_consent_then_bootstraps_in_the_same_request(): void
+    {
+        $bootstrap = Mockery::mock('alias:Structura\Core\Anonymous_Bootstrap');
+        $bootstrap->shouldReceive('grant_cloud_consent')->once()->globally()->ordered();
+        $bootstrap->shouldReceive('bootstrap_now')->once()->globally()->ordered()->andReturn(true);
+
+        $api = new Privacy_Rest_Api();
+
+        $this->assertSame(
+            ['cloudConsent' => true, 'hasWorkspace' => true],
+            $api->grant_cloud_consent(),
+            'Consent is recorded BEFORE the bootstrap runs, and the SPA learns in one round-trip whether a workspace exists.'
+        );
     }
 }

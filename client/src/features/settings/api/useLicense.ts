@@ -61,14 +61,6 @@ interface LicenseCloudStatus extends Partial<LicenseEntitlementsBundle> {
   /** Phase 3.7 workspace surface. Null when the cloud couldn't read it. */
   workspace?: LicenseWorkspaceSummary | null;
   /**
-   * Workspace-audience dimension — Wave-2 rename (2026-05-04). Loose
-   * `string` on the wire so older cloud deploys that omit the field
-   * still type-check; consumers narrow to `"individual" | "agency"` via
-   * `formatPlanLabel` and fall back to a name-only label when absent
-   * or unknown.
-   */
-  audience?: string | null;
-  /**
    * Per-activation campaign cap. Source of truth is the cloud's
    * License doc (Stripe product `max_campaigns` metadata → per-license
    * override → tier fallback); the heartbeat ships the already-
@@ -386,15 +378,6 @@ export const useLicense = () => {
   // mount while the cloud query is pending for paid licensees.
   const plan = cloudStatus?.plan || license?.plan || "none";
   const status = cloudStatus?.status || (license?.is_pro ? "active" : "none");
-  // Workspace-audience axis. Same hybrid as `plan` above: the PHP-side
-  // cache (persisted at activation / heartbeat since 2026-06-07) gives
-  // first paint its full badge label, and the cloud heartbeat
-  // overrides once it lands. Stays null only when neither side has
-  // ever heard the field (pre-rollout plugin + no heartbeat yet) —
-  // consumers must still handle the pending state. Falsy values
-  // normalise to `null` so consumers never see `""` or `undefined`
-  // and can branch on truthiness cleanly.
-  const audience = cloudStatus?.audience || license?.audience || null;
 
   // Per-activation campaign cap. Resolution order:
   //   1. Cloud heartbeat (always populated by current cloud) — most
@@ -606,13 +589,6 @@ export const useLicense = () => {
      */
     isActivationValid,
     plan,
-    /**
-     * Workspace-audience suffix for plan-badge labels. `null` until the
-     * cloud heartbeat lands (PHP snapshot doesn't carry it). Consumers
-     * should compose via `formatPlanLabel(plan, audience)` which falls
-     * back to a name-only label when audience is null.
-     */
-    audience,
     /**
      * Per-activation campaign cap, already resolved through cloud →
      * PHP cache → tier fallback. `null` = unlimited. Drives the
