@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: Structura
+ * Plugin Name: StructuraWP – Autonomous AI Blog Writer & Scheduler
  * Plugin URI: https://www.structurawp.com/
  * Description: Autonomous AI content architect for WordPress.
  * x-release-please-start-version

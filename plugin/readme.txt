@@ -1,4 +1,4 @@
-=== Structura ===
+=== StructuraWP – Autonomous AI Blog Writer & Scheduler ===
 Contributors: xerx, yuriyvasilyev
 Tags: ai, content-generation, seo, automation, gutenberg
 Requires at least: 6.8
