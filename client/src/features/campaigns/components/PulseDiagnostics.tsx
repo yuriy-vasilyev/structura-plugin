@@ -1,5 +1,5 @@
 import { __ } from "@wordpress/i18n";
-import { Activity, AlertTriangle, Bug, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+import { Activity, AlertTriangle, BellRing, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 import { Button, Card, cn, toast } from "@structura/ui";
 import { usePulseCheck } from "../api/usePulseCheck";
 import { useLicense } from "@/features/settings/api/useLicense";
@@ -24,7 +24,7 @@ export const PulseDiagnostics = ({ autoRun = false }: PulseDiagnosticsProps) => 
   // is true for both a licensed activation and a bootstrapped anonymous
   // workspace; a truly unconfigured install (no bearer) has nothing to
   // probe, so the buttons stay disabled there.
-  const { hasWorkspace } = useLicense();
+  const { hasWorkspace, hasUsableLicense } = useLicense();
   const canDiagnose = hasWorkspace === true;
   const { mutate: handleTest, isPending, status } = usePulseCheck();
   const [isTestingError, setIsTestingError] = useState(false);
@@ -42,7 +42,19 @@ export const PulseDiagnostics = ({ autoRun = false }: PulseDiagnosticsProps) => 
     setIsTestingError(true);
     try {
       await apiFetch({ path: "/structura/v1/pulse/test-error", method: "POST" });
-      toast.success(__("Simulation triggered. Check Notifications in a moment.", "structura"));
+      // The button's real job is verifying the signed-error handshake
+      // (cloud → this site's webhook). Only LICENSED installs also get a
+      // Notification Center entry — the cloud's notice pipeline is
+      // license-keyed, so promising anonymous users a notification was a
+      // lie (wp.org QA round 7, 2026-09-03).
+      toast.success(
+        hasUsableLicense
+          ? __(
+              "Test signal sent — your site verified it. A test notice will appear in Notifications shortly.",
+              "structura",
+            )
+          : __("Test signal sent — your site verified the signed-error handshake.", "structura"),
+      );
     } catch (e) {
       toast.error(__("Failed to trigger simulation.", "structura"));
     } finally {
@@ -97,21 +109,24 @@ export const PulseDiagnostics = ({ autoRun = false }: PulseDiagnosticsProps) => 
             {isPending ? __("Handshaking...", "structura") : __("Run Pulse Check", "structura")}
           </Button>
 
+          {/* Sends a harmless test error through the notification pipeline
+              so users can verify alerts actually reach them. Deliberately
+              NOT styled red / "Simulate Failure": wp.org first-impression
+              QA (2026-09-02) read that as leaked internal chaos tooling. */}
           <Button
             variant="secondary"
             size="sm"
             onClick={handleTestError}
             disabled={isPending || isTestingError || !canDiagnose}
-            className="text-red-700! dark:text-red-400!"
           >
             {isTestingError ? (
               <Loader2 size={14} className="mr-2 animate-spin" />
             ) : (
-              <Bug size={14} className="mr-2" />
+              <BellRing size={14} className="mr-2" />
             )}
             {isTestingError
-              ? __("Simulating...", "structura")
-              : __("Simulate Failure", "structura")}
+              ? __("Sending...", "structura")
+              : __("Send Test Notification", "structura")}
           </Button>
         </div>
       </div>

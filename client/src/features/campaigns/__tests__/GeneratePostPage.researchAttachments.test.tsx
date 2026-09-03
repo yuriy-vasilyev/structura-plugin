@@ -82,7 +82,11 @@ vi.mock("@/hooks/useMagicSuggest", () => ({
 }));
 
 vi.mock("@/features/ai-engine", () => ({
-  useAiSettingsQuery: () => ({ data: undefined }),
+  // Truthy so the provider seed effect runs and snaps the form onto the
+  // connected OpenAI — with `undefined` the form stayed on the static
+  // gemini default, which the submit gate now (correctly) blocks as an
+  // unconnected provider (see GeneratePostPage.providerSeedRace.test.tsx).
+  useAiSettingsQuery: () => ({ data: {} }),
 }));
 
 // A bound preset keeps the VisualStyleFallbackNotice quiet (it's covered

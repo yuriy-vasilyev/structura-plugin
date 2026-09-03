@@ -60,6 +60,43 @@ const MODE_ICONS: Record<string, typeof TrendingUp> = {
 
 // Provider icons — delegates to shared PROVIDER_VISUALS via getProviderVisual()
 
+/**
+ * Why the disabled "New Campaign" CTA is disabled, as user-facing copy.
+ *
+ * Priority order matters: an UNLICENSED install's campaign cap resolves
+ * to 0, so letting the at-cap branch win produced "You're using 0 of 0
+ * campaigns on your plan…" — technically true, humanly baffling (wp.org
+ * first-impression QA round 5, 2026-09-03). License gate first, then the
+ * cap, then the missing-AI-provider reason.
+ */
+export const resolveNewCampaignBlockedReason = (args: {
+  isLicensed: boolean;
+  atCampaignCap: boolean;
+  usedCampaigns: number;
+  campaignCap: number | null;
+  engineBlockedReason?: string;
+}): string | undefined => {
+  const { isLicensed, atCampaignCap, usedCampaigns, campaignCap, engineBlockedReason } = args;
+  if (!isLicensed) {
+    return (
+      engineBlockedReason ??
+      __("Campaigns need a license — claim a free one to schedule posts.", "structura")
+    );
+  }
+  if (atCampaignCap && campaignCap !== null) {
+    return sprintf(
+      /* translators: 1: campaigns currently used, 2: plan limit */
+      __(
+        "You're using %1$d of %2$d campaigns on your plan. Pause or delete one, or contact us for more.",
+        "structura"
+      ),
+      usedCampaigns,
+      campaignCap
+    );
+  }
+  return engineBlockedReason;
+};
+
 // ─── Page ─────────────────────────────────────────────────────────────
 
 export const CampaignsPage = () => {
@@ -106,19 +143,13 @@ export const CampaignsPage = () => {
     !hasApiKey && !isManagedAiPlan
       ? __("Connect an AI provider in the AI Engine settings first.", "structura")
       : undefined;
-  const newCampaignBlockedReason = atCampaignCap
-    ? campaignCap !== null
-      ? sprintf(
-          /* translators: 1: campaigns currently used, 2: plan limit */
-          __(
-            "You're using %1$d of %2$d campaigns on your plan. Pause or delete one, or contact us for more.",
-            "structura"
-          ),
-          usedCampaigns,
-          campaignCap
-        )
-      : undefined
-    : engineBlockedReason;
+  const newCampaignBlockedReason = resolveNewCampaignBlockedReason({
+    isLicensed,
+    atCampaignCap,
+    usedCampaigns,
+    campaignCap,
+    engineBlockedReason,
+  });
 
   // Build persona lookup map
   const personaMap = new Map(personas.map((p) => [p.id, p.name]));

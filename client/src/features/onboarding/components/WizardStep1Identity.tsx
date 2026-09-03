@@ -137,7 +137,7 @@ export const WizardStep1Identity = () => {
         </h1>
         <p className="m-0! text-base text-neutral-600 dark:text-neutral-400">
           {__(
-            "We pulled these details from WordPress. Confirm them — edit anything that isn't right.",
+            "We pulled these details from WordPress. Confirm they're right — anything read-only here comes straight from your WordPress settings.",
             "structura",
           )}
         </p>

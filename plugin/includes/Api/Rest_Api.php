@@ -516,6 +516,15 @@ class Rest_Api
             'permission_callback' => [$this, 'check_permission'],
         ]);
 
+        // Weekly one-off generation allowance for the Generate page's
+        // proactive usage indicator (wp.org QA round 4 — before this,
+        // the only way to learn the cap existed was hitting it).
+        register_rest_route($this->namespace, '/generate/quota', [
+            'methods'             => 'GET',
+            'callback'            => [$this, 'get_single_gen_quota'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+
         // User-triggered diagnostics — runs the WP-environment
         // probes that the cloud can't see (DISABLE_WP_CRON, plugin
         // version vs. cloud minimum, future compat checks) and
@@ -2211,6 +2220,17 @@ class Rest_Api
             ],
             'structure'    => [
                 'enabledBlocks' => (array)($params['enabled_blocks'] ?? []),
+                // The SPA's Post Status picker arrives as `post_status`, but
+                // this array never carried it, so Task_Runner's
+                // `structure.postStatus ?? 'draft'` fallback saved EVERY
+                // one-off post as a draft regardless of the user's choice,
+                // and the run receipt (which reads the cloud-side
+                // inputSnapshot) mislabelled drafts "Post published"
+                // (wp.org first-impression QA, 2026-09-02). Same fix the
+                // portal twin got on 2026-07-20 (portal-run.ts).
+                'postStatus'    => in_array($params['post_status'] ?? '', ['publish', 'draft', 'pending'], true)
+                    ? $params['post_status']
+                    : 'draft',
                 'featuredImage' => filter_var($params['featured_image'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'bodyImages'    => filter_var($params['body_images'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'disclosure'    => [
@@ -4659,6 +4679,21 @@ class Rest_Api
         }
 
         $result = Cloud_Client::post('/noticesList', $payload);
+        if (is_wp_error($result)) {
+            return $result;
+        }
+        return rest_ensure_response($result['body']);
+    }
+
+    /**
+     * GET /generate/quota — proxy the weekly one-off generation
+     * allowance to the cloud (`getSingleGenQuota`). Response body:
+     * `{ success, cap, used, resetsAt, tier }` — `cap: null` means
+     * the tier is uncapped and the SPA renders no indicator.
+     */
+    public function get_single_gen_quota($request)
+    {
+        $result = Cloud_Client::post('/getSingleGenQuota', []);
         if (is_wp_error($result)) {
             return $result;
         }

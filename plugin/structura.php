@@ -5,7 +5,7 @@
  * Plugin URI: https://www.structurawp.com/
  * Description: Autonomous AI content architect for WordPress.
  * x-release-please-start-version
- * Version: 2.22.0
+ * Version: 2.23.0
  * x-release-please-end-version
  * Author: Xerx
  * Author URI: https://www.xerx.io
@@ -49,7 +49,7 @@ if (version_compare(PHP_VERSION, '7.4', '<')) {
 }
 
 // 2. Define Constants
-define('STRUCTURA_VERSION', '2.22.0'); // x-release-please-version
+define('STRUCTURA_VERSION', '2.23.0'); // x-release-please-version
 define('STRUCTURA_PATH', plugin_dir_path(__FILE__));
 define('STRUCTURA_URL', plugin_dir_url(__FILE__));
 define('STRUCTURA_AS_GROUP', 'structura');
@@ -146,6 +146,16 @@ register_deactivation_hook(__FILE__, function () {
     // Stop any pending pulse tasks if necessary
     wp_clear_scheduled_hook('structura_daily_license_check');
     wp_clear_scheduled_hook('structura_prune_logs');
+
+    // Action Scheduler's queue-runner cron event registers the
+    // "every_minute" interval via a cron_schedules filter that lives in
+    // the bundled AS library — gone once we're deactivated. Leaving the
+    // event scheduled makes WP cron log "Cron reschedule event error …
+    // Event schedule does not exist" every minute on sites where we're
+    // the only AS provider (wp.org QA round 4, 2026-09-03). If another
+    // active plugin ships AS it simply re-registers the event on its
+    // next page load, so clearing here is safe either way.
+    wp_clear_scheduled_hook('action_scheduler_run_queue', ['WP Cron']);
 
     // Clear the page-builder compat recheck so an admin who
     // deactivates Structura doesn't keep seeing a daily Action

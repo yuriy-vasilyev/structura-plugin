@@ -1,6 +1,7 @@
 export * from "./components/Avatar";
 export * from "./components/ConfirmDialog";
 export * from "./components/Dialog";
+export * from "./components/PromptDialog";
 export * from "./components/Tooltip";
 export * from "./components/Badge";
 export * from "./components/Breadcrumbs";

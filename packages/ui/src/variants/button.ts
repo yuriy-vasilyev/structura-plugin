@@ -28,8 +28,14 @@ export const buttonVariants = cva(
     "relative group/button inline-flex items-center justify-center font-bold text-nowrap cursor-pointer",
     // Transitions — spring deceleration (--ease-out) at --duration-fast
     "transition-all duration-fast ease-out",
-    // Disabled
-    "disabled:cursor-not-allowed disabled:opacity-60 disabled:pointer-events-none",
+    // Disabled — deliberately NO `pointer-events-none`: it swallowed hover
+    // entirely, so neither `cursor-not-allowed` nor the `title` tooltip
+    // callers pass to explain WHY a CTA is gated could ever show. A gated
+    // primary button then read as enabled-but-broken (wp.org first-impression
+    // QA, 2026-09-02: "Generate Post"/"New Campaign" felt like dead clicks).
+    // Native `disabled` already blocks activation; we only suppress the
+    // hover/press motion so the button doesn't *animate* like it's live.
+    "disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 disabled:active:scale-100 disabled:hover:translate-y-0 disabled:active:translate-y-0",
     // Focus — soft glow pattern (design guide 6.5)
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:shadow-[0_0_0_4px_rgba(99,102,241,0.15)]",
     // Micro-interactions (design guide 5.1 target)

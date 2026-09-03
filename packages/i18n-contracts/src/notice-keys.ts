@@ -50,6 +50,13 @@ export const NOTICE_KEYS = {
       body: "notices.quota.managed.body",
       cta: "notices.quota.managed.cta",
     },
+    single_gen_weekly: {
+      // bodyParams: { cap: string } — the tier's weekly one-off
+      // generation allowance (e.g. "2").
+      title: "notices.quota.single_gen_weekly.title",
+      body: "notices.quota.single_gen_weekly.body",
+      cta: "notices.quota.single_gen_weekly.cta",
+    },
   },
   billing: {
     payment_failed: {
@@ -93,6 +100,14 @@ export const NOTICE_KEYS = {
       title: "notices.pluginHealth.compat.title",
       body: "notices.pluginHealth.compat.body",
       cta: "notices.pluginHealth.compat.cta",
+    },
+    // The "Send Test Notification" button's end-to-end proof: raised by
+    // the cloud's simulate_error branch for licensed installs so the
+    // pipeline is verifiably alive (wp.org QA round 7, 2026-09-03).
+    // No CTA — the notice IS the payload; the user just dismisses it.
+    diagnostics_test: {
+      title: "notices.pluginHealth.diagnostics_test.title",
+      body: "notices.pluginHealth.diagnostics_test.body",
     },
     // Cloud → plugin reachability. Reported when the plugin's handshake
     // probe (Site_Reachability) finds the cloud can't POST a blueprint

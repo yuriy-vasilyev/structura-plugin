@@ -151,6 +151,41 @@ export const Account = () => {
               </div>
             </div>
 
+            {/* Anonymous installs saw a description of what a free account
+                unlocks but NO way to get one — the page's only affordance
+                was a license-key field they can't fill (Yurii, 2026-09-03).
+                Primary CTA opens portal signup carrying the site's domain
+                so the claim flow can promote this shadow workspace. */}
+            {!isLicensed && (
+              <div className="mb-8 flex flex-wrap items-center gap-3">
+                <Button
+                  href={buildPortalSignupUrl({
+                    intent: "general_upgrade",
+                    domain:
+                      typeof window !== "undefined" ? window.location.hostname : undefined,
+                    plan,
+                  })}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {__("Create Free Account", "structura")}
+                </Button>
+                <Button
+                  variant="secondary"
+                  href={buildMarketingPricingUrl({
+                    intent: "general_upgrade",
+                    domain:
+                      typeof window !== "undefined" ? window.location.hostname : undefined,
+                    plan,
+                  })}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {__("View Plans", "structura")}
+                </Button>
+              </div>
+            )}
+
             {/* Visual Progress Bar (Micro-interaction)
                 Two-segment journey: connect → upgrade. The second segment
                 is tinted to match the current paid tier so Agency users see
@@ -217,6 +252,11 @@ export const Account = () => {
                     }}
                     disabled={processing || !licenseKeyInput}
                     loading={processing}
+                    title={
+                      !licenseKeyInput
+                        ? __("Paste your license key first.", "structura")
+                        : undefined
+                    }
                   >
                     <Zap className="size-4" />
                     <span className="ml-2">
@@ -227,7 +267,25 @@ export const Account = () => {
                   </Button>
                 </div>
                 <p className="m-0! px-1 text-[10px] font-medium text-gray-400">
-                  {__("Unlock pro features and boost your organic traffic!", "structura")}
+                  {__("No license key yet? It comes with your account.", "structura")}
+                  <a
+                    href={buildPortalSignupUrl({
+                      intent: "general_upgrade",
+                      domain:
+                        typeof window !== "undefined"
+                          ? window.location.hostname
+                          : undefined,
+                      plan,
+                    })}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-brand-600 dark:text-brand-400 ml-1 font-bold hover:underline"
+                  >
+                    {__("Create Free Account", "structura")}
+                  </a>
+                  <span className="mx-1" aria-hidden>
+                    ·
+                  </span>
                   <a
                     href={buildMarketingPricingUrl({
                       intent: "general_upgrade",
@@ -238,7 +296,7 @@ export const Account = () => {
                       plan,
                     })}
                     target="_blank"
-                    className="text-brand-600 dark:text-brand-400 ml-1 font-bold hover:underline"
+                    className="text-brand-600 dark:text-brand-400 font-bold hover:underline"
                   >
                     {__("View Pricing", "structura")}
                   </a>

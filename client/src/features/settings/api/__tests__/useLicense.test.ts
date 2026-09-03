@@ -18,7 +18,28 @@ import {
   deriveProviderCountCap,
   resolveIsAnonymous,
   resolveProviderCountCap,
+  shouldVerifyLicenseWithCloud,
 } from "../useLicense";
+
+describe("shouldVerifyLicenseWithCloud", () => {
+  // Regression — round-9 QA, 2026-09-03: the heartbeat was paid-gated,
+  // so a free→paid upgrade made in the portal never reached wp-admin
+  // (a freshly paid BYOK customer saw FREE on every surface; only the
+  // quota endpoint, which resolves tier server-side, knew the truth).
+  it("verifies a FREE license with a bound key — portal upgrades must reach wp-admin", () => {
+    expect(shouldVerifyLicenseWithCloud({ license_key: "ST-AZY1-39QY-1QFT" })).toBe(true);
+  });
+
+  it("verifies paid licenses with a bound key", () => {
+    expect(shouldVerifyLicenseWithCloud({ license_key: "ST-PRO-XXXX-1234" })).toBe(true);
+  });
+
+  it("skips anonymous installs (no key) and masked snapshots", () => {
+    expect(shouldVerifyLicenseWithCloud(null)).toBe(false);
+    expect(shouldVerifyLicenseWithCloud({ license_key: "" })).toBe(false);
+    expect(shouldVerifyLicenseWithCloud({ license_key: "ST-AZY1-***********1QFT" })).toBe(false);
+  });
+});
 
 describe("deriveIsActivationValid", () => {
   it("returns null when no cloud heartbeat has landed", () => {

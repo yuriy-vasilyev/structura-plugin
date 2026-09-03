@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { __ } from "@wordpress/i18n";
 import {
@@ -143,7 +143,22 @@ export const SinglePostRunDetailPage = () => {
  * transition into the timeline feels like a continuation rather than
  * a context switch.
  */
-const QueueingState = ({ runId: _runId }: { runId: string }) => (
+const QueueingState = ({ runId: _runId }: { runId: string }) => {
+  // Escalating copy: "a few seconds" is a lie past ~15s. The run doc
+  // only exists once the site's Action Scheduler picks up the async
+  // job — on quiet sites that can take up to a minute-plus (wp.org QA
+  // rounds 3–4 measured 14–110s of this state). Be honest about WHY
+  // it's slow instead of spinning silently; the poller's 150s
+  // auto-cancel still backstops a genuinely stuck dispatch.
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setSlow(true), 15000);
+    return () => window.clearTimeout(t);
+  }, []);
+  return renderQueueingState(slow);
+};
+
+const renderQueueingState = (slow: boolean) => (
   <PageContainer variant="narrow">
     <div className="mb-6 flex items-start gap-3">
       <Link
@@ -166,10 +181,12 @@ const QueueingState = ({ runId: _runId }: { runId: string }) => (
     <section className="flex items-center gap-3 rounded-2xl border border-blue-200/60 bg-blue-50/40 p-6 shadow-sm dark:border-blue-900/40 dark:bg-blue-950/20">
       <Loader2 className="h-5 w-5 animate-spin text-blue-600 dark:text-blue-400" />
       <p className="m-0! text-sm text-blue-900 dark:text-blue-100">
-        {__(
-          "Setting up your run — this only takes a few seconds.",
-          "structura",
-        )}
+        {slow
+          ? __(
+              "Still waiting for your site's background runner to pick this up. On quiet sites this can take a minute — the run starts as soon as WordPress cron fires.",
+              "structura",
+            )
+          : __("Setting up your run — this only takes a few seconds.", "structura")}
       </p>
     </section>
   </PageContainer>

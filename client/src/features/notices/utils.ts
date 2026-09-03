@@ -54,6 +54,17 @@ function copyDict(): Record<string, string> {
       "structura",
     ),
     "notices.quota.managed.cta": __("Manage plan", "structura"),
+    "notices.quota.single_gen_weekly.title": __("Weekly post limit reached", "structura"),
+    "notices.quota.single_gen_weekly.body": __(
+      "This site has used all {{cap}} of its one-off generated posts for this week. The allowance resets on Monday (UTC) — or upgrade your plan to generate more.",
+      "structura",
+    ),
+    "notices.quota.single_gen_weekly.cta": __("See upgrade options", "structura"),
+    "notices.pluginHealth.diagnostics_test.title": __("Test notification delivered", "structura"),
+    "notices.pluginHealth.diagnostics_test.body": __(
+      "This is the test notice you asked for from Bridge Diagnostics — your site's error-notification pipeline works end to end. You can dismiss it.",
+      "structura",
+    ),
     "notices.billing.payment_failed.title": __("Your last payment failed", "structura"),
     "notices.billing.payment_failed.body": __(
       "Stripe couldn't charge your card for the most recent invoice. We'll retry automatically, but you can avoid an interruption by updating your payment method now.",

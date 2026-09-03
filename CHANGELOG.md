@@ -1,5 +1,51 @@
 # Changelog
 
+## [2.23.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.22.0...v2.23.0) (2026-09-03)
+
+
+### Features
+
+* **client:** Create Free Account CTAs on the anonymous Account & License page ([c562708](https://github.com/yuriy-vasilyev/structura-core/commit/c562708ff76b1ee4a27828c5acf25534ba385904))
+* **functions:** weekly cap on manual single-post generations ([4f55265](https://github.com/yuriy-vasilyev/structura-core/commit/4f5526549693e4f30ce1165e41a73d410509a0b3))
+* **notices:** Send Test Notification actually delivers a notice ([55d3414](https://github.com/yuriy-vasilyev/structura-core/commit/55d3414e9bb6a17c05c92a0fa95ed8715e5ed3cb))
+* **notices:** weekly single-gen cap refusals reach the Notification Center ([d4d8261](https://github.com/yuriy-vasilyev/structura-core/commit/d4d8261b9eeb678f8fa30218e461c8450df37234))
+* proactive weekly one-off usage indicator on the Generate page ([880559a](https://github.com/yuriy-vasilyev/structura-core/commit/880559ae46e32a012329debe1f173b90fa6d7cc5))
+* **release:** wp.org launch follow-through — www flag flip, portal wp.org zip, SVN deploy in CI ([80653fc](https://github.com/yuriy-vasilyev/structura-core/commit/80653fcc49cbc56a02e9a9f23e8b08d9139ce639))
+* **ui,web:** PromptDialog + upgrade CTAs across the free-tier portal ([a27652b](https://github.com/yuriy-vasilyev/structura-core/commit/a27652b75b4e4a6663bc7d8a8d0da1ad7e893cef))
+* **ui,web:** rich Pro upsell dialogs, tier-true provider pickers, Get Pro CTA ([c46ff91](https://github.com/yuriy-vasilyev/structura-core/commit/c46ff91a41ffcc7c4342b64b8ec7f50f2925cfc0))
+* **video:** Shorts title ships with hashtags, capped at YouTube's 100 chars ([87b37b0](https://github.com/yuriy-vasilyev/structura-core/commit/87b37b056ed4da10d92d32c8ea78c4aba1effd95))
+* **web,functions:** weekly quota surface on the portal Generate page ([a591ae0](https://github.com/yuriy-vasilyev/structura-core/commit/a591ae01ccb8b06a30d7d37d40408d36212b74b2))
+* **www:** 'Available on WordPress.org' badge in the footer brand column ([e9dd0c7](https://github.com/yuriy-vasilyev/structura-core/commit/e9dd0c7834a02ff82e80df5d922a830c928588e5))
+* **www:** FAQ query cluster on the remaining ten vs pages ([fe4c023](https://github.com/yuriy-vasilyev/structura-core/commit/fe4c023c22c012ad2b42ff57d06d0fa167f907cb))
+* **www:** query-first titles + FAQ cluster for the Machined AI and SEOWriting vs pages ([35750ea](https://github.com/yuriy-vasilyev/structura-core/commit/35750ea2e9a4e8f32cf5bdf1d0f6cb37ef798350))
+* **www:** query-first titles for the remaining ten vs pages ([9ab6e41](https://github.com/yuriy-vasilyev/structura-core/commit/9ab6e414f6ac8ae00b56588cdc79f3e4c17ffa4a))
+
+
+### Bug Fixes
+
+* **client:** don't seed the Generate form with a provider that has no key ([d809f55](https://github.com/yuriy-vasilyev/structura-core/commit/d809f553638a2cacb5171d00c72bf3ef51304282))
+* **client:** explain the license gate on the disabled New Campaign CTA ([963ca4e](https://github.com/yuriy-vasilyev/structura-core/commit/963ca4eeece3d38f6833bbf1bb1ba3d7cdbab947))
+* **client:** honest escalating copy while a run waits for the site's cron ([e962f52](https://github.com/yuriy-vasilyev/structura-core/commit/e962f52b5efe94280466c61cee6fd73bdf122dc1))
+* **client:** license gate wins the New Campaign tooltip; no engine-banner flash on cold boot ([2966cbe](https://github.com/yuriy-vasilyev/structura-core/commit/2966cbe194bade78505ea8dd21cb249ce68fc451))
+* **client:** portal-side upgrades finally reach wp-admin ([3cfab43](https://github.com/yuriy-vasilyev/structura-core/commit/3cfab43cc44d244b88e9b3dd47696658481882aa))
+* **client:** the Interview step's Pro button explains itself ([832dd83](https://github.com/yuriy-vasilyev/structura-core/commit/832dd8325b1ac8443012e3b140005871d08ac342))
+* **client:** the notification test button no longer masquerades as chaos tooling ([56dc6c5](https://github.com/yuriy-vasilyev/structura-core/commit/56dc6c5aa57df45823012985906e24e9b6ae566e))
+* **functions:** getSingleGenQuota tolerates a license doc missing status ([d35676a](https://github.com/yuriy-vasilyev/structura-core/commit/d35676aedd199244dc80faea5973fc52ef75a574))
+* **plugin:** clear Action Scheduler's cron event on deactivation ([4d4cce1](https://github.com/yuriy-vasilyev/structura-core/commit/4d4cce1eb3b1752b3a0a852a2d799d471c4d9341))
+* **plugin:** drop unrelated 'xerx' wp.org handle from readme Contributors ([12bf0d7](https://github.com/yuriy-vasilyev/structura-core/commit/12bf0d7a87ebdbcfa5d548f92d219c96d1f29c0e))
+* **plugin:** forward the Post Status choice onto the single-gen wire ([9e842f1](https://github.com/yuriy-vasilyev/structura-core/commit/9e842f1269692f9234beefa811a95919998577f9))
+* **plugin:** rename display name to StructuraWP for wp.org distinctiveness ([8c314e7](https://github.com/yuriy-vasilyev/structura-core/commit/8c314e7ea2cbb532b7152836cfdbd9665a915fce))
+* **ui:** gated CTAs keep their explanatory tooltip and cursor while disabled ([a9b5461](https://github.com/yuriy-vasilyev/structura-core/commit/a9b546147288ee0c2991614c6f2ce4a8183c94b7))
+* **web:** atCampaignCap declared after the campaigns list it reads ([e50a2ab](https://github.com/yuriy-vasilyev/structura-core/commit/e50a2abed69b7e8bb57b268b01e6b36eeef1cb83))
+* **web:** channel tier badges respect entitlement; compact seat count in plan chip ([11f3fa1](https://github.com/yuriy-vasilyev/structura-core/commit/11f3fa178f871ee70ca6cddb4f3a6efb30fccc95))
+* **web:** header CTAs share one flex group instead of scattering ([4742c29](https://github.com/yuriy-vasilyev/structura-core/commit/4742c29336e8a934675ae794d85eb8cc755016ca))
+* **web:** one Add key CTA on the AI-keys page, not two ([0495d1c](https://github.com/yuriy-vasilyev/structura-core/commit/0495d1ca179a7ffc4b522c5afc6a8f82689b2889))
+* **web:** portal New-campaign button respects the campaign cap ([382b0de](https://github.com/yuriy-vasilyev/structura-core/commit/382b0de9a2ad4276345fd4a564ea9aca5734e7a2))
+* **web:** three surfaces stop disagreeing about post counts ([5e911ca](https://github.com/yuriy-vasilyev/structura-core/commit/5e911cab32101733aab5813dd5e7632cbfe4d9c4))
+* **web:** visual-review nits on the conversion batch ([45407e6](https://github.com/yuriy-vasilyev/structura-core/commit/45407e6bdec70a4c93efeb455b30679e5e876504))
+* **web:** workspace rename reaches the header without a manual refresh ([bdf8fcb](https://github.com/yuriy-vasilyev/structura-core/commit/bdf8fcb358d9102392be9ab4e0a71e08824a6cd8))
+* **www:** 308 indexed cross-locale and WP-era blog URLs instead of 404ing ([0fa9311](https://github.com/yuriy-vasilyev/structura-core/commit/0fa9311ffc95aa88d7b4898ebebef5a6323a2fbc))
+
 ## [2.22.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.21.0...v2.22.0) (2026-08-31)
 
 

@@ -33,6 +33,7 @@ import { NoPersonasBlocker } from "@/components/Shared/NoPersonasBlocker";
 import { ProviderToggle } from "@/features/campaigns/components/ProviderToggle";
 import { mirrorModelForTier } from "@/features/campaigns/modelTier";
 import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutations";
+import { useSingleGenQuota } from "@/features/campaigns/api/useSingleGenQuota";
 import {
   researchRejectSizeMessage,
   researchRejectTypeMessage,
@@ -199,7 +200,11 @@ const GeneratePostPage = () => {
   // (Image_Uploads_Unwritable_Notice) and Site Health use. Optional flag:
   // false on plugin builds predating it.
   const uploadsUnwritable = !!window.structuraConfig?.uploads_unwritable;
-  const { activeProviders } = useAiConnections();
+  const {
+    activeProviders,
+    isLoading: connectionsLoading,
+    isFetching: connectionsFetching,
+  } = useAiConnections();
   const { data: aiSettings } = useAiSettingsQuery();
   const { defaultTextProvider, defaultImageProvider } = useDefaultProviders();
   const { data: personas = [], isLoading: loadingPersonas } = usePersonasQuery();
@@ -255,6 +260,15 @@ const GeneratePostPage = () => {
   useEffect(() => {
     if (hasSyncedProviders.current) return;
     if (!aiSettings) return;
+    // BYOK-family plans: wait for the cloud-derived `connected` flags to
+    // land before seeding. The wp_localize bootstrap omits them (see
+    // useAiConnections), so on first paint every provider reads as
+    // unconnected and the defaults fall back to "gemini" — which this
+    // one-shot ref then locked in even when the user's only key was
+    // OpenAI. The generation then 403'd with credentials_missing on a
+    // provider the user never picked (wp.org first-impression QA,
+    // 2026-09-02).
+    if (!isManagedAiPlan && (connectionsLoading || connectionsFetching)) return;
     hasSyncedProviders.current = true;
     setFormData((prev) => ({
       ...prev,
@@ -268,7 +282,14 @@ const GeneratePostPage = () => {
           mirrorModelForTier(defaultImageProvider, "image", prev.intelligence.imageTier ?? "mid") ?? "",
       },
     }));
-  }, [aiSettings, defaultTextProvider, defaultImageProvider]);
+  }, [
+    aiSettings,
+    defaultTextProvider,
+    defaultImageProvider,
+    isManagedAiPlan,
+    connectionsLoading,
+    connectionsFetching,
+  ]);
 
   // Auto-pin the only persona (2026-07-08). "Random persona" is
   // meaningless with a single persona on file, and the dropdown below
@@ -332,7 +353,20 @@ const GeneratePostPage = () => {
   // `!isPaidLicense` short-circuit let None / Free hit Generate with
   // zero providers and watch the cloud reject the handover as
   // Unauthorized, filling System Logs with errors.
-  const isEngineReady = isManagedAiPlan || hasApiKey;
+  // Defence-in-depth behind the seeding fix above: even if a stale or
+  // hand-edited form selects a provider without a key, refuse to hand
+  // the run to the cloud (it would 403 credentials_missing anyway —
+  // this is the UX half of that contract).
+  const selectedTextProviderConnected =
+    isManagedAiPlan || activeProviders.includes(formData.intelligence.textProvider);
+  const isEngineReady = (isManagedAiPlan || hasApiKey) && selectedTextProviderConnected;
+
+  // Weekly one-off allowance (wp.org QA round 4): tell capped tiers where
+  // they stand BEFORE they click, and block the doomed click at the cap —
+  // the cloud enforces the same gate server-side, this is the UX half.
+  const { data: quota } = useSingleGenQuota();
+  const hasWeeklyCap = quota?.cap != null;
+  const atWeeklyCap = hasWeeklyCap && (quota?.used ?? 0) >= (quota?.cap ?? 0);
 
   // Whether the form requests any AI image. Drives the non-blocking
   // "no visual style set" nudge below.
@@ -348,7 +382,7 @@ const GeneratePostPage = () => {
   const wantsAnyImage = formData.structure.featuredImage || formData.structure.bodyImages;
 
   const handleGenerate = async () => {
-    if (!isValid || !isEngineReady || hasNoPersonas) return;
+    if (!isValid || !isEngineReady || hasNoPersonas || atWeeklyCap) return;
     // Only ready rows are submitted (handoff §State Management): busy rows
     // haven't produced a server ref yet and failed rows never will. The
     // refs ride at the campaign's TOP level so the run's inputSnapshot
@@ -423,10 +457,20 @@ const GeneratePostPage = () => {
       <DefaultPersonaAdvisory />
 
       {/* ── Engine not ready warning ─────────────────────────── */}
-      {!isEngineReady && (
+      {/* Gated on the connections fetch settling: on SPA cold boot the
+          `connected` flags haven't landed yet, so this banner flashed
+          "Connect an AI provider" at users whose provider IS connected
+          (wp.org QA round 5, 2026-09-03). Same guard the app-level
+          DisconnectedProvidersBanner uses. */}
+      {!connectionsLoading && !connectionsFetching && !isEngineReady && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50/60 px-5 py-4 dark:border-amber-900/40 dark:bg-amber-950/20">
           <p className="m-0! text-sm font-semibold text-amber-800 dark:text-amber-200">
-            {__("Connect an AI provider in the AI Engine settings first.", "structura")}
+            {hasApiKey
+              ? __(
+                  "The selected text provider isn't connected. Choose a connected provider below, or connect it in the AI Engine settings.",
+                  "structura"
+                )
+              : __("Connect an AI provider in the AI Engine settings first.", "structura")}
           </p>
           <Button
             variant="secondary"
@@ -439,6 +483,32 @@ const GeneratePostPage = () => {
           </Button>
         </div>
       )}
+
+      {/* ── Weekly one-off allowance (capped tiers only) ─────── */}
+      {hasWeeklyCap &&
+        (atWeeklyCap ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 px-5 py-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+            <p className="m-0! text-sm font-semibold text-amber-800 dark:text-amber-200">
+              {sprintf(
+                /* translators: %d: weekly one-off post allowance */
+                __(
+                  "Weekly post limit reached — this site has used all %d of its one-off posts this week. Your allowance resets on Monday (UTC).",
+                  "structura"
+                ),
+                quota?.cap ?? 0
+              )}
+            </p>
+          </div>
+        ) : (
+          <p className="m-0! px-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+            {sprintf(
+              /* translators: 1: one-off posts used this week, 2: weekly allowance */
+              __("%1$d of %2$d one-off posts used this week.", "structura"),
+              quota?.used ?? 0,
+              quota?.cap ?? 0
+            )}
+          </p>
+        ))}
 
       {/* ── No visual style set — non-blocking heads-up ──────── */}
       <VisualStyleFallbackNotice imagesEnabled={wantsAnyImage} />
@@ -1059,7 +1129,15 @@ const GeneratePostPage = () => {
         <Button
           onClick={handleGenerate}
           loading={isGenerating}
-          disabled={!isValid || !isEngineReady || hasNoPersonas}
+          disabled={!isValid || !isEngineReady || hasNoPersonas || atWeeklyCap}
+          title={
+            atWeeklyCap
+              ? __(
+                  "Weekly post limit reached — your allowance resets on Monday.",
+                  "structura"
+                )
+              : undefined
+          }
         >
           <Zap size={14} className="mr-1.5" />
           {__("Generate Now", "structura")}

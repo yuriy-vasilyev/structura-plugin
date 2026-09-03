@@ -4,7 +4,14 @@ import React, { createContext, useContext, useMemo } from "react";
 import { cn } from "../utils";
 import { formFieldLabelVariants, formFieldTriggerVariants } from "../variants/form-field";
 
-type SelectOption = { value: string | number; label: string };
+type SelectOption = {
+  value: string | number;
+  label: string;
+  /** Not selectable — rendered muted. Pair with `badge` to say why. */
+  disabled?: boolean;
+  /** Tiny uppercase chip after the label (e.g. "Pro" for tier-gated options). */
+  badge?: string;
+};
 type SelectContextValue = {
   value?: string | number;
   onValueChange: (value: string | number) => void;
@@ -165,7 +172,7 @@ const SelectContent: React.FC<
   const rendered =
     children ??
     options.map((opt) => (
-      <SelectItem key={opt.value} value={opt.value}>
+      <SelectItem key={opt.value} value={opt.value} disabled={opt.disabled} badge={opt.badge}>
         {opt.label}
       </SelectItem>
     ));
@@ -195,17 +202,36 @@ interface SelectItemProps {
   value: string | number;
   children: React.ReactNode;
   description?: React.ReactNode;
+  /** Not selectable — muted, no pointer. Tier-gated options pair it with `badge`. */
+  disabled?: boolean;
+  /** Tiny uppercase chip after the label (e.g. "Pro"). */
+  badge?: string;
 }
 
-const SelectItem: React.FC<SelectItemProps> = ({ value, children, description }) => {
+const SelectItem: React.FC<SelectItemProps> = ({
+  value,
+  children,
+  description,
+  disabled,
+  badge,
+}) => {
   return (
     <ListboxOption
       value={value}
-      className="group relative cursor-pointer rounded-lg py-2 pr-4 pl-10 text-gray-700 transition-colors select-none data-focus:bg-gray-100 data-focus:text-gray-900 dark:text-gray-300 dark:data-focus:bg-gray-800 dark:data-focus:text-white"
+      disabled={disabled}
+      className={cn(
+        "group relative rounded-lg py-2 pr-4 pl-10 text-gray-700 transition-colors select-none data-focus:bg-gray-100 data-focus:text-gray-900 dark:text-gray-300 dark:data-focus:bg-gray-800 dark:data-focus:text-white",
+        disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+      )}
     >
       <div>
-        <span className="block truncate font-normal group-data-selected:font-bold group-data-selected:text-brand-600 dark:group-data-selected:text-brand-400">
+        <span className="flex items-center gap-2 truncate font-normal group-data-selected:font-bold group-data-selected:text-brand-600 dark:group-data-selected:text-brand-400">
           {children}
+          {badge && (
+            <span className="shrink-0 rounded-md bg-brand-100 px-1.5 py-0.5 text-[9px] font-black tracking-wider text-brand-700 uppercase dark:bg-brand-500/20 dark:text-brand-300">
+              {badge}
+            </span>
+          )}
         </span>
         {description && (
           <span className="block text-xs font-normal text-gray-500 group-data-focus:text-gray-600 dark:text-gray-500 dark:group-data-focus:text-gray-400">

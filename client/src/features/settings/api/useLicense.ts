@@ -207,6 +207,22 @@ export function resolveIsAnonymous(
   return config?.is_anonymous === true;
 }
 
+/**
+ * Gate for the cloud license heartbeat: true when the SPA holds a real
+ * (unmasked) bound license key — ANY tier, Free included.
+ *
+ * History: this used to also require `license.is_pro`, on the theory
+ * that "Free has nothing to verify." That became false the day
+ * portal-side upgrades shipped: the heartbeat is the ONLY signal that
+ * feeds the plan auto-sync effect, so a free→paid upgrade made at
+ * app.structurawp.com never reached wp-admin — a freshly paid BYOK
+ * customer still saw FREE on every surface (round-9 QA, 2026-09-03).
+ * Pure and exported so the regression test runs the real gate.
+ */
+export const shouldVerifyLicenseWithCloud = (
+  license: { license_key?: string | null } | null | undefined,
+): boolean => Boolean(license?.license_key && !license.license_key.includes("*"));
+
 export const useLicense = () => {
   const queryClient = useQueryClient();
   const { data: license, isLoading: isSettingsLoading } = useSettingsQuery((s) => s.license);
@@ -214,7 +230,8 @@ export const useLicense = () => {
 
   const isSyncing = useRef(false);
 
-  const hasKey = !!license?.license_key && !license.license_key.includes("*");
+
+  const hasKey = shouldVerifyLicenseWithCloud(license);
 
   /**
    * Tri-state license-presence gate for cloud-backed query hooks.
@@ -359,14 +376,17 @@ export const useLicense = () => {
         };
       });
     },
-    // Paid-only gate. The cloud heartbeat is a *verification* of what
-    // PHP already told us — not the source of truth for the initial
-    // render. Running it for Free users (a) is wasted work since Free
-    // has nothing to verify, and (b) used to make the UI flicker
-    // through a false "not licensed" state on every mount. Free users
-    // can't purchase add-ons (integrations-store-spec §11), so they
-    // have no entitlements worth fetching here either.
-    enabled: !!license?.is_pro && hasKey,
+    // Any bound key verifies against the cloud — including FREE. This
+    // used to be paid-gated ("Free has nothing to verify"), which was
+    // true until portal-side upgrades existed: a free→paid upgrade made
+    // at app.structurawp.com never reached wp-admin, because the ONLY
+    // path that notices a plan change is this heartbeat feeding the
+    // auto-sync effect below. Round-9 QA (2026-09-03) found a freshly
+    // paid BYOK customer still seeing FREE everywhere. The old flicker
+    // concern doesn't apply — every derived value falls back to the PHP
+    // snapshot until the heartbeat settles (`cloudStatus?.plan ||
+    // license?.plan`), so nothing degrades while pending.
+    enabled: hasKey,
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 

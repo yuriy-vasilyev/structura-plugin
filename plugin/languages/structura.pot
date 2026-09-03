@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-31T05:59:45+00:00\n"
+"POT-Creation-Date: 2026-09-03T11:09:05+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: structura\n"
@@ -30,28 +30,28 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5009
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5063
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5128
-#: plugin/includes/Api/Rest_Api.php:2359 plugin/includes/Api/Rest_Api.php:2509
-#: plugin/includes/Api/Rest_Api.php:2677 plugin/includes/Api/Rest_Api.php:2821
-#: plugin/includes/Api/Rest_Api.php:2853 plugin/includes/Api/Rest_Api.php:2885
-#: plugin/includes/Api/Rest_Api.php:3025 plugin/includes/Api/Rest_Api.php:3053
-#: plugin/includes/Api/Rest_Api.php:3082 plugin/includes/Api/Rest_Api.php:3102
-#: plugin/includes/Api/Rest_Api.php:3134 plugin/includes/Api/Rest_Api.php:3159
-#: plugin/includes/Api/Rest_Api.php:3177 plugin/includes/Api/Rest_Api.php:3204
-#: plugin/includes/Api/Rest_Api.php:3224 plugin/includes/Api/Rest_Api.php:3271
-#: plugin/includes/Api/Rest_Api.php:6048 plugin/includes/Api/Rest_Api.php:6202
-#: plugin/includes/Api/Rest_Api.php:6280 plugin/includes/Api/Rest_Api.php:6363
-#: plugin/includes/Api/Rest_Api.php:6410 plugin/includes/Api/Rest_Api.php:6509
-#: plugin/includes/Api/Rest_Api.php:6563 plugin/includes/Api/Rest_Api.php:6628
+#: plugin/includes/Api/Rest_Api.php:2379 plugin/includes/Api/Rest_Api.php:2529
+#: plugin/includes/Api/Rest_Api.php:2697 plugin/includes/Api/Rest_Api.php:2841
+#: plugin/includes/Api/Rest_Api.php:2873 plugin/includes/Api/Rest_Api.php:2905
+#: plugin/includes/Api/Rest_Api.php:3045 plugin/includes/Api/Rest_Api.php:3073
+#: plugin/includes/Api/Rest_Api.php:3102 plugin/includes/Api/Rest_Api.php:3122
+#: plugin/includes/Api/Rest_Api.php:3154 plugin/includes/Api/Rest_Api.php:3179
+#: plugin/includes/Api/Rest_Api.php:3197 plugin/includes/Api/Rest_Api.php:3224
+#: plugin/includes/Api/Rest_Api.php:3244 plugin/includes/Api/Rest_Api.php:3291
+#: plugin/includes/Api/Rest_Api.php:6083 plugin/includes/Api/Rest_Api.php:6237
+#: plugin/includes/Api/Rest_Api.php:6315 plugin/includes/Api/Rest_Api.php:6398
+#: plugin/includes/Api/Rest_Api.php:6445 plugin/includes/Api/Rest_Api.php:6544
+#: plugin/includes/Api/Rest_Api.php:6598 plugin/includes/Api/Rest_Api.php:6663
 msgid "Active license required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:867
-#: plugin/includes/Api/Rest_Api.php:1100
+#: plugin/includes/Api/Rest_Api.php:1109
 msgid "Active Pro or Cloud license required to access analytics."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1423
-#: plugin/includes/Api/Rest_Api.php:1754
+#: plugin/includes/Api/Rest_Api.php:1763
 msgid "Unknown error"
 msgstr ""
 
@@ -61,31 +61,31 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5058
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5123
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5231
-#: plugin/includes/Api/Rest_Api.php:1832 plugin/includes/Api/Rest_Api.php:6275
-#: plugin/includes/Api/Rest_Api.php:6358 plugin/includes/Api/Rest_Api.php:6405
-#: plugin/includes/Api/Rest_Api.php:6558 plugin/includes/Api/Rest_Api.php:6623
-#: plugin/includes/Api/Rest_Api.php:6728
+#: plugin/includes/Api/Rest_Api.php:1841 plugin/includes/Api/Rest_Api.php:6310
+#: plugin/includes/Api/Rest_Api.php:6393 plugin/includes/Api/Rest_Api.php:6440
+#: plugin/includes/Api/Rest_Api.php:6593 plugin/includes/Api/Rest_Api.php:6658
+#: plugin/includes/Api/Rest_Api.php:6763
 msgid "Campaign ID is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1529
-#: plugin/includes/Api/Rest_Api.php:1860
+#: plugin/includes/Api/Rest_Api.php:1869
 msgid "Manual execution initiated in background."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1575
-#: plugin/includes/Api/Rest_Api.php:1906
+#: plugin/includes/Api/Rest_Api.php:1915
 msgid "Unable to delete task."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1601
-#: plugin/includes/Api/Rest_Api.php:2055
+#: plugin/includes/Api/Rest_Api.php:2064
 msgid "A post objective is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1615
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:50
-#: plugin/includes/Api/Rest_Api.php:2098
+#: plugin/includes/Api/Rest_Api.php:2107
 #: plugin/includes/Scheduler/Campaign_Validator.php:50
 msgid "A text provider is required."
 msgstr ""
@@ -93,21 +93,21 @@ msgstr ""
 #. translators: %s: provider slug (e.g. "anthropic")
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1629
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:65
-#: plugin/includes/Api/Rest_Api.php:2112
+#: plugin/includes/Api/Rest_Api.php:2121
 #: plugin/includes/Scheduler/Campaign_Validator.php:65
 msgid "Provider \"%s\" does not support image generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1647
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:98
-#: plugin/includes/Api/Rest_Api.php:2130
+#: plugin/includes/Api/Rest_Api.php:2139
 #: plugin/includes/Scheduler/Campaign_Validator.php:116
 msgid "The fallback text provider must be different from the primary."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1658
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:110
-#: plugin/includes/Api/Rest_Api.php:2141
+#: plugin/includes/Api/Rest_Api.php:2150
 #: plugin/includes/Scheduler/Campaign_Validator.php:128
 msgid "The fallback image provider must be different from the primary."
 msgstr ""
@@ -115,19 +115,19 @@ msgstr ""
 #. translators: %s: provider slug (e.g. "anthropic")
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1668
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:119
-#: plugin/includes/Api/Rest_Api.php:2151
+#: plugin/includes/Api/Rest_Api.php:2160
 #: plugin/includes/Scheduler/Campaign_Validator.php:137
 msgid "Fallback provider \"%s\" does not support image generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1762
-#: plugin/includes/Api/Rest_Api.php:2315
+#: plugin/includes/Api/Rest_Api.php:2335
 msgid ""
 "Could not cache the post request for background processing. Please try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1782
-#: plugin/includes/Api/Rest_Api.php:2335
+#: plugin/includes/Api/Rest_Api.php:2355
 msgid ""
 "Could not queue this post for background processing. Open Tools → Site "
 "Health and resolve any Structura-flagged issues (usually MySQL "
@@ -135,41 +135,41 @@ msgid ""
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1791
-#: plugin/includes/Api/Rest_Api.php:2344
+#: plugin/includes/Api/Rest_Api.php:2364
 msgid "Your post is being generated in the background."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1811
-#: plugin/includes/Api/Rest_Api.php:2364
+#: plugin/includes/Api/Rest_Api.php:2384
 msgid "Campaign not found."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1819
-#: plugin/includes/Api/Rest_Api.php:2372
+#: plugin/includes/Api/Rest_Api.php:2392
 msgid "Campaign must have an objective."
 msgstr ""
 
 #. translators: %s: campaign identity name or keyphrase.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1826
-#: plugin/includes/Api/Rest_Api.php:2379
+#: plugin/includes/Api/Rest_Api.php:2399
 msgid "Authority discovery started for \"%s\"…"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1844
-#: plugin/includes/Api/Rest_Api.php:2397
+#: plugin/includes/Api/Rest_Api.php:2417
 msgid ""
 "Campaign is missing a text provider. Please re-save the campaign settings."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1875
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2014
-#: plugin/includes/Api/Rest_Api.php:2438 plugin/includes/Api/Rest_Api.php:2590
+#: plugin/includes/Api/Rest_Api.php:2458 plugin/includes/Api/Rest_Api.php:2610
 msgid "Unknown error from discovery service."
 msgstr ""
 
 #. translators: 1: number of domains saved locally, 2: campaign id.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1896
-#: plugin/includes/Api/Rest_Api.php:2459
+#: plugin/includes/Api/Rest_Api.php:2479
 msgid ""
 "Authority discovery saved %1$d domains but cloud persist failed for campaign "
 "%2$s."
@@ -178,7 +178,7 @@ msgstr ""
 #. translators: 1: number of authority domains found, 2: number of queries the discovery service ran, 3: total wall-clock duration in milliseconds.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1904
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2022
-#: plugin/includes/Api/Rest_Api.php:2467 plugin/includes/Api/Rest_Api.php:2598
+#: plugin/includes/Api/Rest_Api.php:2487 plugin/includes/Api/Rest_Api.php:2618
 msgid ""
 "Authority discovery complete: %1$d domains found (%2$d queries, %3$dms)."
 msgstr ""
@@ -186,281 +186,281 @@ msgstr ""
 #. translators: %s: error message from the authority-discovery service.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1921
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2039
-#: plugin/includes/Api/Rest_Api.php:2483 plugin/includes/Api/Rest_Api.php:2614
+#: plugin/includes/Api/Rest_Api.php:2503 plugin/includes/Api/Rest_Api.php:2634
 msgid "Authority discovery failed: %s"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1967
-#: plugin/includes/Api/Rest_Api.php:2529
+#: plugin/includes/Api/Rest_Api.php:2549
 msgid "A keyphrase is required for discovery."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1974
-#: plugin/includes/Api/Rest_Api.php:2536
+#: plugin/includes/Api/Rest_Api.php:2556
 msgid "A text provider is required for authority discovery."
 msgstr ""
 
 #. translators: %s: campaign label (campaign name or first 60 chars of keyphrase).
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1983
-#: plugin/includes/Api/Rest_Api.php:2545
+#: plugin/includes/Api/Rest_Api.php:2565
 msgid "Authority discovery started for \"%s\" (pre-creation)…"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2063
-#: plugin/includes/Api/Rest_Api.php:2638
+#: plugin/includes/Api/Rest_Api.php:2658
 msgid "Domains must be an array."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2075
-#: plugin/includes/Api/Rest_Api.php:2650
+#: plugin/includes/Api/Rest_Api.php:2670
 msgid "Authority list could not be saved. Please try again."
 msgstr ""
 
 #. translators: %d: number of authority domains the user saved.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2082
-#: plugin/includes/Api/Rest_Api.php:2657
+#: plugin/includes/Api/Rest_Api.php:2677
 msgid "Authority domains updated manually (%d domains)."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2088
-#: plugin/includes/Api/Rest_Api.php:2663
+#: plugin/includes/Api/Rest_Api.php:2683
 msgid "Authority domains saved."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2119
-#: plugin/includes/Api/Rest_Api.php:2694
+#: plugin/includes/Api/Rest_Api.php:2714
 msgid "A keyphrase is required for keyword discovery."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2126
-#: plugin/includes/Api/Rest_Api.php:2701
+#: plugin/includes/Api/Rest_Api.php:2721
 msgid "A text provider is required for keyword discovery."
 msgstr ""
 
 #. translators: %s: campaign label (campaign name or first 60 chars of keyphrase).
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2135
-#: plugin/includes/Api/Rest_Api.php:2710
+#: plugin/includes/Api/Rest_Api.php:2730
 msgid "Keyword discovery started for \"%s\" (pre-creation)…"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2166
-#: plugin/includes/Api/Rest_Api.php:2757
+#: plugin/includes/Api/Rest_Api.php:2777
 msgid "Unknown error from keyword discovery service."
 msgstr ""
 
 #. translators: 1: number of keywords found, 2: number of queries the discovery service ran, 3: total wall-clock duration in milliseconds.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2175
-#: plugin/includes/Api/Rest_Api.php:2766
+#: plugin/includes/Api/Rest_Api.php:2786
 msgid "Keyword discovery complete: %1$d keywords found (%2$d queries, %3$dms)."
 msgstr ""
 
 #. translators: %s: error message from the keyword-discovery service.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2191
-#: plugin/includes/Api/Rest_Api.php:2792
+#: plugin/includes/Api/Rest_Api.php:2812
 msgid "Keyword discovery failed: %s"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2219
-#: plugin/includes/Api/Rest_Api.php:3318
+#: plugin/includes/Api/Rest_Api.php:3338
 msgid "Keywords must be an array."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2258
-#: plugin/includes/Api/Rest_Api.php:3364
+#: plugin/includes/Api/Rest_Api.php:3384
 msgid "Keyword bank could not be saved. Please try again."
 msgstr ""
 
 #. translators: %d: number of keywords the user saved to the bank.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2265
-#: plugin/includes/Api/Rest_Api.php:3371
+#: plugin/includes/Api/Rest_Api.php:3391
 msgid "Keyword bank updated (%d keywords)."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2271
-#: plugin/includes/Api/Rest_Api.php:3377
+#: plugin/includes/Api/Rest_Api.php:3397
 msgid "Keyword bank saved."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2282
-#: plugin/includes/Api/Rest_Api.php:3388
+#: plugin/includes/Api/Rest_Api.php:3408
 msgid "Action Scheduler not available."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2320
-#: plugin/includes/Api/Rest_Api.php:3426
+#: plugin/includes/Api/Rest_Api.php:3446
 msgid "Handshake verified. Your server is reachable."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2333
-#: plugin/includes/Api/Rest_Api.php:3439
+#: plugin/includes/Api/Rest_Api.php:3459
 msgid "Invalid suggestion mode."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2351
-#: plugin/includes/Api/Rest_Api.php:3466
+#: plugin/includes/Api/Rest_Api.php:3486
 msgid "Intelligence source not specified."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2458
-#: plugin/includes/Api/Rest_Api.php:3573
+#: plugin/includes/Api/Rest_Api.php:3593
 msgid "AI provider is required for cloud suggestions."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2495
-#: plugin/includes/Api/Rest_Api.php:3617
+#: plugin/includes/Api/Rest_Api.php:3637
 msgid "The AI service returned an unexpected error. Please try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2567
-#: plugin/includes/Api/Rest_Api.php:3689
+#: plugin/includes/Api/Rest_Api.php:3709
 msgid "Failed to disconnect provider in the cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2680
-#: plugin/includes/Api/Rest_Api.php:3802
+#: plugin/includes/Api/Rest_Api.php:3822
 msgid "Cannot delete the default persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2688
-#: plugin/includes/Api/Rest_Api.php:3810
+#: plugin/includes/Api/Rest_Api.php:3830
 msgid "Failed to delete persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2960
-#: plugin/includes/Api/Rest_Api.php:4082
+#: plugin/includes/Api/Rest_Api.php:4102
 msgid "This provider is not available on your current plan."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2987
-#: plugin/includes/Api/Rest_Api.php:4109
+#: plugin/includes/Api/Rest_Api.php:4129
 msgid "Failed to save the provider key in the cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3237
-#: plugin/includes/Api/Rest_Api.php:4359
+#: plugin/includes/Api/Rest_Api.php:4379
 msgid "Request body must be a JSON object."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3262
-#: plugin/includes/Api/Rest_Api.php:4384
+#: plugin/includes/Api/Rest_Api.php:4404
 msgid "Public website URL must start with https://"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3344
-#: plugin/includes/Api/Rest_Api.php:4466
+#: plugin/includes/Api/Rest_Api.php:4486
 msgid "Provide a valid https:// URL before running Quick setup."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3356
-#: plugin/includes/Api/Rest_Api.php:4478
+#: plugin/includes/Api/Rest_Api.php:4498
 msgid "Connect your license before running Quick setup."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3372
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3478
-#: plugin/includes/Api/Rest_Api.php:4494 plugin/includes/Api/Rest_Api.php:4600
+#: plugin/includes/Api/Rest_Api.php:4514 plugin/includes/Api/Rest_Api.php:4620
 msgid "Could not reach the Structura cloud. Try again in a moment."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3388
-#: plugin/includes/Api/Rest_Api.php:4510
+#: plugin/includes/Api/Rest_Api.php:4530
 msgid "Quick setup failed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3446
-#: plugin/includes/Api/Rest_Api.php:4568
+#: plugin/includes/Api/Rest_Api.php:4588
 msgid "Missing connection id."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3455
-#: plugin/includes/Api/Rest_Api.php:4577
+#: plugin/includes/Api/Rest_Api.php:4597
 msgid "Connect your license before verifying IndexNow."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3491
-#: plugin/includes/Api/Rest_Api.php:4613
+#: plugin/includes/Api/Rest_Api.php:4633
 msgid "Verification failed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3556
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3600
-#: plugin/includes/Api/Rest_Api.php:4678 plugin/includes/Api/Rest_Api.php:4722
+#: plugin/includes/Api/Rest_Api.php:4713 plugin/includes/Api/Rest_Api.php:4757
 msgid "noticeId is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3620
-#: plugin/includes/Api/Rest_Api.php:4742
+#: plugin/includes/Api/Rest_Api.php:4777
 msgid "Please enter a license key."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3629
-#: plugin/includes/Api/Rest_Api.php:4751
+#: plugin/includes/Api/Rest_Api.php:4786
 msgid "License activated successfully!"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3635
-#: plugin/includes/Api/Rest_Api.php:4757
+#: plugin/includes/Api/Rest_Api.php:4792
 msgid "Activation failed. Please check your key and try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3650
-#: plugin/includes/Api/Rest_Api.php:4779
+#: plugin/includes/Api/Rest_Api.php:4814
 msgid "License deactivated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3655
-#: plugin/includes/Api/Rest_Api.php:4784
+#: plugin/includes/Api/Rest_Api.php:4819
 msgid "Could not deactivate license."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3678
-#: plugin/includes/Api/Rest_Api.php:4807
+#: plugin/includes/Api/Rest_Api.php:4842
 msgid "Please enter your license key to confirm."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3688
 #: .tmp-wporg/structura/includes/Core/License_Manager.php:567
-#: plugin/includes/Api/Rest_Api.php:4817
+#: plugin/includes/Api/Rest_Api.php:4852
 #: plugin/includes/Core/License_Manager.php:689
 msgid "Site removed from your activations."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3692
-#: plugin/includes/Api/Rest_Api.php:4821
+#: plugin/includes/Api/Rest_Api.php:4856
 msgid "Could not remove this site. Please try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3711
-#: plugin/includes/Api/Rest_Api.php:4840
+#: plugin/includes/Api/Rest_Api.php:4875
 msgid "License plan synchronized with cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3738
-#: plugin/includes/Api/Rest_Api.php:4867
+#: plugin/includes/Api/Rest_Api.php:4902
 msgid "No license bound to this site."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3769
 #: .tmp-wporg/structura/includes/Core/License_Manager.php:80
-#: plugin/includes/Api/Rest_Api.php:4898
+#: plugin/includes/Api/Rest_Api.php:4933
 #: plugin/includes/Core/License_Manager.php:98
 msgid "Invalid server response format."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3784
-#: plugin/includes/Api/Rest_Api.php:4926
+#: plugin/includes/Api/Rest_Api.php:4961
 msgid "Cloud heartbeat rejected."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3868
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3887
-#: plugin/includes/Api/Rest_Api.php:5020 plugin/includes/Api/Rest_Api.php:5039
+#: plugin/includes/Api/Rest_Api.php:5055 plugin/includes/Api/Rest_Api.php:5074
 msgid "Unknown"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3991
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:97
-#: plugin/includes/Api/Rest_Api.php:5198
+#: plugin/includes/Api/Rest_Api.php:5233
 #: plugin/includes/Channels/Channels_Connections_Service.php:100
 msgid "Integration id and webhook URL are required."
 msgstr ""
@@ -469,7 +469,7 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4154
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:155
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:233
-#: plugin/includes/Api/Rest_Api.php:5235 plugin/includes/Api/Rest_Api.php:5454
+#: plugin/includes/Api/Rest_Api.php:5270 plugin/includes/Api/Rest_Api.php:5489
 #: plugin/includes/Channels/Channels_Connections_Service.php:163
 #: plugin/includes/Channels/Channels_Connections_Service.php:338
 msgid "Connection id is required."
@@ -477,7 +477,7 @@ msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4118
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:198
-#: plugin/includes/Api/Rest_Api.php:5418
+#: plugin/includes/Api/Rest_Api.php:5453
 #: plugin/includes/Channels/Channels_Connections_Service.php:303
 msgid "Integration id is required."
 msgstr ""
@@ -489,8 +489,8 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:104
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:224
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:254
-#: plugin/includes/Api/Rest_Api.php:5535 plugin/includes/Api/Rest_Api.php:5819
-#: plugin/includes/Api/Rest_Api.php:5866
+#: plugin/includes/Api/Rest_Api.php:5570 plugin/includes/Api/Rest_Api.php:5854
+#: plugin/includes/Api/Rest_Api.php:5901
 #: plugin/includes/Progress/Runs_Service.php:57
 #: plugin/includes/Progress/Runs_Service.php:116
 #: plugin/includes/Progress/Runs_Service.php:236
@@ -501,36 +501,36 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4389
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:144
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:151
-#: plugin/includes/Api/Rest_Api.php:5695
+#: plugin/includes/Api/Rest_Api.php:5730
 #: plugin/includes/Progress/Runs_Service.php:156
 #: plugin/includes/Progress/Runs_Service.php:163
 msgid "campaign_id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4512
-#: plugin/includes/Api/Rest_Api.php:5833
+#: plugin/includes/Api/Rest_Api.php:5868
 msgid "Active admin session required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4580
-#: plugin/includes/Api/Rest_Api.php:5901
+#: plugin/includes/Api/Rest_Api.php:5936
 msgid "run_id and cancelled_by are required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4588
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:262
-#: plugin/includes/Api/Rest_Api.php:5909
+#: plugin/includes/Api/Rest_Api.php:5944
 #: plugin/includes/Progress/Runs_Service.php:274
 msgid "cancelled_by must be \"user\" or \"system\"."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4639
-#: plugin/includes/Api/Rest_Api.php:5960
+#: plugin/includes/Api/Rest_Api.php:5995
 msgid "integration_id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4840
-#: plugin/includes/Api/Rest_Api.php:6157
+#: plugin/includes/Api/Rest_Api.php:6192
 msgid "Campaign limit reached for your current plan."
 msgstr ""
 
@@ -541,128 +541,128 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4861
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4927
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5189
-#: plugin/includes/Api/Rest_Api.php:6242 plugin/includes/Api/Rest_Api.php:6319
-#: plugin/includes/Api/Rest_Api.php:6686
+#: plugin/includes/Api/Rest_Api.php:6277 plugin/includes/Api/Rest_Api.php:6354
+#: plugin/includes/Api/Rest_Api.php:6721
 msgid "Cloud did not return campaign document."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4875
-#: plugin/includes/Api/Rest_Api.php:6256
+#: plugin/includes/Api/Rest_Api.php:6291
 msgid "New campaign deployed successfully."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4938
-#: plugin/includes/Api/Rest_Api.php:6330
+#: plugin/includes/Api/Rest_Api.php:6365
 msgid "Campaign architecture updated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4991
-#: plugin/includes/Api/Rest_Api.php:6383
+#: plugin/includes/Api/Rest_Api.php:6418
 msgid "Failed to fetch stock summary."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5028
-#: plugin/includes/Api/Rest_Api.php:6528
+#: plugin/includes/Api/Rest_Api.php:6563
 msgid "Failed to enable pre-generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5048
-#: plugin/includes/Api/Rest_Api.php:6548
+#: plugin/includes/Api/Rest_Api.php:6583
 msgid "Not authenticated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5087
-#: plugin/includes/Api/Rest_Api.php:6587
+#: plugin/includes/Api/Rest_Api.php:6622
 msgid "Campaign cleared."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5153
-#: plugin/includes/Api/Rest_Api.php:6653
+#: plugin/includes/Api/Rest_Api.php:6688
 msgid "Source campaign payload was empty."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5172
-#: plugin/includes/Api/Rest_Api.php:6669
+#: plugin/includes/Api/Rest_Api.php:6704
 msgid "(Copy)"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5201
-#: plugin/includes/Api/Rest_Api.php:6698
+#: plugin/includes/Api/Rest_Api.php:6733
 msgid "Campaign cloned successfully."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5239
-#: plugin/includes/Api/Rest_Api.php:6736
+#: plugin/includes/Api/Rest_Api.php:6771
 msgid "Campaign not found in cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5248
-#: plugin/includes/Api/Rest_Api.php:6745
+#: plugin/includes/Api/Rest_Api.php:6780
 msgid "Failed to update campaign status."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5259
-#: plugin/includes/Api/Rest_Api.php:6756
+#: plugin/includes/Api/Rest_Api.php:6791
 msgid "Campaign resumed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5260
-#: plugin/includes/Api/Rest_Api.php:6757
+#: plugin/includes/Api/Rest_Api.php:6792
 msgid "Campaign paused."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5292
-#: plugin/includes/Api/Rest_Api.php:6789
+#: plugin/includes/Api/Rest_Api.php:6824
 msgid "Failed to list visual presets."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5304
-#: plugin/includes/Api/Rest_Api.php:6801
+#: plugin/includes/Api/Rest_Api.php:6836
 msgid "Failed to create visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5320
-#: plugin/includes/Api/Rest_Api.php:6817
+#: plugin/includes/Api/Rest_Api.php:6852
 msgid "Failed to update visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5338
-#: plugin/includes/Api/Rest_Api.php:6835
+#: plugin/includes/Api/Rest_Api.php:6870
 msgid "Failed to fork visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5351
-#: plugin/includes/Api/Rest_Api.php:6848
+#: plugin/includes/Api/Rest_Api.php:6883
 msgid "Failed to delete visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5362
-#: plugin/includes/Api/Rest_Api.php:6859
+#: plugin/includes/Api/Rest_Api.php:6894
 msgid "Failed to bind visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5407
-#: plugin/includes/Api/Rest_Api.php:6965
+#: plugin/includes/Api/Rest_Api.php:7000
 msgid "Failed to fork persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5418
-#: plugin/includes/Api/Rest_Api.php:6976
+#: plugin/includes/Api/Rest_Api.php:7011
 msgid "Failed to set default persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5428
-#: plugin/includes/Api/Rest_Api.php:7007
+#: plugin/includes/Api/Rest_Api.php:7042
 msgid "Failed to list workspace keys."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5439
-#: plugin/includes/Api/Rest_Api.php:7018
+#: plugin/includes/Api/Rest_Api.php:7053
 msgid "Credential id and provider are required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5442
-#: plugin/includes/Api/Rest_Api.php:7021
+#: plugin/includes/Api/Rest_Api.php:7056
 msgid "Failed to bind workspace key."
 msgstr ""
 
@@ -1392,86 +1392,86 @@ msgid ""
 "update PHP to use this plugin."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:1037
+#: plugin/includes/Api/Rest_Api.php:1046
 msgid "Connect to Structura Cloud first."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:1055
+#: plugin/includes/Api/Rest_Api.php:1064
 msgid ""
 "Could not reach Structura Cloud. Check your server's outbound connection and "
 "try again."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:1949
+#: plugin/includes/Api/Rest_Api.php:1958
 msgid "No file was uploaded."
 msgstr ""
 
 #. translators: the supported research attachment formats.
-#: plugin/includes/Api/Rest_Api.php:1958
+#: plugin/includes/Api/Rest_Api.php:1967
 msgid "This file type isn't supported — use PDF, DOCX, TXT, MD or HTML."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:1967
+#: plugin/includes/Api/Rest_Api.php:1976
 msgid "This file is too large — files can be up to 10 MB."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:1973 plugin/includes/Api/Rest_Api.php:2001
-#: plugin/includes/Api/Rest_Api.php:2006 plugin/includes/Api/Rest_Api.php:2022
-#: plugin/includes/Api/Rest_Api.php:2031
+#: plugin/includes/Api/Rest_Api.php:1982 plugin/includes/Api/Rest_Api.php:2010
+#: plugin/includes/Api/Rest_Api.php:2015 plugin/includes/Api/Rest_Api.php:2031
+#: plugin/includes/Api/Rest_Api.php:2040
 msgid "The upload failed — please try again."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2081
+#: plugin/includes/Api/Rest_Api.php:2090
 msgid "Create at least one persona before generating a post."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:3030 plugin/includes/Api/Rest_Api.php:3058
+#: plugin/includes/Api/Rest_Api.php:3050 plugin/includes/Api/Rest_Api.php:3078
 msgid "Invalid step id."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:3108
+#: plugin/includes/Api/Rest_Api.php:3128
 msgid "provider + model required."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:4778
+#: plugin/includes/Api/Rest_Api.php:4813
 msgid "Site removed."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:5362
+#: plugin/includes/Api/Rest_Api.php:5397
 #: plugin/includes/Channels/Channels_Events_Service.php:68
 msgid "Video job id is required."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6170
+#: plugin/includes/Api/Rest_Api.php:6205
 msgid ""
 "This publishing schedule is more frequent than your current plan allows."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6182
+#: plugin/includes/Api/Rest_Api.php:6217
 msgid "Cloud rejected the campaign request."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6449
+#: plugin/includes/Api/Rest_Api.php:6484
 msgid "Failed to fetch stock."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6465
+#: plugin/includes/Api/Rest_Api.php:6500
 msgid "Failed to delete the stock entry."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6480
+#: plugin/includes/Api/Rest_Api.php:6515
 msgid "Failed to empty the stock."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6495
+#: plugin/includes/Api/Rest_Api.php:6530
 msgid "Failed to regenerate the stock."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6988
+#: plugin/includes/Api/Rest_Api.php:7023
 msgid "Failed to add persona to this site."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6997
+#: plugin/includes/Api/Rest_Api.php:7032
 msgid "Failed to remove persona from this site."
 msgstr ""
 
@@ -1621,14 +1621,14 @@ msgstr ""
 #: client/src/components/Layout/Header.tsx:220
 #: client/src/components/Layout/Header.tsx:316
 #: client/src/features/account/components/AddonCard.tsx:177
-#: client/src/features/account/routes/AccountPage.tsx:225
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:995
+#: client/src/features/account/routes/AccountPage.tsx:265
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1065
 msgid "Upgrade"
 msgstr ""
 
 #: client/src/components/Layout/Header.tsx:235
 #: client/src/components/Layout/Header.tsx:327
-#: client/src/features/account/routes/AccountPage.tsx:292
+#: client/src/features/account/routes/AccountPage.tsx:350
 msgid "Manage account"
 msgstr ""
 
@@ -1650,7 +1650,7 @@ msgid "Dashboard"
 msgstr ""
 
 #: client/src/components/Layout/headerNav.ts:36
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:144
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:175
 #: client/src/features/channels/components/CampaignBindingsPicker.tsx:86
 msgid "Campaigns"
 msgstr ""
@@ -1680,6 +1680,58 @@ msgstr ""
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:896
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:659
 msgid "AI Engine"
+msgstr ""
+
+#: client/src/components/Shared/CloudConsentGate.tsx:69
+msgid "A random install ID, generated on this site by WordPress"
+msgstr ""
+
+#: client/src/components/Shared/CloudConsentGate.tsx:70
+msgid "Your site's address (host name) and site title"
+msgstr ""
+
+#: client/src/components/Shared/CloudConsentGate.tsx:71
+msgid "Your WordPress version and the plugin version"
+msgstr ""
+
+#: client/src/components/Shared/CloudConsentGate.tsx:72
+msgid ""
+"Your site's branding details: title, tagline, language, logo URL, and active "
+"theme name"
+msgstr ""
+
+#: client/src/components/Shared/CloudConsentGate.tsx:85
+msgid "Connect this site to Structura Cloud"
+msgstr ""
+
+#: client/src/components/Shared/CloudConsentGate.tsx:90
+msgid ""
+"Structura writes and formats your posts on Structura Cloud, a service run by "
+"the plugin author. Nothing has been sent yet. When you continue, the plugin "
+"creates an anonymous workspace for this site and shares:"
+msgstr ""
+
+#: client/src/components/Shared/CloudConsentGate.tsx:103
+msgid ""
+"No post content, prompts, or visitor data are included. You can disconnect "
+"at any time from Account & License. If you would rather not connect, simply "
+"deactivate the plugin — nothing has been sent."
+msgstr ""
+
+#: client/src/components/Shared/CloudConsentGate.tsx:116
+msgid "Privacy policy"
+msgstr ""
+
+#: client/src/components/Shared/CloudConsentGate.tsx:125
+msgid "Terms of service"
+msgstr ""
+
+#: client/src/components/Shared/CloudConsentGate.tsx:135
+msgid "We couldn't save your choice. Please try again in a moment."
+msgstr ""
+
+#: client/src/components/Shared/CloudConsentGate.tsx:143
+msgid "Connect to Structura Cloud"
 msgstr ""
 
 #: client/src/components/Shared/CloudUnreachableBanner.tsx:40
@@ -1892,6 +1944,7 @@ msgid ""
 msgstr ""
 
 #: client/src/components/Shared/LicenseStatusBanner.tsx:45
+#: client/src/features/account/routes/AccountPage.tsx:184
 msgid "View Plans"
 msgstr ""
 
@@ -1922,14 +1975,14 @@ msgstr ""
 #: client/src/components/Shared/SelectionCard.tsx:81
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:793
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:560
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:859
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:929
 msgid "Required"
 msgstr ""
 
 #: client/src/components/Shared/SelectionCard.tsx:87
 #: client/src/features/ai-engine/components/AvailableProviderCard.tsx:67
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:747
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:870
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:817
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:940
 msgid "Free License"
 msgstr ""
 
@@ -1941,11 +1994,11 @@ msgstr ""
 #: client/src/features/campaigns/components/MagicSuggestButton.tsx:73
 #: client/src/features/campaigns/components/PregenerationControl.tsx:103
 #: client/src/features/campaigns/components/SuggestStrategySection.tsx:120
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:688
+#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:692
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:783
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:550
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:506
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:870
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:576
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:940
 #: client/src/features/channels/components/CatalogEntryCard.tsx:215
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:522
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:552
@@ -2000,7 +2053,7 @@ msgstr ""
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:268
 #: client/src/features/campaigns/components/interview/GuidedInterview.tsx:628
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:336
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1057
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1127
 #: client/src/features/channels/components/AddCredentialForm.tsx:473
 #: client/src/features/channels/components/AddWebhookForm.tsx:511
 #: client/src/features/channels/components/ConfigureConnectionModal.tsx:356
@@ -2172,39 +2225,48 @@ msgstr ""
 msgid "Manage your Structura identity and subscription tier"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:194
+#: client/src/features/account/routes/AccountPage.tsx:171
+#: client/src/features/account/routes/AccountPage.tsx:284
+msgid "Create Free Account"
+msgstr ""
+
+#: client/src/features/account/routes/AccountPage.tsx:229
 msgid "License Activation"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:202
+#: client/src/features/account/routes/AccountPage.tsx:237
 #: client/src/features/onboarding/components/WizardLicenseGate.tsx:122
 msgid "License Key"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:224
+#: client/src/features/account/routes/AccountPage.tsx:257
+msgid "Paste your license key first."
+msgstr ""
+
+#: client/src/features/account/routes/AccountPage.tsx:264
 msgid "Connect Account"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:230
-msgid "Unlock pro features and boost your organic traffic!"
+#: client/src/features/account/routes/AccountPage.tsx:270
+msgid "No license key yet? It comes with your account."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:243
+#: client/src/features/account/routes/AccountPage.tsx:301
 #: client/src/features/settings/routes/VisualsPage.tsx:829
 msgid "View Pricing"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:255
+#: client/src/features/account/routes/AccountPage.tsx:313
 msgid "Cloud Connection Verified"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:265
+#: client/src/features/account/routes/AccountPage.tsx:323
 msgid ""
 "Your license is currently inactive. Please contact support if you believe "
 "this is an error."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:300
+#: client/src/features/account/routes/AccountPage.tsx:358
 #: client/src/features/ai-engine/components/InstalledProviderCard.tsx:216
 #: client/src/features/ai-engine/components/InstalledProviderCard.tsx:241
 #: client/src/features/ai-engine/components/ProviderCard.tsx:143
@@ -2216,35 +2278,35 @@ msgstr ""
 msgid "Disconnect"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:337
+#: client/src/features/account/routes/AccountPage.tsx:395
 msgid "Documentation"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:340
+#: client/src/features/account/routes/AccountPage.tsx:398
 msgid "Learn how to master the Architect and configure custom personas."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:364
+#: client/src/features/account/routes/AccountPage.tsx:422
 msgid "Support Portal"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:367
+#: client/src/features/account/routes/AccountPage.tsx:425
 msgid "Get help from our architects if you run into any issues."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:390
+#: client/src/features/account/routes/AccountPage.tsx:448
 msgid "Community Forum"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:393
+#: client/src/features/account/routes/AccountPage.tsx:451
 msgid "Ask the community and browse existing support topics."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:419
+#: client/src/features/account/routes/AccountPage.tsx:477
 msgid "Disconnect Account"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:420
+#: client/src/features/account/routes/AccountPage.tsx:478
 msgid ""
 "Are you sure? This site will revert to Anonymous Mode and all scheduled "
 "campaign work will stop. If you later activate a different license, you'll "
@@ -2252,19 +2314,19 @@ msgid ""
 "and channel connections won't transfer over."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:428
+#: client/src/features/account/routes/AccountPage.tsx:486
 msgid "Delete permanently"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:429
+#: client/src/features/account/routes/AccountPage.tsx:487
 msgid "Disconnect Site"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:434
+#: client/src/features/account/routes/AccountPage.tsx:492
 msgid "Permanently delete all data for this site"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:435
+#: client/src/features/account/routes/AccountPage.tsx:493
 msgid ""
 "Erases everything we store for this site — it can't be restored. If this is "
 "your only site, your shared personas, AI keys and presets are deleted too."
@@ -2329,7 +2391,7 @@ msgstr ""
 
 #: client/src/features/ai-engine/components/AvailableProviderCard.tsx:191
 #: client/src/features/ai-engine/components/ProviderUpgradeDialog.tsx:217
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:720
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:751
 #: client/src/features/dashboard/components/UpgradeCard.tsx:45
 #: client/src/features/settings/routes/VisualsPage.tsx:815
 msgid "Get Free License"
@@ -2491,7 +2553,7 @@ msgid "Overview"
 msgstr ""
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:65
-#: client/src/features/notices/utils.ts:188
+#: client/src/features/notices/utils.ts:199
 msgid "Connection"
 msgstr ""
 
@@ -2707,7 +2769,7 @@ msgid "One provider per Starter site"
 msgstr ""
 
 #: client/src/features/ai-engine/components/ProviderUpgradeDialog.tsx:167
-#: client/src/features/notices/utils.ts:187
+#: client/src/features/notices/utils.ts:198
 msgid "License"
 msgstr ""
 
@@ -2809,7 +2871,7 @@ msgid "%1$s is %2$s — files can be up to 10 MB."
 msgstr ""
 
 #: client/src/features/campaigns/api/uploadResearchDoc.ts:65
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:158
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:159
 msgid "We couldn't read this file — it may be corrupt or image-only."
 msgstr ""
 
@@ -2846,7 +2908,7 @@ msgid "You're using %1$d of %2$d campaigns on your current plan."
 msgstr ""
 
 #: client/src/features/campaigns/api/useCampaignMutations.ts:304
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:236
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:267
 msgid "You've reached your plan's campaign limit."
 msgstr ""
 
@@ -2855,7 +2917,7 @@ msgid "Campaign limit reached"
 msgstr ""
 
 #: client/src/features/campaigns/api/useCampaignMutations.ts:319
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:252
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:283
 msgid "Contact us"
 msgstr ""
 
@@ -3209,13 +3271,13 @@ msgstr ""
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:30
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:1121
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:1129
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:57
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:58
 msgid "Publish immediately"
 msgstr ""
 
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:31
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:1125
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:58
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:59
 msgid "Save as draft"
 msgstr ""
 
@@ -3223,8 +3285,8 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:92
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:202
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:91
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:659
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:394
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:690
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:428
 msgid "Random persona"
 msgstr ""
 
@@ -3232,8 +3294,8 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:53
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:58
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:691
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:616
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:639
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:686
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:709
 msgid "System Default"
 msgstr ""
 
@@ -3241,15 +3303,15 @@ msgstr ""
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:73
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:102
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:688
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:635
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:446
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:705
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:463
 #: client/src/features/onboarding/components/WizardStep1Identity.tsx:169
 msgid "Language"
 msgstr ""
 
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:172
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:74
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:703
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:773
 msgid "Select…"
 msgstr ""
 
@@ -3257,14 +3319,14 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:150
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:73
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:696
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:676
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:746
 msgid "Post Length"
 msgstr ""
 
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:101
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:115
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:98
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:691
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:761
 msgid "Words"
 msgstr ""
 
@@ -3275,13 +3337,13 @@ msgstr ""
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:162
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:171
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:700
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:702
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:772
 msgid "Post Status"
 msgstr ""
 
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:186
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:104
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:716
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:786
 msgid ""
 "Free and anonymous installs are capped at 500 words per post. Upgrade to Pro "
 "to publish longer posts."
@@ -3429,8 +3491,8 @@ msgid "Deployment"
 msgstr ""
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:367
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:200
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:708
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:231
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:739
 #: client/src/features/dashboard/components/RecentSinglePostRuns.tsx:145
 #: client/src/features/dashboard/routes/DashboardPage.tsx:68
 msgid "Generate Post"
@@ -3479,7 +3541,7 @@ msgid "Next Phase"
 msgstr ""
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:542
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1065
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1143
 msgid "Generate Now"
 msgstr ""
 
@@ -3550,53 +3612,59 @@ msgstr ""
 msgid "Engine"
 msgstr ""
 
-#: client/src/features/campaigns/components/PulseDiagnostics.tsx:45
-msgid "Simulation triggered. Check Notifications in a moment."
+#: client/src/features/campaigns/components/PulseDiagnostics.tsx:52
+msgid ""
+"Test signal sent — your site verified it. A test notice will appear in "
+"Notifications shortly."
 msgstr ""
 
-#: client/src/features/campaigns/components/PulseDiagnostics.tsx:47
+#: client/src/features/campaigns/components/PulseDiagnostics.tsx:56
+msgid "Test signal sent — your site verified the signed-error handshake."
+msgstr ""
+
+#: client/src/features/campaigns/components/PulseDiagnostics.tsx:59
 msgid "Failed to trigger simulation."
 msgstr ""
 
-#: client/src/features/campaigns/components/PulseDiagnostics.tsx:75
+#: client/src/features/campaigns/components/PulseDiagnostics.tsx:87
 msgid "Bridge Diagnostics"
 msgstr ""
 
-#: client/src/features/campaigns/components/PulseDiagnostics.tsx:78
+#: client/src/features/campaigns/components/PulseDiagnostics.tsx:90
 msgid "Test the secure handshake with Structura Cloud nodes."
 msgstr ""
 
-#: client/src/features/campaigns/components/PulseDiagnostics.tsx:97
+#: client/src/features/campaigns/components/PulseDiagnostics.tsx:109
 msgid "Handshaking..."
 msgstr ""
 
-#: client/src/features/campaigns/components/PulseDiagnostics.tsx:97
+#: client/src/features/campaigns/components/PulseDiagnostics.tsx:109
 msgid "Run Pulse Check"
 msgstr ""
 
-#: client/src/features/campaigns/components/PulseDiagnostics.tsx:113
-msgid "Simulating..."
+#: client/src/features/campaigns/components/PulseDiagnostics.tsx:128
+msgid "Sending..."
 msgstr ""
 
-#: client/src/features/campaigns/components/PulseDiagnostics.tsx:114
-msgid "Simulate Failure"
+#: client/src/features/campaigns/components/PulseDiagnostics.tsx:129
+msgid "Send Test Notification"
 msgstr ""
 
-#: client/src/features/campaigns/components/PulseDiagnostics.tsx:131
+#: client/src/features/campaigns/components/PulseDiagnostics.tsx:146
 msgid "Handshake Verified: Bi-directional trust active."
 msgstr ""
 
-#: client/src/features/campaigns/components/PulseDiagnostics.tsx:132
+#: client/src/features/campaigns/components/PulseDiagnostics.tsx:147
 msgid "Bridge Interrupted: Verify your firewall/REST API."
 msgstr ""
 
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:89
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:435
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:452
 msgid "Text provider"
 msgstr ""
 
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:89
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:441
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:458
 msgid "Image provider"
 msgstr ""
 
@@ -3606,7 +3674,7 @@ msgid "Focus keyphrase"
 msgstr ""
 
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:114
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:455
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:472
 msgid "Research files"
 msgstr ""
 
@@ -3660,7 +3728,7 @@ msgid "Starting…"
 msgstr ""
 
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:272
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:370
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:387
 msgid "Run again"
 msgstr ""
 
@@ -3722,7 +3790,7 @@ msgid "Parsed Autonomous Rhythm"
 msgstr ""
 
 #: client/src/features/campaigns/components/SeoTargetingSection.tsx:96
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:531
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:601
 msgid "SEO Targeting"
 msgstr ""
 
@@ -3807,7 +3875,7 @@ msgstr ""
 
 #: client/src/features/campaigns/components/SeoTargetingSection.tsx:335
 #: client/src/features/campaigns/components/StockTab.tsx:292
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:162
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:163
 #: client/src/features/channels/components/SearchPerformanceSection.tsx:111
 msgid "Retry"
 msgstr ""
@@ -3861,7 +3929,7 @@ msgid "Pre-generating"
 msgstr ""
 
 #: client/src/features/campaigns/components/StockTab.tsx:55
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:187
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:188
 #: client/src/features/channels/components/VideoEventRow.tsx:131
 msgid "Ready"
 msgstr ""
@@ -3932,7 +4000,7 @@ msgid "Cancel & regenerate"
 msgstr ""
 
 #: client/src/features/campaigns/components/StockTab.tsx:256
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:608
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:625
 msgid "Generation failed"
 msgstr ""
 
@@ -4202,10 +4270,16 @@ msgid "Next"
 msgstr ""
 
 #: client/src/features/campaigns/components/interview/GuidedInterview.tsx:672
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:686
+#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:690
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:111
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:111
 msgid "Generate Campaign Strategy"
+msgstr ""
+
+#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:683
+msgid ""
+"AI strategy synthesis is a paid feature. Use \"Skip interview\" below to "
+"fill in the details yourself, or upgrade your plan."
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:96
@@ -4270,8 +4344,8 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:386
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:437
-#: client/src/features/notices/utils.ts:161
-#: client/src/features/notices/utils.ts:167
+#: client/src/features/notices/utils.ts:172
+#: client/src/features/notices/utils.ts:178
 msgid "Learn more"
 msgstr ""
 
@@ -4759,7 +4833,7 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:182
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:949
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:777
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:847
 msgid ""
 "Image generation is unavailable because WordPress can't write to your "
 "uploads folder. Posts will still publish without images."
@@ -4768,7 +4842,7 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:203
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:974
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:742
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:835
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:905
 msgid "Content Blocks"
 msgstr ""
 
@@ -4787,7 +4861,7 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:246
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1101
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:893
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:814
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:884
 msgid "Disclosure Notice"
 msgstr ""
 
@@ -5000,7 +5074,7 @@ msgid "Moved to position 1"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/keywordBankLabels.ts:66
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:166
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:167
 #: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:464
 #: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:313
 #: client/src/utils/referralLabels.ts:59 client/src/utils/referralLabels.ts:61
@@ -5319,7 +5393,7 @@ msgstr ""
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:669
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1298
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:431
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:448
 msgid "Mode"
 msgstr ""
 
@@ -5365,7 +5439,7 @@ msgid "Untitled"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:986
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:562
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:579
 #: client/src/features/channels/components/VideoEventRow.tsx:477
 #: client/src/features/progress/useRunStatusToasts.ts:136
 msgid "View post"
@@ -5389,147 +5463,151 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:107
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:429
-msgid "Connect an AI provider in the AI Engine settings first."
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:83
+msgid "Campaigns need a license — claim a free one to schedule posts."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:113
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:89
 msgid ""
 "You're using %1$d of %2$d campaigns on your plan. Pause or delete one, or "
 "contact us for more."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:135
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:144
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:473
+msgid "Connect an AI provider in the AI Engine settings first."
+msgstr ""
+
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:166
 #: client/src/features/channels/components/CampaignBindingsPicker.tsx:137
 msgid "Loading campaigns…"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:150
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:181
 msgid "Create and manage your content campaigns."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:169
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:200
 msgid ""
 "You're using %1$d of %2$d campaigns on your plan. Pause or delete one to "
 "free up a slot, or contact us for more."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:178
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:209
 msgid "%1$d of %2$d campaigns used on your plan."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:186
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:217
 msgid "%1$d / %2$d campaigns"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:209
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:240
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:439
 #: client/src/features/dashboard/routes/DashboardPage.tsx:77
 msgid "New Campaign"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:241
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:272
 msgid ""
 "You're using %1$d of %2$d campaigns. Pause or delete one to free up a slot, "
 "or contact us if you need more."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:290
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:321
 msgid "Hide completed (%s)"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:310
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:341
 msgid "Want more from your campaigns?"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:313
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:344
 msgid ""
 "Upgrade to Pro for keyword research, authority domains, pre-generated "
 "publishes, more active campaigns, and more."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:338
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1046
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:369
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1116
 msgid "See Plans"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:471
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:502
 msgid "Last run failed — %s. View details."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:474
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:479
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:505
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:510
 msgid "Last run failed — view details."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:483
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:514
 msgid "Needs attention"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:557
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:588
 msgid "published"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:579
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:610
 msgid "Next run"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:613
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:644
 msgid "Ends"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:629
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:660
 msgid "Ongoing"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:660
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:691
 msgid "Unknown persona"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:690
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:721
 msgid "Generate a post now — automate later"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:693
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:724
 msgid ""
 "Anonymous installs can generate posts one at a time. Claim a free license to "
 "unlock campaigns that publish on a schedule."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:742
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:773
 msgid "No campaigns yet"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:743
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:774
 msgid "Create your first campaign to start generating content automatically."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CampaignsPage.tsx:750
+#: client/src/features/campaigns/routes/CampaignsPage.tsx:781
 msgid "Create Campaign"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:81
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:117
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:67
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:68
 msgid "Maximize organic traffic with high-volume topics"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:86
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:122
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:68
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:69
 msgid "Target low-competition keywords for fast rankings"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:91
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:127
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:69
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:70
 msgid "Content designed to convert readers to customers"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:96
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:132
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:70
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:71
 msgid "Build topical authority with comprehensive coverage"
 msgstr ""
 
@@ -5634,8 +5712,8 @@ msgstr ""
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1165
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1174
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:378
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:475
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:485
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:545
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:555
 msgid "Writing approach"
 msgstr ""
 
@@ -5683,275 +5761,302 @@ msgstr ""
 msgid "Edit campaign configuration"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:120
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:505
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:121
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:575
 msgid "Research material"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:121
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:122
 #: client/src/features/onboarding/components/WizardGscConnectCard.tsx:288
 msgid "Optional"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:122
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:123
 msgid "Attach research, briefs or notes — the post will draw on them."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:126
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:127
 msgid "Click to upload"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:127
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:128
 msgid "or drag and drop"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:128
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:129
 msgid "PDF, DOCX, TXT, MD or HTML · up to 10 MB each · up to 5 files"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:132
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:133
 msgid "Drop to attach"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:133
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:134
 msgid "Uploading & reading…"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:143
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:144
 msgid "≈%s words read"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:150
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:151
 msgid "Long document — we'll use the first ~%d pages."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:155
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:156
 msgid "Long document — we'll use the first ~%s words."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:169
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:170
 msgid "Cancel upload"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:175
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:176
 msgid "Add more files · %1$d of %2$d"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:179
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:180
 msgid "5 of 5 files attached — remove one to add another."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:183
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:184
 #: client/src/features/channels/components/ConfigureConnectionModal.tsx:874
 msgid "%1$d of %2$d"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:411
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:445
 msgid "Generate a Post"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:413
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:447
 msgid "Create a single post right now using AI."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:437
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:469
+msgid ""
+"The selected text provider isn't connected. Choose a connected provider "
+"below, or connect it in the AI Engine settings."
+msgstr ""
+
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:481
 msgid "Connect AI Provider"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:447
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:494
+msgid ""
+"Weekly post limit reached — this site has used all %d of its one-off posts "
+"this week. Your allowance resets on Monday (UTC)."
+msgstr ""
+
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:506
+msgid "%1$d of %2$d one-off posts used this week."
+msgstr ""
+
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:517
 msgid "What should we write about?"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:451
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:521
 msgid "Generate post strategy"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:452
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:522
 msgid "We'll study your site and draft a focused objective."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:456
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:526
 msgid "Describe your post topic or objective"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:458
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:528
 msgid ""
 "e.g. Write an in-depth guide on React server components for mid-level "
 "developers, covering streaming, suspense boundaries, and real-world "
 "migration patterns..."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:468
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:538
 msgid "Please describe your topic in at least 20 characters."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:507
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:577
 msgid ""
 "Ground posts in your own PDFs, briefs and interview notes — attach up to 5 "
 "files per post."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:522
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:592
 #: client/src/features/channels/components/CatalogEntryCard.tsx:288
 #: client/src/features/channels/components/VideoGates.tsx:63
 #: client/src/features/settings/components/VideoPresetSection.tsx:281
 msgid "Upgrade plan"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:542
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:612
 msgid "AI & Persona"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:603
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:673
 msgid "Select persona…"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:636
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:706
 msgid "Select language…"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:725
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:795
 msgid "Content Options"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:733
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:737
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:746
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:803
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:807
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:816
 #: client/src/features/progress/routes/RunDetailPage.tsx:802
 msgid "Featured image"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:797
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:801
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:867
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:871
 msgid "AI disclosure"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:911
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:981
 msgid "Content Features"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:914
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:984
 msgid "FAQ section"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:920
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:990
 msgid "Action steps"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:926
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:996
 msgid "Supporting statistics"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:932
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1002
 msgid "Number in title"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:938
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1008
 msgid "Internal linking"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:944
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1014
 msgid "Authority outbound links"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:966
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1036
 msgid ""
 "Readability, keyphrase placement, SERP analysis, and meta fields are "
 "optimised automatically on every post."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:976
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1046
 msgid "Unlock full SEO optimisation with Pro"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:979
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1049
 msgid ""
 "Readability tuning, keyphrase placement, SERP-aware writing, and link "
 "validation."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1012
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1082
 msgid "Want to automate this?"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1015
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1085
 msgid ""
 "Create a free account to set up campaigns that automatically generate and "
 "publish posts on a schedule. No more manual work."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1032
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1102
 msgid "Get Free Account"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:137
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1135
+msgid "Weekly post limit reached — your allowance resets on Monday."
+msgstr ""
+
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:138
 msgid "%d page read"
 msgid_plural "%d pages read"
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:152
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:195
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:328
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:167
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:212
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:345
 msgid "Back to Generate"
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:157
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:336
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:172
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:353
 #: client/src/features/dashboard/components/RecentSinglePostRuns.tsx:52
 msgid "Single-post generation"
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:160
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:175
 msgid "queueing"
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:169
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:185
+msgid ""
+"Still waiting for your site's background runner to pick this up. On quiet "
+"sites this can take a minute — the run starts as soon as WordPress cron "
+"fires."
+msgstr ""
+
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:189
 msgid "Setting up your run — this only takes a few seconds."
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:185
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:202
 #: client/src/features/progress/routes/RunDetailPage.tsx:100
 msgid "Run not found"
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:187
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:204
 msgid ""
 "We don't have this run anymore. Run docs are kept for 30 days after "
 "completion."
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:349
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:531
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:366
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:548
 #: client/src/features/progress/components/CampaignRunProgress.tsx:329
 #: client/src/features/progress/milestones.ts:67
 #: client/src/features/progress/useRunStatusToasts.ts:125
 msgid "Post published"
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:350
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:532
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:367
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:549
 msgid "Draft created"
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:413
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:430
 msgid "Working on your post — this usually takes 4–5 minutes."
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:427
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:444
 msgid "Inputs"
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:536
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:553
 msgid "It's saved as a draft — nothing is live yet."
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:574
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:591
 #: client/src/features/progress/useRunStatusToasts.ts:135
 msgid "Review draft"
 msgstr ""
 
-#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:612
+#: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:629
 msgid ""
 "The run stopped before the post was created. Try Run again, or adjust your "
 "inputs and retry."
@@ -6993,7 +7098,7 @@ msgstr ""
 
 #: client/src/features/channels/components/SearchPerformanceSection.tsx:212
 #: client/src/features/dashboard/components/GscSummaryCard.tsx:252
-#: client/src/features/notices/utils.ts:80
+#: client/src/features/notices/utils.ts:91
 msgid "Reconnect"
 msgstr ""
 
@@ -7621,109 +7726,133 @@ msgid "Manage plan"
 msgstr ""
 
 #: client/src/features/notices/utils.ts:57
-msgid "Your last payment failed"
+msgid "Weekly post limit reached"
 msgstr ""
 
 #: client/src/features/notices/utils.ts:58
+msgid ""
+"This site has used all {{cap}} of its one-off generated posts for this week. "
+"The allowance resets on Monday (UTC) — or upgrade your plan to generate more."
+msgstr ""
+
+#: client/src/features/notices/utils.ts:62
+msgid "See upgrade options"
+msgstr ""
+
+#: client/src/features/notices/utils.ts:63
+msgid "Test notification delivered"
+msgstr ""
+
+#: client/src/features/notices/utils.ts:64
+msgid ""
+"This is the test notice you asked for from Bridge Diagnostics — your site's "
+"error-notification pipeline works end to end. You can dismiss it."
+msgstr ""
+
+#: client/src/features/notices/utils.ts:68
+msgid "Your last payment failed"
+msgstr ""
+
+#: client/src/features/notices/utils.ts:69
 msgid ""
 "Stripe couldn't charge your card for the most recent invoice. We'll retry "
 "automatically, but you can avoid an interruption by updating your payment "
 "method now."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:62
-#: client/src/features/notices/utils.ts:68
+#: client/src/features/notices/utils.ts:73
+#: client/src/features/notices/utils.ts:79
 msgid "Update payment method"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:63
+#: client/src/features/notices/utils.ts:74
 msgid "Your subscription is past due"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:64
+#: client/src/features/notices/utils.ts:75
 msgid ""
 "After several failed payment attempts your subscription has been marked past "
 "due. Service may be downgraded soon. Update your payment method to restore "
 "your plan."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:69
+#: client/src/features/notices/utils.ts:80
 msgid "We couldn't activate your license"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:70
+#: client/src/features/notices/utils.ts:81
 msgid ""
 "Structura tried to activate this site against your license but the cloud "
 "refused. This usually means the license expired, the seat limit was reached, "
 "or the payment status changed."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:74
+#: client/src/features/notices/utils.ts:85
 msgid "Open account"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:75
+#: client/src/features/notices/utils.ts:86
 msgid "{{integrationId}} disconnected"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:76
+#: client/src/features/notices/utils.ts:87
 msgid ""
 "Structura's connection to {{integrationId}} stopped working — the access "
 "token couldn't be refreshed. Reconnect this channel to resume publishing."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:81
+#: client/src/features/notices/utils.ts:92
 msgid "{{integrationId}} webhook unreachable"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:82
+#: client/src/features/notices/utils.ts:93
 msgid ""
 "We couldn't reach the webhook URL configured for {{integrationId}}. The "
 "endpoint may be offline, the URL may have changed, or your firewall may be "
 "blocking us."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:86
+#: client/src/features/notices/utils.ts:97
 msgid "Open channel settings"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:87
+#: client/src/features/notices/utils.ts:98
 msgid "A post couldn't be generated"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:88
+#: client/src/features/notices/utils.ts:99
 msgid ""
 "Structura hit an error while generating content for this site. We'll "
 "automatically try again on the next scheduled run — open your campaigns to "
 "review the failed run or start a new one."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:92
+#: client/src/features/notices/utils.ts:103
 msgid "View campaigns"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:93
+#: client/src/features/notices/utils.ts:104
 msgid "Plugin compatibility check failed"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:94
+#: client/src/features/notices/utils.ts:105
 msgid ""
 "Diagnostics on this site detected a compatibility issue with another plugin "
 "or theme that may affect Structura. Review the diagnostics report and apply "
 "the suggested fix."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:104
-#: client/src/features/notices/utils.ts:110
-#: client/src/features/notices/utils.ts:98
+#: client/src/features/notices/utils.ts:109
+#: client/src/features/notices/utils.ts:115
+#: client/src/features/notices/utils.ts:121
 msgid "Open diagnostics"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:99
+#: client/src/features/notices/utils.ts:110
 msgid "Structura Cloud can't reach your site"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:100
+#: client/src/features/notices/utils.ts:111
 msgid ""
 "Posts are generated in the cloud and delivered back over a webhook. The last "
 "connection check couldn't reach your site, so generated posts have nowhere "
@@ -7732,96 +7861,96 @@ msgid ""
 "details and a fix."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:105
+#: client/src/features/notices/utils.ts:116
 msgid "Scheduler isn't running on time"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:106
+#: client/src/features/notices/utils.ts:117
 msgid ""
 "WordPress cron hasn't fired the scheduler heartbeat recently. Posts and "
 "images may be delayed. Diagnostics has the details and a fix."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:111
+#: client/src/features/notices/utils.ts:122
 msgid "Update Structura"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:112
+#: client/src/features/notices/utils.ts:123
 msgid ""
 "This site is running an older Structura version that's missing fixes the "
 "cloud relies on. Update the plugin to keep everything working smoothly."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:116
+#: client/src/features/notices/utils.ts:127
 msgid "Open Plugins"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:117
+#: client/src/features/notices/utils.ts:128
 msgid "Fresh keyword opportunities found"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:118
+#: client/src/features/notices/utils.ts:129
 msgid ""
 "The monthly keyword refresh for {{campaignName}} surfaced {{newCount}} new "
 "opportunities. They've been added to the campaign's keyword bank and will "
 "feed upcoming posts."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:122
+#: client/src/features/notices/utils.ts:133
 msgid "View campaign"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:123
+#: client/src/features/notices/utils.ts:134
 msgid "Campaign is running without keywords"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:124
+#: client/src/features/notices/utils.ts:135
 msgid ""
 "{{campaignName}} has an empty keyword bank — new posts fall back to a "
 "generic topic instead of a targeted keyphrase. This usually happens after "
 "changing the campaign language. Re-run keyword discovery to fix it."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:128
+#: client/src/features/notices/utils.ts:139
 msgid "Re-discover keywords"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:129
+#: client/src/features/notices/utils.ts:140
 msgid "Campaign has covered every keyword"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:133
+#: client/src/features/notices/utils.ts:144
 msgid ""
 "{{campaignName}} has already published a post for every keyword in its bank, "
 "so scheduled posts are paused rather than repeating a topic. Add or re-"
 "discover keywords to start it up again."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:137
-#: client/src/features/notices/utils.ts:155
+#: client/src/features/notices/utils.ts:148
+#: client/src/features/notices/utils.ts:166
 msgid "Add keywords"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:138
+#: client/src/features/notices/utils.ts:149
 msgid "We added new keywords to your campaign"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:142
+#: client/src/features/notices/utils.ts:153
 msgid ""
 "{{campaignName}} was running low on fresh topics, so we researched its niche "
 "and added {{newCount}} new keywords to its keyword bank. Upcoming posts will "
 "use them."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:146
+#: client/src/features/notices/utils.ts:157
 msgid "Review keywords"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:147
+#: client/src/features/notices/utils.ts:158
 msgid "We skipped a duplicate post"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:151
+#: client/src/features/notices/utils.ts:162
 msgid ""
 "A scheduled post for {{campaignName}} would have used the web address "
 "“{{slug}}”, which you already publish under — so we stopped it instead of "
@@ -7829,66 +7958,66 @@ msgid ""
 "so the next post covers something new."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:156
+#: client/src/features/notices/utils.ts:167
 msgid "Search data budget almost used up"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:157
+#: client/src/features/notices/utils.ts:168
 msgid ""
 "This workspace has used 80% of its monthly search-data allowance. Keyword "
 "refreshes keep running until the cap is reached, then pause until next month."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:162
+#: client/src/features/notices/utils.ts:173
 msgid "Search data paused until next month"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:163
+#: client/src/features/notices/utils.ts:174
 msgid ""
 "This workspace has used its full monthly search-data allowance. Keyword "
 "refreshes continue with AI-only discovery, and enriched search data resumes "
 "at the start of next month."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:186
+#: client/src/features/notices/utils.ts:197
 msgid "Billing"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:189
+#: client/src/features/notices/utils.ts:200
 msgid "Quota"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:190
+#: client/src/features/notices/utils.ts:201
 msgid "AI key"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:191
+#: client/src/features/notices/utils.ts:202
 msgid "Generation"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:192
+#: client/src/features/notices/utils.ts:203
 msgid "Plugin health"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:193
+#: client/src/features/notices/utils.ts:204
 #: client/src/features/onboarding/components/WizardShell.tsx:87
 #: client/src/features/onboarding/routes/OnboardingPage.tsx:300
 msgid "SEO intelligence"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:228
+#: client/src/features/notices/utils.ts:239
 msgid "just now"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:229
+#: client/src/features/notices/utils.ts:240
 msgid "%dm ago"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:231
+#: client/src/features/notices/utils.ts:242
 msgid "%dh ago"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:233
+#: client/src/features/notices/utils.ts:244
 msgid "%dd ago"
 msgstr ""
 
@@ -8200,8 +8329,8 @@ msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep1Identity.tsx:139
 msgid ""
-"We pulled these details from WordPress. Confirm them — edit anything that "
-"isn't right."
+"We pulled these details from WordPress. Confirm they're right — anything "
+"read-only here comes straight from your WordPress settings."
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep1Identity.tsx:150

@@ -680,6 +680,10 @@ export const GuidedInterview = ({ onComplete }: GuidedInterviewProps) => {
             // below to proceed manually.
             <Button
               disabled
+              title={__(
+                "AI strategy synthesis is a paid feature. Use \"Skip interview\" below to fill in the details yourself, or upgrade your plan.",
+                "structura"
+              )}
               className="from-brand-600 to-purple-600 bg-gradient-to-r font-bold"
             >
               <Wand2 size={16} className="mr-2" />

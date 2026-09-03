@@ -1,5 +1,5 @@
 === StructuraWP – Autonomous AI Blog Writer & Scheduler ===
-Contributors: xerx, yuriyvasilyev
+Contributors: xerxio
 Tags: ai, content-generation, seo, automation, gutenberg
 Requires at least: 6.8
 Tested up to: 7.0
@@ -47,11 +47,12 @@ services* below for exactly what is shared after that. Anonymous Mode
 is intentionally limited:
 
 * Paragraph blocks only (no headings, lists, callouts, or images).
+* Posts capped at 500 words (all non-paid tiers share this cap).
 * A subset of the SEO protocol.
 * Manual generation only — no campaigns, no schedules.
 * OpenAI is the only provider available at this level.
 
-To unlock more, sign in (free) at **https://app.structurawp.com/** and
+To unlock more, sign in (free) at **[app.structurawp.com](https://app.structurawp.com/)** and
 get a free license:
 
 * **Free license** — adds heading blocks, the persona engine, more SEO
@@ -63,11 +64,15 @@ get a free license:
   authority-link verification.
 * **Cloud / Cloud Pro** (paid) — Structura provisions the AI provider
   for you, with one bill from Structura instead of separate provider
-  charges. See https://www.structurawp.com/pricing for details.
+  charges. Cloud Pro adds frontier AI models, photorealistic
+  imagery, and AI video generation (Shorts/TikTok/Reels). See
+  [structurawp.com/pricing](https://www.structurawp.com/pricing) for
+  details.
 
 The plugin's compiled JavaScript at `assets/structura.js` is built
 from TypeScript sources hosted publicly at
-https://github.com/yuriy-vasilyev/structura-plugin — see that
+[github.com/yuriy-vasilyev/structura-plugin](https://github.com/yuriy-vasilyev/structura-plugin)
+— see that
 repository's README for reproducible build instructions.
 
 == Installation ==
@@ -83,7 +88,8 @@ repository's README for reproducible build instructions.
    away.
 4. (Optional, recommended) To unlock the persona engine, more block
    types, image generation, and scheduled campaigns, click *Account &
-   License* and connect to https://app.structurawp.com/. A free
+   License* and connect to
+   [app.structurawp.com](https://app.structurawp.com/). A free
    license takes a minute to claim and gates several features.
 
 == Frequently Asked Questions ==
@@ -128,7 +134,7 @@ pick up where you left off.
 If you want WordPress to wipe everything on uninstall, turn on
 *Structura → Settings → Wipe all data on uninstall* before deleting
 the plugin. The toggle is **off by default** for safety. Cloud-side
-data (your account on https://app.structurawp.com/) is owned by your
+data (your account on [app.structurawp.com](https://app.structurawp.com/)) is owned by your
 portal account and is not touched by the plugin uninstall — manage it
 from the portal.
 
@@ -196,9 +202,9 @@ What is sent and when (all of it only after you opt in):
 
 This service is provided by Xerx, the plugin author.
 
-* Customer portal: https://app.structurawp.com/
-* Terms of service: https://www.structurawp.com/terms
-* Privacy policy: https://www.structurawp.com/privacy
+* Customer portal: [app.structurawp.com/](https://app.structurawp.com/)
+* Terms of service: [www.structurawp.com/terms](https://www.structurawp.com/terms)
+* Privacy policy: [www.structurawp.com/privacy](https://www.structurawp.com/privacy)
 
 **Channel destinations** — Slack, Discord, Telegram, LinkedIn, IndexNow,
 generic webhooks
@@ -216,17 +222,17 @@ destination supports it, the featured image) every time a post
 publishes through a campaign or manual run that has that channel
 enabled.
 
-* Slack — terms: https://slack.com/terms-of-service, privacy:
-  https://slack.com/privacy-policy
-* Discord — terms: https://discord.com/terms, privacy:
-  https://discord.com/privacy
-* Telegram — terms: https://telegram.org/tos, privacy:
-  https://telegram.org/privacy
-* LinkedIn — terms: https://www.linkedin.com/legal/user-agreement,
-  privacy: https://www.linkedin.com/legal/privacy-policy
+* Slack — terms: [slack.com/terms-of-service](https://slack.com/terms-of-service), privacy:
+  [slack.com/privacy-policy](https://slack.com/privacy-policy)
+* Discord — terms: [discord.com/terms](https://discord.com/terms), privacy:
+  [discord.com/privacy](https://discord.com/privacy)
+* Telegram — terms: [telegram.org/tos](https://telegram.org/tos), privacy:
+  [telegram.org/privacy](https://telegram.org/privacy)
+* LinkedIn — terms: [www.linkedin.com/legal/user-agreement](https://www.linkedin.com/legal/user-agreement),
+  privacy: [www.linkedin.com/legal/privacy-policy](https://www.linkedin.com/legal/privacy-policy)
 * IndexNow (operated by Microsoft Bing) — FAQ / terms:
-  https://www.indexnow.org/faq, privacy:
-  https://www.microsoft.com/privacy/privacystatement
+  [www.indexnow.org/faq](https://www.indexnow.org/faq), privacy:
+  [www.microsoft.com/privacy/privacystatement](https://www.microsoft.com/privacy/privacystatement)
 * Generic webhooks — a URL you own; its terms are yours.
 
 **Structura customer portal** — `app.structurawp.com`
@@ -240,8 +246,8 @@ What is sent: standard browser navigation. The plugin itself does not
 post data to the portal — it links you there for the OAuth-style
 sign-in.
 
-* Terms of service: https://www.structurawp.com/terms
-* Privacy policy: https://www.structurawp.com/privacy
+* Terms of service: [www.structurawp.com/terms](https://www.structurawp.com/terms)
+* Privacy policy: [www.structurawp.com/privacy](https://www.structurawp.com/privacy)
 
 **Structura marketing site** — `www.structurawp.com`
 
@@ -252,8 +258,8 @@ the plugin's Settings page.
 
 What is sent: post URL, revalidation tag identifiers. No content body.
 
-* Terms of service: https://www.structurawp.com/terms
-* Privacy policy: https://www.structurawp.com/privacy
+* Terms of service: [www.structurawp.com/terms](https://www.structurawp.com/terms)
+* Privacy policy: [www.structurawp.com/privacy](https://www.structurawp.com/privacy)
 
 **WordPress.org plugin directory API** — `api.wordpress.org`
 
@@ -264,8 +270,8 @@ is the source of truth).
 
 What is sent: the plugin slug (`structura`). No site or user data.
 
-* WordPress.org terms: https://wordpress.org/about/license/
-* WordPress.org privacy: https://wordpress.org/about/privacy/
+* WordPress.org terms: [wordpress.org/about/license/](https://wordpress.org/about/license/)
+* WordPress.org privacy: [wordpress.org/about/privacy/](https://wordpress.org/about/privacy/)
 
 **Google Cloud Storage release manifest** — `storage.googleapis.com`
 
@@ -278,8 +284,8 @@ code path is disabled and no request is made.
 What is sent: a static GET to a public JSON file. No site or user
 data is transmitted.
 
-* Google Cloud Storage terms: https://cloud.google.com/terms
-* Google privacy policy: https://policies.google.com/privacy
+* Google Cloud Storage terms: [cloud.google.com/terms](https://cloud.google.com/terms)
+* Google privacy policy: [policies.google.com/privacy](https://policies.google.com/privacy)
 
 == Privacy ==
 
@@ -302,19 +308,106 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Screenshots ==
 
-1. Campaigns list — at-a-glance view of every campaign and its next
-   scheduled publish.
-2. Campaign editor — pick a persona, set a schedule, and choose
-   taxonomy targets without leaving WordPress.
-3. Persona library — author multiple writing voices and assign them
-   to campaigns.
-4. Run progress drawer — live status of every cloud generation,
-   including step durations and image-slot fallbacks.
-5. Channels — connect Slack, Discord, LinkedIn, Telegram, IndexNow
-   and others; each post fans out automatically with channel-native
-   copy.
+1. A real campaign run — the full process timeline from research and
+   competitor analysis through writing, link validation, image
+   generation, and publishing, with per-step durations.
+2. The generated post in the Gutenberg editor — List View shows
+   individually selectable blocks, not pasted HTML.
+3. A generated post in Yoast SEO — focus keyphrase set, SEO and
+   readability analysis both green.
+4. The persona library — multiple writing voices with their own
+   directives and reading-level targets.
+5. Account & License — your tier, workspace, and license activation
+   managed inside wp-admin.
 
 == Changelog ==
+
+= 2.23.0 =
+* New: your weekly one-off post allowance is visible right on the
+  Generate page ("X of N used this week"), and reaching it raises a
+  clear notice in the Notification Center instead of a silent stop.
+* New: Send Test Notification verifies your site's error-notification
+  pipeline end to end — licensed sites get a real test notice.
+* Fixed: upgrading your plan on the customer portal now reaches
+  wp-admin immediately — no more stale "Free" badges after paying.
+* Fixed: one-off generated posts honor your Post Status choice —
+  "Publish" actually publishes (they always saved as drafts before).
+* Fixed: gated buttons explain themselves everywhere — tooltips and
+  upgrade prompts instead of dead clicks.
+* Fixed: honest progress copy while a run waits for your site's cron,
+  and no stray cron warnings after deactivating the plugin.
+* Improved: Account & License offers "Create Free Account" directly,
+  and the AI Engine no longer flashes "connect a provider" at sites
+  whose provider is already connected.
+
+= 2.22.0 =
+* New: explicit opt-in screen before the plugin contacts Structura
+  Cloud — nothing is sent until you consent.
+* New: ranked keyword bank on the campaign wizard's Keywords step,
+  with per-keyword search volume and difficulty.
+* Improved: keyword discovery prefers informational blog topics,
+  collapses reworded duplicates, and auto-refreshes the bank when it
+  runs low.
+* Improved: a two-stage duplicate-topic gate and more varied title
+  shapes across a campaign's posts.
+* Improved: tags now follow the same reuse-first governance as
+  categories — no more tag sprawl.
+* Fixed: the Structura admin menu sits right after Settings, admin
+  notices load their assets properly, and JSON-LD output is hardened
+  against markup injection.
+
+= 2.21.0 =
+* New: attach research documents (PDF, DOCX, TXT, MD, HTML) to a
+  post generation — the article is grounded on them.
+* New: model tier picker (Top / Standard) for every
+  bring-your-own-key plan.
+* New: Austrian and Swiss German campaign languages with
+  variant-aware wording.
+* Fixed: campaigns with an empty keyword bank warn instead of
+  silently running off-topic.
+
+= 2.20.0 =
+* New: Top / Standard model tier picker on campaigns, single posts,
+  and image regeneration.
+* New: "Run again" asks for confirmation with a summary of what the
+  run will do.
+* Improved: the Search Console connect prompt moved to a dismissable
+  dashboard banner.
+* Fixed: the Personas page shows only this site's bound voices, and
+  anonymous installs recover automatically from a revoked cloud
+  connection.
+
+= 2.19.0 =
+* Improved: the weekly Search Console digest email only sends when
+  there's a real story to tell, and stays short for agencies.
+
+= 2.18.0 =
+* New: Search performance page — trends, an opportunity queue, and a
+  per-post table from your Search Console data.
+* New: redesigned Search Console connect flow and a dashboard glance
+  card.
+
+= 2.17.0 =
+* New: Google Search Console integration — connect your property and
+  see how generated posts perform inside wp-admin.
+* Fixed: notices render translated copy instead of raw message keys,
+  and API key fields reject URL-shaped input before the live test.
+
+= 2.16.0 =
+* New: share preview links and post export (Markdown, HTML, DOCX).
+* Fixed: free-tier weekly and monthly post caps are enforced
+  correctly.
+* Fixed: generated articles anchor to the current date and no longer
+  cite your competitors as sources.
+* Fixed: the campaign Posts tab includes draft posts.
+
+= 2.15.0 =
+* New: rebuilt video rendering with six polished templates and more
+  natural narration voices.
+* Improved: image generation falls back to a generic style instead
+  of blocking when no visual preset is bound.
+* Changed: generated posts default to draft — the "pending" status
+  is retired.
 
 = 2.14.0 =
 * Campaign view now shows posts created vs posts published at a
@@ -351,10 +444,11 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 For older entries, see the full changelog in the public source
 repository:
-https://github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md
+[github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md](https://github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md)
 
 == Upgrade Notice ==
 
-= 2.14.0 =
-Campaign publish counters and LinkedIn publishing reliability
-improvements. Safe upgrade — no database migrations.
+= 2.23.0 =
+Plan upgrades now sync to wp-admin instantly, one-off posts honor the
+Publish status, and weekly allowances are visible up front. Safe
+upgrade — no database migrations.
