@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.24.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.23.0...v2.24.0) (2026-09-03)
+
+
+### Features
+
+* **web:** WordPress connect flow becomes a real stepper with a verify stage ([637b3f1](https://github.com/yuriy-vasilyev/structura-core/commit/637b3f1dbf9d755d689afaf0522441a6d3feafa9))
+
+
+### Bug Fixes
+
+* **plugin:** richer Plugins-screen row — description, action links, meta links ([9578acc](https://github.com/yuriy-vasilyev/structura-core/commit/9578acc89c1f115a66782767f3b697d4bc3a3e9f))
+* **ui:** explicit aria-disabled on inert Stepper chips ([69f6db2](https://github.com/yuriy-vasilyev/structura-core/commit/69f6db28fb9cbdd6dba04e2445fc0f0881747286))
+
 ## [2.23.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.22.0...v2.23.0) (2026-09-03)
 
 

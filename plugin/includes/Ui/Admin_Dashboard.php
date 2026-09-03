@@ -41,6 +41,71 @@ class Admin_Dashboard
         echo '<div id="structura-root"></div>';
     }
 
+    /**
+     * Prepend "Dashboard" and "Settings" to the plugin's row on
+     * Plugins → Installed Plugins.
+     *
+     * The wp.org first-impression program (2026-09) showed reviewers
+     * landing on the Plugins screen after activation with no obvious
+     * next step — every neighbouring plugin offered one, ours didn't.
+     * Both targets are the SPA (hash routes), so they stay valid
+     * regardless of which page the SPA later defaults to.
+     *
+     * @param string[] $links Existing action links (Deactivate, etc.).
+     * @return string[]
+     */
+    public function add_action_links(array $links): array
+    {
+        $ours = [
+            sprintf(
+                '<a href="%s">%s</a>',
+                esc_url(admin_url('admin.php?page=structura')),
+                esc_html__('Dashboard', 'structura')
+            ),
+            sprintf(
+                '<a href="%s">%s</a>',
+                esc_url(admin_url('admin.php?page=structura#/settings')),
+                esc_html__('Settings', 'structura')
+            ),
+        ];
+
+        return array_merge($ours, $links);
+    }
+
+    /**
+     * Append "Docs", "Support" and "Account" to the plugin's meta row
+     * (the "Version x | By Xerx | View details" line).
+     *
+     * `plugin_row_meta` fires for every plugin, so the basename check
+     * is what keeps our links off other plugins' rows.
+     *
+     * @param string[] $links Existing meta links.
+     * @param string   $file  Plugin basename the row is being rendered for.
+     * @return string[]
+     */
+    public function add_row_meta(array $links, string $file): array
+    {
+        if (plugin_basename(STRUCTURA_PATH . 'structura.php') !== $file) {
+            return $links;
+        }
+
+        $external = [
+            'https://docs.structurawp.com/'        => __('Docs', 'structura'),
+            'https://www.structurawp.com/support'  => __('Support', 'structura'),
+            'https://app.structurawp.com/'         => __('Account', 'structura'),
+        ];
+
+        foreach ($external as $url => $label) {
+            $links[] = sprintf(
+                '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+                esc_url($url),
+                esc_html($label)
+            );
+        }
+
+        return $links;
+    }
+
     public function enqueue_scripts($hook): void
     {
         if ('toplevel_page_structura' !== $hook) {

@@ -66,6 +66,10 @@ export const Stepper: FC<StepperProps> = ({
           <button
             type="button"
             disabled={!clickable}
+            // Redundant with native `disabled` but makes the a11y tree
+            // unambiguous for tooling that reads aria-* only (connect-
+            // stepper visual review, 2026-09-03).
+            aria-disabled={!clickable || undefined}
             onClick={() => clickable && onStepClick(step.id, i)}
             title={labelMode === "active" ? step.label : undefined}
             className={cn(

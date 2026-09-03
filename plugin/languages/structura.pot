@@ -10581,3 +10581,11 @@ msgstr ""
 msgid ""
 "Enter a full URL, including https://. Tracking parameters are kept as-is."
 msgstr ""
+
+#: plugin/includes/Ui/Admin_Dashboard.php:94
+msgid "Support"
+msgstr ""
+
+#: plugin/includes/Ui/Admin_Dashboard.php:95
+msgid "Account"
+msgstr ""

@@ -3,9 +3,9 @@
 /**
  * Plugin Name: StructuraWP – Autonomous AI Blog Writer & Scheduler
  * Plugin URI: https://www.structurawp.com/
- * Description: Autonomous AI content architect for WordPress.
+ * Description: Autonomous AI blog writer for WordPress. Plans campaigns, writes SEO-ready Gutenberg posts with images, and publishes them on a schedule — you keep editorial control. To get started: activate the plugin, then open <strong>Structura</strong> in the admin menu and follow the setup wizard.
  * x-release-please-start-version
- * Version: 2.23.0
+ * Version: 2.24.0
  * x-release-please-end-version
  * Author: Xerx
  * Author URI: https://www.xerx.io
@@ -49,7 +49,7 @@ if (version_compare(PHP_VERSION, '7.4', '<')) {
 }
 
 // 2. Define Constants
-define('STRUCTURA_VERSION', '2.23.0'); // x-release-please-version
+define('STRUCTURA_VERSION', '2.24.0'); // x-release-please-version
 define('STRUCTURA_PATH', plugin_dir_path(__FILE__));
 define('STRUCTURA_URL', plugin_dir_url(__FILE__));
 define('STRUCTURA_AS_GROUP', 'structura');

@@ -322,6 +322,11 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Changelog ==
 
+= 2.24.0 =
+* Improved: the plugin's row on the Plugins screen — clearer
+  description plus quick links to the dashboard, settings,
+  documentation, and support.
+
 = 2.23.0 =
 * New: your weekly one-off post allowance is visible right on the
   Generate page ("X of N used this week"), and reaching it raises a
@@ -447,6 +452,10 @@ repository:
 [github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md](https://github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md)
 
 == Upgrade Notice ==
+
+= 2.24.0 =
+Nicer Plugins-screen row with quick links. Safe upgrade — no database
+migrations.
 
 = 2.23.0 =
 Plan upgrades now sync to wp-admin instantly, one-off posts honor the

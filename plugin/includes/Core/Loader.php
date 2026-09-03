@@ -389,5 +389,11 @@ class Loader
         add_action('admin_menu', [$plugin_admin, 'add_plugin_menu']);
         add_action('admin_enqueue_scripts', [$plugin_admin, 'enqueue_styles']);
         add_action('admin_enqueue_scripts', [$plugin_admin, 'enqueue_scripts']);
+
+        // Plugins-screen affordances: quick links into the SPA and out
+        // to docs/support/account, like every neighbouring plugin has.
+        $basename = plugin_basename(STRUCTURA_PATH . 'structura.php');
+        add_filter('plugin_action_links_' . $basename, [$plugin_admin, 'add_action_links']);
+        add_filter('plugin_row_meta', [$plugin_admin, 'add_row_meta'], 10, 2);
     }
 }
