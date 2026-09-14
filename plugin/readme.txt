@@ -1,6 +1,6 @@
-=== StructuraWP – Autonomous AI Blog Writer & Scheduler ===
+=== StructuraWP – AI Autoblogging & Auto Blog Post Scheduler ===
 Contributors: xerxio
-Tags: ai, content-generation, seo, automation, gutenberg
+Tags: autoblogging, auto-blog, ai-writer, content-automation, seo
 Requires at least: 6.8
 Tested up to: 7.0
 Requires PHP: 7.4
@@ -8,14 +8,16 @@ Stable tag: 2.14.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Autonomous AI content architect for WordPress — writes, formats, and publishes Gutenberg-native blog posts on a schedule.
+AI autoblogging for WordPress: researches, writes and auto-publishes SEO blog posts on a schedule. Gutenberg-native, no RSS scraping.
 
 == Description ==
 
-Structura turns AI content generation into a real WordPress workflow:
-write a post, format it as native Gutenberg blocks, run it through a
-20+ point SEO protocol, and publish — manually or on a schedule. You
-keep editorial control; Structura handles the repetitive work.
+Structura is autoblogging done right. Instead of scraping RSS feeds and
+spinning the results, it researches a keyword against live search
+results, writes an original article, formats it as native Gutenberg
+blocks, runs it through a 20+ point SEO protocol, and auto-publishes it
+on your schedule. You keep editorial control; Structura handles the
+repetitive work.
 
 **Highlights**
 

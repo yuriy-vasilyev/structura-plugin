@@ -120,3 +120,69 @@ describe("useFinishWizard — visual preset video fields", () => {
     expect("palette" in content).toBe(false);
   });
 });
+
+describe("useFinishWizard — visual preset overwrite protection", () => {
+  // Regression — wp.org QA, 2026-09-03: Finish unconditionally wrote the
+  // bound preset, so an untouched step-4 pass-through (draft hydrated FROM
+  // the preset) bumped it, and a re-onboarding regenerated the saved style
+  // from scratch. An unchanged draft must be a no-op.
+  it("does NOT update the bound preset when step 4 matches it (untouched)", async () => {
+    presetsMock.current = {
+      boundPresetId: "preset-1",
+      presets: [
+        {
+          presetId: "preset-1",
+          globalArtDirection: "Editorial photography",
+          aspectRatio: "16:9",
+          format: "webp",
+          optimizeOnUpload: true,
+          medium: "photography",
+        },
+      ],
+    };
+    useWizardStore.getState().setStep4Draft({
+      globalArtDirection: "Editorial photography",
+      aspectRatio: "16:9",
+      format: "webp",
+      optimizeOnUpload: true,
+      medium: "photography",
+    });
+
+    const { result } = renderHook(() => useFinishWizard(), { wrapper });
+    await result.current.mutateAsync();
+
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(createMock).not.toHaveBeenCalled();
+  });
+
+  it("DOES update the bound preset when the user changed a field", async () => {
+    presetsMock.current = {
+      boundPresetId: "preset-1",
+      presets: [
+        {
+          presetId: "preset-1",
+          globalArtDirection: "Editorial photography",
+          aspectRatio: "16:9",
+          format: "webp",
+          optimizeOnUpload: true,
+          medium: "photography",
+        },
+      ],
+    };
+    useWizardStore.getState().setStep4Draft({
+      globalArtDirection: "Bold flat illustration", // changed
+      aspectRatio: "16:9",
+      format: "webp",
+      optimizeOnUpload: true,
+      medium: "illustration",
+    });
+
+    const { result } = renderHook(() => useFinishWizard(), { wrapper });
+    await result.current.mutateAsync();
+
+    await waitFor(() => expect(updateMock).toHaveBeenCalled());
+    expect(updateMock.mock.calls[0][0].content.global_art_direction).toBe(
+      "Bold flat illustration",
+    );
+  });
+});

@@ -50,6 +50,7 @@ import { buildReferralLabels } from "@/utils/referralLabels";
 import {
   useSuggestWizardPositioningMutation,
   useWizardAiCompetitorsQuery,
+  useWizardPositioningQuery,
 } from "../api/useWizardSeo";
 import { useWizardStore } from "../state/wizardStore";
 import { WizardMagicLoader } from "./WizardMagicLoader";
@@ -64,6 +65,12 @@ const EMPTY_POSITIONING: PositioningDraft = { what: "", who: "", problem: "" };
 
 export const WizardStep3SeoIntelligence = () => {
   const { data: siteAnalysis } = useSiteAnalysisQuery();
+  // Saved workspace positioning — the source of truth for a returning /
+  // re-onboarding user. seoIntelSettings carries competitors but NOT
+  // positioning, so without this the wizard only ever seeded a fresh AI
+  // draft and a paid customer who'd already answered saw blank fields
+  // (wp.org QA, 2026-09-03).
+  const { data: savedPositioning } = useWizardPositioningQuery();
   const suggestedCompetitors = siteAnalysis?.suggestedCompetitors ?? [];
   const { successToast, errorToast } = useToast();
   const { isPaidLicense } = useLicense();
@@ -83,14 +90,24 @@ export const WizardStep3SeoIntelligence = () => {
       seededRef.current = true;
       return;
     }
+    // Wait for the saved-positioning read before seeding, so a returning
+    // user hydrates their real answers instead of racing in a blank/AI
+    // draft. `undefined` = still loading; `{ positioning: null }` = none
+    // saved (fine to seed from the prewarmed draft).
+    if (savedPositioning === undefined) return;
     seededRef.current = true;
+    // Priority: saved workspace positioning → prewarmed AI draft → empty.
+    const saved = savedPositioning.positioning;
+    const hasSaved = !!(saved && (saved.what || saved.who || saved.problem));
     setStep3Draft({
-      positioning: prewarmedPositioning ?? EMPTY_POSITIONING,
-      positioningSource: prewarmedPositioning ? "ai_draft" : "user",
+      positioning: hasSaved
+        ? { what: saved!.what ?? "", who: saved!.who ?? "", problem: saved!.problem ?? "" }
+        : prewarmedPositioning ?? EMPTY_POSITIONING,
+      positioningSource: hasSaved ? "user" : prewarmedPositioning ? "ai_draft" : "user",
       competitorUrls: siteAnalysis?.seoIntelSettings?.competitorUrls ?? [],
       referralLinks: siteAnalysis?.seoIntelSettings?.referralLinks ?? [],
     });
-  }, [step3, siteAnalysis, setStep3Draft, prewarmedPositioning]);
+  }, [step3, siteAnalysis, setStep3Draft, prewarmedPositioning, savedPositioning]);
 
   // Convenience accessors with safe fallbacks.
   const positioning = step3?.positioning ?? EMPTY_POSITIONING;

@@ -4233,11 +4233,33 @@ class Rest_Api
                 'has_image'       => Provider_Registry::has_image_provider($plan),
                 'models_fallback' => Provider_Registry::is_using_fallback(),
             ],
-            'onboarding_dismissed'  => (bool)get_user_meta(get_current_user_id(), 'structura_guide_dismissed', true),
+            'onboarding_dismissed'  => self::resolve_onboarding_dismissed(),
             'free_banner_dismissed' => (bool)get_user_meta(get_current_user_id(), 'structura_free_banner_dismissed',
                 true),
             'scheduler_simple_mode' => self::get_user_meta_with_default('structura_scheduler_simple_mode', true),
         ];
+    }
+
+    /**
+     * Whether the setup/resume surfaces should stay hidden for this user.
+     *
+     * Two historically separate flags both mean "this install finished or
+     * dismissed setup": the per-user guide meta (set by the resume tile's
+     * own dismiss) and the site-wide `structura_onboarding_dismissed`
+     * option (set on wizard finish/dismiss, self-healed from the cloud's
+     * `completedAt`, and deliberately deleted when the site disconnects so
+     * a fresh workspace re-onboards). Reading only the user meta made the
+     * "Finish your Structura setup — 6 steps left" tile resurface for a
+     * paying customer whose anonymous-era wizard completion lived solely
+     * in the option (wp.org QA, 2026-09-03). Either signal now suppresses
+     * the tile; the deliberate re-onboard path still works because the
+     * disconnect flow deletes the option and a fresh workspace has no
+     * completion signal at all.
+     */
+    public static function resolve_onboarding_dismissed(): bool
+    {
+        return (bool)get_user_meta(get_current_user_id(), 'structura_guide_dismissed', true)
+            || get_option('structura_onboarding_dismissed') === '1';
     }
 
     /**

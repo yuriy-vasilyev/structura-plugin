@@ -1,5 +1,33 @@
 # Changelog
 
+## [2.25.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.24.0...v2.25.0) (2026-09-14)
+
+
+### Features
+
+* **plugin:** name and tag the wp.org listing for the autoblogging cluster ([eba1eb4](https://github.com/yuriy-vasilyev/structura-core/commit/eba1eb4f31b53639543abc24fb32ff5263ee0fcd))
+* **pricing:** retire the founding offer from www and the portal, keep the Stripe code live ([61ef184](https://github.com/yuriy-vasilyev/structura-core/commit/61ef184d1109415b98def8a0ba75625823d2a9c1))
+* **www:** add followed SeekTool.ai footer link for the free directory listing ([f73dd8e](https://github.com/yuriy-vasilyev/structura-core/commit/f73dd8e3d50cfd15097ad3aeeb7eb9796ee6992a))
+* **www:** drop Learn from the header nav — footer Resources only ([94e5f03](https://github.com/yuriy-vasilyev/structura-core/commit/94e5f039d4e80ca4c3d913a0a9c0b1ba8a2a2f28))
+* **www:** lead the EN /vs/ titles with "alternative", the query that ranks ([3b80f8c](https://github.com/yuriy-vasilyev/structura-core/commit/3b80f8cb7e847e076d5d137727b0fa03fa77f8dc))
+* **www:** PeerPush verification badge in the footer directory row ([4b7c7fc](https://github.com/yuriy-vasilyev/structura-core/commit/4b7c7fc3b313a8c278aea6dc86758706f78b12e8))
+* **www:** surface the Learn hub site-wide and 308 cross-locale tag/category ghosts ([7375528](https://github.com/yuriy-vasilyev/structura-core/commit/7375528458c9e98f67f40fe1134024b95d218187))
+
+
+### Bug Fixes
+
+* **channels:** email-owner channel actually sends — wire the mail-collection transport ([6690bea](https://github.com/yuriy-vasilyev/structura-core/commit/6690beaa66f3f8e0deb5420f779882679a0b07c0))
+* **client:** GSC connect dialog title keeps its icon inline in wp-admin ([12be14c](https://github.com/yuriy-vasilyev/structura-core/commit/12be14ce8e77ecbc2500bedf49eae614c1b24819))
+* **client:** wizard pre-fills saved positioning + never clobbers an untouched visual preset ([206666f](https://github.com/yuriy-vasilyev/structura-core/commit/206666fe2a7034b2fa2cb65026931b5575fcb4a4))
+* **functions:** headless run receipts finally reference their delivered post ([138e9c0](https://github.com/yuriy-vasilyev/structura-core/commit/138e9c04715d4eae5239301ff44db1ceef7253aa))
+* **functions:** restore surface-interest modules swept into 94e5f039d ([8301d1f](https://github.com/yuriy-vasilyev/structura-core/commit/8301d1fe42365d3026d8e02ffca6624265882920))
+* **functions:** strip leaked image-directive paragraphs from post bodies ([1ecd00c](https://github.com/yuriy-vasilyev/structura-core/commit/1ecd00c8ffeb0c2c775ff4762ef7132dbd7b7078))
+* **headless:** post view reads the delivery-time AI model stamp ([6fc82f1](https://github.com/yuriy-vasilyev/structura-core/commit/6fc82f170acb8769c261d6d5a239d32f062185a6))
+* **plugin:** completed setup stays completed across the license claim ([f405b9c](https://github.com/yuriy-vasilyev/structura-core/commit/f405b9c73f4b1c954cdfd98bc9a0c4d58d508510))
+* **web,ui:** GSC property picker scoped to the site's domain; tall dialogs scroll ([2613e36](https://github.com/yuriy-vasilyev/structura-core/commit/2613e367d7f8a70830e778a24a16fd22fc79aa35))
+* **web:** admin site-limit override goes through the adminOverrideSiteLimit callable ([32ede95](https://github.com/yuriy-vasilyev/structura-core/commit/32ede95f1aeb523f980fec0f6a142a482d69b817))
+* **web:** campaign view rendered raw key campaignView.seo.liveData ([41f3c92](https://github.com/yuriy-vasilyev/structura-core/commit/41f3c92774a006d8ab2f967f13e425ee67c48533))
+
 ## [2.24.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.23.0...v2.24.0) (2026-09-03)
 
 

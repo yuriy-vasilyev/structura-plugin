@@ -149,9 +149,25 @@ export function useFinishWizard() {
             : {}),
         };
         const boundId = presetsData?.boundPresetId ?? null;
+        const boundPreset = boundId
+          ? presetsData?.presets.find((p) => p.presetId === boundId)
+          : undefined;
+        // Don't clobber an existing bound preset the user didn't touch.
+        // Step 4 hydrates the draft FROM the bound preset, so an untouched
+        // pass-through produces byte-identical content — writing it anyway
+        // bumped the preset and (worse) a re-onboarding regenerated the
+        // saved style from scratch (wp.org QA, 2026-09-03). Only the
+        // fields the wizard actually manages are compared.
+        const unchanged =
+          boundPreset !== undefined &&
+          boundPreset.globalArtDirection === content.global_art_direction &&
+          boundPreset.aspectRatio === content.aspect_ratio &&
+          boundPreset.format === content.format &&
+          boundPreset.optimizeOnUpload === content.optimize_on_upload &&
+          boundPreset.medium === content.medium;
         try {
           if (boundId) {
-            await updatePreset({ preset_id: boundId, content });
+            if (!unchanged) await updatePreset({ preset_id: boundId, content });
           } else {
             await createPreset({
               label: "Default",

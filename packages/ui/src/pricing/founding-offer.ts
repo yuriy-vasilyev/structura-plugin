@@ -52,8 +52,16 @@ export interface OfferConfig {
  * to retire every offer outright.
  *
  * @see resolveOfferState — the auto-advance that makes this safe.
+ *
+ * Retired to `"none"` on 2026-09-06: the remaining founding seats are being
+ * held back from the public pricing surfaces so they are not spent on
+ * influencer-referral discounts (those get their own first-year coupons).
+ * The Stripe `FOUNDING` promotion code itself stays live — it was already
+ * quoted in outreach emails, and checkout keeps `allow_promotion_codes`, so
+ * anyone holding the code can still type it at Stripe. Flip back to
+ * `"founding"` to re-advertise; nothing else needs to change.
  */
-export const OFFER_STATE: OfferState = "founding";
+export const OFFER_STATE: OfferState = "none";
 
 /**
  * Config for each non-`none` state. `none` has no config — {@link activeOffer}

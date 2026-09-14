@@ -740,9 +740,11 @@ export const GscConnectModal = ({ connection, open, onClose }: GscConnectModalPr
         </button>
         <Dialog.Header>
           {/* Handoff modal header: 20px "G" + text-base title. `text-base!`
-              overrides Dialog.Title's default text-xl against wp-admin's
-              heading CSS. */}
-          <Dialog.Title className="flex items-center gap-2 text-base!">
+              overrides Dialog.Title's default text-xl, and `flex!` beats
+              wp-admin core's unlayered `h1..h6 {display:block}` — Tailwind
+              utilities live in @layer, so bare `flex` loses and the glyph
+              stacks above the title (2026-09-04). */}
+          <Dialog.Title className="flex! items-center gap-2 text-base!">
             <GoogleGGlyph size={20} className="shrink-0" />
             {title}
           </Dialog.Title>

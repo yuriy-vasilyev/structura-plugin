@@ -59,8 +59,17 @@ const Root = ({
           />
         </Transition.Child>
 
-        <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-          {children}
+        {/* Scroll layer OUTSIDE the centering flex. A panel taller than
+            the viewport used to be clipped at both ends: `items-center`
+            centred it on the viewport and nothing scrolled, so the footer
+            CTA was unreachable (GSC property picker with 7 properties,
+            2026-09-11). `min-h-full` keeps short panels centred; a tall
+            one grows past it and this layer scrolls. The panel keeps
+            `overflow-hidden`, so nothing inside changes clipping. */}
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full w-full items-center justify-center p-4">
+            {children}
+          </div>
         </div>
       </HeadlessDialog>
     </Transition>
