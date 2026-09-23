@@ -1,56 +1,28 @@
 import { __ } from "@wordpress/i18n";
 import { useMemo } from "react";
-import { BookOpen, Globe2, Loader2, Target, TrendingUp, UserCheck, Zap } from "lucide-react";
+import { Loader2, UserCheck } from "lucide-react";
 
 // Hooks
 import { useCampaignForm } from "@/features/campaigns/context/CampaignContext";
-import { usePersonasQuery } from "@/features/personas";
+import { useSitePersonasQuery } from "@/features/personas";
 import { useDefaultProviders, useLicense } from "@/features/settings";
 
 // UI Components
-import { Card, InputField, Select, TextArea, cn } from "@structura/ui";
+import { Card, InputField, Select, TextArea } from "@structura/ui";
 import { AIProvider, CampaignMode } from "@/features/campaigns/types";
 import { ProviderToggle } from "../ProviderToggle";
 import { mirrorModelForTier } from "@/features/campaigns/modelTier";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
 import { MagicSuggestButton } from "@/features/campaigns/components/MagicSuggestButton";
 
-const CAMPAIGN_MODES: {
-  value: CampaignMode;
-  label: string;
-  description: string;
-  icon: React.ElementType;
-}[] = [
-  {
-    value: "traffic_magnet",
-    label: __("Traffic Magnet", "structura"),
-    description: __("Broad informational content built to capture high search volume.", "structura"),
-    icon: Globe2,
-  },
-  {
-    value: "quick_wins",
-    label: __("Quick Wins", "structura"),
-    description: __("Low-competition, niche topics the site can rank for fast.", "structura"),
-    icon: Zap,
-  },
-  {
-    value: "conversion",
-    label: __("Conversion", "structura"),
-    description: __("Bottom-of-funnel content engineered to turn readers into customers.", "structura"),
-    icon: TrendingUp,
-  },
-  {
-    value: "authority",
-    label: __("Authority", "structura"),
-    description: __("Deep expert-level writing that builds long-term topical trust.", "structura"),
-    icon: BookOpen,
-  },
-];
-
 export const StepObjective = () => {
   const { formData, updateForm, mode } = useCampaignForm();
 
-  const { data: personas = [], isLoading: loadingPersonas } = usePersonasQuery();
+  // Site-scoped: the whole workspace library here listed every sibling
+  // site's voice on a multi-site workspace (2026-09-22).
+  const { data: personas, isLoading: loadingPersonas } = useSitePersonasQuery(
+    formData.intelligence.personaId,
+  );
   const { plan } = useLicense();
   const { availableProviders, availableImageProviders, isFullyConfigured, isCloud } = useDefaultProviders();
 
@@ -67,6 +39,7 @@ export const StepObjective = () => {
     const data = await suggest("campaign", {
       provider,
       context: [],
+      language: formData.intelligence.language,
     });
 
     if (data?.name && data?.strategy) {
@@ -79,6 +52,9 @@ export const StepObjective = () => {
       const validModes: CampaignMode[] = ["traffic_magnet", "quick_wins", "conversion", "authority"];
       if (data.campaign_mode && validModes.includes(data.campaign_mode as CampaignMode)) {
         update.campaignMode = data.campaign_mode as CampaignMode;
+        // A suggestion is not a decision: leaving the source "inferred" keeps
+        // the cloud free to re-derive the approach as the footprint moves.
+        update.campaignModeSource = "inferred";
       }
 
       updateForm("identity", update);
@@ -133,62 +109,6 @@ export const StepObjective = () => {
             onChange={(e) => updateForm("identity", { objective: e.target.value })}
             rows={6}
           />
-        </div>
-      </div>
-
-      {/* SECTION 2: CAMPAIGN MODE / CONTENT GOAL */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Target size={13} className="text-neutral-400" />
-          <span className="text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-            {mode === "single"
-              ? __("Content Goal", "structura")
-              : __("Campaign Mode", "structura")}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          {CAMPAIGN_MODES.map((m) => {
-            const Icon = m.icon;
-            const isSelected = formData.identity.campaignMode === m.value;
-
-            return (
-              <button
-                key={m.value}
-                type="button"
-                onClick={() => updateForm("identity", { campaignMode: m.value })}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition-all duration-fast",
-                  isSelected
-                    ? "border-brand-300 bg-brand-50/70 ring-1 ring-brand-200 dark:border-brand-700 dark:bg-brand-950/70 dark:ring-brand-800"
-                    : "border-neutral-200 bg-white hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600"
-                )}
-              >
-                <Icon
-                  size={13}
-                  className={isSelected ? "text-brand-500" : "text-neutral-400"}
-                />
-                <div>
-                  <span
-                    className={cn(
-                      "text-[10px] font-black tracking-widest uppercase",
-                      isSelected ? "text-brand-700 dark:text-brand-300" : "text-neutral-500 dark:text-neutral-400"
-                    )}
-                  >
-                    {m.label}
-                  </span>
-                  <p
-                    className={cn(
-                      "m-0! text-[10px] leading-snug",
-                      isSelected ? "text-brand-600/70 dark:text-brand-300/70" : "text-neutral-400 dark:text-neutral-500"
-                    )}
-                  >
-                    {m.description}
-                  </p>
-                </div>
-              </button>
-            );
-          })}
         </div>
       </div>
 

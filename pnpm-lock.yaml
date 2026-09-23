@@ -362,6 +362,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.3
         version: 1.2.4(@types/react@18.3.12)(react@18.3.1)
+      '@structura/i18n-contracts':
+        specifier: workspace:*
+        version: link:../i18n-contracts
       '@structura/types':
         specifier: workspace:*
         version: link:../types

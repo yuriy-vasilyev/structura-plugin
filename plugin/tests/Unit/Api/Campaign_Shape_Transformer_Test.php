@@ -704,4 +704,48 @@ class Campaign_Shape_Transformer_Test extends TestCase
             )
         );
     }
+
+    /**
+     * Setup-draft provenance (2026-09-22): the inferred writing approach's
+     * source and the rationale codes ride through every direction, and are
+     * OMITTED (not nulled) when absent so older clouds see the legacy body.
+     */
+    public function test_setup_rationale_and_mode_source_round_trip()
+    {
+        $wp_input = [
+            'name'                 => 'X',
+            'campaign_mode'        => 'authority',
+            'campaign_mode_source' => 'inferred',
+            'setup_rationale'      => [
+                ['code' => 'approach_authority_low_footprint'],
+                ['code' => 'overlap_sibling_campaign', 'params' => ['name' => '<b>Spring</b>', 'count' => 3]],
+                ['bogus' => true],
+                ['code' => 42],
+            ],
+        ];
+        $cloud = Campaign_Shape_Transformer::wp_input_to_cloud($wp_input);
+        $this->assertSame('inferred', $cloud['campaignModeSource']);
+        $this->assertSame(
+            [
+                ['code' => 'approach_authority_low_footprint'],
+                ['code' => 'overlap_sibling_campaign', 'params' => ['name' => 'Spring', 'count' => 3]],
+            ],
+            $cloud['setupRationale'],
+        );
+
+        $wp = Campaign_Shape_Transformer::cloud_to_wp(['campaignId' => 'c', 'campaignModeSource' => 'user', 'setupRationale' => [['code' => 'language_from_site']]]);
+        $this->assertSame('user', $wp['identity']['campaignModeSource']);
+        $this->assertSame([['code' => 'language_from_site']], $wp['identity']['setupRationale']);
+    }
+
+    public function test_setup_rationale_and_mode_source_are_omitted_when_absent()
+    {
+        $cloud = Campaign_Shape_Transformer::wp_input_to_cloud(['name' => 'X', 'campaign_mode_source' => 'nope']);
+        $this->assertArrayNotHasKey('campaignModeSource', $cloud);
+        $this->assertArrayNotHasKey('setupRationale', $cloud);
+
+        $wp = Campaign_Shape_Transformer::cloud_to_wp(['campaignId' => 'c']);
+        $this->assertNull($wp['identity']['campaignModeSource']);
+        $this->assertNull($wp['identity']['setupRationale']);
+    }
 }

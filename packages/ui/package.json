@@ -92,6 +92,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@structura/i18n-contracts": "workspace:*",
     "@structura/types": "workspace:*",
     "lucide-react": "^0.539.0",
     "zod": "^4.3.6"

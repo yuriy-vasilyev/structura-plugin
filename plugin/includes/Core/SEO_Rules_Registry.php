@@ -61,11 +61,6 @@ class SEO_Rules_Registry
                 'description' => __('Integrate relevant statistics to support the content.', 'structura'),
                 'plan'        => 'byok',
             ],
-            'number_in_title'            => [
-                'label'       => __('Include a number in the title', 'structura'),
-                'description' => __('Add a number to the meta title to increase click-through rates.', 'structura'),
-                'plan'        => 'byok',
-            ],
 
             // --- LINK STRATEGY (Pro) ---
             //

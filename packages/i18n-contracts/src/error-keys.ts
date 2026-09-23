@@ -137,6 +137,9 @@ export const ERROR_KEYS = {
     invalidRole: "workspaces.invalidRole",
     cannotDemoteLastOwner: "workspaces.cannotDemoteLastOwner",
     cannotChangeOwnRole: "workspaces.cannotChangeOwnRole",
+    // `role: "owner"` is refused on the role endpoint — ownership only
+    // moves through the transfer flow (2026-09-23).
+    ownerRoleViaTransferOnly: "workspaces.ownerRoleViaTransferOnly",
     cannotRemoveSelf: "workspaces.cannotRemoveSelf",
     // Phase 3.7 Pass B — invitation flow.
     invalidEmail: "workspaces.invalidEmail",

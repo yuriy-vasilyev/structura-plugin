@@ -25,7 +25,7 @@ import { DEFAULT_CAMPAIGN_FORM_DATA } from "../constants";
 const resetStore = () => {
   useCampaignDraftStore.setState({
     formData: DEFAULT_CAMPAIGN_FORM_DATA,
-    activeStep: "interview",
+    activeStep: "setup",
     completedSteps: [],
     skippedSteps: [],
     lastUpdatedAt: null,
@@ -50,7 +50,7 @@ describe("draftStore — initial state", () => {
     expect(lastUpdatedAt).toBeNull();
     expect(completedSteps).toEqual([]);
     expect(skippedSteps).toEqual([]);
-    expect(activeStep).toBe("interview");
+    expect(activeStep).toBe("setup");
   });
 });
 
@@ -77,22 +77,22 @@ describe("draftStore — touched semantics", () => {
 
   it("markComplete deduplicates entries and touches the draft", () => {
     const { markComplete } = useCampaignDraftStore.getState();
-    markComplete("interview");
-    markComplete("interview");
-    expect(useCampaignDraftStore.getState().completedSteps).toEqual(["interview"]);
+    markComplete("setup");
+    markComplete("setup");
+    expect(useCampaignDraftStore.getState().completedSteps).toEqual(["setup"]);
     expect(useCampaignDraftStore.getState().lastUpdatedAt).not.toBeNull();
   });
 
   it("clearStepFlag wipes the step from BOTH completed and skipped lists", () => {
     const s = useCampaignDraftStore.getState();
-    s.markComplete("interview");
-    s.markSkipped("interview");
-    expect(useCampaignDraftStore.getState().completedSteps).toContain("interview");
-    expect(useCampaignDraftStore.getState().skippedSteps).toContain("interview");
+    s.markComplete("setup");
+    s.markSkipped("setup");
+    expect(useCampaignDraftStore.getState().completedSteps).toContain("setup");
+    expect(useCampaignDraftStore.getState().skippedSteps).toContain("setup");
 
-    useCampaignDraftStore.getState().clearStepFlag("interview");
-    expect(useCampaignDraftStore.getState().completedSteps).not.toContain("interview");
-    expect(useCampaignDraftStore.getState().skippedSteps).not.toContain("interview");
+    useCampaignDraftStore.getState().clearStepFlag("setup");
+    expect(useCampaignDraftStore.getState().completedSteps).not.toContain("setup");
+    expect(useCampaignDraftStore.getState().skippedSteps).not.toContain("setup");
   });
 });
 
@@ -100,15 +100,15 @@ describe("draftStore — discardDraft", () => {
   it("resets in-memory state to the initial values", () => {
     const s = useCampaignDraftStore.getState();
     s.updateForm("identity", { name: "Half-finished" });
-    s.markComplete("interview");
-    s.setActiveStep("strategy");
+    s.markComplete("setup");
+    s.setActiveStep("keywords");
 
     useCampaignDraftStore.getState().discardDraft();
 
     const after = useCampaignDraftStore.getState();
     expect(after.formData).toEqual(DEFAULT_CAMPAIGN_FORM_DATA);
     expect(after.completedSteps).toEqual([]);
-    expect(after.activeStep).toBe("interview");
+    expect(after.activeStep).toBe("setup");
     expect(after.lastUpdatedAt).toBeNull();
   });
 

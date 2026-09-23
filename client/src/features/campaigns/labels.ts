@@ -1,10 +1,18 @@
-import { __ } from "@wordpress/i18n";
+import { __, sprintf } from "@wordpress/i18n";
+import { contentLanguageLabel } from "@structura/i18n-contracts";
+import type {
+  ContentLanguagePickerLabels,
+  SetupRationaleIcon,
+  SetupRationaleItem,
+} from "@structura/ui";
 import type {
   BankKeyword,
   Campaign,
   CampaignPostStatus,
   CampaignTaxonomy,
   JobStatus,
+  SetupRationale,
+  SetupRationaleCode,
 } from "./types";
 
 /**
@@ -115,3 +123,158 @@ export const keywordVolumeLabel = (volume: KeywordVolume | string): string => {
       return String(volume);
   }
 };
+
+// ─── Campaign language picker ───────────────────────────────────────────────
+
+/**
+ * Every translatable string `<ContentLanguagePicker>` renders. The primitive
+ * lives in `@structura/ui`, which has no i18n runtime, so each surface hands
+ * it its own strings — these are wp-admin's.
+ */
+export const contentLanguagePickerLabels = (): ContentLanguagePickerLabels => ({
+  alsoOnSite: __("Also on your site", "structura"),
+  supported: __("Supported", "structura"),
+  other: __("Other…", "structura"),
+  otherCaption: __("More languages", "structura"),
+  allWordPressLanguages: __("More languages", "structura"),
+  searchPlaceholder: __("Search languages…", "structura"),
+  noMatches: (query: string) =>
+    sprintf(
+      /* translators: %s is the text the user typed into the language search. */
+      __("No language matches “%s”.", "structura"),
+      query,
+    ),
+  searchCount: (matched: number, total: number) =>
+    sprintf(
+      /* translators: 1: languages matching the search. 2: languages in the list. */
+      __("%1$d of %2$d", "structura"),
+      matched,
+      total,
+    ),
+  backToSupported: __("Back to the supported list", "structura"),
+  aiOnlyNote: (languageName: string) =>
+    sprintf(
+      /* translators: %s is a language name, e.g. "Polish". */
+      __(
+        "Search-volume data isn't available for %s yet. Topics come from AI research instead.",
+        "structura",
+      ),
+      languageName,
+    ),
+  pickSupported: __("Pick a supported language", "structura"),
+  aiOnlyReassurance: __(
+    "Everything else works the same: discovery, rhythm, publishing.",
+    "structura",
+  ),
+});
+
+// ─── Setup rationale ────────────────────────────────────────────────────────
+
+/** Which icon carries each coded reason — fixed by the design handoff. */
+const RATIONALE_ICONS: Record<SetupRationaleCode, SetupRationaleIcon> = {
+  language_from_site: "globe",
+  language_ai_only: "info",
+  approach_authority_low_footprint: "trending-up",
+  approach_quick_wins_page_two: "trending-up",
+  approach_conversion_objective: "target",
+  approach_traffic_magnet_default: "trending-up",
+  overlap_sibling_campaign: "layers",
+  rhythm_shared_cadence: "calendar-clock",
+  footprint_refreshed: "refresh-cw",
+};
+
+const rationaleSentence = (
+  { code, params }: SetupRationale,
+  uiLocale: string,
+): string | null => {
+  const languageName = () =>
+    contentLanguageLabel(String(params?.language ?? ""), uiLocale);
+  const count = () => Number(params?.count ?? 0);
+
+  switch (code) {
+    case "language_from_site":
+      return sprintf(
+        /* translators: %s is a language name, e.g. "German". */
+        __("Writing in %s, your site's language.", "structura"),
+        languageName(),
+      );
+    case "language_ai_only":
+      return sprintf(
+        /* translators: %s is a language name, e.g. "Polish". */
+        __(
+          "Search-volume data isn't available for %s yet. Topics come from AI research instead.",
+          "structura",
+        ),
+        languageName(),
+      );
+    case "approach_authority_low_footprint":
+      return __(
+        "Your site ranks for few keywords so far, so this campaign builds topical authority first.",
+        "structura",
+      );
+    case "approach_quick_wins_page_two":
+      return sprintf(
+        /* translators: %d is how many keywords currently rank on page 2. */
+        __(
+          "You have %d keywords on page 2. This campaign targets those first.",
+          "structura",
+        ),
+        count(),
+      );
+    case "approach_conversion_objective":
+      return __(
+        "Your objective is commercial, so posts lead readers to your offer.",
+        "structura",
+      );
+    case "approach_traffic_magnet_default":
+      return __(
+        "This campaign goes after the topics with the most search demand.",
+        "structura",
+      );
+    case "overlap_sibling_campaign":
+      return sprintf(
+        /* translators: %s is another campaign's name. */
+        __(
+          "“%s” already covers similar ground. This campaign takes a different angle.",
+          "structura",
+        ),
+        String(params?.name ?? ""),
+      );
+    case "rhythm_shared_cadence":
+      return sprintf(
+        /* translators: %d is the site's combined weekly post count. */
+        __(
+          "Together with your other campaigns this site publishes %d posts a week.",
+          "structura",
+        ),
+        count(),
+      );
+    case "footprint_refreshed":
+      return sprintf(
+        /* translators: %d is how many keywords the site now ranks for. */
+        __(
+          "Your site now ranks for %d keywords. Keyword difficulty for this campaign was raised.",
+          "structura",
+        ),
+        count(),
+      );
+    default:
+      // A code the cloud knows and this build doesn't: say nothing rather
+      // than render a raw enum at the user (§10 release window).
+      return null;
+  }
+};
+
+/**
+ * Turn the campaign's coded rationale into the icon + sentence pairs
+ * `<SetupRationaleStrip>` renders. Unknown codes are dropped.
+ */
+export const setupRationaleItems = (
+  rationale: SetupRationale[] | undefined,
+  uiLocale: string,
+): SetupRationaleItem[] =>
+  (rationale ?? []).flatMap((entry) => {
+    const text = rationaleSentence(entry, uiLocale);
+    if (!text) return [];
+    return [{ icon: RATIONALE_ICONS[entry.code] ?? "info", text, key: entry.code }];
+  });

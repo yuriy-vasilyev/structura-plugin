@@ -2,15 +2,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { __, sprintf } from "@wordpress/i18n";
 import apiFetch from "@wordpress/api-fetch";
+import { contentLanguageLabel } from "@structura/i18n-contracts";
 import {
   ArrowLeft,
+  ArrowUpRight,
   Bot,
   CalendarClock,
   Check,
   ChevronDown,
   ChevronsRight,
-  ClipboardList,
+  Compass,
   FolderOpen,
+  Globe,
   HelpCircle,
   Image as ImageIcon,
   Key,
@@ -25,9 +28,22 @@ import {
   Shield,
   Sparkles,
   Tag,
+  Target,
   Trash2,
 } from "lucide-react";
-import { Button, Card, cn, InputField, OptionCardGroup, Switch, TextArea, Tooltip } from "@structura/ui";
+import {
+  Alert,
+  Button,
+  Card,
+  cn,
+  ConfirmDialog,
+  InputField,
+  SetupRationaleStrip,
+  Skeleton,
+  Switch,
+  TextArea,
+  Tooltip,
+} from "@structura/ui";
 import { PageTitle } from "@/components/Layout/PageTitle";
 import { PageDescription } from "@/components/Layout/PageSubtitle";
 import { PageContainer } from "@/components/Layout/PageContainer";
@@ -42,18 +58,37 @@ import {
   isCampaignLimitReachedError,
   useCampaignMutations,
 } from "@/features/campaigns/api/useCampaignMutations";
-import { GuidedInterview } from "@/features/campaigns/components/interview/GuidedInterview";
+import {
+  useCampaignSetupDraft,
+  type CampaignSetupDraft,
+} from "@/features/campaigns/api/useCampaignSetupDraft";
+import {
+  CampaignLanguageField,
+  adminUiLocale,
+  useSiteContentLanguage,
+} from "@/features/campaigns/components/CampaignLanguageField";
+import {
+  WritingApproachOverride,
+  campaignModeShortLabel,
+} from "@/features/campaigns/components/WritingApproachOverride";
+import { setupRationaleItems } from "@/features/campaigns/labels";
 import { StepKeywords, KeywordDiscoveryHandle } from "@/features/campaigns/components/steps/StepKeywords";
 import { AuthorityDiscovery, AuthorityDiscoveryHandle } from "@/features/campaigns/components/steps/AuthorityDiscovery";
 import { SimpleStepRhythm } from "@/features/campaigns/components/steps/SimpleStepRhythm";
 import { TaxonomySection } from "@/features/campaigns/components/TaxonomySection";
-import { SelectionCard } from "@/components/Shared/SelectionCard";
-import { AIProvider, CampaignMode } from "@/features/campaigns/types";
+import { AIProvider } from "@/features/campaigns/types";
 import { ProviderToggle } from "@/features/campaigns/components/ProviderToggle";
 import { mirrorModelForTier } from "@/features/campaigns/modelTier";
 import { CampaignAiEngineSection } from "@/features/campaigns/components/CampaignAiEngineSection";
 import { CoreContentSettings } from "@/features/campaigns/components/CoreContentSettings";
-import { SeoRuleName, SUPPORTED_BLOCK_TYPE, useDefaultProviders, useLicense, useSeoRules } from "@/features/settings";
+import {
+  SeoRuleName,
+  SUPPORTED_BLOCK_TYPE,
+  useDefaultProviders,
+  useLicense,
+  usePublicSiteProfile,
+  useSeoRules,
+} from "@/features/settings";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
 
 // ─── Page wrapper — provides CampaignProvider ────────────────────────────
@@ -68,35 +103,6 @@ const CreateCampaignPage = () => {
 
 export default CreateCampaignPage;
 
-// ─── Campaign mode selector ──────────────────────────────────────────────
-
-const CAMPAIGN_MODES: Array<{
-  value: CampaignMode;
-  label: string;
-  description: string;
-}> = [
-  {
-    value: "traffic_magnet",
-    label: __("Traffic Magnet", "structura"),
-    description: __("Maximize organic traffic with high-volume topics", "structura"),
-  },
-  {
-    value: "quick_wins",
-    label: __("Quick Wins", "structura"),
-    description: __("Target low-competition keywords for fast rankings", "structura"),
-  },
-  {
-    value: "conversion",
-    label: __("Conversion", "structura"),
-    description: __("Content designed to convert readers to customers", "structura"),
-  },
-  {
-    value: "authority",
-    label: __("Authority", "structura"),
-    description: __("Build topical authority with comprehensive coverage", "structura"),
-  },
-];
-
 // ─── Step definitions ────────────────────────────────────────────────────
 
 interface StepDef {
@@ -105,9 +111,11 @@ interface StepDef {
   icon: typeof MessageSquare;
 }
 
+// The Interview step is gone (spec `campaign-language-and-smart-setup.md`
+// §4.1): the questions it asked are all answerable from the site itself, so
+// Setup arrives drafted instead of blank.
 const ALL_STEPS: StepDef[] = [
-  { id: "interview", label: __("Interview", "structura"), icon: MessageSquare },
-  { id: "strategy", label: __("Strategy", "structura"), icon: ClipboardList },
+  { id: "setup", label: __("Setup", "structura"), icon: Compass },
   { id: "keywords", label: __("Keywords", "structura"), icon: Key },
   { id: "authority", label: __("Authority", "structura"), icon: Shield },
   { id: "rhythm", label: __("Rhythm", "structura"), icon: CalendarClock },
@@ -116,17 +124,22 @@ const ALL_STEPS: StepDef[] = [
 
 // ─── Horizontal stepper ─────────────────────────────────────────────────
 
-const HorizontalStepper = ({
+// Exported for unit testing — reachability is what decides whether a user
+// who steps back can get forward again (2026-09-22).
+export const HorizontalStepper = ({
   steps,
   activeStep,
   completedSteps,
   skippedSteps,
+  visitedSteps,
   onStepClick,
 }: {
   steps: StepDef[];
   activeStep: string;
   completedSteps: Set<string>;
   skippedSteps: Set<string>;
+  /** Steps the user has been on, complete or not — see the page's state. */
+  visitedSteps: Set<string>;
   onStepClick: (step: string) => void;
 }) => {
   return (
@@ -137,7 +150,8 @@ const HorizontalStepper = ({
           const isComplete = completedSteps.has(step.id);
           const isSkipped = skippedSteps.has(step.id);
           const activeIdx = steps.findIndex((s) => s.id === activeStep);
-          const isReachable = i <= activeIdx || isComplete || isSkipped;
+          const isReachable =
+            i <= activeIdx || isComplete || isSkipped || visitedSteps.has(step.id);
           const Icon = step.icon;
 
           return (
@@ -239,6 +253,9 @@ const CreateCampaignInner = () => {
   const markSkipped = useCampaignDraftStore((s) => s.markSkipped);
   const clearStepFlag = useCampaignDraftStore((s) => s.clearStepFlag);
   const discardDraft = useCampaignDraftStore((s) => s.discardDraft);
+  // The store's own updater, for the one write that must NOT mark the draft
+  // as the user's work — see the language seed below.
+  const updateFormStore = useCampaignDraftStore((s) => s.updateForm);
   const hasDraft = useCampaignDraftStore((s) => s.lastUpdatedAt !== null);
 
   const completedSteps = useMemo(() => new Set(completedStepsArr), [completedStepsArr]);
@@ -250,10 +267,19 @@ const CreateCampaignInner = () => {
   const [keywordsPhase, setKeywordsPhase] = useState<string>("idle");
   const [authorityPhase, setAuthorityPhase] = useState<string>("idle");
 
-  // Interview topics → explicit keyword-discovery seeds. Transient (like the
-  // phase trackers above): the objective persists in the draft and is the
-  // fallback seed source, so a resumed draft simply re-derives seeds from it.
-  const [interviewTopics, setInterviewTopics] = useState<string[]>([]);
+  // Setup-draft topics → explicit keyword-discovery seeds (the slot the
+  // retired Interview step's chips filled). Transient, like the phase
+  // trackers above: the objective persists in the draft and is the fallback
+  // seed source, so a resumed draft simply re-derives seeds from it.
+  const [draftTopics, setDraftTopics] = useState<string[]>([]);
+
+  // Steps the user has actually been on. The completed/skipped flags only
+  // land when a step is left FORWARD, so the step someone was standing on
+  // when they clicked back up the strip became unreachable — they had to
+  // walk the whole flow again to return to it (2026-09-22).
+  const [visitedSteps, setVisitedSteps] = useState<Set<string>>(
+    () => new Set([activeStep])
+  );
 
   // Build the steps list dynamically.
   //
@@ -312,6 +338,9 @@ const CreateCampaignInner = () => {
   const goToStep = useCallback(
     (step: string) => {
       setActiveStep(step);
+      setVisitedSteps((visited) =>
+        visited.has(step) ? visited : new Set(visited).add(step)
+      );
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
     [setActiveStep]
@@ -327,40 +356,117 @@ const CreateCampaignInner = () => {
     [steps, goToStep]
   );
 
-  // ── Skip interview handler ────────────────────────────────────────────
+  // ── Setup draft (spec §4.4) ───────────────────────────────────────────
+  //
+  // Two stages: a deterministic draft everyone gets the instant the step
+  // mounts, then an AI refinement that replaces the same fields in place.
+  // The refinement is paid-only and never automatic — it burns a model call
+  // to rewrite prose the user may already be editing, so it waits for Magic
+  // suggest (owner decision 2026-09-23).
 
-  const handleSkipInterview = useCallback(() => {
-    markSkipped("interview");
-    goToStep("strategy");
-  }, [markSkipped, goToStep]);
+  const { isLoading: loadingProfile } = usePublicSiteProfile();
+  const siteLanguage = useSiteContentLanguage();
+  const language = formData.intelligence.language;
 
-  // ── Interview completion handler ──────────────────────────────────────
+  // A new campaign starts in the site's own language. Seeded BEFORE the draft
+  // call so the cloud drafts in the right language on the first pass instead
+  // of drafting in English and being asked again.
+  //
+  // Two details this effect has to survive. It writes UNTOUCHED, because
+  // opening the wizard is not a draft anybody asked to resume. And it keys on
+  // the whole `formData` object, not on the language string: the
+  // license-defaults bootstrap in CampaignProvider replaces the entire form
+  // right after this (child) effect runs, so the seeded value is reverted
+  // before it is ever rendered — watching the string alone would see no
+  // change and never retry.
+  const [languageSeeded, setLanguageSeeded] = useState(false);
+  useEffect(() => {
+    if (languageSeeded || loadingProfile) return;
+    const current = useCampaignDraftStore.getState().formData.intelligence.language;
+    // Nothing to seed (WordPress reports no language) — leave the sentinel
+    // and let the cloud resolve it.
+    if (current !== "default" || !siteLanguage) {
+      setLanguageSeeded(true);
+      return;
+    }
+    updateFormStore("intelligence", { language: siteLanguage }, { markTouched: false });
+  }, [languageSeeded, loadingProfile, formData, siteLanguage, updateFormStore]);
 
-  const handleInterviewComplete = useCallback(
-    (result: {
-      name: string;
-      objective: string;
-      campaignMode?: CampaignMode;
-      topics?: string[];
-    }) => {
+  // Latched, not `activeStep === "setup"`: flipping this back and forth would
+  // re-fire the draft every time the user walks back up the strip and clobber
+  // what they wrote.
+  const [setupEntered, setSetupEntered] = useState(activeStep === "setup");
+  useEffect(() => {
+    if (activeStep === "setup") setSetupEntered(true);
+  }, [activeStep]);
+
+  // What the last accepted draft wrote, so a field the user has since edited
+  // survives the AI pass landing on top of it.
+  const draftedRef = useRef<{ name: string; objective: string } | null>(null);
+  // Set when the user confirms a language change: they asked for a redraft,
+  // so it replaces their edits (the ConfirmDialog says so).
+  const forceDraftRef = useRef(false);
+
+  const applyDraft = useCallback(
+    (draft: CampaignSetupDraft) => {
+      // Read the live store, not the render closure: the draft lands
+      // asynchronously, long after this callback was created.
+      const identity = useCampaignDraftStore.getState().formData.identity;
+      const previous = draftedRef.current;
+      // An `ai` draft only ever arrives because the user pressed Magic
+      // suggest and — if they had edits — confirmed losing them, so it is
+      // always a replacement. Deriving it from the stage rather than a flag
+      // set at click time means a failed run can't leave the flag armed for
+      // some later, unrelated draft.
+      const force = forceDraftRef.current || draft.stage === "ai";
+      forceDraftRef.current = false;
+      draftedRef.current = { name: draft.name, objective: draft.objective };
+
+      const keepName = !force && identity.name.length > 0 && identity.name !== previous?.name;
+      const keepObjective =
+        !force && identity.objective.length > 0 && identity.objective !== previous?.objective;
+
       updateForm("identity", {
-        name: result.name,
-        objective: result.objective,
-        ...(result.campaignMode ? { campaignMode: result.campaignMode } : {}),
+        ...(keepName ? {} : { name: draft.name }),
+        ...(keepObjective ? {} : { objective: draft.objective }),
+        // An explicit override in Advanced outranks the inference for good.
+        ...(identity.campaignModeSource === "user"
+          ? {}
+          : { campaignMode: draft.campaignMode, campaignModeSource: "inferred" as const }),
+        setupRationale: draft.rationale,
       });
-      setInterviewTopics(result.topics ?? []);
-      // Clear any prior skipped/completed flag on interview, then mark complete.
-      clearStepFlag("interview");
-      markComplete("interview");
-      goToStep("strategy");
+      setDraftTopics(draft.topics);
     },
-    [updateForm, clearStepFlag, markComplete, goToStep]
+    [updateForm]
   );
 
-  // ── Strategy confirmation handler ─────────────────────────────────────
+  const {
+    draft,
+    isDrafting,
+    isRefining,
+    error: draftError,
+    refineError,
+    redraft,
+    refine,
+  } = useCampaignSetupDraft({
+    language,
+    enabled: languageSeeded && setupEntered,
+    onDraft: applyDraft,
+  });
 
-  const confirmStrategy = () => {
-    markComplete("strategy");
+  const changeLanguage = useCallback(
+    (code: string) => {
+      forceDraftRef.current = true;
+      updateForm("intelligence", { language: code });
+    },
+    [updateForm]
+  );
+
+
+  // ── Setup confirmation handler ────────────────────────────────────────
+
+  const confirmSetup = () => {
+    markComplete("setup");
     goToStep("keywords");
   };
 
@@ -458,37 +564,24 @@ const CreateCampaignInner = () => {
         activeStep={activeStep}
         completedSteps={completedSteps}
         skippedSteps={skippedSteps}
+        visitedSteps={visitedSteps}
         onStepClick={goToStep}
       />
 
       {/* ── Active step content ──────────────────────────────────────── */}
       <div className="rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-sm sm:p-8 dark:border-neutral-800 dark:bg-neutral-900">
-        {/* ── Interview ────────────────────────────────────────────── */}
-        {activeStep === "interview" && (
-          <div className="space-y-6">
-            <GuidedInterview onComplete={handleInterviewComplete} />
-            <div className="border-t border-neutral-100 pt-4 dark:border-neutral-800">
-              <button
-                type="button"
-                onClick={handleSkipInterview}
-                className="cursor-pointer text-xs font-medium text-neutral-400 transition-colors hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300"
-              >
-                <ChevronsRight size={14} className="mr-1 inline-block" />
-                {__("Skip interview — I'll fill in the details myself", "structura")}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ── Strategy ─────────────────────────────────────────────── */}
-        {activeStep === "strategy" && (
-          <StrategySection
-            onConfirm={confirmStrategy}
-            onRestart={() => {
-              clearStepFlag("interview");
-              clearStepFlag("strategy");
-              goToStep("interview");
-            }}
+        {/* ── Setup ────────────────────────────────────────────────── */}
+        {activeStep === "setup" && (
+          <SetupSection
+            draft={draft}
+            isDrafting={isDrafting}
+            isRefining={isRefining}
+            error={draftError}
+            refineError={refineError}
+            onRetry={redraft}
+            onRefine={refine}
+            onLanguageChange={changeLanguage}
+            onConfirm={confirmSetup}
           />
         )}
 
@@ -498,7 +591,7 @@ const CreateCampaignInner = () => {
             <StepKeywords
               ref={keywordsRef}
               topic={formData.identity.objective}
-              topicSeeds={interviewTopics}
+              topicSeeds={draftTopics}
               campaignName={formData.identity.name}
               language={formData.intelligence.language}
               provider={formData.intelligence.textProvider}
@@ -887,6 +980,14 @@ const AdvancedSettings = () => {
           {/* Language/Post Length/Persona/Post Status moved out of Advanced —
               see CoreContentSettings rendered just above this component. */}
 
+          {/* ── Writing approach ─────────────────────────────────── */}
+          <SettingsGroup
+            icon={<Target size={13} className="text-brand-500" />}
+            label={__("Writing approach", "structura")}
+          >
+            <WritingApproachOverride />
+          </SettingsGroup>
+
           {/* ── AI Engine — only in Advanced when fully configured.
               Compact layout: pre-generation toggle + provider/model/
               fallback dropdowns for text and image. */}
@@ -1113,66 +1214,259 @@ const AdvancedSettings = () => {
   );
 };
 
-// ─── Strategy Review Section ─────────────────────────────────────────────
+// ─── Overlap notice ──────────────────────────────────────────────────────
 
-const StrategySection = ({
-  onConfirm,
-  onRestart,
+/**
+ * One amber line when another campaign is already running on this site in
+ * the same language. Informational on purpose: the wizard proceeds either
+ * way (spec §4.1), it just makes sure nobody discovers the clash after two
+ * campaigns have been writing the same posts for a week.
+ */
+const OverlapNotice = ({
+  sibling,
+  onDismiss,
 }: {
+  sibling: CampaignSetupDraft["siblingCampaigns"][number];
+  onDismiss: () => void;
+}) => {
+  // wp-admin serves the SPA from admin.php?page=…; keep the query string so
+  // the new tab lands on the plugin rather than the dashboard.
+  const viewUrl = `${window.location.href.split("#")[0]}#/campaigns/${sibling.campaignId}/edit`;
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 dark:border-amber-900/50 dark:bg-amber-950/30">
+      <Layers size={16} className="shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+      <span className="text-[13px] leading-relaxed text-amber-900 dark:text-amber-100">
+        {sprintf(
+          /* translators: 1: another campaign's name. 2: a language name. */
+          __("“%1$s” is already running in %2$s.", "structura"),
+          sibling.name,
+          contentLanguageLabel(sibling.language, adminUiLocale())
+        )}
+      </span>
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="cursor-pointer text-xs font-bold text-amber-900 underline underline-offset-2 dark:text-amber-100"
+      >
+        {__("Continue anyway", "structura")}
+      </button>
+      <a
+        href={viewUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="ml-auto inline-flex items-center gap-1 text-xs font-bold text-amber-900 dark:text-amber-100"
+      >
+        {__("View", "structura")}
+        <ArrowUpRight size={12} aria-hidden="true" />
+      </a>
+    </div>
+  );
+};
+
+// ─── Setup Section ───────────────────────────────────────────────────────
+
+/**
+ * Step 1 — Setup. The old Strategy step with the language lifted to the top
+ * and the fields arriving drafted instead of blank (spec §4.1). The writing
+ * approach is no longer asked for here; it lives in Advanced as an override
+ * over the inferred value.
+ */
+const SetupSection = ({
+  draft,
+  isDrafting,
+  isRefining,
+  error,
+  refineError,
+  onRetry,
+  onRefine,
+  onLanguageChange,
+  onConfirm,
+}: {
+  draft: CampaignSetupDraft | null;
+  isDrafting: boolean;
+  isRefining: boolean;
+  error: string | null;
+  refineError: string | null;
+  onRetry: () => void;
+  onRefine: () => void;
+  onLanguageChange: (code: string) => void;
   onConfirm: () => void;
-  onRestart: () => void;
 }) => {
   const { formData, updateForm } = useCampaignForm();
-  const { availableProviders, availableImageProviders, isFullyConfigured, isCloud } = useDefaultProviders();
+  const { isPaidLicense } = useLicense();
+  const { availableProviders, availableImageProviders, isFullyConfigured, isCloud } =
+    useDefaultProviders();
+
+  const { name, objective } = formData.identity;
+  const language = formData.intelligence.language;
+
+  // Session-only: dismissing the notice changes no value, it just stops the
+  // wizard repeating something the user has already read.
+  const [overlapDismissed, setOverlapDismissed] = useState(false);
+  const [pendingLanguage, setPendingLanguage] = useState<string | null>(null);
+  const [confirmRefine, setConfirmRefine] = useState(false);
+
+  const sibling = draft?.siblingCampaigns?.[0] ?? null;
+
+  // A field still holding exactly what the draft wrote is one the user hasn't
+  // touched — nothing of theirs is at stake when it gets rewritten.
+  const nameIsDrafted = !!draft && name === draft.name;
+  const objectiveIsDrafted = !!draft && objective === draft.objective;
+  const hasOwnEdits =
+    (name.length > 0 && !nameIsDrafted) || (objective.length > 0 && !objectiveIsDrafted);
+
+  const rationaleItems = useMemo(
+    () => setupRationaleItems(formData.identity.setupRationale, adminUiLocale()),
+    [formData.identity.setupRationale]
+  );
+
+  const requestLanguage = (code: string) => {
+    if (code === language) return;
+    // Redrafting replaces the objective, so the user gets asked first when
+    // there is work of theirs to lose.
+    if (hasOwnEdits) {
+      setPendingLanguage(code);
+      return;
+    }
+    onLanguageChange(code);
+  };
+
+  const requestRefine = () => {
+    if (hasOwnEdits) {
+      setConfirmRefine(true);
+      return;
+    }
+    onRefine();
+  };
 
   return (
     <div className="space-y-5">
-      {/* AI-generated badge */}
-      <div className="flex items-center gap-3">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-50 to-purple-50 px-3 py-1 text-[10px] font-bold text-brand-700 dark:from-brand-950/40 dark:to-purple-950/40 dark:text-brand-300">
-          <Sparkles size={10} />
-          {__("AI-Generated Strategy", "structura")}
-        </span>
-        <button
-          type="button"
-          onClick={onRestart}
-          className="cursor-pointer text-[10px] font-medium text-neutral-400 underline-offset-2 hover:text-brand-600 hover:underline dark:text-neutral-500 dark:hover:text-brand-400"
-        >
-          {__("Restart interview", "structura")}
-        </button>
+      {/* Section header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-500/15 text-brand-600 dark:text-brand-300">
+            <Compass size={18} />
+          </span>
+          <div>
+            <h3 className="m-0! text-sm font-bold text-neutral-900 dark:text-white">
+              {__("Setup", "structura")}
+            </h3>
+            <p className="m-0! text-xs text-neutral-500 dark:text-neutral-400">
+              {__("Language, objective and voice for this campaign", "structura")}
+            </p>
+          </div>
+        </div>
+        {/* Paid only — and no upsell on free: the deterministic draft is a
+            complete answer, so a locked button here would frame it as the
+            broken half of a feature (owner decision 2026-09-23). */}
+        {isPaidLicense && (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={requestRefine}
+            loading={isRefining}
+            disabled={isDrafting}
+          >
+            <Sparkles size={14} />
+            {__("Magic suggest", "structura")}
+          </Button>
+        )}
       </div>
 
-      {/* Campaign name */}
-      <InputField
-        label={__("Campaign Name", "structura")}
-        value={formData.identity.name}
-        onChange={(e) => updateForm("identity", { name: e.target.value })}
-        placeholder={__("e.g. Winter 2026 SEO Push", "structura")}
+      {/* A failed draft must never be a dead end — the form below stays
+          fully usable, the user just fills it in themselves. */}
+      {error && (
+        <Alert variant="error">
+          <Alert.Description>
+            {__(
+              "Couldn't draft this campaign — fill it in yourself or try again.",
+              "structura"
+            )}
+          </Alert.Description>
+          <div className="mt-2">
+            <Button size="sm" variant="secondary" onClick={onRetry}>
+              <RefreshCw size={14} className="mr-1.5" />
+              {__("Try again", "structura")}
+            </Button>
+          </div>
+        </Alert>
+      )}
+
+      {/* Magic suggest failed or the cloud declined it. Whatever was in the
+          fields is still there — this only explains why it didn't change. */}
+      {!error && refineError && (
+        <Alert variant="error">
+          <Alert.Description>
+            {__("Couldn't refine this campaign — try again", "structura")}
+          </Alert.Description>
+          <div className="mt-2">
+            <Button size="sm" variant="secondary" onClick={requestRefine} disabled={isRefining}>
+              <RefreshCw size={14} className="mr-1.5" />
+              {__("Try again", "structura")}
+            </Button>
+          </div>
+        </Alert>
+      )}
+
+      {/* Language — the decision every other field is drafted against */}
+      <CampaignLanguageField
+        value={language}
+        onChange={requestLanguage}
+        additionalLanguages={draft?.language?.additionalLanguages}
+        showSitePill
+        helper={__(
+          "Everything this campaign writes — topics, titles, posts — is in this language.",
+          "structura"
+        )}
       />
 
-      {/* Campaign objective */}
-      <TextArea
-        label={__("Campaign Objective", "structura")}
-        value={formData.identity.objective}
-        onChange={(e) => updateForm("identity", { objective: e.target.value })}
-        rows={6}
-        placeholder={__("Your campaign strategy…", "structura")}
-      />
+      {sibling && !overlapDismissed && (
+        <OverlapNotice sibling={sibling} onDismiss={() => setOverlapDismissed(true)} />
+      )}
 
-      {/* Campaign mode */}
-      <div>
-        <label className="mb-2 block text-[10px] font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
-          {__("Writing approach", "structura")}
-        </label>
-        <OptionCardGroup
-          options={CAMPAIGN_MODES}
-          // May be unset until the interview fills it in — the group then
-          // renders with no card selected (the primitive tolerates a
-          // no-match value), matching the previous hand-rolled behavior.
-          value={formData.identity.campaignMode as CampaignMode}
-          onChange={(value) => updateForm("identity", { campaignMode: value })}
-          ariaLabel={__("Writing approach", "structura")}
+      {/* Campaign name. Magic suggest rewrites both fields outright — the
+          user either had no edits or confirmed losing them — so the skeleton
+          is unconditional while it runs. */}
+      {isRefining ? (
+        <div className="space-y-1.5" data-testid="setup-name-skeleton">
+          <span className="block text-[10px] font-black tracking-widest text-neutral-400 uppercase">
+            {__("Campaign Name", "structura")}
+          </span>
+          <Skeleton className="h-10 w-full rounded-xl" />
+        </div>
+      ) : (
+        <InputField
+          label={__("Campaign Name", "structura")}
+          value={name}
+          onChange={(e) => updateForm("identity", { name: e.target.value })}
+          placeholder={__("e.g. Winter 2026 SEO Push", "structura")}
         />
+      )}
+
+      {/* Objective */}
+      <div className="space-y-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+          <span className="text-[10px] font-black tracking-widest text-neutral-400 uppercase">
+            {__("Campaign Objective", "structura")}
+          </span>
+          {draft && <DraftedPill stage={draft.stage} />}
+        </div>
+        {isRefining ? (
+          <Skeleton className="h-28 w-full rounded-xl" data-testid="setup-objective-skeleton" />
+        ) : (
+          <TextArea
+            label={__("Campaign Objective", "structura")}
+            hiddenLabel
+            value={objective}
+            onChange={(e) => updateForm("identity", { objective: e.target.value })}
+            rows={4}
+            placeholder={__("What should this campaign achieve, and for whom?", "structura")}
+          />
+        )}
+        <p className="m-0! text-[11px] leading-snug text-neutral-500 dark:text-neutral-400">
+          {__("Two or three sentences. Structura writes every post against this.", "structura")}
+        </p>
       </div>
 
       {/* Provider + model override — visible inline when not fully configured */}
@@ -1218,9 +1512,23 @@ const StrategySection = ({
         </Card>
       )}
 
-      {/* Core content settings — pulled out of Advanced so the knobs authors
-          reach for on every campaign aren't one click away. */}
-      <CoreContentSettings />
+      {/* Persona / post length / post status — the language field above owns
+          the language, so it is hidden here. */}
+      <CoreContentSettings showLanguage={false} />
+
+      <SetupRationaleStrip
+        title={__("Why these settings", "structura")}
+        items={rationaleItems}
+        loading={isDrafting || isRefining}
+        footer={
+          isPaidLicense
+            ? __(
+                "Structura decided these from your site. Change anything — nothing here is locked.",
+                "structura"
+              )
+            : undefined
+        }
+      />
 
       {/* Advanced Settings */}
       <AdvancedSettings />
@@ -1229,17 +1537,65 @@ const StrategySection = ({
       <div className="flex justify-end border-t border-neutral-100 pt-5 dark:border-neutral-800">
         <Button
           onClick={onConfirm}
-          disabled={
-            formData.identity.name.length < 3 ||
-            formData.identity.objective.length < 20
-          }
+          disabled={name.length < 3 || objective.length < 20}
         >
-          {__("Looks good — continue", "structura")}
+          {__("Continue to Keywords", "structura")}
         </Button>
       </div>
+
+      <ConfirmDialog
+        isOpen={pendingLanguage !== null}
+        onClose={() => setPendingLanguage(null)}
+        onConfirm={() => {
+          const next = pendingLanguage;
+          setPendingLanguage(null);
+          if (next) onLanguageChange(next);
+        }}
+        title={__("Redraft this campaign?", "structura")}
+        description={__(
+          "Switching the language drafts the campaign again. Your edits to the name and objective will be replaced.",
+          "structura"
+        )}
+        confirmButtonProps={{ label: __("Redraft", "structura") }}
+        cancelButtonProps={{ label: __("Keep what I wrote", "structura") }}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmRefine}
+        onClose={() => setConfirmRefine(false)}
+        onConfirm={() => {
+          setConfirmRefine(false);
+          onRefine();
+        }}
+        title={__("Replace your edits?", "structura")}
+        description={__(
+          "Magic suggest will rewrite the name and objective. Your edits will be replaced.",
+          "structura"
+        )}
+        confirmButtonProps={{ label: __("Replace", "structura") }}
+        cancelButtonProps={{ label: __("Keep mine", "structura") }}
+      />
     </div>
   );
 };
+
+/**
+ * Where the drafted fields came from. Purple is the product's AI colour, so
+ * it is reserved for the refined pass; the deterministic draft is honest
+ * about being assembled from the site, not written by a model.
+ */
+const DraftedPill = ({ stage }: { stage: CampaignSetupDraft["stage"] }) =>
+  stage === "ai" ? (
+    <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
+      <Sparkles size={12} aria-hidden="true" />
+      {__("Drafted for you", "structura")}
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-bold text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+      <Globe size={12} aria-hidden="true" />
+      {__("Drafted from your site", "structura")}
+    </span>
+  );
 
 // ─── Summary Section ────────────────────────────────────────────────────
 
@@ -1269,7 +1625,16 @@ const SummarySection = ({
   const { data: personas = [], isLoading: loadingPersonas } = usePersonasQuery();
   const hasNoPersonas = !loadingPersonas && personas.length === 0;
 
-  const modeLabel = CAMPAIGN_MODES.find((m) => m.value === formData.identity.campaignMode)?.label ?? "—";
+  const modeLabel = campaignModeShortLabel(formData.identity.campaignMode);
+  const modeQualifier =
+    formData.identity.campaignModeSource === "user"
+      ? __("your choice", "structura")
+      : __("inferred", "structura");
+
+  const rationaleItems = setupRationaleItems(
+    formData.identity.setupRationale,
+    adminUiLocale()
+  );
 
   return (
     <div className="space-y-6">
@@ -1281,6 +1646,15 @@ const SummarySection = ({
           {__("Review your campaign details before launching", "structura")}
         </p>
       </div>
+
+      {/* The Setup step's reasons, repeated above the configuration so the
+          user reads WHY before WHAT (design handoff, Summary step). */}
+      {rationaleItems.length > 0 && (
+        <SetupRationaleStrip
+          title={__("Why these settings", "structura")}
+          items={rationaleItems}
+        />
+      )}
 
       {/* Campaign overview grid */}
       <div className="grid gap-3 sm:grid-cols-2">
@@ -1297,7 +1671,26 @@ const SummarySection = ({
           <span className="mb-1 block text-[10px] font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
             {__("Mode", "structura")}
           </span>
-          <span className="text-sm font-bold text-neutral-900 dark:text-white">{modeLabel}</span>
+          <span className="text-sm font-bold text-neutral-900 dark:text-white">
+            {modeLabel}{" "}
+            <span className="font-mono text-[11px] font-normal text-neutral-400">
+              {modeQualifier}
+            </span>
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-neutral-100 bg-neutral-50/50 p-4 dark:border-neutral-800 dark:bg-neutral-800/30">
+          <span className="mb-1 block text-[10px] font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
+            {__("Language", "structura")}
+          </span>
+          {/* The stored code, not a resolved display name — what the campaign
+              doc will carry is what the user should see here. */}
+          <span className="text-sm font-bold text-neutral-900 dark:text-white">
+            {contentLanguageLabel(formData.intelligence.language, adminUiLocale())}{" "}
+            <span className="font-mono text-[11px] font-normal text-neutral-400">
+              {formData.intelligence.language}
+            </span>
+          </span>
         </div>
 
         <div className="rounded-xl border border-neutral-100 bg-neutral-50/50 p-4 dark:border-neutral-800 dark:bg-neutral-800/30">

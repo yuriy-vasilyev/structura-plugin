@@ -75,6 +75,13 @@ export interface ComboboxGroup {
   count?: number;
   /** Present ⇒ options hidden, teaser rendered. See {@link ComboboxGate}. */
   gate?: ComboboxGate;
+  /**
+   * Render a 1px divider instead of the sticky counted header. For a
+   * single-row escape hatch (the language picker's "Other…") a header
+   * reading "OTHER 1" is noise; the label stays in the DOM visually hidden
+   * so the group keeps its accessible name.
+   */
+  hideHeader?: boolean;
   options: ComboboxOption[];
 }
 
@@ -118,6 +125,10 @@ export interface ComboboxProps {
   onOptionAction?: (id: string) => void;
   disabled?: boolean;
   className?: string;
+  /** Id for the trigger button, so a consumer `<label htmlFor>` can target it. */
+  id?: string;
+  /** Forwarded to the trigger — lets a consumer tie an inline note to the field. */
+  "aria-describedby"?: string;
   /** Empty-state headline for a query with no matches. Pre-translated. */
   noMatchesLabel?: (query: string) => React.ReactNode;
   /** Label for the ✕ button and the empty-state "Clear search" action. Pre-translated. */
@@ -368,6 +379,17 @@ const ComboboxPanel: React.FC<PanelProps> = ({
     const count = gated || !q ? total : (searchCountLabel?.(matched.length, total) ?? `${matched.length} of ${total}`);
     return (
       <div role="group" aria-labelledby={headerId} key={group.id}>
+        {group.hideHeader ? (
+          <>
+            <span id={headerId} className="sr-only">
+              {group.label}
+            </span>
+            <div
+              role="presentation"
+              className="mx-1 my-1 border-t border-neutral-100 dark:border-neutral-700"
+            />
+          </>
+        ) : (
         <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-md bg-white/95 px-2.5 pt-2 pb-1 backdrop-blur-sm dark:bg-neutral-800/95">
           {/* The id sits on the label span (not the header row) so the
               group's accessible name is "OpenAI", not "OpenAI 9". */}
@@ -379,6 +401,7 @@ const ComboboxPanel: React.FC<PanelProps> = ({
             {count}
           </span>
         </div>
+        )}
         {group.gate != null ? (
           <div className="mx-1 mb-1 flex items-center gap-3 rounded-lg border border-dashed border-neutral-200 bg-neutral-50/70 px-3 py-2.5 dark:border-neutral-700 dark:bg-white/[.03]">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-400 dark:bg-white/[.06] dark:text-neutral-500">
@@ -510,6 +533,8 @@ export const Combobox: React.FC<ComboboxProps> = ({
   onOptionAction,
   disabled = false,
   className,
+  id,
+  "aria-describedby": ariaDescribedBy,
   noMatchesLabel,
   clearSearchLabel,
   searchCountLabel,
@@ -532,8 +557,10 @@ export const Combobox: React.FC<ComboboxProps> = ({
 
   const button = (
     <PopoverButton
+      id={id}
       role="combobox"
       aria-haspopup="listbox"
+      aria-describedby={ariaDescribedBy}
       disabled={disabled}
       style={leadingAdornment != null ? { paddingLeft: 16 + leadingWidth + 8 } : undefined}
       className={cn(

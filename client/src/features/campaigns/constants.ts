@@ -76,14 +76,16 @@ export const getProviderVisual = (id: string): ProviderVisual =>
  *
  * We default FAQ, Action Steps, and statistics to `true` because they're the
  * main "SEO-featured" additions that justify the plugin — a post without any
- * of them looks thin next to competitors. Number-in-title and link rules
- * default to `true` too; sites that don't want them can flip the toggles.
+ * of them looks thin next to competitors. The link rules default to `true`
+ * too; sites that don't want them can flip the toggles.
+ *
+ * `number_in_title` is deliberately absent — retired 2026-09-14, now owned by
+ * the cloud's per-post cadence rotation.
  */
 export const DEFAULT_SEO_RULES: SeoOptimizationRules = {
   include_faq_section: true,
   include_action_steps: true,
   include_statistics: true,
-  number_in_title: true,
   internal_link_optimization: true,
   outbound_link_authority: true,
   eeat_signals: true,

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { __, sprintf } from "@wordpress/i18n";
-import apiFetch from "@wordpress/api-fetch";
 import {
   Check,
   ChevronRight,
@@ -16,6 +15,7 @@ import { useMagicSuggest } from "@/hooks/useMagicSuggest";
 import { useLicense } from "@/features/settings";
 import { useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { AIProvider, CampaignMode } from "@/features/campaigns/types";
+import { useTopicChipsQuery } from "@/features/campaigns/api/useTopicChipsQuery";
 import { ProviderPill } from "../ProviderPill";
 import { MagicSuggestProgress } from "../MagicSuggestProgress";
 
@@ -40,6 +40,17 @@ interface InterviewQuestion {
   multiSelect?: boolean;
 }
 
+/**
+ * Where the user had got to in the interview. Held by the wizard page,
+ * because this component unmounts every time the wizard shows another
+ * step — keeping it here dropped anyone who stepped back onto a blank
+ * question 1 (2026-09-22).
+ */
+export interface InterviewSession {
+  currentStep: number;
+  answers: Map<string, InterviewAnswer[]>;
+}
+
 interface GuidedInterviewProps {
   onComplete: (result: {
     name: string;
@@ -48,6 +59,10 @@ interface GuidedInterviewProps {
     /** The selected topic chips, threaded on as explicit keyword-discovery seeds. */
     topics?: string[];
   }) => void;
+  /** Answers to restore; absent on a first visit and after "Restart interview". */
+  session?: InterviewSession | null;
+  /** Called on every answer so the page can hand the session back later. */
+  onSessionChange?: (session: InterviewSession) => void;
 }
 
 // ─── Questions ──────────────────────────────────────────────────────────────
@@ -138,9 +153,16 @@ export const mergeTopicChips = (
   return merged;
 };
 
+/** Stable empty list — a fresh `[]` would re-run the merge memo each render. */
+const NO_CHIPS: ChipOption[] = [];
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
-export const GuidedInterview = ({ onComplete }: GuidedInterviewProps) => {
+export const GuidedInterview = ({
+  onComplete,
+  session,
+  onSessionChange,
+}: GuidedInterviewProps) => {
   const { suggest, isSuggesting } = useMagicSuggest();
   // The interview is AI-driven (topic chips + the strategy synthesis), so
   // it's a paid-tier feature. Non-paid keep the "Skip interview — I'll
@@ -153,63 +175,25 @@ export const GuidedInterview = ({ onComplete }: GuidedInterviewProps) => {
   const activeProvider = formData.intelligence.textProvider;
   const handleProviderChange = (p: AIProvider) => updateForm("intelligence", { textProvider: p });
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Map<string, InterviewAnswer[]>>(new Map());
+  const [currentStep, setCurrentStep] = useState(session?.currentStep ?? 0);
+  const [answers, setAnswers] = useState<Map<string, InterviewAnswer[]>>(
+    () => new Map(session?.answers ?? [])
+  );
   const [customInput, setCustomInput] = useState("");
   const [isCustomMode, setIsCustomMode] = useState(false);
 
-  // AI-generated topic chips (loaded silently — no error toasts)
-  const [topicChips, setTopicChips] = useState<ChipOption[]>([]);
-  const [isLoadingTopics, setIsLoadingTopics] = useState(false);
-  const [topicsLoaded, setTopicsLoaded] = useState(false);
-
-  // Track which provider was used for the last topic fetch so we can re-fetch on switch
-  const [topicProvider, setTopicProvider] = useState<string | null>(null);
-
-  // Pre-load AI topic chips silently (using apiFetch directly to avoid error toasts).
-  // Re-fetches when the active provider changes.
+  // Mirror every answer up to the page. `session` is read at mount only, so
+  // this can't loop: the component stays the source of truth while mounted.
   useEffect(() => {
-    if (!isPaidLicense) return; // AI topic chips are a paid-tier feature.
-    if (isLoadingTopics) return;
-    if (topicProvider === activeProvider) return; // already fetched for this provider
+    onSessionChange?.({ currentStep, answers });
+  }, [currentStep, answers, onSessionChange]);
 
-    const loadTopics = async () => {
-      setIsLoadingTopics(true);
-      setTopicProvider(activeProvider);
-      console.info("[Structura] Loading topic chips via provider:", activeProvider);
-      try {
-        const response: any = await apiFetch({
-          path: "/structura/v1/suggest",
-          method: "POST",
-          data: {
-            mode: "topic_chips",
-            provider: activeProvider,
-            context: [],
-          },
-        });
-        const data = response?.result ?? response;
-        let topics = data?.topics;
-        if (typeof topics === "string") {
-          try { topics = JSON.parse(topics); } catch { topics = null; }
-        }
-        if (Array.isArray(topics) && topics.length > 0) {
-          setTopicChips(
-            topics.map((t: { label: string; value: string }) => ({
-              label: t.label,
-              value: t.value,
-            }))
-          );
-        }
-      } catch (err) {
-        console.warn("[Structura] Topic chip suggestion failed:", err);
-      } finally {
-        setIsLoadingTopics(false);
-        setTopicsLoaded(true);
-      }
-    };
-
-    loadTopics();
-  }, [activeProvider]); // eslint-disable-line react-hooks/exhaustive-deps
+  // AI-generated topic chips — a paid-tier feature, loaded silently (the
+  // query never toasts) and cached per provider so re-entering the step
+  // costs nothing. See useTopicChipsQuery.
+  const topicChipsQuery = useTopicChipsQuery(activeProvider, isPaidLicense);
+  const topicChips = topicChipsQuery.data ?? NO_CHIPS;
+  const isLoadingTopics = topicChipsQuery.isFetching;
 
   // The topic question gathers TOPIC SEEDS for keyword discovery, so it is
   // fed by the AI `topic_chips` pass only — deliberately NOT prefilled from
@@ -380,6 +364,7 @@ export const GuidedInterview = ({ onComplete }: GuidedInterviewProps) => {
     const data = await suggest("campaign", {
       provider: activeProvider,
       context,
+      language: formData.intelligence.language,
     });
 
     if (data?.name && data?.strategy) {

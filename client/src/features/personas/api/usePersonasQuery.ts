@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import apiFetch from "@wordpress/api-fetch";
 import { personaKeys } from "./keys";
@@ -77,6 +78,52 @@ export const useMemberPersonaIdsQuery = () => {
     enabled: hasWorkspace === true,
     staleTime: 1000 * 60 * 5,
   });
+};
+
+/**
+ * Personas that write for THIS site — the workspace library narrowed to the
+ * activation's membership set, plus `selectedPersonaId` when the campaign
+ * being edited names a voice the site never bound.
+ *
+ * Membership is what the cloud rotates over for "Random persona"
+ * (`functions/src/scheduler/helpers.ts`), and the Personas page and the
+ * onboarding wizard have split on it since 2026-07-03. The campaign and
+ * Generate-post pickers kept offering the whole library, so on a workspace
+ * running several sites every sibling's voice showed up in the dropdown
+ * (2026-09-22).
+ *
+ * Two escape hatches, both deliberate:
+ *   - An empty membership set falls back to the whole library. That is what
+ *     the cloud resolver does for pre-membership activations, and it keeps
+ *     an older site's picker usable instead of empty.
+ *   - `selectedPersonaId` is appended when it is not a member, because live
+ *     campaigns do name personas their site never bound. Dropping it would
+ *     rewrite the campaign's voice to "random" on the next save.
+ *
+ * `isLoading` covers BOTH queries: rendering the options off a resolved
+ * library while memberships are still in flight would flash the full list.
+ */
+export const useSitePersonasQuery = (selectedPersonaId?: string | number) => {
+  const { data: library, isLoading: personasLoading } = usePersonasQuery();
+  const { data: memberIds, isLoading: membersLoading } = useMemberPersonaIdsQuery();
+
+  // Memoised so callers keep a stable array identity across renders — the
+  // campaign forms build their `personaOptions` in a `useMemo` keyed on it.
+  // Both inputs stay undefined (not a fresh `[]`) until their query lands,
+  // or the memo would recompute on every render while loading.
+  const data = useMemo(() => {
+    const lib = library ?? [];
+    const memberSet = new Set(memberIds ?? []);
+    const members = lib.filter((p) => memberSet.has(String(p.id)));
+    if (members.length === 0) return lib;
+    if (selectedPersonaId != null && !memberSet.has(String(selectedPersonaId))) {
+      const selected = lib.find((p) => String(p.id) === String(selectedPersonaId));
+      if (selected) return [...members, selected];
+    }
+    return members;
+  }, [library, memberIds, selectedPersonaId]);
+
+  return { data, isLoading: personasLoading || membersLoading };
 };
 
 // Fetch WP Users (with longer cache)

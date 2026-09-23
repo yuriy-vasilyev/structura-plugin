@@ -34,11 +34,56 @@ export interface Job {
 /**
  * DOMAIN CLUSTERS
  */
+/**
+ * Who decided the campaign's writing approach.
+ *
+ * `"inferred"` — the Setup step's draft picked it from the site's search
+ * footprint. `"user"` — the operator overrode it in Advanced. The cloud keeps
+ * re-inferring an `"inferred"` mode as the footprint moves; a `"user"` one is
+ * never touched again.
+ */
+export type CampaignModeSource = "inferred" | "user";
+
+/**
+ * Why the Setup step configured the campaign the way it did — one coded line
+ * per decision, rendered through i18n by {@link setupRationaleItems}.
+ *
+ * Coded rather than free text so the copy is translatable, stays
+ * vague-on-method and can never carry a model-invented claim. Mirrors the
+ * cloud's `SetupRationaleCode`. Spec:
+ * `specs/campaign-language-and-smart-setup.md` §3.5.
+ */
+export type SetupRationaleCode =
+  | "language_from_site"
+  | "language_ai_only"
+  | "approach_authority_low_footprint"
+  | "approach_quick_wins_page_two"
+  | "approach_conversion_objective"
+  | "approach_traffic_magnet_default"
+  | "overlap_sibling_campaign"
+  | "rhythm_shared_cadence"
+  | "footprint_refreshed";
+
+/** One rationale line: its code plus the values its sentence interpolates. */
+export interface SetupRationale {
+  code: SetupRationaleCode;
+  params?: Record<string, string | number>;
+}
+
 export interface CampaignIdentity {
   name: string;
   objective: string; // renamed from 'topic' for clarity
   /** Strategic angle that shapes content generation. */
   campaignMode?: CampaignMode;
+  /**
+   * Whether {@link campaignMode} was inferred by the Setup draft or picked by
+   * hand in Advanced. Optional during rollout (CLAUDE.md §10) — campaigns
+   * saved before the inferred-approach change carry neither this nor
+   * {@link setupRationale}, and an older plugin drops both on the wire.
+   */
+  campaignModeSource?: CampaignModeSource;
+  /** The Setup draft's coded reasons, replayed on the Summary + campaign view. */
+  setupRationale?: SetupRationale[];
   /**
    * Single-post focus keyphrase picked in the "Generate a Post" SEO Targeting
    * section (a real DFS long-tail, or the user's own phrase). Drives the post's

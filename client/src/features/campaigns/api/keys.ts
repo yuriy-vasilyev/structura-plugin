@@ -13,6 +13,8 @@ export const campaignKeys = {
   // Stock tab (2026-06-05) — full live-entry list for one campaign.
   // Sibling of stockSummary so both refresh on stock mutations.
   stock: (id: string | number) => [...campaignKeys.all, "stock", id] as const,
+  // AI topic seeds for the create-flow interview, per text provider.
+  topicChips: (provider: string) => [...campaignKeys.all, "topic-chips", provider] as const,
 };
 
 export const jobKeys = {

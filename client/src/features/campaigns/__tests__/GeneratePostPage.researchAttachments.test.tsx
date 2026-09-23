@@ -41,6 +41,8 @@ const licenseMock = vi.hoisted(() => ({
 }));
 vi.mock("@/features/settings", () => ({
   useLicense: () => licenseMock.current,
+  // The language picker reads the WP site profile to seed / label itself.
+  usePublicSiteProfile: () => ({ data: { language: "en-US" }, isLoading: false }),
   useAiConnections: () => ({
     activeProviders: ["openai"],
     textProviders: ["openai"],
@@ -67,15 +69,18 @@ vi.mock("@/features/settings", () => ({
   }),
 }));
 
-vi.mock("@/features/personas", () => ({
-  usePersonasQuery: () => ({
+vi.mock("@/features/personas", () => {
+  const personas = () => ({
     data: [
       { id: "p1", name: "House voice" },
       { id: "p2", name: "Casual expert" },
     ],
     isLoading: false,
-  }),
-}));
+  });
+  // The page reads the site-scoped list; `NoPersonasBlocker` /
+  // `DefaultPersonaAdvisory` still read the workspace library.
+  return { usePersonasQuery: personas, useSitePersonasQuery: personas };
+});
 
 vi.mock("@/hooks/useMagicSuggest", () => ({
   useMagicSuggest: () => ({ suggest: vi.fn(), isSuggesting: false }),

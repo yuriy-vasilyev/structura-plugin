@@ -99,12 +99,19 @@ export interface UnifiedSettings {
  * The authoritative list lives in
  * `plugin/includes/Core/SEO_Rules_Registry.php` and is fetched via
  * `/structura/v1/settings/seo-rules`. This union must stay in sync with it.
+ *
+ * `number_in_title` was removed on 2026-09-14. It was never a project-level
+ * choice — whether a headline carries a digit is craft, not configuration —
+ * and shipping it ON by default bypassed the title-shape rotation on every
+ * paid campaign. Numbers are decided per post by the cloud's cadence layer
+ * now. Campaigns created earlier still have the value stored; the server
+ * ignores it (see `RETIRED_TOGGLE_SLUGS` in `instruction-builder.ts`), so the
+ * stale key is inert rather than breaking.
  */
 export type SeoRuleName =
   | "include_faq_section"
   | "include_action_steps"
   | "include_statistics"
-  | "number_in_title"
   | "internal_link_optimization"
   | "outbound_link_authority"
   | "eeat_signals"

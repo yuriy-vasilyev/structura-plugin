@@ -39,11 +39,12 @@ import {
   researchRejectTypeMessage,
   uploadResearchDoc,
 } from "@/features/campaigns/api/uploadResearchDoc";
+import { CampaignLanguageField } from "@/features/campaigns/components/CampaignLanguageField";
 import { SeoTargetingSection } from "@/features/campaigns/components/SeoTargetingSection";
 import { MagicSuggestButton } from "@/features/campaigns/components/MagicSuggestButton";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
 import type { AIProvider, CampaignFormData, CampaignMode, CampaignPostStatus, } from "@/features/campaigns/types";
-import { usePersonasQuery } from "@/features/personas";
+import { useSitePersonasQuery } from "@/features/personas";
 import { useAiConnections, useDefaultProviders, useLicense } from "@/features/settings";
 import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
 import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
@@ -207,7 +208,6 @@ const GeneratePostPage = () => {
   } = useAiConnections();
   const { data: aiSettings } = useAiSettingsQuery();
   const { defaultTextProvider, defaultImageProvider } = useDefaultProviders();
-  const { data: personas = [], isLoading: loadingPersonas } = usePersonasQuery();
   const { generatePost, isGenerating } = useCampaignMutations();
   const { suggest, isSuggesting } = useMagicSuggest();
 
@@ -243,6 +243,14 @@ const GeneratePostPage = () => {
     getCampaignFormDataForLicense({ isPaidLicense, isLicensed })
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Site-scoped: the whole workspace library here listed every sibling
+  // site's voice on a multi-site workspace (2026-09-22). Declared after
+  // `formData` because the picker keeps an already-chosen non-member
+  // persona visible.
+  const { data: personas, isLoading: loadingPersonas } = useSitePersonasQuery(
+    formData.intelligence.personaId,
+  );
 
   // Research material rows (paid only). Held OUTSIDE formData: rows carry
   // transient UI state (busy/failed, error copy) that must never leak into
@@ -680,54 +688,13 @@ const GeneratePostPage = () => {
             </Select.Content>
           </Select>
 
-          {/* Language (if they have any preference) */}
-          <Select
-            options={[
-              { value: "default", label: __("System Default", "structura") },
-              { value: "en", label: "English" },
-              { value: "es", label: "Español" },
-              { value: "fr", label: "Français" },
-              { value: "de", label: "Deutsch" },
-              { value: "it", label: "Italiano" },
-              { value: "pt", label: "Português" },
-              { value: "nl", label: "Nederlands" },
-              { value: "ru", label: "Русский" },
-              { value: "ja", label: "日本語" },
-              { value: "zh", label: "中文" },
-              { value: "ko", label: "한국어" },
-              { value: "ar", label: "العربية" },
-              { value: "hi", label: "हिन्दी" },
-              { value: "uk", label: "Українська" },
-            ]}
+          {/* Language — the same picker the campaign wizard uses, so a
+              one-off post can be written in any language the site does. */}
+          <CampaignLanguageField
+            id="single-post-language"
             value={formData.intelligence.language}
-            onValueChange={(val) => update("intelligence", { language: val as string })}
-          >
-            <Select.Label>{__("Language", "structura")}</Select.Label>
-            <Select.Trigger placeholder={__("Select language…", "structura")} />
-            <Select.Content>
-              {[
-                { value: "default", label: __("System Default", "structura") },
-                { value: "en", label: "English" },
-                { value: "es", label: "Español" },
-                { value: "fr", label: "Français" },
-                { value: "de", label: "Deutsch" },
-                { value: "it", label: "Italiano" },
-                { value: "pt", label: "Português" },
-                { value: "nl", label: "Nederlands" },
-                { value: "ru", label: "Русский" },
-                { value: "ja", label: "日本語" },
-                { value: "zh", label: "中文" },
-                { value: "ko", label: "한국어" },
-                { value: "ar", label: "العربية" },
-                { value: "hi", label: "हिन्दी" },
-                { value: "uk", label: "Українська" },
-              ].map((opt) => (
-                <Select.Item key={opt.value} value={opt.value}>
-                  {opt.label}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select>
+            onChange={(code) => update("intelligence", { language: code })}
+          />
 
           {/* Post Length */}
           {/*
@@ -996,12 +963,6 @@ const GeneratePostPage = () => {
             label={__("Supporting statistics", "structura")}
             checked={formData.intelligence.seoRules.include_statistics}
             onChange={(v) => updateSeoRule("include_statistics", v)}
-            available={!!isPaidLicense}
-          />
-          <SeoToggle
-            label={__("Number in title", "structura")}
-            checked={formData.intelligence.seoRules.number_in_title}
-            onChange={(v) => updateSeoRule("number_in_title", v)}
             available={!!isPaidLicense}
           />
           <SeoToggle

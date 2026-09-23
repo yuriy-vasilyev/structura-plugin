@@ -47,6 +47,12 @@ class Campaign_Shape_Transformer
                 'name'         => $cloud['name'] ?? '',
                 'objective'    => $cloud['objective'] ?? '',
                 'campaignMode' => $cloud['campaignMode'] ?? 'traffic_magnet',
+                // Inferred-vs-user provenance of the writing approach and the
+                // Setup step's rationale codes (spec campaign-language-and-
+                // smart-setup.md §3.5). Absent on campaigns created before
+                // 2026-09-22 — the SPA treats a missing source as "user".
+                'campaignModeSource' => self::normalize_mode_source($cloud['campaignModeSource'] ?? null),
+                'setupRationale'     => self::normalize_rationale($cloud['setupRationale'] ?? null),
             ],
             'intelligence' => [
                 'textProvider'          => $cloud['textProvider'] ?? 'gemini',
@@ -246,6 +252,18 @@ class Campaign_Shape_Transformer
             $cloud['imageTier'] = $wp_input['image_tier'];
         }
 
+        // Setup-draft provenance (spec campaign-language-and-smart-setup.md
+        // §3.5). Omitted when the SPA didn't send them so the create body
+        // keeps its pre-2026-09-22 shape for older clouds.
+        $mode_source = self::normalize_mode_source($wp_input['campaign_mode_source'] ?? $wp_input['campaignModeSource'] ?? null);
+        if ($mode_source !== null) {
+            $cloud['campaignModeSource'] = $mode_source;
+        }
+        $rationale = self::normalize_rationale($wp_input['setup_rationale'] ?? $wp_input['setupRationale'] ?? null);
+        if ($rationale !== null) {
+            $cloud['setupRationale'] = $rationale;
+        }
+
         return $cloud;
     }
 
@@ -329,6 +347,15 @@ class Campaign_Shape_Transformer
             $cloud['imageTier'] = $intelligence['imageTier'];
         }
 
+        $mode_source = self::normalize_mode_source($identity['campaignModeSource'] ?? null);
+        if ($mode_source !== null) {
+            $cloud['campaignModeSource'] = $mode_source;
+        }
+        $rationale = self::normalize_rationale($identity['setupRationale'] ?? null);
+        if ($rationale !== null) {
+            $cloud['setupRationale'] = $rationale;
+        }
+
         return $cloud;
     }
 
@@ -377,6 +404,48 @@ class Campaign_Shape_Transformer
     /**
      * Normalize a nullable value: empty string → null, otherwise keep as-is.
      */
+    /**
+     * `inferred` | `user`, or null when absent/unknown (older docs, older SPAs).
+     */
+    private static function normalize_mode_source($value): ?string
+    {
+        return in_array($value, ['inferred', 'user'], true) ? $value : null;
+    }
+
+    /**
+     * Setup rationale codes as `[['code' => 'snake_case', 'params' => [scalar…]], …]`,
+     * or null when absent. Keys are sanitised; the rendered copy lives in the
+     * SPA's i18n table, so junk codes simply render nothing.
+     *
+     * @return array<int, array{code: string, params?: array<string, scalar>}>|null
+     */
+    private static function normalize_rationale($value): ?array
+    {
+        if ( ! is_array($value)) {
+            return null;
+        }
+        $out = [];
+        foreach ($value as $entry) {
+            if ( ! is_array($entry) || empty($entry['code']) || ! is_string($entry['code'])) {
+                continue;
+            }
+            $row = ['code' => sanitize_key($entry['code'])];
+            if (isset($entry['params']) && is_array($entry['params'])) {
+                $params = [];
+                foreach ($entry['params'] as $k => $v) {
+                    if (is_scalar($v)) {
+                        $params[sanitize_key((string) $k)] = is_string($v) ? sanitize_text_field($v) : $v;
+                    }
+                }
+                if ($params) {
+                    $row['params'] = $params;
+                }
+            }
+            $out[] = $row;
+        }
+        return $out;
+    }
+
     private static function normalize_nullable($value)
     {
         if ($value === '' || $value === null) {

@@ -18,12 +18,12 @@
 
 import { useMemo } from "react";
 import { __ } from "@wordpress/i18n";
-import { FileStack, Languages, Loader2, Send, UserCheck } from "lucide-react";
+import { FileStack, Loader2, Send, UserCheck } from "lucide-react";
 import { InputField, Select } from "@structura/ui";
 import { useCampaignForm } from "@/features/campaigns/context/CampaignContext";
-import { usePersonasQuery } from "@/features/personas";
+import { useSitePersonasQuery } from "@/features/personas";
 import { useLicense } from "@/features/settings";
-import { LANGUAGES } from "@/data/languages";
+import { CampaignLanguageField } from "@/features/campaigns/components/CampaignLanguageField";
 import { CampaignPostStatus } from "@/features/campaigns/types";
 
 const POST_STATUS_OPTIONS: Array<{ value: CampaignPostStatus; label: string }> = [
@@ -32,12 +32,24 @@ const POST_STATUS_OPTIONS: Array<{ value: CampaignPostStatus; label: string }> =
   // "Pending review" was removed 2026-07-09 — WP treated it as a draft.
 ];
 
-export const CoreContentSettings = () => {
+export interface CoreContentSettingsProps {
+  /**
+   * The campaign Setup step owns the language itself (it drives the setup
+   * draft and carries the "From your site" pill), so it hides the copy here
+   * rather than showing the same control twice.
+   */
+  showLanguage?: boolean;
+}
+
+export const CoreContentSettings = ({ showLanguage = true }: CoreContentSettingsProps = {}) => {
   const { formData, updateForm } = useCampaignForm();
   const { isPaidLicense } = useLicense();
-  const { data: personas = [], isLoading: loadingPersonas } = usePersonasQuery();
-
   const { intelligence, structure } = formData;
+  // Site-scoped: the whole workspace library here listed every sibling
+  // site's voice on a multi-site workspace (2026-09-22).
+  const { data: personas, isLoading: loadingPersonas } = useSitePersonasQuery(
+    intelligence.personaId,
+  );
 
   const personaOptions = useMemo(
     () => [
@@ -51,36 +63,20 @@ export const CoreContentSettings = () => {
     [personas],
   );
 
-  const languageOptions = useMemo(
-    () => [{ value: "default", label: __("System Default", "structura") }, ...LANGUAGES],
-    [],
-  );
-
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {/* Language */}
-      <div className="space-y-1.5">
-        <span className="flex items-center gap-1.5 text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-          <Languages size={12} className="text-brand-500" />
-          {__("Language", "structura")}
-        </span>
-        <Select
+      {/* Language sits above the grid, full width: the picker reveals an
+          inline catalogue list and an honest note for unsupported languages,
+          neither of which fits a quarter-width cell. */}
+      {showLanguage && (
+        <CampaignLanguageField
           value={intelligence.language}
-          onValueChange={(val) => updateForm("intelligence", { language: val as string })}
-          options={languageOptions}
-        >
-          <Select.Label hidden>{__("Language", "structura")}</Select.Label>
-          <Select.Trigger placeholder={__("Select…", "structura")} />
-          <Select.Content className="w-(--button-width)">
-            {languageOptions.map((l) => (
-              <Select.Item key={l.value} value={l.value}>
-                {l.label}
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select>
-      </div>
+          onChange={(code) => updateForm("intelligence", { language: code })}
+          className="max-w-md"
+        />
+      )}
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 
       {/* Post Length */}
       <div className="space-y-1.5">

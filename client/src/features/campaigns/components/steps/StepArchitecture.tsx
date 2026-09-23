@@ -1,14 +1,14 @@
 import { __ } from "@wordpress/i18n";
-import { FileStack, Image as ImageIcon, Languages, Layout, Rocket, Scale } from "lucide-react";
+import { FileStack, Image as ImageIcon, Layout, Rocket, Scale } from "lucide-react";
 import { useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { useLicense } from "@/features/settings/api/useLicense";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
 
 // UI Components
-import { Card, InputField, ReferralLinksEditor, Select, Switch, TextArea } from "@structura/ui";
+import { Card, InputField, ReferralLinksEditor, Switch, TextArea } from "@structura/ui";
 import { useRef } from "react";
 import { SelectionCard } from "@/components/Shared/SelectionCard";
-import { LANGUAGES } from "@/data/languages";
+import { CampaignLanguageField } from "@/features/campaigns/components/CampaignLanguageField";
 import { SUPPORTED_BLOCK_TYPE } from "@/features/settings";
 import { buildReferralLabels } from "@/utils/referralLabels";
 
@@ -41,29 +41,12 @@ export const StepArchitecture = () => {
       {/* SECTION 1: LINGUISTICS & MAGNITUDE */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card className="space-y-4">
-          <div className="text-brand-600 dark:text-brand-400 flex items-center gap-3">
-            <Languages size={18} />
-            <h4 className="m-0! text-[10px] font-black tracking-widest text-neutral-400 uppercase">
-              {__("Output Language", "structura")}
-            </h4>
-          </div>
-          <Select
+          <CampaignLanguageField
+            id="architecture-language"
+            label={__("Output Language", "structura")}
             value={intelligence.language}
-            onValueChange={(val) => updateForm("intelligence", { language: val as string })}
-            options={[{ value: "default", label: __("System Default", "structura") }, ...LANGUAGES]}
-          >
-            <Select.Label hidden>{__("Content Language", "structura")}</Select.Label>
-            <Select.Trigger placeholder={__("Select language...", "structura")} />
-            <Select.Content className="w-(--button-width)">
-              {[{ value: "default", label: __("System Default", "structura") }, ...LANGUAGES].map(
-                (l) => (
-                  <Select.Item key={l.value} value={l.value}>
-                    {l.label}
-                  </Select.Item>
-                )
-              )}
-            </Select.Content>
-          </Select>
+            onChange={(code) => updateForm("intelligence", { language: code })}
+          />
         </Card>
 
         <Card className="space-y-4">

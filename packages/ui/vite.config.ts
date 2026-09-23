@@ -33,13 +33,16 @@ export default defineConfig(() => {
       rollupOptions: {
         // `lucide-react` is used by the pricing composites — externalised so
         // consumers' bundlers dedupe it against their own lucide-react copy
-        // rather than each subentry shipping its own icon set.
+        // rather than each subentry shipping its own icon set. Same for
+        // `@structura/i18n-contracts`: web and client both depend on it, and
+        // the WP locale catalogue must not ship twice.
         external: [
           "react",
           "react-dom",
           "react/jsx-runtime",
           "@headlessui/react",
           "lucide-react",
+          "@structura/i18n-contracts",
         ],
         output: {
           globals: isWordPress

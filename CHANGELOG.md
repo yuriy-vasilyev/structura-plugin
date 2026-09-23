@@ -1,5 +1,60 @@
 # Changelog
 
+## [2.26.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.25.0...v2.26.0) (2026-09-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ai,client,web,plugin:** `number_in_title` is no longer a user-toggleable SEO rule. Stored values are ignored by the cloud and cleared by the script above; the `SeoRuleName` union no longer includes it. Numbers in titles are now decided per post by the cadence rotation.
+
+### Features
+
+* **ai,client,web,plugin:** retire the "Number in title" toggle ([f47e7bc](https://github.com/yuriy-vasilyev/structura-core/commit/f47e7bc2fcccbca2b91c7dfbd2b83984b12539b2))
+* **billing:** gate member invites by plan tier only, drop the 3+ sites rule ([51016f1](https://github.com/yuriy-vasilyev/structura-core/commit/51016f1be4b237d2dc2356aeba187382c07c8d2f))
+* campaign language per site and a drafted Setup step replace the interview ([9f38e25](https://github.com/yuriy-vasilyev/structura-core/commit/9f38e2573608df17febc92a2b65d657a36b782bc))
+* **functions:** forward error-level incidents to Telegram by default ([3e79f64](https://github.com/yuriy-vasilyev/structura-core/commit/3e79f64c3565c30d4c86204eff3dbf926fe967ac))
+* **functions:** page ops on the money paths and the autonomous engines ([9b62628](https://github.com/yuriy-vasilyev/structura-core/commit/9b62628ac646c56966f566c2f5b5dce20a24d544))
+* **functions:** rank authority domains per post keyword before the site-search sweep ([708d8f6](https://github.com/yuriy-vasilyev/structura-core/commit/708d8f6e0ac6e8061ea24e60273d0850d8242307))
+* **growth:** name the signup source on the Telegram ping ([3bd378e](https://github.com/yuriy-vasilyev/structura-core/commit/3bd378eda7fbcac6f49d9c2371c8ab376ab08cd9))
+* **web,client:** run the AI refinement from a Magic suggest button, never automatically ([8743c77](https://github.com/yuriy-vasilyev/structura-core/commit/8743c77ec31c1747f27b2213734e7ac7f6e8e4e5))
+* **web:** create a visual preset from the site Visuals page when none is bound ([9f284f7](https://github.com/yuriy-vasilyev/structura-core/commit/9f284f77102eff6deb41e69f7120107c2a47f7db))
+* **www:** add /blog-automation — the "how does it run unattended?" page ([5f140f5](https://github.com/yuriy-vasilyev/structura-core/commit/5f140f588c206d3ef930346e19fca6703a391f97))
+* **www:** opt-in eyebrowAsHeading so /blog-automation inverts all 7 sections ([f870e0d](https://github.com/yuriy-vasilyev/structura-core/commit/f870e0dfeae65e49149eb49a9753629e5d7ef420))
+* **www:** re-add SeekTool.ai as a neutral reciprocal link ([f6163f6](https://github.com/yuriy-vasilyev/structura-core/commit/f6163f627f27defeff7a04faba7ef927881e1283))
+* **www:** rotate the footer directory badges through one slot ([773c950](https://github.com/yuriy-vasilyev/structura-core/commit/773c9506341bdbd37836413d0e703ec0303fe317))
+
+
+### Bug Fixes
+
+* **ai:** numbered-title suppression never fired — detector missed our own shape ([92e61e4](https://github.com/yuriy-vasilyev/structura-core/commit/92e61e457fc14b9d4936d731d7d1971fef77044e))
+* **ci:** give the integration emulator a dummy RESEND_API_KEY ([2bf473a](https://github.com/yuriy-vasilyev/structura-core/commit/2bf473abc6bf13619419c5a5dbbf73744a133081))
+* **client:** keep the campaign interview's answers and seeds across a revisit ([dd4b0d1](https://github.com/yuriy-vasilyev/structura-core/commit/dd4b0d1c8ad4fff31461b4a4f3163b4eaf70506a))
+* **firestore:** add the campaigns index the SEO-intel refresh cron needs ([a38c40a](https://github.com/yuriy-vasilyev/structura-core/commit/a38c40aa71cd5e87a93c971de8301069c175f34d))
+* **firestore:** restore COLLECTION-scoped single-field indexes on campaigns.status ([79ca292](https://github.com/yuriy-vasilyev/structura-core/commit/79ca2929590ed5f63968203bdfa0382ee4b09069))
+* **functions:** an unbound RESEND_API_KEY must not kill the runtime ([0a47b82](https://github.com/yuriy-vasilyev/structura-core/commit/0a47b828502b497e5629e153553010492f838709))
+* **functions:** balance watch POSTed a GET-only endpoint, failing every tick ([ca38225](https://github.com/yuriy-vasilyev/structura-core/commit/ca38225f7e10fca930c17a81662d1b4266c148f6))
+* **functions:** bind the growth-alert secrets once on the campaign create paths ([97817a5](https://github.com/yuriy-vasilyev/structura-core/commit/97817a5abcf84e49cd8ea9e64e5aa9230e703f0f))
+* **functions:** count the monthly post cap per post, not per key resolution ([4db2907](https://github.com/yuriy-vasilyev/structura-core/commit/4db290799513d93e3a8e2350a516f13facf73c52))
+* **functions:** isolate the headless tick per campaign, wire the SEO-intel error rate ([035a97e](https://github.com/yuriy-vasilyev/structura-core/commit/035a97ebb4bc5813be00b990b235b2df4a14886e))
+* **functions:** page when the balance watch goes blind; retune threshold to $5 ([772504e](https://github.com/yuriy-vasilyev/structura-core/commit/772504e9c1b25497bcca92f662ed1779ad5dcac9)), closes [#182](https://github.com/yuriy-vasilyev/structura-core/issues/182)
+* **functions:** refresh cron never selected a never-refreshed campaign ([136f027](https://github.com/yuriy-vasilyev/structura-core/commit/136f027464d4021251dce6881544283d47fec9b0))
+* **functions:** refresh tick was killed at 60s and had no SERPER key ([7dac863](https://github.com/yuriy-vasilyev/structura-core/commit/7dac8633af576f3a21f26028460e7c0f45151c26))
+* **functions:** reject "placeholder" stub blueprints and track outcomes per model ([8942c91](https://github.com/yuriy-vasilyev/structura-core/commit/8942c91fb1c376c3402593fa00cae59c08cde92d))
+* **i18n:** call the language catalogue "More languages", not "All WordPress languages" ([e8f5c25](https://github.com/yuriy-vasilyev/structura-core/commit/e8f5c2557ca366c3f5d3d90a5a9d18da2790c88b))
+* **web,functions:** stop invited members landing on a dead workspace; owner-only billing and owner row ([df83857](https://github.com/yuriy-vasilyev/structura-core/commit/df83857b41fcf284d7ffc445db60f241a46c9d50))
+* **web:** gate campaign model pickers on the workspace's plan, not the user's own license ([1e7c467](https://github.com/yuriy-vasilyev/structura-core/commit/1e7c4670d41aab9adbdd566940afd51e9fe2d14e))
+* **web:** keep the GSC property picker inside the setup wizard; treat WebKit MIME-type errors as stale chunks ([7dae965](https://github.com/yuriy-vasilyev/structura-core/commit/7dae9652f31170498b7ac1a38da73fa1872e1a28))
+* **web:** keep the license workspace when the membership callable fails ([c819d80](https://github.com/yuriy-vasilyev/structura-core/commit/c819d80821f77d0f00b02664ac65cedd8a88e416))
+* **web:** let the campaign wizard step back to Interview and forward again ([dc391d0](https://github.com/yuriy-vasilyev/structura-core/commit/dc391d08a5f81db87b6fc95b06af1937c650e37a))
+* **www:** don't lazy-load theme-paired footer badges ([335b3cf](https://github.com/yuriy-vasilyev/structura-core/commit/335b3cf7ced8b680a510a7b5aab18ac5feaa82a6))
+* **www:** drop the SeekTool.ai pill — we were never listed there ([71c8a33](https://github.com/yuriy-vasilyev/structura-core/commit/71c8a33ff8ec3c3970de6c0fe7b727cb22b1ff98))
+* **www:** retarget /en/for-agencies off a term that means "hire an agency" ([2d55472](https://github.com/yuriy-vasilyev/structura-core/commit/2d55472bcdc119bfc9f04482eb6ff06c51eec533))
+
+
+### Miscellaneous Chores
+
+* release the next version as 2.26.0, not 3.0.0 ([997199b](https://github.com/yuriy-vasilyev/structura-core/commit/997199b6127dcba938abf2f3e0c2a88ca4a6c5e3))
+
 ## [2.25.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.24.0...v2.25.0) (2026-09-14)
 
 

@@ -12,8 +12,7 @@ import dayjs from "@/libs/dayjs";
  * to the route module.
  */
 const STEP_LABEL: Record<string, string> = {
-  interview: __("Interview", "structura"),
-  strategy: __("Strategy", "structura"),
+  setup: __("Setup", "structura"),
   keywords: __("Keywords", "structura"),
   authority: __("Authority", "structura"),
   rhythm: __("Rhythm", "structura"),

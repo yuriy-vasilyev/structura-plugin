@@ -154,6 +154,14 @@ export const flattenCampaign = (data: CampaignFormData) => {
     name: identity.name,
     topic: identity.objective,
     campaign_mode: identity.campaignMode,
+    // Who chose the approach, and the Setup draft's coded reasons. Sent only
+    // when the form holds them so an edit from an older surface — or the
+    // single-post flow, which has neither — can't wipe what the cloud doc
+    // already carries (§10).
+    ...(identity.campaignModeSource
+      ? { campaign_mode_source: identity.campaignModeSource }
+      : {}),
+    ...(identity.setupRationale?.length ? { setup_rationale: identity.setupRationale } : {}),
     // Single-post focus keyphrase (SEO Targeting). Only present when the user
     // picked one; the plugin maps it to the ephemeral post's picked keyword.
     ...(identity.focusKeyphrase?.trim()

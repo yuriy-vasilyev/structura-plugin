@@ -1530,6 +1530,21 @@ export interface SiteIdentity {
    */
   language?: string;
   /**
+   * How `language` was established. WordPress activations are always
+   * `"wp"` (the plugin sync owns the field). Headless: `"guess"` from the
+   * homepage / hreflang / TLD at setup, `"user"` once confirmed or edited
+   * in the portal, `"none"` when nothing could be inferred (the portal asks
+   * the user to confirm). Absent on activations created before 2026-09-22 —
+   * read as `"wp"` for WP surfaces, `"none"` otherwise.
+   */
+  languageSource?: "wp" | "user" | "guess" | "none";
+  /**
+   * Other languages the site publishes in (WP-style codes), from hreflang
+   * alternates on headless sites. Pinned first in the campaign Language
+   * picker. Optional; absent means "none known".
+   */
+  additionalLanguages?: string[];
+  /**
    * Resolved custom-logo URL (or site icon as fallback). Empty string is a
    * sentinel for "set on this site, but the file is gone" — we keep the
    * entry rather than dropping it so a cloud reader can distinguish

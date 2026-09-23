@@ -28,7 +28,7 @@
 /**
  * Wizard steps that support the resume-draft URL. Intentionally a
  * subset of `ALL_STEPS` — the user shouldn't deep-link into Summary
- * (that's the final review) or Interview / Strategy (those have no
+ * (that's the final review) or Setup (it has no
  * upsell teaser, so there's no off-site round-trip to come back from).
  *
  * If a future step grows an upsell teaser, widen this union AND mirror

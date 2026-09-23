@@ -22,6 +22,7 @@ import {
   Shield,
   Sparkles,
   Tag,
+  Target,
 } from "lucide-react";
 import { Badge, Button, cn, InputField, PageLoader, Switch, TextArea, Tooltip, } from "@structura/ui";
 
@@ -40,10 +41,11 @@ import {
 import { SimpleStepRhythm } from "@/features/campaigns/components/steps/SimpleStepRhythm";
 import { TaxonomySection } from "@/features/campaigns/components/TaxonomySection";
 import { CampaignAiEngineSection } from "@/features/campaigns/components/CampaignAiEngineSection";
-import { AIProvider, Campaign, CampaignFormData, CampaignMode } from "@/features/campaigns/types";
+import { AIProvider, Campaign, CampaignFormData } from "@/features/campaigns/types";
 import { SeoRuleName, SUPPORTED_BLOCK_TYPE, useDefaultProviders, useLicense, useSeoRules, } from "@/features/settings";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
 import { CoreContentSettings } from "@/features/campaigns/components/CoreContentSettings";
+import { WritingApproachOverride } from "@/features/campaigns/components/WritingApproachOverride";
 import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
 import { normalizePostStatus } from "@/features/campaigns/helpers";
 import { getBadgeIntentByCampaignStatus } from "@/utils/helpers";
@@ -103,35 +105,6 @@ const EditCampaignPage = () => {
 };
 
 export default EditCampaignPage;
-
-// ─── Campaign mode options ──────────────────────────────────────────────
-
-const CAMPAIGN_MODES: Array<{
-  value: CampaignMode;
-  label: string;
-  description: string;
-}> = [
-  {
-    value: "traffic_magnet",
-    label: __("Traffic Magnet", "structura"),
-    description: __("Maximize organic traffic with high-volume topics", "structura"),
-  },
-  {
-    value: "quick_wins",
-    label: __("Quick Wins", "structura"),
-    description: __("Target low-competition keywords for fast rankings", "structura"),
-  },
-  {
-    value: "conversion",
-    label: __("Conversion", "structura"),
-    description: __("Content designed to convert readers to customers", "structura"),
-  },
-  {
-    value: "authority",
-    label: __("Authority", "structura"),
-    description: __("Build topical authority with comprehensive coverage", "structura"),
-  },
-];
 
 // ─── Step definitions ───────────────────────────────────────────────────
 
@@ -372,45 +345,6 @@ const StrategyEditSection = () => {
         placeholder={__("Your campaign strategy…", "structura")}
       />
 
-      {/* Campaign mode */}
-      <div>
-        <label className="mb-2 block text-[10px] font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
-          {__("Writing approach", "structura")}
-        </label>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {CAMPAIGN_MODES.map((mode) => {
-            const isSelected = formData.identity.campaignMode === mode.value;
-            return (
-              <button
-                key={mode.value}
-                type="button"
-                onClick={() => updateForm("identity", { campaignMode: mode.value })}
-                className={cn(
-                  "cursor-pointer rounded-xl border px-3 py-3 text-left transition-all",
-                  isSelected
-                    ? "border-brand-300 bg-brand-50 dark:border-brand-700 dark:bg-brand-950/40 shadow-sm"
-                    : "hover:border-brand-200 dark:hover:border-brand-800 border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800"
-                )}
-              >
-                <span
-                  className={cn(
-                    "block text-xs font-bold",
-                    isSelected
-                      ? "text-brand-700 dark:text-brand-300"
-                      : "text-neutral-700 dark:text-neutral-300"
-                  )}
-                >
-                  {mode.label}
-                </span>
-                <span className="mt-0.5 block text-[10px] text-neutral-400 dark:text-neutral-500">
-                  {mode.description}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Core content settings — pulled out of Advanced so the knobs authors
           reach for on every campaign aren't one click away. */}
       <CoreContentSettings />
@@ -649,6 +583,14 @@ const EditAdvancedSettings = () => {
         <div className="space-y-4 p-4">
           {/* Language/Post Length/Persona/Post Status moved out of Advanced —
               see CoreContentSettings rendered just above this component. */}
+
+          {/* ── Writing approach ─────────────────────────────────── */}
+          <SettingsGroup
+            icon={<Target size={13} className="text-brand-500" />}
+            label={__("Writing approach", "structura")}
+          >
+            <WritingApproachOverride />
+          </SettingsGroup>
 
           {/* AI Engine — pre-generation toggle + provider/model/fallback
               pickers, all in a single compact block. See

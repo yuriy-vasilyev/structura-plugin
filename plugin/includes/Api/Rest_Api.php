@@ -282,6 +282,14 @@ class Rest_Api
             'permission_callback' => [$this, 'check_permission'],
         ]);
 
+        // Campaign Setup step prefill — proxied to the cloud's
+        // `executeDraftCampaignSetup` (spec campaign-language-and-smart-setup.md §4.4).
+        register_rest_route($this->namespace, '/campaigns/draft-setup', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'draft_campaign_setup'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+
         // --- SEO INTELLIGENCE ---
         // Spec: specs/seo-intelligence-plan.md §4.2.
         // The `/site` page's "Analyze my site" button — fires the Live
@@ -2689,6 +2697,56 @@ class Rest_Api
      * Accepts keyphrase/language/provider in the body (no campaign ID needed).
      * Returns a keyword bank of 20–50 curated keywords.
      */
+    /**
+     * Draft the campaign Setup step from what the cloud already knows about
+     * this site: `{language?, stage?}` in, `{success, draft}` out. `stage`
+     * is `deterministic` (instant, any tier) or `ai` (paid refinement); the
+     * cloud decides tier access and degrades to the deterministic draft.
+     * The plugin resolves nothing here — "default" language means the site
+     * language and is resolved cloud-side from the synced identity.
+     */
+    public function draft_campaign_setup($request)
+    {
+        $license = License_Manager::get_license_data();
+        if (empty($license['license_key'])) {
+            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        }
+
+        $params   = $request->get_json_params();
+        $language = sanitize_text_field($params['language'] ?? '');
+        $stage    = sanitize_text_field($params['stage'] ?? 'deterministic');
+        if ($stage !== 'ai') {
+            $stage = 'deterministic';
+        }
+
+        $secret_data = Key_Manager::get_license_payload();
+        $payload     = [
+            'license_key'       => $license['license_key'],
+            'site_url'          => wp_parse_url(home_url(), PHP_URL_HOST),
+            'activation_secret' => $secret_data['secret'] ?? '',
+            'stage'             => $stage,
+        ];
+        if ($language !== '' && $language !== 'default') {
+            $payload['language'] = $language;
+        }
+
+        $result = Cloud_Client::post('/executeDraftCampaignSetup', $payload, ['timeout' => 120]);
+        if (is_wp_error($result)) {
+            return new \WP_Error('cloud_error', $result->get_error_message(), ['status' => 500]);
+        }
+
+        $body = $result['body'] ?? [];
+        if (($result['code'] ?? 500) !== 200 || empty($body['draft'])) {
+            return new \WP_Error(
+                'draft_failed',
+                $body['error'] ?? __('Could not draft the campaign.', 'structura'),
+                ['status' => 502],
+            );
+        }
+
+        return rest_ensure_response(['success' => true, 'draft' => $body['draft']]);
+    }
+
     public function discover_keywords_detached($request)
     {
         $license = License_Manager::get_license_data();
@@ -3472,6 +3530,16 @@ class Rest_Api
             $medium = '';
         }
 
+        // Campaign / topic_chips modes: the CAMPAIGN's content language.
+        // `site_identity.language` below is always the WP site language,
+        // so without this an English campaign on a German site had its
+        // objective drafted in German (2026-09-22). "default" and empty
+        // mean "site language" and are not forwarded.
+        $language = sanitize_text_field($request['language'] ?? '');
+        if ($language === 'default' || ! preg_match('/^[a-z]{2,3}([_-][A-Za-z0-9]{2,8})*$/', $language)) {
+            $language = '';
+        }
+
         // Cloud-tier users: utility suggestions (topic chips, campaign strategy,
         // persona, visual style) use our preferred provider silently — the user's
         // chosen default only matters for actual post/image generation.
@@ -3503,7 +3571,7 @@ class Rest_Api
             // runs through the cloud. The free / none rate cap is
             // applied by `resolveProviderKeyForTier`; BYOK keys are
             // read from `/workspaces/{w}/credentials/{c}`.
-            return $this->execute_cloud_suggestion($mode, $site_identity, $user_context, $provider, $medium);
+            return $this->execute_cloud_suggestion($mode, $site_identity, $user_context, $provider, $medium, $language);
         } catch (\Exception $e) {
             $this->log('error', 'Suggestion execution failed: ' . $e->getMessage(), 0, 'suggestion_handler');
 
@@ -3584,7 +3652,7 @@ class Rest_Api
     /**
      * @throws \Exception
      */
-    private function execute_cloud_suggestion($mode, $site_identity, $user_context, $provider, $medium = '')
+    private function execute_cloud_suggestion($mode, $site_identity, $user_context, $provider, $medium = '', $language = '')
     {
         $license = License_Manager::get_license_data();
         $payload = Key_Manager::get_license_payload();
@@ -3609,6 +3677,12 @@ class Rest_Api
         // to photography).
         if ($medium !== '') {
             $cloud_payload['visualMedium'] = $medium;
+        }
+
+        // Campaign content language override (see handle_unified_suggestion).
+        // Omitted when empty so older cloud builds see the legacy payload.
+        if ($language !== '') {
+            $cloud_payload['language'] = $language;
         }
 
         // 240s curl timeout — the cloud function is provisioned for 300s

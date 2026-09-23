@@ -60,4 +60,34 @@ describe("useMagicSuggest", () => {
     );
     expect(out).toEqual({ name: "Voice" });
   });
+
+  it("forwards the campaign language so the cloud drafts in it, not the site language", async () => {
+    // Regression (2026-09-22): the body carried no language; the cloud
+    // appended the WP site language, so an English campaign on a German
+    // site got a German objective.
+    licenseMock.current = { isPaidLicense: true };
+    apiFetchMock.mockResolvedValue({ result: { name: "X", strategy: "Y" } });
+    const { result } = renderHook(() => useMagicSuggest());
+
+    await act(async () => {
+      await result.current.suggest("campaign", { provider: "openai", context: [], language: "en" });
+    });
+
+    expect(apiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ mode: "campaign", language: "en" }) }),
+    );
+  });
+
+  it("omits the language key when the caller has none (legacy body shape)", async () => {
+    licenseMock.current = { isPaidLicense: true };
+    apiFetchMock.mockResolvedValue({ result: { name: "Voice" } });
+    const { result } = renderHook(() => useMagicSuggest());
+
+    await act(async () => {
+      await result.current.suggest("persona", { provider: "openai" });
+    });
+
+    const body = apiFetchMock.mock.calls[0][0].data as Record<string, unknown>;
+    expect(body).not.toHaveProperty("language");
+  });
 });

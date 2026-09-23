@@ -1,3 +1,4 @@
+import { toContentLanguageOption, WP_LOCALE_CATALOG } from "@structura/i18n-contracts";
 import { CampaignFormData, CampaignPostStatus } from "@/features/campaigns/types";
 import { DEFAULT_CAMPAIGN_FORM_DATA } from "@/features/campaigns/constants";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
@@ -37,7 +38,6 @@ const NO_SEO_RULES: SeoOptimizationRules = {
   include_faq_section: false,
   include_action_steps: false,
   include_statistics: false,
-  number_in_title: false,
   internal_link_optimization: false,
   outbound_link_authority: false,
   eeat_signals: false,
@@ -128,4 +128,32 @@ export const getCampaignFormDataForLicense = ({
       postLength: 500,
     },
   };
+};
+
+/**
+ * Normalise any WordPress or BCP-47 locale to the campaign language picker's
+ * value space.
+ *
+ * Two callers, one rule. A site's `siteIdentity.language` arrives as BCP-47
+ * from `get_bloginfo('language')` (`de-AT`, `en-US`); a campaign saved before
+ * the picker existed holds a raw WP locale (`de_DE`, `fr_FR`). A supported
+ * language collapses to its picker option (`de-AT` → `de_AT`, `de_DE` → `de`);
+ * anything else keeps its WordPress locale code (`fa-IR` → `fa_IR`) so the
+ * campaign still writes in it through the "Other…" catalogue rather than
+ * silently falling back to English.
+ *
+ * Returns `null` when there is nothing to normalise — callers then leave the
+ * campaign on the `"default"` sentinel and let the cloud resolve it.
+ */
+export const toCampaignLanguageCode = (raw: string | null | undefined): string | null => {
+  const supported = toContentLanguageOption(raw);
+  if (supported) return supported;
+
+  const wpCode = (raw ?? "").trim().replace(/-/g, "_");
+  if (!wpCode || wpCode === "default") return null;
+
+  const catalogued = WP_LOCALE_CATALOG.find(
+    (entry) => entry.value.toLowerCase() === wpCode.toLowerCase(),
+  );
+  return catalogued ? catalogued.value : wpCode;
 };

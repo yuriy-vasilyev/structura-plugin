@@ -8,7 +8,7 @@ import { perActivationStorageKey } from "@/utils/storageKey";
  * Persisted-draft store for the New Campaign wizard.
  *
  * Why this exists: the wizard is multi-step and several steps
- * (Interview, Keywords, Authority) take real user effort. Before this
+ * (Setup, Keywords, Authority) take real user effort. Before this
  * store the entire form lived in component state, so navigating away
  * — even briefly to check a setting on another page — wiped the draft.
  *
@@ -27,8 +27,12 @@ import { perActivationStorageKey } from "@/utils/storageKey";
  * a stale shape.
  */
 
-/** Bump when the persisted shape of CampaignFormData / step state changes incompatibly. */
-const STORE_VERSION = 1;
+/**
+ * Bump when the persisted shape of CampaignFormData / step state changes
+ * incompatibly. v2: the Interview step was removed and Strategy became Setup,
+ * so a v1 draft would rehydrate onto a step the wizard no longer renders.
+ */
+const STORE_VERSION = 2;
 
 const STORAGE_KEY_PREFIX = "structura-campaign-draft";
 
@@ -72,7 +76,7 @@ export interface CampaignDraftState {
 
 const buildInitialState = () => ({
   formData: DEFAULT_CAMPAIGN_FORM_DATA,
-  activeStep: "interview",
+  activeStep: "setup",
   completedSteps: [] as string[],
   skippedSteps: [] as string[],
   lastUpdatedAt: null as string | null,

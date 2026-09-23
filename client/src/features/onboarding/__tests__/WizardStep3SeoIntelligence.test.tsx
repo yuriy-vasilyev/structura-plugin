@@ -50,6 +50,18 @@ const licenseMock = vi.hoisted(() => ({
 const analysisMock = vi.hoisted(() => ({
   current: { data: undefined as Record<string, unknown> | undefined },
 }));
+// The step seeds its draft from server-saved positioning and returns early
+// while that query is still `undefined`, so this has to RESOLVE for the
+// seeding path to run at all. Default `positioning: null` = a workspace that
+// never saved one, which is what these tests exercise; a test wanting the
+// returning-user branch overwrites `.current`.
+const positioningQueryMock = vi.hoisted(() => ({
+  current: {
+    data: { positioning: null } as
+      | { positioning: Record<string, string> | null }
+      | undefined,
+  },
+}));
 
 vi.mock("@/features/settings", () => ({
   useLicense: () => licenseMock.current,
@@ -64,7 +76,13 @@ vi.mock("../components/WizardGscConnectCard", () => ({
 vi.mock("@/features/site/api/useSiteAnalysis", () => ({
   useSiteAnalysisQuery: () => analysisMock.current,
 }));
+// A factory mock replaces the WHOLE module, so every export the component
+// calls must appear here — a missing one throws "No <name> export is defined
+// on the mock" at call time. That is how `useWizardPositioningQuery` broke
+// this file: the step started reading saved positioning and this factory was
+// not updated alongside it.
 vi.mock("../api/useWizardSeo", () => ({
+  useWizardPositioningQuery: () => positioningQueryMock.current,
   useSuggestWizardPositioningMutation: () => ({
     mutateAsync: positioningSuggestMock,
     isPending: false,
@@ -92,6 +110,7 @@ function renderStep() {
 beforeEach(() => {
   useWizardStore.getState().reset();
   positioningSuggestMock.mockReset();
+  positioningQueryMock.current = { data: { positioning: null } };
   aiCompetitorsQueryMock.calls.length = 0;
   aiCompetitorsQueryMock.result.current = {
     data: undefined,
