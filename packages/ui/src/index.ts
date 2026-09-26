@@ -14,6 +14,7 @@ export * from "./components/Button";
 export * from "./components/BouncingLoader";
 export * from "./components/Tag";
 export * from "./components/Favicon";
+export * from "./components/ChipAddInput";
 export * from "./components/DiscoverableChipList";
 export * from "./components/MetricChip";
 export * from "./components/KeywordRow";

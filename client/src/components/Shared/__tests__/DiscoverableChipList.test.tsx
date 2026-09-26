@@ -1,7 +1,7 @@
 /**
  * DiscoverableChipList — the shared keyword/competitor/authority picker, now in
  * `@structura/ui`. Pins the interaction contract every surface relies on. Run
- * here (client Vitest) because the package itself has no test runner.
+ * here (client Vitest) so the wp-admin consumer contract is pinned where it is used.
  */
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
@@ -57,23 +57,35 @@ describe("DiscoverableChipList", () => {
     expect(props.onAddAll).toHaveBeenCalled();
   });
 
-  it("fires onAddManual on Enter and clears the input on success", () => {
+  it("fires onAddManual on Enter with the value as a one-item batch and clears the input", () => {
     const onAddManual = vi.fn();
     setup({ onAddManual });
     const input = screen.getByPlaceholderText("type here") as HTMLInputElement;
     fireEvent.change(input, { target: { value: "delta" } });
     fireEvent.keyDown(input, { key: "Enter" });
-    expect(onAddManual).toHaveBeenCalledWith("delta");
+    expect(onAddManual).toHaveBeenCalledWith(["delta"]);
     expect(input.value).toBe("");
   });
 
-  it("keeps the input when onAddManual returns false (validation failure)", () => {
-    const onAddManual = vi.fn().mockReturnValue(false);
+  it("splits a comma-separated entry into ONE onAddManual call and shows the count", () => {
+    const onAddManual = vi.fn();
     setup({ onAddManual });
     const input = screen.getByPlaceholderText("type here") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "bad" } });
+    fireEvent.change(input, { target: { value: "delta, epsilon, zeta" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add 3" }));
+    expect(onAddManual).toHaveBeenCalledTimes(1);
+    expect(onAddManual).toHaveBeenCalledWith(["delta", "epsilon", "zeta"]);
+    expect(input.value).toBe("");
+    expect(screen.getByText("Add several at once: separate them with commas.")).toBeInTheDocument();
+  });
+
+  it("keeps the rejected values in the input (validation failure)", () => {
+    const onAddManual = vi.fn().mockReturnValue(["bad"]);
+    setup({ onAddManual });
+    const input = screen.getByPlaceholderText("type here") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "good, bad" } });
     fireEvent.keyDown(input, { key: "Enter" });
-    expect(onAddManual).toHaveBeenCalledWith("bad");
+    expect(onAddManual).toHaveBeenCalledWith(["good", "bad"]);
     expect(input.value).toBe("bad");
   });
 

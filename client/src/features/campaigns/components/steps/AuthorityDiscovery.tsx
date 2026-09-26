@@ -11,13 +11,13 @@ import {
   GraduationCap,
   Loader2,
   Newspaper,
-  Plus,
   RefreshCw,
   Shield,
   Sparkles,
   X,
 } from "lucide-react";
-import { Button, cn, Favicon, InputField } from "@structura/ui";
+import { Button, ChipAddInput, cn, Favicon } from "@structura/ui";
+import { buildChipListLabels } from "@/utils/chipListLabels";
 import { VettedAuthorityDomain } from "@/features/campaigns/types";
 import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutations";
 import { useLicense } from "@/features/settings";
@@ -137,7 +137,6 @@ export const AuthorityDiscovery = forwardRef<AuthorityDiscoveryHandle, Authority
     );
     const [domains, setDomains] = useState<VettedAuthorityDomain[]>(existingDomains ?? []);
     const [error, setError] = useState<string>("");
-    const [newDomainInput, setNewDomainInput] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     const {
       discoverAuthority,
@@ -259,38 +258,34 @@ export const AuthorityDiscovery = forwardRef<AuthorityDiscoveryHandle, Authority
       setDomains((prev) => prev.filter((d) => d.domain !== domain));
     };
 
-    const addManualDomain = () => {
-      const raw = newDomainInput
-        .trim()
-        .toLowerCase()
-        .replace(/^(https?:\/\/)?(www\.)?/, "")
-        .replace(/\/.*$/, "");
-      if (!raw || raw.length < 3 || !raw.includes(".")) return;
-
-      if (domains.some((d) => d.domain === raw)) {
-        setNewDomainInput("");
-        return;
+    // One state update per batch. Entries that don't look like a domain are
+    // handed back so they stay in the input; duplicates are dropped silently.
+    const addManualDomains = (values: string[]): string[] => {
+      const seen = new Set(domains.map((d) => d.domain));
+      const fresh: VettedAuthorityDomain[] = [];
+      const rejected: string[] = [];
+      for (const value of values) {
+        const raw = value
+          .toLowerCase()
+          .replace(/^(https?:\/\/)?(www\.)?/, "")
+          .replace(/\/.*$/, "");
+        if (!raw || raw.length < 3 || !raw.includes(".")) {
+          rejected.push(value);
+          continue;
+        }
+        if (seen.has(raw)) continue;
+        seen.add(raw);
+        fresh.push({
+          domain: raw,
+          description: __("Manually added", "structura"),
+          tier: "niche",
+          citedBy: 0,
+          category: "industry",
+          sampleUrls: [],
+        });
       }
-
-      const newDomain: VettedAuthorityDomain = {
-        domain: raw,
-        description: __("Manually added", "structura"),
-        tier: "niche",
-        citedBy: 0,
-        category: "industry",
-        sampleUrls: [],
-      };
-
-      setDomains((prev) => [...prev, newDomain]);
-      setNewDomainInput("");
-      inputRef.current?.focus();
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        addManualDomain();
-      }
+      if (fresh.length > 0) setDomains((prev) => [...prev, ...fresh]);
+      return rejected;
     };
 
     // ── Render: Teaser for free users ──────────────────────────────────────
@@ -444,26 +439,12 @@ export const AuthorityDiscovery = forwardRef<AuthorityDiscoveryHandle, Authority
 
         {/* Manual domain input */}
         <div className="mb-6">
-          <InputField
+          <ChipAddInput
             ref={inputRef}
             label={__("Add domain", "structura")}
-            hiddenLabel
-            size="sm"
-            value={newDomainInput}
-            onChange={(e) => setNewDomainInput(e.target.value)}
-            onKeyDown={handleKeyDown}
             placeholder={__("Add a domain manually (e.g. moz.com)", "structura")}
-            rightAdornment={
-              <Button
-                variant="transparent"
-                size="sm"
-                onClick={addManualDomain}
-                disabled={!newDomainInput.trim()}
-              >
-                <Plus size={14} className="mr-1" />
-                {__("Add", "structura")}
-              </Button>
-            }
+            onAdd={addManualDomains}
+            labels={buildChipListLabels()}
           />
         </div>
       </div>

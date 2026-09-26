@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.27.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.26.0...v2.27.0) (2026-09-26)
+
+
+### Features
+
+* **ui:** accept comma-separated lists in every per-item add field ([1187991](https://github.com/yuriy-vasilyev/structura-core/commit/1187991a1ed44222a5ddb15f6940d80e58bd2b16))
+* **www:** animate the channels hero illustration ([e2e6cce](https://github.com/yuriy-vasilyev/structura-core/commit/e2e6cceb0ab02d850e1ea15b59ee937bcf2f3780))
+* **www:** animate the features hero illustration ([8219773](https://github.com/yuriy-vasilyev/structura-core/commit/821977306a8b197754c91f2160886a362c20f7aa))
+* **www:** animate the homepage hero illustration ([71957e1](https://github.com/yuriy-vasilyev/structura-core/commit/71957e14fc746cfb1126f3ef5ffd3e1f8619093a))
+
+
+### Bug Fixes
+
+* **functions:** gate reference-lookup queries out of keyphrase grounding ([d2ea7c9](https://github.com/yuriy-vasilyev/structura-core/commit/d2ea7c9783ca928fb753f3738d8aa01790a121f3))
+* **functions:** never delete the workspace when purging the last site ([2031e95](https://github.com/yuriy-vasilyev/structura-core/commit/2031e950d680d535dcd5d2fe4320e02d2b5e3115))
+* **plugin:** replace German strings leaked into the es/fr catalogs ([014219d](https://github.com/yuriy-vasilyev/structura-core/commit/014219d4fffc708a7048005ccbf1e7affdc88400))
+
 ## [2.26.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.25.0...v2.26.0) (2026-09-23)
 
 

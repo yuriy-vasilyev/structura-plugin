@@ -491,7 +491,7 @@ export const Account = () => {
           className="mt-4"
           label={__("Permanently delete all data for this site", "structura")}
           description={__(
-            "Erases everything we store for this site — it can't be restored. If this is your only site, your shared personas, AI keys and presets are deleted too.",
+            "Erases everything we store for this site — it can't be restored. Shared personas, AI keys and presets are kept.",
             "structura"
           )}
           checked={purge}

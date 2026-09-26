@@ -4896,8 +4896,8 @@ class Rest_Api
     public function deactivate_license_endpoint(\WP_REST_Request $request)
     {
         // `purge` (default false) opts into a hard remove — delete the cloud
-        // activation (and the workspace when it's the last site) instead of a
-        // reversible soft disconnect. Set by the removal dialog's
+        // activation (never the workspace, see functions/src/workspaces/purge.ts)
+        // instead of a reversible soft disconnect. Set by the removal dialog's
         // "permanently delete all data" checkbox.
         $purge   = (bool) $request->get_param('purge');
         $success = License_Manager::deactivate($purge);

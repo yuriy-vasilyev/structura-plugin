@@ -11,6 +11,7 @@
  */
 import { useState } from "react";
 import { __ } from "@wordpress/i18n";
+import { buildChipListLabels } from "@/utils/chipListLabels";
 import {
   Check,
   CloudOff,
@@ -365,11 +366,17 @@ export const SeoTargetingSection = ({
           onRemove={(value) =>
             setAuthority(authorityDomains.map((d) => d.domain).filter((d) => d !== value))
           }
-          onAddManual={(raw) => {
-            const v = raw.trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-            if (!v) return false;
-            setAuthority([...authorityDomains.map((d) => d.domain), v]);
-            return true;
+          onAddManual={(values) => {
+            const existing = authorityDomains.map((d) => d.domain);
+            const fresh: string[] = [];
+            const rejected: string[] = [];
+            for (const raw of values) {
+              const v = raw.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+              if (!v) rejected.push(raw);
+              else if (!existing.includes(v) && !fresh.includes(v)) fresh.push(v);
+            }
+            if (fresh.length > 0) setAuthority([...existing, ...fresh]);
+            return rejected;
           }}
           onDiscover={runAuthorityDiscovery}
           discovering={isDiscoveringDetached}
@@ -378,6 +385,7 @@ export const SeoTargetingSection = ({
           emptyText={__("No authority sources yet.", "structura")}
           inputPlaceholder={__("Add a domain (e.g. developer.mozilla.org)", "structura")}
           ariaLabel={__("Authority sources", "structura")}
+          labels={buildChipListLabels()}
         />
       </div>
     </div>

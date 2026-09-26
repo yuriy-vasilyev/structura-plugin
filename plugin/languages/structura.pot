@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-23T18:42:46+00:00\n"
+"POT-Creation-Date: 2026-09-26T17:12:59+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: structura\n"
@@ -2009,7 +2009,6 @@ msgstr ""
 #: client/src/features/campaigns/components/MagicSuggestButton.tsx:73
 #: client/src/features/campaigns/components/PregenerationControl.tsx:103
 #: client/src/features/campaigns/components/SuggestStrategySection.tsx:120
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:677
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:876
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:484
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:584
@@ -2066,7 +2065,6 @@ msgstr ""
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:474
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:515
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:268
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:613
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:309
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:1088
 #: client/src/features/channels/components/AddCredentialForm.tsx:473
@@ -2343,8 +2341,8 @@ msgstr ""
 
 #: client/src/features/account/routes/AccountPage.tsx:493
 msgid ""
-"Erases everything we store for this site — it can't be restored. If this is "
-"your only site, your shared personas, AI keys and presets are deleted too."
+"Erases everything we store for this site — it can't be restored. Shared "
+"personas, AI keys and presets are kept."
 msgstr ""
 
 #: client/src/features/ai-engine/api/useDisconnectProvider.ts:17
@@ -2709,7 +2707,6 @@ msgid "Refresh Models"
 msgstr ""
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:686
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:627
 #: client/src/features/onboarding/components/WizardShell.tsx:375
 msgid "Back"
 msgstr ""
@@ -3671,7 +3668,7 @@ msgid "Image provider"
 msgstr ""
 
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:108
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:191
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:192
 msgid "Focus keyphrase"
 msgstr ""
 
@@ -3791,134 +3788,135 @@ msgstr ""
 msgid "Parsed Autonomous Rhythm"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:96
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:97
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:609
 msgid "SEO Targeting"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:99
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:100
 msgid ""
 "Ground this post in a real focus keyphrase with live search volume and "
 "vetted authority sources — using real Google search data."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:106
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:336
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:387
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:107
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:331
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:373
 msgid "Pro / Cloud Feature"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:112
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:316
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:367
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:113
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:311
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:353
 msgid "Unlock with Pro"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:113
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:317
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:368
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:114
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:312
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:354
 msgid "Create account"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:205
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:206
 msgid "Clear keyphrase"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:216
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:217
 msgid ""
 "Pick one focus keyphrase and every heading, section, and meta field is "
 "optimized around it. Suggest pulls ranked candidates with real monthly "
 "search volume."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:223
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:224
 msgid "Suggest keyphrases"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:227
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:228
 msgid "Describe the post topic above first."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:237
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:238
 msgid "Finding your best keyphrase…"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:246
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:247
 msgid "Pick one — it becomes your focus keyphrase."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:248
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:479
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:249
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:465
 msgid "Live data"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:250
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:481
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:251
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:467
 msgid "AI estimate"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:255
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:256
 msgid "Re-suggest"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:297
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:298
 msgid "What searchers also ask"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:318
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:319
 msgid "No live search data for that topic. Enter your own focus keyphrase."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:328
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:329
 msgid ""
 "Couldn't reach the keyword service. The post can still generate — enter a "
 "keyphrase manually or retry."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:335
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:336
 #: client/src/features/campaigns/components/StockTab.tsx:292
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:164
 #: client/src/features/channels/components/SearchPerformanceSection.tsx:111
 msgid "Retry"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:346
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:380
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:347
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:387
 msgid "Authority sources"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:348
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:349
 msgid "· optional"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:352
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:353
 msgid ""
 "Reputable domains the post can cite as outbound links for E-E-A-T. Discover "
 "them automatically or add your own — leave empty to let the writer choose."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:376
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:383
 msgid "Discover authority sources"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:377
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:384
+#: client/src/utils/chipListLabels.ts:20
 msgid "Suggested — tap to add"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:378
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:385
 msgid "No authority sources yet."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:379
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:386
 msgid "Add a domain (e.g. developer.mozilla.org)"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:410
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:414
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:418
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:422
 msgid "…or type your own keyphrase"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:424
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:432
 msgid "Use"
 msgstr ""
 
@@ -4191,156 +4189,6 @@ msgid ""
 "grows."
 msgstr ""
 
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:73
-msgid "What's the primary goal of this campaign?"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:75
-msgid "Drive organic traffic"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:76
-msgid "Target low-competition topics"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:77
-msgid "Convert readers to customers"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:78
-msgid "Build niche authority"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:84
-msgid "Who's your target audience?"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:86
-msgid "Beginners & newcomers"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:87
-msgid "Professionals & practitioners"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:88
-msgid "Business owners & decision-makers"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:89
-msgid "Developers & technical users"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:90
-msgid "General public"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:96
-msgid "What topics or niches should this campaign cover?"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:103
-msgid "What type of content works best for your audience?"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:105
-msgid "How-to guides"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:106
-msgid "Listicles & roundups"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:107
-msgid "In-depth analysis"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:108
-msgid "Comparisons & reviews"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:109
-msgid "Tutorials & walkthroughs"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:110
-#: client/src/features/settings/components/KeyPagesEditor.tsx:33
-msgid "Case studies"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:117
-msgid "What makes your perspective unique?"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:119
-msgid "Years of hands-on experience"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:120
-msgid "Data-driven insights"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:121
-msgid "Contrarian / fresh take"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:122
-msgid "Step-by-step practical advice"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:123
-msgid "Industry insider knowledge"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:460
-msgid "Question %d of %d"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:542
-msgid "AI-suggested"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:551
-msgid "Suggesting more topics…"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:568
-msgid "Type your own answer"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:574
-msgid "Your answer"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:582
-msgid "e.g. WordPress performance optimization"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:584
-msgid "Type your answer…"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:585
-msgid "Type your own answer…"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:636
-msgid "Next"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:657
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:675
-#: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:91
-#: client/src/features/campaigns/components/steps/StepObjective.tsx:87
-msgid "Generate Campaign Strategy"
-msgstr ""
-
-#: client/src/features/campaigns/components/interview/GuidedInterview.tsx:668
-msgid ""
-"AI strategy synthesis is a paid feature. Use \"Skip interview\" below to "
-"fill in the details yourself, or upgrade your plan."
-msgstr ""
-
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:96
 msgid "Academic"
 msgstr ""
@@ -4370,114 +4218,107 @@ msgstr ""
 msgid "Community"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:205
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:277
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:204
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:280
 msgid "Manually added"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:216
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:215
 msgid ""
 "No authority domains were found for this niche. You can add domains manually "
 "below."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:227
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:226
 msgid ""
 "Discovery failed. You can retry, add domains manually, or skip this step."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:325
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:418
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:320
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:413
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1710
 msgid "Authority Sources"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:348
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:399
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:343
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:385
 msgid "Skip & continue"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:386
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:437
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:381
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:423
 #: client/src/features/notices/utils.ts:172
 #: client/src/features/notices/utils.ts:178
 msgid "Learn more"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:417
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:412
 msgid "%d Authority Source(s)"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:422
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:486
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:417
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:472
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:616
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:664
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:271
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:295
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:345
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:327
 msgid "Re-discover"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:422
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:486
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:346
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:417
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:472
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:328
 msgid "Discover"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:440
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:435
 msgid "No domains yet. Use Discover or add domains manually below."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:449
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:444
 msgid "Add domain"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:455
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:445
 msgid "Add a domain manually (e.g. moz.com)"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:464
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:570
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:483
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:315
-msgid "Add"
-msgstr ""
-
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:499
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:480
 msgid "Universal"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:499
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:480
 msgid "Niche"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:530
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:511
 msgid "Remove domain"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:549
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:601
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:530
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:573
 msgid "Analyzing"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:550
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:531
 msgid "Understanding your campaign objective and niche…"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:554
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:606
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:535
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:578
 msgid "Discovering"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:555
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:536
 msgid "Identifying authoritative domains in your topic space…"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:559
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:540
 msgid "Verifying"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:560
+#: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:541
 msgid "Checking domain availability and validating sources…"
 msgstr ""
 
@@ -4562,6 +4403,11 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:90
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:86
 msgid "Generate Post Strategy"
+msgstr ""
+
+#: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:91
+#: client/src/features/campaigns/components/steps/StepObjective.tsx:87
+msgid "Generate Campaign Strategy"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:93
@@ -4884,34 +4730,34 @@ msgstr ""
 msgid "This roadmap will continue producing content until manually paused."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:249
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:248
 msgid ""
 "No keywords were discovered for this topic. You can add keywords manually "
 "below."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:261
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:260
 msgid ""
 "Keyword discovery failed. You can retry, add keywords manually, or skip this "
 "step."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:376
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:470
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:362
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:456
 msgid "Keyword Bank"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:469
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:455
 msgid "%d Keyword(s)"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:496
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:482
 msgid ""
 "Prefilled from your site's target keywords by default. Add, remove, or re-"
 "discover to tailor them for this campaign."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:508
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:494
 msgid ""
 "These keywords were generated by AI based on your campaign objective. Real "
 "search-volume data wasn't available for this run — typically because your "
@@ -4919,39 +4765,39 @@ msgid ""
 "supported yet. Numbers are estimates."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:543
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:529
 msgid "No keywords yet. Use Discover or add keywords manually below."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:552
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:538
 msgid "Add keyword"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:558
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:539
 msgid "Add a keyword manually (e.g. best WordPress SEO plugins)"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:602
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:574
 msgid "Studying your topic landscape…"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:607
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:579
 msgid "Surfacing how readers search this niche…"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:611
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:583
 msgid "Expanding"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:612
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:584
 msgid "Mapping adjacent angles and long-tail variants…"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:616
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:588
 msgid "Curating"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:617
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:589
 msgid "Ranking by relevance to your campaign…"
 msgstr ""
 
@@ -5060,9 +4906,8 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/keywordBankLabels.ts:66
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:168
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:481
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:313
-#: client/src/utils/referralLabels.ts:59 client/src/utils/referralLabels.ts:61
+#: client/src/utils/chipListLabels.ts:14 client/src/utils/referralLabels.ts:59
+#: client/src/utils/referralLabels.ts:61
 msgid "Remove %s"
 msgstr ""
 
@@ -8330,13 +8175,13 @@ msgid ""
 msgstr ""
 
 #: client/src/features/onboarding/components/PositioningCard.tsx:140
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:412
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:415
 msgid "Draft from my homepage"
 msgstr ""
 
 #: client/src/features/onboarding/components/PositioningCard.tsx:153
 #: client/src/features/settings/components/PublicSiteCard.tsx:269
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:305
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:292
 #: client/src/features/site/routes/tabs/SiteReferralsTab.tsx:60
 msgid "Save"
 msgstr ""
@@ -8346,27 +8191,27 @@ msgid "What does your business do?"
 msgstr ""
 
 #: client/src/features/onboarding/components/PositioningCard.tsx:173
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:424
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:427
 msgid "We help remote design teams ship Figma faster…"
 msgstr ""
 
 #: client/src/features/onboarding/components/PositioningCard.tsx:179
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:431
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:434
 msgid "Who's your typical customer?"
 msgstr ""
 
 #: client/src/features/onboarding/components/PositioningCard.tsx:184
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:437
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:440
 msgid "Senior designers at 20–200-person companies…"
 msgstr ""
 
 #: client/src/features/onboarding/components/PositioningCard.tsx:190
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:444
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:447
 msgid "What problem do you solve for them?"
 msgstr ""
 
 #: client/src/features/onboarding/components/PositioningCard.tsx:195
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:450
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:453
 msgid "Async handoff between designers and engineers breaks down…"
 msgstr ""
 
@@ -8594,99 +8439,94 @@ msgid ""
 "it to generate suggestions."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:154
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:155
 msgid "Drafted from your homepage — edit anything below."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:161
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:162
 msgid ""
 "We couldn't find a public homepage to read. Add your website URL on the Site "
 "info step, or just fill the answers in yourself."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:165
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:166
 msgid ""
 "AI couldn't draft this right now. Try again in a moment, or fill the answers "
 "in yourself."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:172
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:173
 msgid "Something went wrong drafting from your homepage. Please try again."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:335
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:338
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:214
 msgid "Reading your homepage…"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:336
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:339
 msgid "Drafting your positioning…"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:337
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:340
 msgid "Scouting competitors…"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:366
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:385
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:369
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:388
 msgid "Tell us about your business"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:372
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:375
 msgid "Researching your business"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:388
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:391
 msgid ""
 "Three quick questions and a couple of competitors. We'll do the heavy "
 "lifting from there — each campaign discovers its own keywords and sources."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:399
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:402
 msgid "About your business"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:418
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:421
 msgid "In one sentence, what does your business do?"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:459
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:462
 msgid "AI draft"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:461
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:464
 msgid ""
 "Edit anything that doesn't feel right — your changes overwrite the draft."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:475
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:478
 msgid "Sites you compete with"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:482
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:314
-msgid "Add all"
-msgstr ""
-
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:485
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:484
 #: client/src/features/site/components/SiteSubNav.tsx:67
 msgid "Competitors"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:499
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:498
 msgid "Suggest competitors"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:503
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:350
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:502
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:332
 msgid "Auto-detected from your site"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:504
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:503
 msgid "AI-suggested — tap to add"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:510
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:509
 msgid "Looking for likely competitors…"
 msgstr ""
 
@@ -9706,6 +9546,10 @@ msgstr ""
 msgid "Pricing"
 msgstr ""
 
+#: client/src/features/settings/components/KeyPagesEditor.tsx:33
+msgid "Case studies"
+msgstr ""
+
 #: client/src/features/settings/components/KeyPagesEditor.tsx:34
 msgid "Blog index"
 msgstr ""
@@ -10355,97 +10199,97 @@ msgid ""
 "competitors, and refresh preferences."
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:79
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:70
 msgid "Competitor map"
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:82
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:73
 msgid ""
 "Tell us who you compete with and we'll surface the keywords they rank for "
 "that you don't — straight into your next campaign's keyword bank."
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:89
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:80
 msgid "competitor-a.example"
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:91
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:97
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:82
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:88
 msgid "Example"
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:95
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:86
 msgid "competitor-b.example"
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:188
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:179
 msgid "Maximum of %d competitor URLs reached."
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:230
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:225
 msgid "Enter a valid URL or domain."
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:234
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:227
 msgid "That URL is already in the list."
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:250
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:237
 msgid ""
 "We couldn't find SERP-measured competitors for your domain yet (common for "
 "new or low-traffic sites), so these are AI suggestions based on what you do. "
 "Re-discover once your site is indexed to swap in measured data."
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:258
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:245
 msgid "No SERP data yet — asking AI for likely competitors…"
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:265
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:252
 msgid ""
 "Analysis ran, but no SERP competitors were found for this domain yet. Common "
 "for new sites with limited ranking footprint. Re-discover after you've "
 "published more content."
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:280
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:267
 msgid "Loading competitors…"
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:288
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:275
 msgid "Your competitors"
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:289
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:276
 msgid ""
 "Used at every campaign creation to mine gap-keyword opportunities — terms "
 "they rank for that you don't."
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:317
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:299
 msgid "Competitor URLs"
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:343
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:325
 #: client/src/features/site/routes/tabs/SiteInfoTab.tsx:89
 msgid "Analyzing…"
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:352
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:334
 msgid ""
 "No competitors confirmed yet. Adopt a suggestion above, or add one manually "
 "below."
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:356
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:338
 msgid "competitor.com or https://competitor.com/blog"
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:375
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:358
 msgid "Find the keywords your competitors rank for — that you don't."
 msgstr ""
 
-#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:379
+#: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:362
 msgid ""
 "Add competitor URLs and Structura surfaces the gap-keyword opportunities "
 "they're winning, ready for your next campaign."
@@ -10631,6 +10475,30 @@ msgstr ""
 
 #: client/src/index.tsx:42
 msgid "Data Fetch Error:"
+msgstr ""
+
+#: client/src/utils/chipListLabels.ts:15
+msgid "Add all"
+msgstr ""
+
+#: client/src/utils/chipListLabels.ts:16
+msgid "Add"
+msgstr ""
+
+#: client/src/utils/chipListLabels.ts:18
+msgid "Add %d"
+msgstr ""
+
+#: client/src/utils/chipListLabels.ts:19
+msgid "Add several at once: separate them with commas."
+msgstr ""
+
+#: client/src/utils/chipListLabels.ts:21
+msgid "AI suggest"
+msgstr ""
+
+#: client/src/utils/chipListLabels.ts:22
+msgid "Add an item"
 msgstr ""
 
 #: client/src/utils/cronUtils.ts:28

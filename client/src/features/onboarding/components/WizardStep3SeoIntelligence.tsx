@@ -30,7 +30,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "@wordpress/element";
-import { __, sprintf } from "@wordpress/i18n";
+import { __ } from "@wordpress/i18n";
 import {
   Badge,
   Button,
@@ -46,6 +46,7 @@ import { Loader2, Search, Sparkles, Users } from "lucide-react";
 import { useSiteAnalysisQuery } from "@/features/site/api/useSiteAnalysis";
 import { useLicense } from "@/features/settings";
 import { buildReferralLabels } from "@/utils/referralLabels";
+import { buildChipListLabels } from "@/utils/chipListLabels";
 
 import {
   useSuggestWizardPositioningMutation,
@@ -178,13 +179,15 @@ export const WizardStep3SeoIntelligence = () => {
   };
 
   /* ─── 3b. Competitors (instant, local) ────────────────────────── */
-  const addCompetitor = (raw: string) => {
-    const trimmed = raw.trim();
-    if (!trimmed) return;
+  // One `patch` per batch so a pasted "a.com, b.com" lands in a single write.
+  const addCompetitors = (raw: string[]) => {
+    const trimmed = raw.map((r) => r.trim()).filter(Boolean);
+    if (trimmed.length === 0) return;
     patch({
-      competitorUrls: Array.from(new Set([...savedCompetitors, trimmed])),
+      competitorUrls: Array.from(new Set([...savedCompetitors, ...trimmed])),
     });
   };
+  const addCompetitor = (raw: string) => addCompetitors([raw]);
 
   const removeCompetitor = (url: string) =>
     patch({ competitorUrls: savedCompetitors.filter((c) => c !== url) });
@@ -477,11 +480,7 @@ export const WizardStep3SeoIntelligence = () => {
 
         <DiscoverableChipList
           kind="domain"
-          labels={{
-            remove: (l) => sprintf(__("Remove %s", "structura"), l),
-            addAll: __("Add all", "structura"),
-            add: __("Add", "structura"),
-          }}
+          labels={buildChipListLabels()}
           ariaLabel={__("Competitors", "structura")}
           added={savedCompetitors.map((url) => ({
             value: url,
@@ -512,7 +511,9 @@ export const WizardStep3SeoIntelligence = () => {
             ) : undefined
           }
           inputPlaceholder="https://example.com"
-          onAddManual={addCompetitor}
+          onAddManual={(values) => {
+            addCompetitors(values);
+          }}
         />
       </Card>
 

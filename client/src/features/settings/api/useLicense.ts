@@ -521,8 +521,8 @@ export const useLicense = () => {
   });
 
   const deactivateMutation = useMutation({
-    // `purge` opts into a hard remove (delete the cloud activation, and the
-    // workspace if it's the last site) instead of a reversible disconnect.
+    // `purge` opts into a hard remove (delete the cloud activation; the
+    // workspace always survives) instead of a reversible disconnect.
     mutationFn: (opts?: { purge?: boolean }) =>
       apiFetch({
         path: "/structura/v1/license/deactivate",

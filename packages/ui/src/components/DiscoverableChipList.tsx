@@ -24,13 +24,13 @@
  * Design guide: dark-mode-first, design tokens only; chips are real buttons
  * with focus rings + aria labels.
  */
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Loader2, Plus, RefreshCw, Sparkles, X, type LucideIcon } from "lucide-react";
 
 import { cn } from "../utils";
 import { Button } from "./Button";
+import { ChipAddInput, DEFAULT_CHIP_ADD_LABELS, type ChipAddInputLabels } from "./ChipAddInput";
 import { Favicon } from "./Favicon";
-import { InputField } from "./InputField";
 import { Tooltip } from "./Tooltip";
 
 /** One row of the picker. `value` is canonical (url/keyword); `label` displays. */
@@ -55,13 +55,11 @@ export interface DiscoverableChipBadge {
  * default; consumers override with their own i18n (`__()` in the plugin,
  * `t()` in the portal) so nothing ships English-only.
  */
-export interface DiscoverableChipLabels {
+export interface DiscoverableChipLabels extends ChipAddInputLabels {
   /** Accessible name for a chip's remove button, given the chip label. */
   remove: (label: string) => string;
   /** "Add all" button in the suggested header. */
   addAll: string;
-  /** Manual-add submit button. */
-  add: string;
   /** Suggested-area eyebrow when `suggestedLabel` is not supplied. */
   suggested: string;
   /** Discover button when `discoverLabel` is not supplied. */
@@ -71,9 +69,9 @@ export interface DiscoverableChipLabels {
 }
 
 const DEFAULT_LABELS: DiscoverableChipLabels = {
+  ...DEFAULT_CHIP_ADD_LABELS,
   remove: (label) => `Remove ${label}`,
   addAll: "Add all",
-  add: "Add",
   suggested: "Suggested — tap to add",
   discover: "AI suggest",
   addItem: "Add an item",
@@ -112,12 +110,15 @@ export interface DiscoverableChipListProps {
    */
   chipBadges?: Record<string, DiscoverableChipBadge>;
   /**
-   * Add a manually-typed value. Return `false` to KEEP the input (e.g. a
-   * validation failure the parent surfaces via `addManualError`); any other
-   * return clears it. Optional — omit together with `hideInput` for a
-   * suggestions-only sub-list that has no manual-add field.
+   * Add manually-typed values. One entry may hold several (comma / newline
+   * separated — see {@link splitChipInput}); they arrive as ONE call so the
+   * parent can commit a single state update. Return the values that were
+   * rejected (validation failure the parent surfaces via `addManualError`,
+   * cap reached…) — they stay in the input; return nothing to clear it.
+   * Optional — omit together with `hideInput` for a suggestions-only
+   * sub-list that has no manual-add field.
    */
-  onAddManual?: (raw: string) => void | boolean;
+  onAddManual?: (values: string[]) => string[] | void;
   addManualError?: string | null;
   /** Caps/locks all add affordances (e.g. at the list cap). */
   disabled?: boolean;
@@ -170,14 +171,6 @@ export function DiscoverableChipList({
   labels: labelOverrides,
 }: DiscoverableChipListProps) {
   const labels = { ...DEFAULT_LABELS, ...labelOverrides };
-  const [input, setInput] = useState("");
-
-  const submit = () => {
-    const v = input.trim();
-    if (!v || disabled || !onAddManual) return;
-    // Parent returns false to reject (keep the text so the user can fix it).
-    if (onAddManual(v) !== false) setInput("");
-  };
 
   const leading = (item: DiscoverableChipItem) =>
     kind === "domain" ? (
@@ -306,33 +299,14 @@ export function DiscoverableChipList({
       ) : null}
 
       {/* Compact manual add. */}
-      {hideInput ? null : (
-        <InputField
+      {hideInput || !onAddManual ? null : (
+        <ChipAddInput
           label={inputPlaceholder ?? labels.addItem}
-          hiddenLabel
-          size="sm"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              submit();
-            }
-          }}
           placeholder={inputPlaceholder}
           disabled={disabled}
           error={addManualError ?? undefined}
-          rightAdornment={
-            <Button
-              variant="transparent"
-              size="sm"
-              onClick={submit}
-              disabled={!input.trim() || disabled}
-            >
-              <Plus size={14} className="mr-1" />
-              {labels.add}
-            </Button>
-          }
+          onAdd={onAddManual}
+          labels={labels}
         />
       )}
     </div>

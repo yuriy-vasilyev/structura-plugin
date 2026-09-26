@@ -553,10 +553,10 @@ class License_Manager
 
         if ($purge && ! empty($data['key'])) {
             // Hard remove ("permanently delete all data" checkbox): delete
-            // the cloud activation outright — and, when it's the last site
-            // in the workspace, the whole workspace (shared personas, AI
-            // keys, presets, usage history) — via the same /forgetActivation
-            // path forget_site() uses. The license key is the cloud auth
+            // the cloud activation outright via the same /forgetActivation
+            // path forget_site() uses. The workspace (shared personas, AI
+            // keys, presets) survives even when this was the last site —
+            // see functions/src/workspaces/purge.ts. The license key is the cloud auth
             // boundary here, mirroring forget_site() (the bearer is dropped
             // below).
             Cloud_Client::post('/forgetActivation', [

@@ -21,6 +21,8 @@
 import { useState } from "react";
 import { __, sprintf } from "@wordpress/i18n";
 import { Button, Card, DiscoverableChipList, PageLoader } from "@structura/ui";
+import { buildChipListLabels } from "@/utils/chipListLabels";
+import { planCompetitorAdds } from "./competitorAdds";
 import { Loader2, Save } from "lucide-react";
 import { useLicense } from "@/features/settings";
 import {
@@ -51,17 +53,6 @@ function hostOf(raw: string): string {
 }
 
 const COMPETITOR_URLS_MAX = 25;
-
-function normaliseInput(raw: string): string | null {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  try {
-    const candidate = trimmed.startsWith("http") ? trimmed : `https://${trimmed}`;
-    return new URL(candidate).toString();
-  } catch {
-    return null;
-  }
-}
 
 function suggestionToConfirmedUrl(domain: string): string {
   // Suggestions come back as bare hostnames; the confirmed list stores
@@ -222,25 +213,21 @@ const CompetitorsEditor = () => {
     addToDraft(value);
   };
 
-  // Manual add: validate, surface errors via `addManualError`, return false to
-  // keep the user's text on failure.
-  const onAddManual = (raw: string): boolean => {
-    const normalised = normaliseInput(raw);
-    if (!normalised) {
-      setError(__("Enter a valid URL or domain.", "structura"));
-      return false;
-    }
-    if (confirmedUrls.includes(normalised)) {
-      setError(__("That URL is already in the list.", "structura"));
-      return false;
-    }
-    if (atCap) {
-      setError(capMessage);
-      return false;
-    }
-    addToDraft(normalised);
-    setError(null);
-    return true;
+  // Manual add: one batch per submit. Rejected entries go back to the input
+  // (via the return value) and the reason surfaces through `addManualError`.
+  const onAddManual = (values: string[]): string[] => {
+    const plan = planCompetitorAdds(values, confirmedUrls, remaining);
+    if (plan.accepted.length > 0) addMany(plan.accepted);
+    setError(
+      plan.reason === "cap"
+        ? capMessage
+        : plan.reason === "invalid"
+        ? __("Enter a valid URL or domain.", "structura")
+        : plan.reason === "duplicate"
+        ? __("That URL is already in the list.", "structura")
+        : null,
+    );
+    return plan.rejected;
   };
 
   // Contextual notice shown in the suggested area when there are no chips:
@@ -309,11 +296,6 @@ const CompetitorsEditor = () => {
 
       <DiscoverableChipList
         kind="domain"
-        labels={{
-          remove: (l) => sprintf(__("Remove %s", "structura"), l),
-          addAll: __("Add all", "structura"),
-          add: __("Add", "structura"),
-        }}
         ariaLabel={__("Competitor URLs", "structura")}
         added={confirmedUrls.map((url) => ({ value: url, label: hostOf(url) }))}
         suggested={suggestedItems}
@@ -360,6 +342,7 @@ const CompetitorsEditor = () => {
         onAddManual={onAddManual}
         addManualError={error}
         disabled={atCap}
+        labels={buildChipListLabels()}
       />
     </Card>
   );

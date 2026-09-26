@@ -15,7 +15,6 @@ import {
   ExternalLink,
   Key,
   Loader2,
-  Plus,
   RefreshCw,
   Search,
   Sparkles,
@@ -25,12 +24,13 @@ import {
   Badge,
   Button,
   cn,
-  InputField,
+  ChipAddInput,
   KeywordBankList,
   provenanceFromWireSource,
   type KeywordBankItem,
   type KeywordRowMetrics,
 } from "@structura/ui";
+import { buildChipListLabels } from "@/utils/chipListLabels";
 import { BankKeyword, KeywordDiscoveryMeta } from "@/features/campaigns/types";
 import {
   keywordBankLabels,
@@ -144,7 +144,6 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
       existingDiscoveryMeta ?? null
     );
     const dataPath = discoveryMeta?.path ?? null;
-    const [newKeywordInput, setNewKeywordInput] = useState("");
     // Bumped per discovery so the list's collapsed state resets (spec §3).
     const [listKey, setListKey] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -309,31 +308,18 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
     );
     const modeCaption = keywordModeCaption(discoveryMeta);
 
-    const addManualKeyword = () => {
-      const raw = newKeywordInput.trim().toLowerCase();
-      if (!raw || raw.length < 2) return;
-
-      if (keywords.some((k) => k.keyword.toLowerCase() === raw)) {
-        setNewKeywordInput("");
-        return;
+    // One state update per batch; dedupe is case-insensitive against the bank
+    // and within the batch. Sub-2-char entries are silently dropped (as before).
+    const addManualKeywords = (values: string[]) => {
+      const seen = new Set(keywords.map((k) => k.keyword.toLowerCase()));
+      const fresh: BankKeyword[] = [];
+      for (const value of values) {
+        const key = value.toLowerCase();
+        if (key.length < 2 || seen.has(key)) continue;
+        seen.add(key);
+        fresh.push({ keyword: value, source: "manual", usageCount: 0 });
       }
-
-      const newKw: BankKeyword = {
-        keyword: newKeywordInput.trim(),
-        source: "manual",
-        usageCount: 0,
-      };
-
-      setKeywords((prev) => [...prev, newKw]);
-      setNewKeywordInput("");
-      inputRef.current?.focus();
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        addManualKeyword();
-      }
+      if (fresh.length > 0) setKeywords((prev) => [...prev, ...fresh]);
     };
 
     // ── Render: Teaser for free users ──────────────────────────────────────
@@ -547,29 +533,15 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
 
         {/* Manual keyword input */}
         <div>
-          <InputField
+          <ChipAddInput
             ref={inputRef}
             label={__("Add keyword", "structura")}
-            hiddenLabel
-            size="sm"
-            value={newKeywordInput}
-            onChange={(e) => setNewKeywordInput(e.target.value)}
-            onKeyDown={handleKeyDown}
             placeholder={__(
               "Add a keyword manually (e.g. best WordPress SEO plugins)",
               "structura"
             )}
-            rightAdornment={
-              <Button
-                variant="transparent"
-                size="sm"
-                onClick={addManualKeyword}
-                disabled={!newKeywordInput.trim()}
-              >
-                <Plus size={14} className="mr-1" />
-                {__("Add", "structura")}
-              </Button>
-            }
+            onAdd={addManualKeywords}
+            labels={buildChipListLabels()}
           />
         </div>
       </div>

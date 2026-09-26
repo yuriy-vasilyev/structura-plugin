@@ -10,7 +10,7 @@ msgstr ""
 #: plugin/includes/Api/Campaign_Shape_Transformer.php:140
 #: plugin/includes/Api/Campaign_Shape_Transformer.php:149
 msgid "Not Scheduled"
-msgstr "Nicht geplant"
+msgstr "Sin programar"
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:821
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1806
@@ -42,13 +42,12 @@ msgstr "Aktive Licencia requerida."
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:867
 #: plugin/includes/Api/Rest_Api.php:1009
 msgid "Active Pro or Cloud license required to access analytics."
-msgstr ""
-"Aktive Pro- ode la Cloud-Licencia requerida, um auf Analysen zuzugreifen."
+msgstr "Se necesita una licencia Pro o Cloud activa para acceder a las analíticas."
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1423
 #: plugin/includes/Api/Rest_Api.php:1565
 msgid "Unknown error"
-msgstr "Unbekannter Error"
+msgstr "Error desconocido"
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1501
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4894
@@ -167,7 +166,7 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2014
 #: plugin/includes/Api/Rest_Api.php:2063 plugin/includes/Api/Rest_Api.php:2216
 msgid "Unknown error from discovery service."
-msgstr "Unbekannter Error vom Erkennungsdienst."
+msgstr "Error desconocido del servicio de descubrimiento."
 
 #. translators: 1: number of domains saved locally, 2: campaign id.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1896
@@ -250,12 +249,12 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2135
 #: plugin/includes/Api/Rest_Api.php:2337
 msgid "Keyword discovery started for \"%s\" (pre-creation)…"
-msgstr "Palabra clave-Erkennung gestartet para \"%s\" (vor de la Erstellung)…"
+msgstr "Descubrimiento de palabras clave iniciado para \"%s\" (antes de la creación)…"
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2166
 #: plugin/includes/Api/Rest_Api.php:2380
 msgid "Unknown error from keyword discovery service."
-msgstr "Unbekannter Error vom Palabra clave-Erkennungsdienst."
+msgstr "Error desconocido del servicio de descubrimiento de palabras clave."
 
 #. translators: 1: number of keywords found, 2: number of queries the discovery service ran, 3: total wall-clock duration in milliseconds.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2175
@@ -269,7 +268,7 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2191
 #: plugin/includes/Api/Rest_Api.php:2405
 msgid "Keyword discovery failed: %s"
-msgstr "Palabra clave-Erkennung fehlgeschlagen: %s"
+msgstr "El descubrimiento de palabras clave ha fallado: %s"
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2219
 #: plugin/includes/Api/Rest_Api.php:2861
@@ -285,12 +284,12 @@ msgstr "No se pudo guardar el banco de palabras clave. Inténtalo de nuevo."
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2265
 #: plugin/includes/Api/Rest_Api.php:2907
 msgid "Keyword bank updated (%d keywords)."
-msgstr "Palabra clave-Bank aktualisiert (%d Keywords)."
+msgstr "Banco de palabras clave actualizado (%d palabras clave)."
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2271
 #: plugin/includes/Api/Rest_Api.php:2913
 msgid "Keyword bank saved."
-msgstr "Palabra clave-Bank gespeichert."
+msgstr "Banco de palabras clave guardado."
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2282
 #: plugin/includes/Api/Rest_Api.php:2924
@@ -471,7 +470,7 @@ msgstr "Heartbeat de la nube rechazado."
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3887
 #: plugin/includes/Api/Rest_Api.php:4539 plugin/includes/Api/Rest_Api.php:4558
 msgid "Unknown"
-msgstr "Unbekannt"
+msgstr "Desconocido"
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3991
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:97
@@ -800,7 +799,7 @@ msgstr "Añade un número al meta título para aumentar las tasas de clics."
 #: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:75
 #: plugin/includes/Core/SEO_Rules_Registry.php:75
 msgid "Internal link optimization"
-msgstr "Optimierung interner Links"
+msgstr "Optimización del enlazado interno"
 
 #: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:76
 #: plugin/includes/Core/SEO_Rules_Registry.php:76
@@ -990,7 +989,7 @@ msgstr "Name es requerida."
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:22
 #: plugin/includes/Scheduler/Campaign_Validator.php:22
 msgid "Objective too short."
-msgstr "Objetivo zu kurz."
+msgstr "Objetivo demasiado corto."
 
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:170
 #: plugin/includes/Scheduler/Campaign_Validator.php:179
@@ -1000,12 +999,12 @@ msgstr "Formato de pulso de despliegue no válido."
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:180
 #: plugin/includes/Scheduler/Campaign_Validator.php:189
 msgid "Quota must be positive."
-msgstr "Kontingent muss positiv sun."
+msgstr "La cuota debe ser positiva."
 
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:199
 #: plugin/includes/Scheduler/Campaign_Validator.php:214
 msgid "Configuration errors."
-msgstr "Konfigurationsfehler."
+msgstr "Errores de configuración."
 
 #. translators: %d is the number of failed campaign runs.
 #: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:307
@@ -1055,7 +1054,7 @@ msgstr "Campaña sin título"
 #: plugin/includes/Ui/Attention_Admin_Notice.php:597
 #: plugin/includes/Ui/Dashboard_Widget.php:436
 msgid "Warnings"
-msgstr "Warnungen"
+msgstr "Advertencias"
 
 #: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:598
 #: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:437
@@ -1254,7 +1253,7 @@ msgstr "Frase clave"
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:732
 #: plugin/includes/Ui/Post_Meta_Box.php:732
 msgid "tokens used"
-msgstr "verwendete Token"
+msgstr "tokens usados"
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:793
 #: plugin/includes/Ui/Post_Meta_Box.php:820
@@ -1337,7 +1336,7 @@ msgstr "Generando tu imagen…"
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:995
 #: plugin/includes/Ui/Post_Meta_Box.php:1022
 msgid "Generate"
-msgstr "Generieren"
+msgstr "Generar"
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1005
 #: plugin/includes/Ui/Post_Meta_Box.php:1032
@@ -1353,7 +1352,7 @@ msgstr "Usar esta imagen"
 #: plugin/includes/Ui/Post_Meta_Box.php:1484
 #: plugin/includes/Ui/Post_Meta_Box.php:1622
 msgid "Permission denied."
-msgstr "Permiso verweigert."
+msgstr "Permiso denegado."
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1041
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1246
@@ -1616,7 +1615,7 @@ msgstr "Contactar con soporte"
 
 #: client/src/components/Layout/Header.tsx:52
 msgid "Anonymous"
-msgstr "Anonym"
+msgstr "Anónimo"
 
 #: client/src/components/Layout/Header.tsx:142
 msgid "Account menu"
@@ -1695,7 +1694,7 @@ msgstr "Channels"
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:922
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:655
 msgid "AI Engine"
-msgstr "KI-Engine"
+msgstr "Motor de IA"
 
 #: client/src/components/Shared/AddonOrphanBanner.tsx:96
 msgid "Payment issue — add-on access is pending revocation"
@@ -1890,7 +1889,7 @@ msgstr "Reconectar desde Cuenta"
 
 #: client/src/components/Shared/ErrorBoundary.tsx:68
 msgid "Something went wrong"
-msgstr "Etwas es schief gelaufen"
+msgstr "Algo ha salido mal"
 
 #: client/src/components/Shared/ErrorBoundary.tsx:71
 msgid ""
@@ -1906,11 +1905,11 @@ msgstr "Copiar detalles del error"
 
 #: client/src/components/Shared/ErrorBoundary.tsx:102
 msgid "View Stack Trace"
-msgstr "Stack Trace anzeigen"
+msgstr "Ver traza de la pila"
 
 #: client/src/components/Shared/ErrorBoundary.tsx:114
 msgid "Reload Dashboard"
-msgstr "Dashboard neu laden"
+msgstr "Recargar el panel"
 
 #: client/src/components/Shared/ErrorBoundary.tsx:123
 #: client/src/components/Shared/LicenseStatusBanner.tsx:55
@@ -1952,7 +1951,7 @@ msgstr "Ver conexiones"
 
 #: client/src/components/Shared/LicenseStatusBanner.tsx:20
 msgid "Payment Required"
-msgstr "Zahlung requerida"
+msgstr "Pago necesario"
 
 #: client/src/components/Shared/LicenseStatusBanner.tsx:21
 msgid ""
@@ -1964,11 +1963,11 @@ msgstr ""
 
 #: client/src/components/Shared/LicenseStatusBanner.tsx:25
 msgid "Update Billing"
-msgstr "Abrechnung aktualisieren"
+msgstr "Actualizar facturación"
 
 #: client/src/components/Shared/LicenseStatusBanner.tsx:30
 msgid "License Expired"
-msgstr "Licencia abgelaufen"
+msgstr "Licencia caducada"
 
 #: client/src/components/Shared/LicenseStatusBanner.tsx:31
 msgid ""
@@ -1980,11 +1979,11 @@ msgstr ""
 
 #: client/src/components/Shared/LicenseStatusBanner.tsx:35
 msgid "Renew License"
-msgstr "Licencia erneuern"
+msgstr "Renovar licencia"
 
 #: client/src/components/Shared/LicenseStatusBanner.tsx:40
 msgid "Subscription Canceled"
-msgstr "Abonnement storniert"
+msgstr "Suscripción cancelada"
 
 #: client/src/components/Shared/LicenseStatusBanner.tsx:41
 msgid ""
@@ -2039,7 +2038,7 @@ msgstr "Erforde lalich"
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:560
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:664
 msgid "Free License"
-msgstr "Kostenlose Licencia"
+msgstr "Licencia gratuita"
 
 #: client/src/components/Shared/SelectionCard.tsx:86
 #: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:76
@@ -2061,7 +2060,7 @@ msgstr "Pro"
 
 #: client/src/components/Shared/SelectionCard.tsx:100
 msgid "Toggle %s"
-msgstr "Umschalten %s"
+msgstr "Alternar %s"
 
 #: client/src/components/Shared/SiteNotConnectedBanner.tsx:127
 msgid "This site isn't connected"
@@ -2133,7 +2132,7 @@ msgstr "Página"
 #: client/src/components/Shared/TablePagination.tsx:14
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:1049
 msgid "of"
-msgstr "von"
+msgstr "de"
 
 #: client/src/components/Shared/WpCronDisabledBanner.tsx:44
 msgid "WordPress cron is disabled on this site"
@@ -2183,7 +2182,7 @@ msgstr ""
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:694
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:702
 msgid "Enabled"
-msgstr "Aktiviert"
+msgstr "Activado"
 
 #: client/src/features/account/components/AddonCard.tsx:97
 msgid "Included with Agency"
@@ -2293,7 +2292,7 @@ msgstr[1] ""
 
 #: client/src/features/account/routes/AccountPage.tsx:46
 msgid "Anonymous Mode"
-msgstr "Anonymer Modus"
+msgstr "Modo anónimo"
 
 #: client/src/features/account/routes/AccountPage.tsx:47
 msgid ""
@@ -2305,7 +2304,7 @@ msgstr ""
 
 #: client/src/features/account/routes/AccountPage.tsx:55
 msgid "Registered Architect"
-msgstr "Regesrierter Architekt"
+msgstr "Registered Architect"
 
 #: client/src/features/account/routes/AccountPage.tsx:56
 msgid ""
@@ -2317,7 +2316,7 @@ msgstr ""
 
 #: client/src/features/account/routes/AccountPage.tsx:65
 msgid "Pro Architect"
-msgstr "Pro-Architekt"
+msgstr "Pro Architect"
 
 #: client/src/features/account/routes/AccountPage.tsx:66
 msgid ""
@@ -2328,7 +2327,7 @@ msgstr ""
 
 #: client/src/features/account/routes/AccountPage.tsx:75
 msgid "Cloud Architect"
-msgstr "Cloud-Architekt"
+msgstr "Cloud Architect"
 
 #: client/src/features/account/routes/AccountPage.tsx:76
 msgid ""
@@ -2355,7 +2354,7 @@ msgstr "Gestiona tu identidad de Structura y tu nivel de suscripción"
 
 #: client/src/features/account/routes/AccountPage.tsx:197
 msgid "License Activation"
-msgstr "Lizenzaktivierung"
+msgstr "Activación de la licencia"
 
 #: client/src/features/account/routes/AccountPage.tsx:205
 #: client/src/features/onboarding/components/WizardLicenseGate.tsx:122
@@ -2364,7 +2363,7 @@ msgstr "Clave de licencia"
 
 #: client/src/features/account/routes/AccountPage.tsx:227
 msgid "Connect Account"
-msgstr "Cuenta verbinden"
+msgstr "Conectar cuenta"
 
 #: client/src/features/account/routes/AccountPage.tsx:233
 msgid "Unlock pro features and boost your organic traffic!"
@@ -2373,7 +2372,7 @@ msgstr "¡Desbloquea las funciones Pro e impulsa tu tráfico orgánico!"
 #: client/src/features/account/routes/AccountPage.tsx:246
 #: client/src/features/settings/routes/VisualsPage.tsx:687
 msgid "View Pricing"
-msgstr "Preise anzeigen"
+msgstr "Ver precios"
 
 #: client/src/features/account/routes/AccountPage.tsx:258
 msgid "Cloud Connection Verified"
@@ -2397,11 +2396,11 @@ msgstr ""
 #: client/src/features/channels/components/ChannelConnectionRow.tsx:212
 #: client/src/features/channels/components/ChannelConnectionRow.tsx:257
 msgid "Disconnect"
-msgstr "Trennen"
+msgstr "Desconectar"
 
 #: client/src/features/account/routes/AccountPage.tsx:341
 msgid "Documentation"
-msgstr "Dokumentation"
+msgstr "Documentación"
 
 #: client/src/features/account/routes/AccountPage.tsx:344
 msgid "Learn how to master the Architect and configure custom personas."
@@ -2410,7 +2409,7 @@ msgstr ""
 
 #: client/src/features/account/routes/AccountPage.tsx:368
 msgid "Support Portal"
-msgstr "Support-Portal"
+msgstr "Portal de soporte"
 
 #: client/src/features/account/routes/AccountPage.tsx:371
 msgid "Get help from our architects if you run into any issues."
@@ -2426,7 +2425,7 @@ msgstr "Pregunta a la comunidad y explora los temas de soporte existentes."
 
 #: client/src/features/account/routes/AccountPage.tsx:419
 msgid "Disconnect Account"
-msgstr "Cuenta trennen"
+msgstr "Desconectar cuenta"
 
 #: client/src/features/account/routes/AccountPage.tsx:420
 msgid ""
@@ -2442,11 +2441,11 @@ msgstr ""
 
 #: client/src/features/account/routes/AccountPage.tsx:426
 msgid "Disconnect Site"
-msgstr "Site trennen"
+msgstr "Desconectar sitio"
 
 #: client/src/features/ai-engine/api/useDisconnectProvider.ts:17
 msgid "Provider disconnected successfully."
-msgstr "Anbieter erfolgreich getrennt."
+msgstr "Proveedor desconectado correctamente."
 
 #: client/src/features/ai-engine/api/useSaveKey.ts:19
 msgid "Key authenticated and encrypted."
@@ -2454,7 +2453,7 @@ msgstr "Clave autenticada y cifrada."
 
 #: client/src/features/ai-engine/api/useUpdateAiSettings.ts:19
 msgid "Processor configuration updated."
-msgstr "Prozessor-Configuración aktualisiert."
+msgstr "Configuración del procesador actualizada."
 
 #: client/src/features/ai-engine/api/useUpdateAiSettings.ts:24
 msgid "Failed to update configuration."
@@ -2517,7 +2516,7 @@ msgstr "Obtener licencia gratuita"
 #: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:245
 #: client/src/features/onboarding/components/WizardLicenseGate.tsx:134
 msgid "Connect"
-msgstr "Verbinden"
+msgstr "Conectar"
 
 #: client/src/features/ai-engine/components/DefaultProviderConfig.tsx:48
 msgid "Default Providers"
@@ -2581,7 +2580,7 @@ msgstr "Gestionar"
 #: client/src/features/ai-engine/components/ProviderCard.tsx:90
 #: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:283
 msgid "Disconnect Provider"
-msgstr "Anbieter trennen"
+msgstr "Desconectar proveedor"
 
 #: client/src/features/ai-engine/components/InstalledProviderCard.tsx:228
 #: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:284
@@ -2594,7 +2593,7 @@ msgstr ""
 
 #: client/src/features/ai-engine/components/ProviderCard.tsx:59
 msgid "Authorized"
-msgstr "Autorisiert"
+msgstr "Autorizado"
 
 #: client/src/features/ai-engine/components/ProviderCard.tsx:59
 msgid "Key Required"
@@ -2606,7 +2605,7 @@ msgstr "Clave segura de acceso a la API"
 
 #: client/src/features/ai-engine/components/ProviderCard.tsx:119
 msgid "Update Key"
-msgstr "Clave aktualisieren"
+msgstr "Actualizar clave"
 
 #: client/src/features/ai-engine/components/ProviderCard.tsx:137
 msgid "Confirm Disconnect"
@@ -2625,7 +2624,7 @@ msgstr ""
 #: client/src/features/channels/components/CatalogEntryCard.tsx:139
 #: client/src/utils/planLabel.ts:27
 msgid "Free"
-msgstr "Kostenlos"
+msgstr "Gratis"
 
 #: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:78
 #: client/src/utils/planLabel.ts:31
@@ -2750,7 +2749,7 @@ msgstr "Elige modelos y establece este proveedor como predeterminado."
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:536
 #: client/src/features/campaigns/components/ProviderToggle.tsx:344
 msgid "Text Model"
-msgstr "Textmodell"
+msgstr "Modelo de texto"
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:544
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:579
@@ -2761,12 +2760,12 @@ msgstr "Seleccionar modelo..."
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:552
 #: client/src/features/campaigns/components/ProviderToggle.tsx:311
 msgid "Recommended"
-msgstr "Empfohlen"
+msgstr "Recomendado"
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:569
 #: client/src/features/campaigns/components/ProviderToggle.tsx:365
 msgid "Image Model"
-msgstr "Bildmodell"
+msgstr "Modelo de imagen"
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:596
 msgid "Default Provider"
@@ -3047,7 +3046,7 @@ msgstr "Contáctanos"
 #: client/src/features/campaigns/api/useCampaignMutations.ts:327
 #: client/src/index.tsx:52
 msgid "Action Failed:"
-msgstr "Acción fehlgeschlagen:"
+msgstr "La acción ha fallado:"
 
 #: client/src/features/campaigns/api/useCampaignMutations.ts:339
 msgid "Campaign duplicated."
@@ -3067,11 +3066,11 @@ msgstr "Ejecución de la campaña iniciada."
 
 #: client/src/features/campaigns/api/useJobMutations.ts:86
 msgid "Task rescheduled for immediate retry."
-msgstr "Tarea para sofortigen Wiede laholungsversuch neu geplant."
+msgstr "Tarea reprogramada para reintentarla de inmediato."
 
 #: client/src/features/campaigns/api/useJobMutations.ts:98
 msgid "Task removed from queue."
-msgstr "Tarea aus Warteschlange entfernt."
+msgstr "Tarea eliminada de la cola."
 
 #: client/src/features/campaigns/api/usePulseCheck.ts:21
 msgid "Pulse Verified: Cloud handshake successful!"
@@ -3210,7 +3209,7 @@ msgstr "Entrevista"
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:110
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:140
 msgid "Strategy"
-msgstr "Strategie"
+msgstr "Estrategia"
 
 #: client/src/features/campaigns/components/CampaignDraftBanner.tsx:17
 #: client/src/features/campaigns/components/CampaignRunsTab.tsx:336
@@ -3241,7 +3240,7 @@ msgstr "Autoridad"
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:143
 #: client/src/features/progress/routes/RunDetailPage.tsx:460
 msgid "Rhythm"
-msgstr "Rhythmus"
+msgstr "Ritmo"
 
 #: client/src/features/campaigns/components/CampaignDraftBanner.tsx:20
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:153
@@ -3278,7 +3277,7 @@ msgstr "Descartar"
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:425
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:498
 msgid "Resume"
-msgstr "Fortfahren"
+msgstr "Reanudar"
 
 #: client/src/features/campaigns/components/CampaignRunsTab.tsx:55
 msgid "Couldn’t load run history"
@@ -3454,7 +3453,7 @@ msgstr "Persona aleatoria"
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:428
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:451
 msgid "System Default"
-msgstr "Systemstandardwert"
+msgstr "Predeterminado del sistema"
 
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:66
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:73
@@ -3551,11 +3550,11 @@ msgstr ""
 
 #: client/src/features/campaigns/components/JobTable.tsx:66
 msgid "Filter tasks"
-msgstr "Tareas filtern"
+msgstr "Filtrar tareas"
 
 #: client/src/features/campaigns/components/JobTable.tsx:69
 msgid "Filter tasks..."
-msgstr "Tareas filtern…"
+msgstr "Filtrar tareas…"
 
 #: client/src/features/campaigns/components/JobTable.tsx:85
 msgid "Blueprint / Campaign"
@@ -3563,7 +3562,7 @@ msgstr "Plano / Campaña"
 
 #: client/src/features/campaigns/components/JobTable.tsx:87
 msgid "Architect Error"
-msgstr "Architekt-Error"
+msgstr "Error del Arquitecto"
 
 #: client/src/features/campaigns/components/JobTable.tsx:89
 msgid "Execution Time"
@@ -3583,7 +3582,7 @@ msgstr "¿Purgar el trabajo de producción?"
 
 #: client/src/features/campaigns/components/JobTable.tsx:220
 msgid "Retry Architect Step?"
-msgstr "Architekt-Schritt erneut versuchen?"
+msgstr "¿Reintentar el paso del Arquitecto?"
 
 #: client/src/features/campaigns/components/JobTable.tsx:221
 msgid "Execute Immediately?"
@@ -3603,7 +3602,7 @@ msgstr "Eliminar para siempre"
 
 #: client/src/features/campaigns/components/JobTable.tsx:234
 msgid "Proceed"
-msgstr "Fortfahren"
+msgstr "Continuar"
 
 #: client/src/features/campaigns/components/MagicSuggestButton.tsx:70
 msgid "Magic suggestions are available on Pro and above."
@@ -3634,13 +3633,13 @@ msgstr "Fuentes"
 #: client/src/features/dashboard/components/ActiveQueue.tsx:24
 #: client/src/features/dashboard/components/RecentBlueprints.tsx:24
 msgid "Intelligence"
-msgstr "Intelligenz"
+msgstr "Inteligencia"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:149
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:158
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:46
 msgid "Architecture"
-msgstr "Architektur"
+msgstr "Arquitectura"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:150
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:159
@@ -3648,16 +3647,16 @@ msgstr "Architektur"
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1039
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:796
 msgid "Taxonomy"
-msgstr "Taxonomie"
+msgstr "Taxonomía"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:151
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:160
 msgid "SEO Rules"
-msgstr "SEO-Regeln"
+msgstr "Reglas SEO"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:152
 msgid "Deployment"
-msgstr "Bereitstellung"
+msgstr "Despliegue"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:368
 #: client/src/features/campaigns/routes/CampaignsPage.tsx:200
@@ -3665,7 +3664,7 @@ msgstr "Bereitstellung"
 #: client/src/features/dashboard/components/RecentSinglePostRuns.tsx:141
 #: client/src/features/dashboard/routes/DashboardPage.tsx:66
 msgid "Generate Post"
-msgstr "Artículo generieren"
+msgstr "Generar entrada"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:370
 msgid "Modify Roadmap"
@@ -3677,15 +3676,15 @@ msgstr "Arquitecto de campañas"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:379
 msgid "Phase %d of %d"
-msgstr "Phase %d von %d"
+msgstr "Fase %d de %d"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:417
 msgid "Switch to Advanced mode"
-msgstr "Wechsel zum erweiterten Modus"
+msgstr "Cambiar al modo avanzado"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:418
 msgid "Switch to Simple mode"
-msgstr "Wechsel zum unfachen Modus"
+msgstr "Cambiar al modo sencillo"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:424
 msgid "Advanced"
@@ -3702,7 +3701,7 @@ msgstr "Cerrar la ventana del programador"
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:485
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:526
 msgid "Prev Phase"
-msgstr "Vorherige Phase"
+msgstr "Fase anterior"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:500
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:545
@@ -3712,11 +3711,11 @@ msgstr "Siguiente fase"
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:543
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:870
 msgid "Generate Now"
-msgstr "Jetzt generieren"
+msgstr "Generar ahora"
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:544
 msgid "Initialize Engine"
-msgstr "Engine initialisieren"
+msgstr "Inicializar motor"
 
 #: client/src/features/campaigns/components/PageBuilderCompatCard.tsx:138
 msgid "%s detected on this site."
@@ -3827,11 +3826,11 @@ msgstr "Ejecutar comprobación de pulso"
 
 #: client/src/features/campaigns/components/PulseDiagnostics.tsx:106
 msgid "Simulating..."
-msgstr "Wird simuliert…"
+msgstr "Simulando…"
 
 #: client/src/features/campaigns/components/PulseDiagnostics.tsx:107
 msgid "Simulate Failure"
-msgstr "Error simulieren"
+msgstr "Simular un fallo"
 
 #: client/src/features/campaigns/components/PulseDiagnostics.tsx:124
 msgid "Handshake Verified: Bi-directional trust active."
@@ -3843,35 +3842,35 @@ msgstr "Puente interrumpido: comprueba tu cortafuegos o la API REST."
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:44
 msgid "Mon"
-msgstr "Mo"
+msgstr "Lun"
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:45
 msgid "Tue"
-msgstr "Di"
+msgstr "Mar"
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:46
 msgid "Wed"
-msgstr "Mi"
+msgstr "Mié"
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:47
 msgid "Thu"
-msgstr "Do"
+msgstr "Jue"
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:48
 msgid "Fri"
-msgstr "Fr"
+msgstr "Vie"
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:49
 msgid "Sat"
-msgstr "Sa"
+msgstr "Sáb"
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:50
 msgid "Sun"
-msgstr "So"
+msgstr "Dom"
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:124
 msgid "Deployment Pulse"
-msgstr "Bereitstellungsimpuls"
+msgstr "Pulso de despliegue"
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:146
 msgid "Daily publishing is available on paid plans."
@@ -3886,7 +3885,7 @@ msgstr ""
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:213
 msgid "Specific Day of Month"
-msgstr "Spezifischer Etiqueta des Monats"
+msgstr "Día concreto del mes"
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:223
 msgid "Day"
@@ -3898,7 +3897,7 @@ msgstr "Ventana de ejecución"
 
 #: client/src/features/campaigns/components/ScheduleBuilder.tsx:255
 msgid "Parsed Autonomous Rhythm"
-msgstr "Analysierter autonomer Rhythmus"
+msgstr "Ritmo autónomo interpretado"
 
 #: client/src/features/campaigns/components/StockSummaryChip.tsx:66
 msgid "%d ready"
@@ -4101,7 +4100,7 @@ msgstr "Agregar recursos de marca para mejores resultados"
 
 #: client/src/features/campaigns/components/TaxonomySection.tsx:45
 msgid "Autonomous"
-msgstr "Autonom"
+msgstr "Autónomo"
 
 #: client/src/features/campaigns/components/TaxonomySection.tsx:54
 #: client/src/features/campaigns/labels.ts:93
@@ -4345,7 +4344,7 @@ msgstr "Fuentes de Autoridad"
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:425
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:311
 msgid "Pro / Cloud Feature"
-msgstr "Pro / Cloud-Funktion"
+msgstr "Función Pro / Cloud"
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:437
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:323
@@ -4356,7 +4355,7 @@ msgstr "Omitir y continuar"
 #: client/src/features/campaigns/components/steps/StepCompetitors.tsx:180
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:361
 msgid "Learn more"
-msgstr "Weitere Informationen"
+msgstr "Más información"
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:506
 msgid "%d Authority Source(s)"
@@ -4370,13 +4369,13 @@ msgstr "%d Fuentes de Autoridad"
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:318
 #: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:337
 msgid "Re-discover"
-msgstr "Erneut entdecken"
+msgstr "Volver a descubrir"
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:511
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:410
 #: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:338
 msgid "Discover"
-msgstr "Entdecken"
+msgstr "Descubrir"
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:529
 msgid "No domains yet. Use Discover or add domains manually below."
@@ -4396,7 +4395,7 @@ msgstr "Omitir estas URL"
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:567
 msgid "— these will never appear in your sources"
-msgstr "— diese werden nie in Ihren Fuentes angezeigt"
+msgstr "— nunca aparecerán en tus fuentes"
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:593
 msgid "Exclude domain"
@@ -4416,11 +4415,11 @@ msgstr "Exclusiones sugeridas por IA para este nicho"
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:679
 msgid "Universal"
-msgstr "Universell"
+msgstr "Universal"
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:679
 msgid "Niche"
-msgstr "Nische"
+msgstr "Nicho"
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:710
 msgid "Remove domain"
@@ -4474,7 +4473,7 @@ msgstr "La programación inteligente está disponible en los planes de pago."
 
 #: client/src/features/campaigns/components/steps/SimpleStepRhythm.tsx:119
 msgid "Smart"
-msgstr "Intelligent"
+msgstr "Inteligente"
 
 #: client/src/features/campaigns/components/steps/SimpleStepRhythm.tsx:132
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:96
@@ -4505,7 +4504,7 @@ msgstr "Mes"
 
 #: client/src/features/campaigns/components/steps/SimpleStepRhythm.tsx:196
 msgid "Humanized schedule active"
-msgstr "Humanisierter Zeitplan aktiv"
+msgstr "Calendario humanizado activo"
 
 #: client/src/features/campaigns/components/steps/SimpleStepRhythm.tsx:199
 msgid ""
@@ -4519,7 +4518,7 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/SimpleStepRhythm.tsx:222
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:158
 msgid "Lifecycle"
-msgstr "Lebenszyklus"
+msgstr "Ciclo de vida"
 
 #: client/src/features/campaigns/components/steps/SimpleStepRhythm.tsx:261
 msgid "Total posts to publish"
@@ -4546,11 +4545,11 @@ msgstr ""
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:111
 #: client/src/utils/campaignModeMeta.ts:16
 msgid "Traffic Magnet"
-msgstr "Traffic-Magnet"
+msgstr "Traffic Magnet"
 
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:24
 msgid "Broad informational content for high search volume."
-msgstr "Breiter informativer Contenido para hohes Suchvolumen."
+msgstr "Contenido informativo amplio para un gran volumen de búsqueda."
 
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:29
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:31
@@ -4559,7 +4558,7 @@ msgstr "Breiter informativer Contenido para hohes Suchvolumen."
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:116
 #: client/src/utils/campaignModeMeta.ts:22
 msgid "Quick Wins"
-msgstr "Schnelle Siege"
+msgstr "Quick Wins"
 
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:30
 msgid "Low-competition topics you can rank for fast."
@@ -4586,7 +4585,7 @@ msgstr "Redacción de nivel experto que genera confianza temática."
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:109
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:109
 msgid "Generate Post Strategy"
-msgstr "Artículo-Strategie generieren"
+msgstr "Generar estrategia de la entrada"
 
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:112
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:112
@@ -4605,7 +4604,7 @@ msgstr "Nombre de la campaña"
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1154
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:359
 msgid "e.g. Winter 2026 SEO Push"
-msgstr "z. B. Winter 2026 SEO-Push"
+msgstr "p. ej., Impulso SEO invierno 2026"
 
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:130
 msgid "Post Objective"
@@ -4614,7 +4613,7 @@ msgstr "Artículo-Objetivo"
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:130
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:129
 msgid "Deep Objective"
-msgstr "Tiefes Objetivo"
+msgstr "Objetivo en profundidad"
 
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:131
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:130
@@ -4625,7 +4624,7 @@ msgstr "Describe el objetivo general..."
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:359
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:144
 msgid "Content Goal"
-msgstr "Inhaltsziel"
+msgstr "Objetivo del contenido"
 
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:143
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:359
@@ -4639,7 +4638,7 @@ msgstr "Modo de campaña"
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:229
 #: client/src/features/settings/routes/SettingsPage.tsx:73
 msgid "Syncing..."
-msgstr "Wird synchronisiert…"
+msgstr "Sincronizando…"
 
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:248
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:250
@@ -4650,18 +4649,18 @@ msgstr "Elige una persona..."
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:102
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:108
 msgid "ON"
-msgstr "AN"
+msgstr "SÍ"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:92
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:102
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:108
 msgid "OFF"
-msgstr "AUS"
+msgstr "NO"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:120
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:150
 msgid "Infinite"
-msgstr "Unendlich"
+msgstr "Infinito"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:122
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:1017
@@ -4672,11 +4671,11 @@ msgstr "%s Artículos"
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:124
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:610
 msgid "Schedule"
-msgstr "Zeitplan"
+msgstr "Calendario"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:140
 msgid "%d %s per %s"
-msgstr "%d %s pro %s"
+msgstr "%d %s por %s"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:142
 msgid "post"
@@ -4709,7 +4708,7 @@ msgstr "Meta título y slug"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:257
 msgid "Meta Description"
-msgstr "Metabeschreibung"
+msgstr "Metadescripción"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:263
 msgid "Target Keyphrase"
@@ -4721,15 +4720,15 @@ msgstr "Frase clave-Optimierung"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:276
 msgid "Readability Rules"
-msgstr "Lesbarkeitsregeln"
+msgstr "Reglas de legibilidad"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:282
 msgid "Competitor Gap Analysis"
-msgstr "Konkurrenz-Gap-Análisis"
+msgstr "Análisis de brechas frente a la competencia"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:288
 msgid "Semantic / LSI Optimization"
-msgstr "Semantische / LSI-Optimierung"
+msgstr "Optimización semántica / LSI"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:294
 msgid "Link Validation"
@@ -4737,7 +4736,7 @@ msgstr "Link-Validación"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:301
 msgid "Internal Linking"
-msgstr "Interne Verlinkung"
+msgstr "Enlazado interno"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:307
 msgid "Authority Links"
@@ -4772,7 +4771,7 @@ msgstr "Verifica tus parámetros autónomos antes de desplegar."
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:355
 msgid "No objective set"
-msgstr "Kun Objetivo gesetzt"
+msgstr "Sin objetivo definido"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:391
 msgid "Persona:"
@@ -4780,12 +4779,12 @@ msgstr "Persona:"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:400
 msgid "Features & SEO"
-msgstr "Funktionen & SEO"
+msgstr "Funciones y SEO"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:408
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:67
 msgid "Intelligence Score"
-msgstr "Intelligenz-Punktzahl"
+msgstr "Puntuación de inteligencia"
 
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:450
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:167
@@ -4816,11 +4815,11 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:36
 msgid "Output Language"
-msgstr "Ausgabesprache"
+msgstr "Idioma de salida"
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:44
 msgid "Content Language"
-msgstr "Inhaltssprache"
+msgstr "Idioma del contenido"
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:45
 msgid "Select language..."
@@ -4828,11 +4827,11 @@ msgstr "Seleccionar idioma..."
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:73
 msgid "Target Word Count"
-msgstr "Zielwortanzahl"
+msgstr "Número de palabras objetivo"
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:107
 msgid "General Improvements"
-msgstr "Allgemune Verbesserungen"
+msgstr "Mejoras generales"
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:113
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:939
@@ -4851,7 +4850,7 @@ msgstr ""
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:945
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:685
 msgid "Disable emojis"
-msgstr "Emojis deaktivieren"
+msgstr "Desactivar emojis"
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:126
 msgid ""
@@ -4875,7 +4874,7 @@ msgstr "Crea una imagen destacada relevante para la entrada."
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:966
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:717
 msgid "Body image generation"
-msgstr "Body-Image-Generierung"
+msgstr "Generación de imágenes en el cuerpo"
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:160
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:967
@@ -4894,14 +4893,14 @@ msgstr "Bloques de contenido"
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1082
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:853
 msgid "AI Transparency Signal"
-msgstr "KI-Transparenzsignal"
+msgstr "Señal de transparencia de IA"
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:216
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1105
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:884
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:606
 msgid "Disclosure Notice"
-msgstr "Offenlegungsmitteilung"
+msgstr "Aviso de divulgación"
 
 #: client/src/features/campaigns/components/steps/StepCompetitors.tsx:101
 msgid "No additional competitors were found. You can add your own below."
@@ -4972,11 +4971,11 @@ msgstr "Añade un competidor (p. ej. competidor.com)"
 
 #: client/src/features/campaigns/components/steps/StepDeployment.tsx:36
 msgid "Lifecycle Termination"
-msgstr "Lebenszyklus-Beendigung"
+msgstr "Fin del ciclo de vida"
 
 #: client/src/features/campaigns/components/steps/StepDeployment.tsx:72
 msgid "Total Blueprints then Archiving"
-msgstr "Gesamte Planos dann Archivierung"
+msgstr "Total de planos antes de archivar"
 
 #: client/src/features/campaigns/components/steps/StepDeployment.tsx:94
 msgid "This roadmap will continue producing content until manually paused."
@@ -4990,7 +4989,7 @@ msgstr "Búsqueda relacionada"
 
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:94
 msgid "People Also Ask"
-msgstr "Nutzer fragen auch"
+msgstr "Otras preguntas de los usuarios"
 
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:95
 msgid "AI Assistant"
@@ -5068,7 +5067,7 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:521
 msgid "Remove keyword"
-msgstr "Palabra clave entfernen"
+msgstr "Quitar palabra clave"
 
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:547
 msgid "Studying your topic landscape…"
@@ -5096,7 +5095,7 @@ msgstr "Clasificando por relevancia para tu campaña…"
 
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:26
 msgid "Broad informational content built to capture high search volume."
-msgstr "Breiter informativer Contenido para hohes Suchvolumen."
+msgstr "Contenido informativo amplio pensado para captar un gran volumen de búsqueda."
 
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:32
 msgid "Low-competition, niche topics the site can rank for fast."
@@ -5106,7 +5105,7 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:38
 msgid "Bottom-of-funnel content engineered to turn readers into customers."
-msgstr "Bottom-of-Funnel-Contenidos, entwickelt um Leser in Kyen umzuwandeln."
+msgstr "Contenido de final de embudo diseñado para convertir lectores en clientes."
 
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:44
 msgid "Deep expert-level writing that builds long-term topical trust."
@@ -5116,13 +5115,13 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:222
 msgid "Assigned Persona"
-msgstr "Zugewiesene Persona"
+msgstr "Persona asignada"
 
 #: client/src/features/campaigns/components/steps/StepSeoRules.tsx:35
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1006
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:767
 msgid "SEO Directives"
-msgstr "SEO-Richtlinien"
+msgstr "Directivas SEO"
 
 #: client/src/features/campaigns/components/steps/StepSeoRules.tsx:38
 msgid ""
@@ -5134,7 +5133,7 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:92
 msgid "Mapping"
-msgstr "Zuordnung"
+msgstr "Asignación"
 
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:100
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:691
@@ -5143,11 +5142,11 @@ msgstr "Imagen destacada"
 
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:117
 msgid "Pulse Timing"
-msgstr "Impulszeitplanung"
+msgstr "Temporización del pulso"
 
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:132
 msgid "Local Time"
-msgstr "Ortszeit"
+msgstr "Hora local"
 
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:140
 msgid "System Cron"
@@ -5155,7 +5154,7 @@ msgstr "System Cron"
 
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:146
 msgid "Termination"
-msgstr "Beendigung"
+msgstr "Finalización"
 
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:153
 msgid "%s Blueprints"
@@ -5201,7 +5200,7 @@ msgstr "Publicada"
 #: client/src/features/campaigns/labels.ts:57
 #: client/src/features/dashboard/components/ActiveQueue.tsx:26
 msgid "Scheduled"
-msgstr "Geplant"
+msgstr "Programado"
 
 #: client/src/features/campaigns/labels.ts:59
 msgid "Private"
@@ -5258,7 +5257,7 @@ msgstr "Ejecutar ahora"
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:392
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:525
 msgid "Duplicate"
-msgstr "Duplizieren"
+msgstr "Duplicar"
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:400
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:478
@@ -5270,7 +5269,7 @@ msgstr "Eliminar"
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:420
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:488
 msgid "Pause"
-msgstr "Unterbrechen"
+msgstr "Pausar"
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:431
 #: client/src/features/channels/components/ChannelConnectionRow.tsx:198
@@ -5363,7 +5362,7 @@ msgstr "+ %s dominios de autoridad"
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:622
 msgid "Output Progress"
-msgstr "Ausgabefortschritt"
+msgstr "Progreso de la salida"
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:642
 msgid "Campaign Configuration"
@@ -6666,7 +6665,7 @@ msgstr "El catálogo está vacío en este momento"
 
 #: client/src/features/dashboard/components/ActiveQueue.tsx:13
 msgid "Active Generation Queue"
-msgstr "Aktive Generierungswarteschlange"
+msgstr "Cola de generación activa"
 
 #: client/src/features/dashboard/components/ActiveQueue.tsx:16
 msgid "%d Tasks Remaining"
@@ -6674,7 +6673,7 @@ msgstr "%d Tareas Pendientes"
 
 #: client/src/features/dashboard/components/ActiveQueue.tsx:23
 msgid "Blueprint Topic"
-msgstr "Plano-Thema"
+msgstr "Tema del plano"
 
 #: client/src/features/dashboard/components/ActiveQueue.tsx:25
 msgid "Status"
@@ -6682,7 +6681,7 @@ msgstr "Estado"
 
 #: client/src/features/dashboard/components/ActiveQueue.tsx:33
 msgid "Queue is currently empty."
-msgstr "Warteschlange es de lazeit leer."
+msgstr "La cola está vacía en este momento."
 
 #: client/src/features/dashboard/components/IntelligenceUsage.tsx:50
 msgid "Unable to load usage data. Please try again later."
@@ -6705,7 +6704,7 @@ msgstr "%d %% usado"
 
 #: client/src/features/dashboard/components/IntelligenceUsage.tsx:135
 msgid "tokens"
-msgstr "verwendete Token"
+msgstr "tokens"
 
 #: client/src/features/dashboard/components/IntelligenceUsage.tsx:159
 msgid "%1$d / %2$d images this cycle"
@@ -6735,7 +6734,7 @@ msgstr "Diseñado recientemente"
 
 #: client/src/features/dashboard/components/RecentBlueprints.tsx:22
 msgid "Blueprint / Topic"
-msgstr "Plano / Thema"
+msgstr "Plano / Tema"
 
 #: client/src/features/dashboard/components/RecentBlueprints.tsx:25
 msgid "Actions"
@@ -6747,11 +6746,11 @@ msgstr "Kune Planos in de la Datenbank gefyen."
 
 #: client/src/features/dashboard/components/RecentBlueprints.tsx:73
 msgid "Edit Post"
-msgstr "Artículo bearbeiten"
+msgstr "Editar entrada"
 
 #: client/src/features/dashboard/components/RecentBlueprints.tsx:82
 msgid "View Live"
-msgstr "Live anzeigen"
+msgstr "Ver en vivo"
 
 #: client/src/features/dashboard/components/RecentSinglePostRuns.tsx:134
 msgid "Recent Generations"
@@ -6810,7 +6809,7 @@ msgstr "Tu contenido de un vistazo."
 
 #: client/src/features/dashboard/routes/DashboardPage.tsx:91
 msgid "Posts Created"
-msgstr "Erstellte Artículos"
+msgstr "Entradas creadas"
 
 #: client/src/features/dashboard/routes/DashboardPage.tsx:93
 msgid "%d content blocks"
@@ -6818,7 +6817,7 @@ msgstr "%d bloques de contenido"
 
 #: client/src/features/dashboard/routes/DashboardPage.tsx:97
 msgid "Images Generated"
-msgstr "Bilde la generiert"
+msgstr "Imágenes generadas"
 
 #: client/src/features/dashboard/routes/DashboardPage.tsx:100
 msgid "%s storage reclaimed"
@@ -7407,7 +7406,7 @@ msgstr "Ir al paso"
 
 #: client/src/features/onboarding/components/WizardShell.tsx:292
 msgid "Step"
-msgstr "Schritt"
+msgstr "Paso"
 
 #: client/src/features/onboarding/components/WizardShell.tsx:380
 msgid "Skip for now"
@@ -7772,7 +7771,7 @@ msgstr "Medio de la imagen"
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:314
 #: client/src/features/settings/routes/VisualsPage.tsx:373
 msgid "Suggest Image Style"
-msgstr "Bildstil vorschlagen"
+msgstr "Sugerir estilo de imagen"
 
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:315
 #: client/src/features/settings/routes/VisualsPage.tsx:374
@@ -7787,17 +7786,17 @@ msgstr "Añadir recurso"
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:320
 #: client/src/features/settings/routes/VisualsPage.tsx:379
 msgid "Generate Image Style"
-msgstr "Bildstil generieren"
+msgstr "Generar estilo de imagen"
 
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:322
 #: client/src/features/settings/routes/VisualsPage.tsx:381
 msgid "Company logo"
-msgstr "Unternehmenslogo"
+msgstr "Logotipo de la empresa"
 
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:327
 #: client/src/features/settings/routes/VisualsPage.tsx:386
 msgid "Site Logo"
-msgstr "Site-Logo"
+msgstr "Logotipo del sitio"
 
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:335
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:338
@@ -7966,11 +7965,11 @@ msgstr "Completa este paso para continuar"
 
 #: client/src/features/personas/api/usePersonaMutations.ts:18
 msgid "Persona configuration saved."
-msgstr "Persona-Configuración gespeichert."
+msgstr "Configuración de la persona guardada."
 
 #: client/src/features/personas/api/usePersonaMutations.ts:31
 msgid "Persona removed."
-msgstr "Persona entfernt."
+msgstr "Persona eliminada."
 
 #: client/src/features/personas/api/usePersonaMutations.ts:36
 msgid "Cannot delete the primary architect."
@@ -7987,13 +7986,13 @@ msgstr "Persona predeterminada actualizada para este sitio."
 #: client/src/features/personas/components/PersonaCard.tsx:66
 #: client/src/features/personas/components/TemplateLibrary.tsx:58
 msgid "System Directive"
-msgstr "System-Richtlinie"
+msgstr "Directiva del sistema"
 
 #: client/src/features/personas/components/PersonaCard.tsx:77
 #: client/src/features/personas/components/PersonaEditor.tsx:169
 #: client/src/features/personas/components/TemplateLibrary.tsx:69
 msgid "Reading Level"
-msgstr "Leseniveau"
+msgstr "Nivel de lectura"
 
 #: client/src/features/personas/components/PersonaCard.tsx:120
 msgid "Yes, Delete"
@@ -8005,7 +8004,7 @@ msgstr "Confirmar eliminación"
 
 #: client/src/features/personas/components/PersonaEditor.tsx:56
 msgid "Persona optimized by AI."
-msgstr "Persona von KI optimiert."
+msgstr "Persona optimizada con IA."
 
 #: client/src/features/personas/components/PersonaEditor.tsx:67
 msgid "Create New Persona"
@@ -8013,7 +8012,7 @@ msgstr "Crear nueva persona"
 
 #: client/src/features/personas/components/PersonaEditor.tsx:68
 msgid "Edit Persona"
-msgstr "Persona bearbeiten"
+msgstr "Editar persona"
 
 #: client/src/features/personas/components/PersonaEditor.tsx:96
 msgid "Architecting…"
@@ -8029,7 +8028,7 @@ msgstr "Nombre de la identidad"
 
 #: client/src/features/personas/components/PersonaEditor.tsx:111
 msgid "e.g. Technical Reviewer"
-msgstr "z. B. Technischer Reviewer"
+msgstr "p. ej., Revisor técnico"
 
 #: client/src/features/personas/components/PersonaEditor.tsx:122
 msgid "Publishing Author"
@@ -8041,7 +8040,7 @@ msgstr "Selecciona un autor..."
 
 #: client/src/features/personas/components/PersonaEditor.tsx:136
 msgid "Intelligence Directive (System Prompt)"
-msgstr "Intelligenz-Richtlinie (System Prompt)"
+msgstr "Directiva de inteligencia (prompt del sistema)"
 
 #: client/src/features/personas/components/PersonaEditor.tsx:141
 msgid "You are a rigorous academic..."
@@ -8049,7 +8048,7 @@ msgstr "Eres un académico riguroso..."
 
 #: client/src/features/personas/components/PersonaEditor.tsx:151
 msgid "Linguistic Tone"
-msgstr "Sprachton"
+msgstr "Tono lingüístico"
 
 #: client/src/features/personas/components/PersonaEditor.tsx:152
 msgid "Select a tone..."
@@ -8076,11 +8075,11 @@ msgstr "Plantillas"
 #: client/src/features/personas/components/PersonaManager.tsx:126
 #: client/src/features/personas/routes/PersonasPage.tsx:29
 msgid "New Persona"
-msgstr "Neue Persona"
+msgstr "Nueva persona"
 
 #: client/src/features/personas/components/PersonaManager.tsx:114
 msgid "No Personas Yet"
-msgstr "Noch kune Personas"
+msgstr "Aún no hay personas"
 
 #: client/src/features/personas/components/PersonaManager.tsx:117
 msgid ""
@@ -8092,7 +8091,7 @@ msgstr ""
 
 #: client/src/features/personas/components/PersonaManager.tsx:130
 msgid "Browse Templates"
-msgstr "Plantillas durchsuchen"
+msgstr "Explorar plantillas"
 
 #: client/src/features/personas/components/TemplateLibrary.tsx:25
 msgid "Persona Templates"
@@ -8104,7 +8103,7 @@ msgstr "Cerrar plantillas de personas"
 
 #: client/src/features/personas/data/personaTemplates.ts:8
 msgid "Professional"
-msgstr "Professionell"
+msgstr "Profesional"
 
 #: client/src/features/personas/data/personaTemplates.ts:9
 msgid "Casual"
@@ -8112,11 +8111,11 @@ msgstr "Informal"
 
 #: client/src/features/personas/data/personaTemplates.ts:10
 msgid "Humorous"
-msgstr "Humorvoll"
+msgstr "Humorístico"
 
 #: client/src/features/personas/data/personaTemplates.ts:11
 msgid "Authoritative"
-msgstr "Autoritativ"
+msgstr "Autoritativo"
 
 #: client/src/features/personas/data/personaTemplates.ts:12
 msgid "Enthusiastic"
@@ -8124,35 +8123,35 @@ msgstr "Begeesert"
 
 #: client/src/features/personas/data/personaTemplates.ts:13
 msgid "Empathetic"
-msgstr "Empathisch"
+msgstr "Empático"
 
 #: client/src/features/personas/data/personaTemplates.ts:14
 msgid "Controversial"
-msgstr "Kontrovers"
+msgstr "Polémico"
 
 #: client/src/features/personas/data/personaTemplates.ts:18
 msgid "Grade 5 (Simple)"
-msgstr "Klasse 5 (Simple)"
+msgstr "Nivel 5 (Sencillo)"
 
 #: client/src/features/personas/data/personaTemplates.ts:19
 msgid "Grade 8 (Standard)"
-msgstr "Klasse 8 (Predeterminado)"
+msgstr "Nivel 8 (Estándar)"
 
 #: client/src/features/personas/data/personaTemplates.ts:20
 msgid "Grade 12 (Complex)"
-msgstr "Klasse 12 (Komplex)"
+msgstr "Nivel 12 (Complejo)"
 
 #: client/src/features/personas/data/personaTemplates.ts:21
 msgid "PhD (Academic)"
-msgstr "PhD (Akademisch)"
+msgstr "Doctorado (académico)"
 
 #: client/src/features/personas/routes/PersonasPage.tsx:22
 msgid "Persona & Author Management"
-msgstr "Persona & Autoren-Gestión"
+msgstr "Gestión de personas y autores"
 
 #: client/src/features/personas/routes/PersonasPage.tsx:43
 msgid "Persona Modularization"
-msgstr "Persona-Modularisierung"
+msgstr "Modularización de personas"
 
 #: client/src/features/personas/routes/PersonasPage.tsx:46
 msgid ""
@@ -8543,7 +8542,7 @@ msgstr "La entrada se publicó, pero uno o más pasos reportaron un problema."
 
 #: client/src/features/settings/api/useLicense.ts:470
 msgid "Plan synchronized: \"%s\"."
-msgstr "Plan synchronisiert: \"%s\"."
+msgstr "Plan sincronizado: \"%s\"."
 
 #: client/src/features/settings/api/useLicense.ts:488
 msgid "Your license is no longer active."
@@ -8551,7 +8550,7 @@ msgstr "Tu licencia ya no está activa."
 
 #: client/src/features/settings/api/useLicense.ts:515
 msgid "Pro features unlocked!"
-msgstr "Pro-Funktionen freigegeben!"
+msgstr "¡Funciones Pro desbloqueadas!"
 
 #: client/src/features/settings/api/useLicense.ts:665
 msgid "Register for a Free Account to unlock %s"
@@ -8572,15 +8571,15 @@ msgstr ""
 
 #: client/src/features/settings/api/useSettingsMutations.ts:20
 msgid "Settings synchronized."
-msgstr "Configuración synchronisiert."
+msgstr "Ajustes sincronizados."
 
 #: client/src/features/settings/api/useSettingsMutations.ts:30
 msgid "API key secured."
-msgstr "API-Clave gesichert."
+msgstr "Clave de API protegida."
 
 #: client/src/features/settings/api/useVisualMutations.ts:16
 msgid "Art direction synchronized."
-msgstr "Kunstrichtung synchronisiert."
+msgstr "Dirección de arte sincronizada."
 
 #: client/src/features/settings/api/useVisualPresets.ts:109
 msgid "Visual preset created."
@@ -9031,23 +9030,23 @@ msgstr ""
 
 #: client/src/features/settings/routes/VisualsPage.tsx:54
 msgid "1:1 Square Format"
-msgstr "1:1 Quadratisches Formato"
+msgstr "1:1 Formato cuadrado"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:55
 msgid "4:3 Classic Professional"
-msgstr "4:3 Klassisch Professionell"
+msgstr "4:3 Clásico profesional"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:56
 msgid "3:4 Standard Portrait"
-msgstr "3:4 Predeterminado Hochformat"
+msgstr "3:4 Vertical estándar"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:57
 msgid "16:9 Cinematic Landscape"
-msgstr "16:9 Kinematisch Querformat"
+msgstr "16:9 Panorámico cinematográfico"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:58
 msgid "9:16 Vertical Portrait"
-msgstr "9:16 Vertikales Hochformat"
+msgstr "9:16 Vertical"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:62
 msgid "WebP (Smallest File)"
@@ -9059,12 +9058,12 @@ msgstr "JPEG (compatibilidad estándar)"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:64
 msgid "PNG (Lossless)"
-msgstr "PNG (Verlustfrei)"
+msgstr "PNG (sin pérdida)"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:266
 #: client/src/features/settings/routes/VisualsPage.tsx:292
 msgid "Image Generation & Optimization Engine"
-msgstr "Bildgenerierungs- y Optimierungs-Engine"
+msgstr "Motor de generación y optimización de imágenes"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:276
 msgid "Calibrating Optics…"
@@ -9110,7 +9109,7 @@ msgstr "Guardar como nuevo (solo para este sitio)"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:361
 msgid "Global Image Style"
-msgstr "Globaler Bildstil"
+msgstr "Estilo de imagen global"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:393
 msgid "Preset name"
@@ -9129,7 +9128,7 @@ msgstr ""
 
 #: client/src/features/settings/routes/VisualsPage.tsx:421
 msgid "Global Art Direction"
-msgstr "Globale Kunstrichtung"
+msgstr "Dirección de arte global"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:425
 msgid "Enter global art direction directives..."
@@ -9145,7 +9144,7 @@ msgstr ""
 
 #: client/src/features/settings/routes/VisualsPage.tsx:447
 msgid "Output Dimensions"
-msgstr "Ausgabedimensionen"
+msgstr "Dimensiones de salida"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:454
 msgid "Select dimensions..."
@@ -9173,7 +9172,7 @@ msgstr ""
 
 #: client/src/features/settings/routes/VisualsPage.tsx:491
 msgid "Format Encoding"
-msgstr "Formato-Kodierung"
+msgstr "Codificación del formato"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:505
 msgid "Select encoding..."
@@ -9181,7 +9180,7 @@ msgstr "Selecciona la codificación..."
 
 #: client/src/features/settings/routes/VisualsPage.tsx:527
 msgid "SEO Automation"
-msgstr "SEO-Automatisierung"
+msgstr "Automatización SEO"
 
 #: client/src/features/settings/routes/VisualsPage.tsx:530
 msgid "Always on"
@@ -9570,7 +9569,7 @@ msgstr "La IA devolvió un plano vacío."
 
 #: client/src/index.tsx:39
 msgid "Data Fetch Error:"
-msgstr "Datenabruffehler:"
+msgstr "Error al obtener los datos:"
 
 #: client/src/utils/cronUtils.ts:28
 msgid "Custom schedule"
