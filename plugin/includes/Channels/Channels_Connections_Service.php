@@ -110,6 +110,7 @@ class Channels_Connections_Service implements Channels_Connections_Service_Inter
         $payload = array_merge($envelope, [
             'integration_id' => $integration_id,
             'webhook_url'    => $webhook_url,
+            'ui_locale'      => sanitize_text_field(get_user_locale()),
         ]);
         if ($display_name !== null && $display_name !== '') {
             $payload['display_name'] = $display_name;

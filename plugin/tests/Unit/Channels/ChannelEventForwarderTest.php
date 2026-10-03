@@ -24,6 +24,116 @@ use Structura\Tests\Unit\TestCase;
  */
 class ChannelEventForwarderTest extends TestCase
 {
+    /** @test */
+    public function it_never_delivers_password_protected_published_content(): void
+    {
+        Functions\when('get_post_field')->alias(function ($field) {
+            return ['post_status' => 'publish', 'post_password' => 'private', 'post_content' => '<p>Protected</p>'][$field] ?? '';
+        });
+        $method = new \ReflectionMethod(Channel_Event_Forwarder::class, 'published_article');
+        $method->setAccessible(true);
+        $this->assertNull($method->invoke(new Channel_Event_Forwarder(), self::POST_ID, []));
+    }
+
+    /** @test */
+    public function it_delivers_the_final_article_with_content_language_and_rank_math_title(): void
+    {
+        Functions\when('get_post_field')->alias(function ($field) {
+            return ['post_status' => 'publish', 'post_name' => 'hallo', 'post_content' => '<p>Hallo Welt</p>'][$field] ?? '';
+        });
+        Functions\when('get_post_meta')->alias(function ($id, $key) {
+            return ['_structura_content_language' => 'de', 'rank_math_title' => 'Hallo SEO', 'rank_math_description' => 'Beschreibung', 'rank_math_focus_keyword' => 'Hallo'][$key] ?? '';
+        });
+        Functions\stubs([
+            'sanitize_title' => function ($v) { return $v; },
+            'sanitize_textarea_field' => function ($v) { return strip_tags($v); },
+            'wp_kses_post' => function ($v) { return $v; },
+            'get_post_modified_time' => '2026-09-28T10:00:00Z',
+        ]);
+        $method = new \ReflectionMethod(Channel_Event_Forwarder::class, 'published_article');
+        $method->setAccessible(true);
+        $article = $method->invoke(new Channel_Event_Forwarder(), self::POST_ID, [
+            'post_title' => 'Hallo', 'excerpt' => 'Kurz', 'locale' => 'en_US',
+            'published_at' => '2026-09-28T09:00:00Z', 'post_url' => 'https://example.com/hallo', 'featured_image_url' => '',
+        ]);
+        $this->assertSame('de', $article['locale']);
+        $this->assertSame('Hallo SEO', $article['metaTitle']);
+        $this->assertSame('Beschreibung', $article['metaDescription']);
+        $this->assertSame('<p>Hallo Welt</p>', $article['html']);
+        $this->assertSame('https://example.com/hallo', $article['canonicalUrl']);
+        $this->assertNull($article['author']);
+    }
+
+    /** @test */
+    public function approval_queues_one_unique_article_job_without_calling_the_cloud(): void
+    {
+        if (!defined('STRUCTURA_AS_GROUP')) define('STRUCTURA_AS_GROUP', 'structura');
+        Mockery::mock('alias:Structura\Core\Cloud_Client')->shouldNotReceive('post');
+        Functions\expect('as_enqueue_async_action')->once()
+            ->with('structura/channels/article_delivery_queued', [self::POST_ID], STRUCTURA_AS_GROUP, true)
+            ->andReturn(123);
+        (new Channel_Event_Forwarder())->on_structura_post_published(['post_id' => self::POST_ID]);
+    }
+
+    /** @test */
+    public function approval_uses_wordpress_cron_when_action_scheduler_is_unavailable(): void
+    {
+        Mockery::mock('alias:Structura\Core\Cloud_Client')->shouldNotReceive('post');
+        Functions\expect('wp_schedule_single_event')->once()
+            ->with(Mockery::type('int'), 'structura/channels/article_delivery_queued', [self::POST_ID])->andReturn(true);
+        (new Channel_Event_Forwarder())->on_structura_post_published(['post_id' => self::POST_ID]);
+    }
+
+    /** @test */
+    public function queued_approval_does_not_deliver_a_post_reverted_to_draft(): void
+    {
+        Functions\when('get_post_field')->justReturn('draft');
+        Mockery::mock('alias:Structura\Core\Cloud_Client')->shouldNotReceive('post');
+        (new Channel_Event_Forwarder())->deliver_approved_article(self::POST_ID);
+        $this->assertTrue(true);
+    }
+
+    /** @test */
+    public function expands_rank_math_templates_with_rank_math_even_when_yoast_is_present(): void
+    {
+        $post = (object)['ID' => self::POST_ID];
+        Functions\when('get_post')->justReturn($post);
+        Functions\when('get_post_meta')->alias(function ($id, $key) {
+            return strpos($key, 'rank_math_') === 0 ? '%title% %sitename%' : '';
+        });
+        Functions\expect('wpseo_replace_vars')->never();
+        Mockery::mock('alias:RankMath\Helper')->shouldReceive('replace_vars')->twice()
+            ->with('%title% %sitename%', $post)->andReturn('Expanded title Site');
+        Functions\when('get_post_field')->alias(function ($field) {
+            return ['post_status' => 'publish', 'post_name' => 'hello', 'post_content' => '<p>Body</p>'][$field] ?? '';
+        });
+        Functions\stubs([
+            'sanitize_title' => function ($v) { return $v; },
+            'sanitize_textarea_field' => function ($v) { return strip_tags($v); },
+            'wp_kses_post' => function ($v) { return $v; },
+            'get_post_modified_time' => '2026-09-29T10:00:00Z',
+        ]);
+        Mockery::mock('alias:Structura\Core\License_Manager')->shouldReceive('is_licensed')->andReturn(true);
+        Mockery::mock('alias:Structura\Core\Key_Manager')->shouldReceive('get_license_payload')->andReturn(['key' => 'test', 'secret' => 'test']);
+        Mockery::mock('alias:Structura\Core\Log_Service')->shouldReceive('add');
+        Mockery::mock('alias:Structura\Core\Cloud_Client')->shouldReceive('post')->once()
+            ->with('/channelsPostPublished', Mockery::on(function ($payload) {
+                return $payload['article']['metaTitle'] === 'Expanded title Site'
+                    && $payload['article']['metaDescription'] === 'Expanded title Site';
+            }), Mockery::any())->andReturn(['code' => 200]);
+        (new Channel_Event_Forwarder())->on_structura_post_inserted([
+            'post_id' => self::POST_ID, 'campaign_id' => self::CAMPAIGN_ID,
+            'status' => 'publish', 'post_title' => 'Hello', 'locale' => 'en',
+            'post_url' => 'https://example.com/hello', 'published_at' => '2026-09-29T10:00:00Z',
+        ]);
+    }
+
+    /** Returns initial-publication and draft-approval entry points. */
+    public static function publicationEntryPoints(): array
+    {
+        return ['initial publication' => [false], 'approved draft' => [true]];
+    }
+
     private const POST_ID     = 42;
     private const CAMPAIGN_ID = 7;
 
@@ -159,8 +269,11 @@ class ChannelEventForwarderTest extends TestCase
     //  Logs page.
     // ──────────────────────────────────────────────────────────────────────
 
-    /** @test */
-    public function it_posts_to_the_cloud_endpoint(): void
+    /**
+     * @test
+     * @dataProvider publicationEntryPoints
+     */
+    public function it_posts_to_the_cloud_endpoint(bool $approved_draft): void
     {
         Functions\when('get_post_meta')->justReturn(self::CAMPAIGN_ID);
 
@@ -178,10 +291,11 @@ class ChannelEventForwarderTest extends TestCase
         $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
         $cloud->shouldReceive('post')
             ->once()
-            ->withArgs(function ($endpoint, $payload, $args) {
+            ->withArgs(function ($endpoint, $payload, $args) use ($approved_draft) {
                 return $endpoint === '/channelsPostPublished'
                     && is_array($payload)
-                    && $payload['event'] === 'post_published'
+                    && ($payload['allowed_integration_ids'] ?? null) === ($approved_draft ? ['webhook-deliver'] : null)
+                    && $payload['event'] === ($approved_draft ? 'article_delivery_requested' : 'post_published')
                     && $payload['license_key'] === 'live_xxx'
                     && $payload['activation_secret'] === 'sek_yyy'
                     && $payload['site_url'] === 'https://example.com'
@@ -241,7 +355,11 @@ class ChannelEventForwarderTest extends TestCase
             ->once();
 
         $forwarder = new Channel_Event_Forwarder();
-        $forwarder->forward_post_published(self::POST_ID);
+        if ($approved_draft) {
+            $forwarder->deliver_approved_article(self::POST_ID);
+        } else {
+            $forwarder->forward_post_published(self::POST_ID);
+        }
 
         $this->assertTrue(true);
     }

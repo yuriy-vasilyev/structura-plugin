@@ -21,6 +21,9 @@ if ( ! defined('ABSPATH')) {
  */
 class Campaign_Shape_Transformer
 {
+    /** Text providers the provider advice can be hidden for. */
+    private const AI_ADVICE_PROVIDERS = ['openai', 'gemini', 'anthropic'];
+
     /**
      * Convert a cloud flat CampaignDoc to WP cluster shape.
      *
@@ -110,6 +113,10 @@ class Campaign_Shape_Transformer
                 // disabled").
                 'pregenerationEnabled' => (bool) ($cloud['pregenerationEnabled'] ?? true),
             ],
+            // Provider advice state: which text provider the advice was
+            // hidden for, else null. Absent on clouds deployed before
+            // 2026-10-02; the SPA reads null as "shows".
+            'aiAdvice'     => self::normalize_ai_advice_read($cloud['aiAdvice'] ?? null),
             'authority'    => [
                 'domains'         => (array) ($cloud['authorityDomains'] ?? []),
                 'discoveredAt'    => $cloud['authorityDiscoveredAt'] ?? null,
@@ -175,6 +182,53 @@ class Campaign_Shape_Transformer
             get_option('date_format') . ' ' . get_option('time_format'),
             $next_run_timestamp
         );
+    }
+
+    /**
+     * Cloud-owned fields an update sends only when the request carries them,
+     * cloud key => request key.
+     *
+     * 2026-10-02: the validator drops these and wp_input_to_cloud() fills
+     * defaults, so every edit-form save re-activated a paused campaign and
+     * reset its progress (postsPublished, keywordQueueIndex, lastRunTimestamp)
+     * and discovery stamps. The cloud merges an update patch, so an absent
+     * key keeps the stored value.
+     */
+    private const UPDATE_ONLY_WHEN_SENT = [
+        'status'                => 'status',
+        'postsPublished'        => 'posts_published',
+        'keywordQueueIndex'     => 'keyword_queue_index',
+        'lastRunTimestamp'      => 'last_run_timestamp',
+        'authorityDiscoveredAt' => 'authority_discovered_at',
+        'keywordsDiscoveredAt'  => 'keywords_discovered_at',
+    ];
+
+    /**
+     * Returns the cloud patch for a campaign update: wp_input_to_cloud()
+     * without the cloud-owned fields the request did not carry.
+     *
+     * @param array $validated Campaign_Validator output.
+     * @param array $request   Raw request params.
+     * @return array Cloud flat patch.
+     */
+    public static function wp_update_to_cloud(array $validated, array $request): array
+    {
+        $carried = [];
+        foreach (self::UPDATE_ONLY_WHEN_SENT as $request_key) {
+            $value = $request[$request_key] ?? null;
+            if (is_scalar($value) && $value !== '') {
+                $carried[$request_key] = $value;
+            }
+        }
+
+        $cloud = self::wp_input_to_cloud(array_merge($validated, $carried));
+        foreach (self::UPDATE_ONLY_WHEN_SENT as $cloud_key => $request_key) {
+            if (!array_key_exists($request_key, $carried)) {
+                unset($cloud[$cloud_key]);
+            }
+        }
+
+        return $cloud;
     }
 
     /**
@@ -250,6 +304,17 @@ class Campaign_Shape_Transformer
         }
         if (in_array($wp_input['image_tier'] ?? null, ['top', 'mid'], true)) {
             $cloud['imageTier'] = $wp_input['image_tier'];
+        }
+
+        // Provider advice hidden / shown again (specs/byok-ai-guidance.md §4).
+        // Forwarded only when the SPA sent it, so a save that didn't touch
+        // the advice never wipes it. `{hidden: null}` shows it again; the
+        // cloud stamps `at` and `by` itself.
+        if (array_key_exists('ai_advice', $wp_input)) {
+            $advice = self::normalize_ai_advice_write($wp_input['ai_advice']);
+            if ($advice !== null) {
+                $cloud['aiAdvice'] = $advice;
+            }
         }
 
         // Setup-draft provenance (spec campaign-language-and-smart-setup.md
@@ -464,6 +529,50 @@ class Campaign_Shape_Transformer
      * @param mixed $raw
      * @return array{resolvedMode:string,kdCeiling:int|null,path:string}|null
      */
+    /**
+     * Returns the cloud `aiAdvice` write for the SPA's `ai_advice` value:
+     * `['hidden' => ['textProvider' => …]]` to hide, `['hidden' => null]` to
+     * show again, or null to send nothing (malformed or unknown provider).
+     *
+     * @param mixed $raw
+     * @return array|null
+     */
+    public static function normalize_ai_advice_write($raw): ?array
+    {
+        if ($raw === null) {
+            return ['hidden' => null];
+        }
+        if ( ! is_array($raw) || ! array_key_exists('hidden', $raw)) {
+            return null;
+        }
+        if ($raw['hidden'] === null) {
+            return ['hidden' => null];
+        }
+        $provider = is_array($raw['hidden']) ? sanitize_key((string) ($raw['hidden']['textProvider'] ?? '')) : '';
+
+        return in_array($provider, self::AI_ADVICE_PROVIDERS, true)
+            ? ['hidden' => ['textProvider' => $provider]]
+            : null;
+    }
+
+    /**
+     * Returns the SPA's `aiAdvice` for a cloud doc's `aiAdvice`:
+     * `['hidden' => ['textProvider' => …]]` when hidden, else null.
+     *
+     * @param mixed $raw
+     * @return array|null
+     */
+    public static function normalize_ai_advice_read($raw): ?array
+    {
+        $provider = is_array($raw) && is_array($raw['hidden'] ?? null)
+            ? sanitize_key((string) ($raw['hidden']['textProvider'] ?? ''))
+            : '';
+
+        return in_array($provider, self::AI_ADVICE_PROVIDERS, true)
+            ? ['hidden' => ['textProvider' => $provider]]
+            : null;
+    }
+
     public static function sanitize_discovery_meta($raw): ?array
     {
         if ( ! is_array($raw)) {

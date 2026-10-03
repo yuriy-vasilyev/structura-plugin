@@ -32,6 +32,7 @@ class ChannelsConnectionsServiceTest extends TestCase
         parent::setUp();
 
         Functions\stubs([
+            'get_user_locale' => function () { return 'de_DE'; },
             'home_url' => function () { return 'https://example.com'; },
         ]);
     }
@@ -144,6 +145,7 @@ class ChannelsConnectionsServiceTest extends TestCase
             ->withArgs(function ($endpoint, $payload, $args) {
                 return $endpoint === '/channelsSaveWebhookConnection'
                     && $payload['integration_id'] === 'slack'
+                    && $payload['ui_locale'] === 'de_DE'
                     && $payload['webhook_url'] === 'https://hooks.slack.com/services/T/B/X'
                     && $payload['display_name'] === '#deploys'
                     && $payload['license_key'] === 'live_xxx';

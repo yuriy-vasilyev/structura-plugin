@@ -365,6 +365,39 @@ class BlockSerializerTest extends TestCase
     }
 
     // ──────────────────────────────────────────────────────────────────────
+    //  ACTION STEPS (2026-10-02: `name: text`, never an em-dash join)
+    // ──────────────────────────────────────────────────────────────────────
+
+    /** @test */
+    public function action_steps_join_name_and_text_with_a_colon_outside_the_strong(): void
+    {
+        $html = $this->render_action_steps([
+            ['name' => 'Measure your light', 'text' => 'Track sun hours for a week.'],
+        ]);
+
+        $this->assertStringContainsString('<li><strong>Measure your light</strong>: Track sun hours for a week.</li>', $html);
+        $this->assertStringNotContainsString('—', $html);
+    }
+
+    /** @test */
+    public function action_steps_whose_name_ends_in_punctuation_take_a_space_and_no_colon(): void
+    {
+        $html = $this->render_action_steps([
+            ['name' => 'Why drainage?', 'text' => 'Roots rot in standing water.'],
+            ['name' => 'Water daily!', 'text' => 'Containers dry out fast.'],
+            ['name' => 'Step one:', 'text' => 'Pick a pot.'],
+            ['name' => 'Done.', 'text' => 'Harvest.'],
+        ]);
+
+        $this->assertStringContainsString('<strong>Why drainage?</strong> Roots rot in standing water.', $html);
+        $this->assertStringContainsString('<strong>Water daily!</strong> Containers dry out fast.', $html);
+        $this->assertStringContainsString('<strong>Step one:</strong> Pick a pot.', $html);
+        $this->assertStringContainsString('<strong>Done.</strong> Harvest.', $html);
+        $this->assertStringNotContainsString('</strong>:', $html);
+        $this->assertStringNotContainsString('—', $html);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
     //  HEADING RENDERER
     // ──────────────────────────────────────────────────────────────────────
 
@@ -1217,6 +1250,19 @@ class BlockSerializerTest extends TestCase
             'blocks' => [
                 ['type' => 'core/paragraph', 'content' => $content],
             ],
+        ]);
+    }
+
+    /**
+     * Shorthand: serialize a post whose only extra is an Action Steps section.
+     *
+     * @param array<int, array{name: string, text: string}> $steps
+     */
+    private function render_action_steps(array $steps): string
+    {
+        return $this->serializer->serialize_post([
+            'blocks'       => [['type' => 'core/paragraph', 'content' => 'Intro.']],
+            'action_steps' => ['section_title' => 'How to start', 'steps' => $steps],
         ]);
     }
 

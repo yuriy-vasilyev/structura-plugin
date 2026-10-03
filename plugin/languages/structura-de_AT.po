@@ -9978,3 +9978,109 @@ msgstr "Das sieht nach einer Webadresse aus, nicht nach einem API-Schlüssel. F�
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx
 msgid "That looks like a web address, not an API key. Paste the key itself from your provider's dashboard."
 msgstr "Das sieht nach einer Webadresse aus, nicht nach einem API-Schlüssel. Füge den Schlüssel selbst aus dem Dashboard deines Anbieters ein."
+
+msgid "Article delivery"
+msgstr "Artikelübertragung"
+
+msgid "Publish complete articles to your Lovable, Bolt, v0, Replit or custom-built blog."
+msgstr "Veröffentliche vollständige Artikel in deinem Blog auf Lovable, Bolt, v0, Replit oder einer eigenen Website."
+
+msgid "e.g. My website blog"
+msgstr "z. B. Mein Website-Blog"
+
+msgid "More posts and images per site, AI video, bundled Channels distribution and a dedicated support channel."
+msgstr "Mehr Beiträge und Bilder pro Website, KI-Videos, inklusive Channels-Verteilung und ein dedizierter Support-Kanal."
+
+msgid "The AI service couldn't complete the request. Please try again."
+msgstr "Der KI-Dienst konnte die Anfrage nicht abschließen. Bitte versuche es erneut."
+
+msgid "The AI service is experiencing high demand right now. Try again in a moment."
+msgstr "Der KI-Dienst ist gerade stark ausgelastet. Versuche es gleich noch einmal."
+
+msgid "This site has used %1$d of its %2$d posts for this month. New posts pause once all of them are used."
+msgstr "Diese Website hat %1$d von %2$d Beiträgen für diesen Monat verbraucht. Neue Beiträge pausieren, sobald alle verbraucht sind."
+
+msgid "This site has used %1$d of its %2$d posts for this month. New posts resume when the month resets. Upgrade to keep posting."
+msgstr "Diese Website hat %1$d von %2$d Beiträgen für diesen Monat verbraucht. Neue Beiträge gibt es wieder, sobald der Monat zurückgesetzt wird. Führe ein Upgrade durch, um weiter zu veröffentlichen."
+
+msgctxt "ai advice"
+msgid "Recommended"
+msgstr "Empfohlen"
+
+msgctxt "ai advice"
+msgid "Recommended for text"
+msgstr "Empfohlen für Text"
+
+msgctxt "ai advice"
+msgid "Needs a Pro License"
+msgstr "Erfordert eine Pro-Lizenz"
+
+msgctxt "ai advice"
+msgid "Compare plans"
+msgstr "Tarife vergleichen"
+
+msgctxt "ai advice"
+msgid "Gemini isn’t recommended for writing."
+msgstr "Gemini wird zum Schreiben nicht empfohlen."
+
+msgctxt "ai advice"
+msgid "In our tests, its posts contained more invented details."
+msgstr "In unseren Tests enthielten seine Beiträge mehr erfundene Details."
+
+msgctxt "ai advice"
+msgid "Switch to %s"
+msgstr "Zu %s wechseln"
+
+msgctxt "ai advice"
+msgid "Connect a Claude or OpenAI key"
+msgstr "Einen Claude- oder OpenAI-Schlüssel verbinden"
+
+msgctxt "ai advice"
+msgid "Connect an OpenAI key"
+msgstr "Einen OpenAI-Schlüssel verbinden"
+
+msgctxt "ai advice"
+msgid "Connect Claude for the best results"
+msgstr "Claude für die besten Ergebnisse verbinden"
+
+msgctxt "ai advice"
+msgid "Upgrade to Cloud, where we run the AI"
+msgstr "Zu Cloud wechseln, dort betreiben wir die KI"
+
+msgctxt "ai advice"
+msgid "Upgrade for Claude or managed AI"
+msgstr "Upgrade für Claude oder verwaltete KI"
+
+msgctxt "ai advice"
+msgid "Hide this advice for this campaign"
+msgstr "Diesen Hinweis für diese Kampagne ausblenden"
+
+msgctxt "ai advice"
+msgid "Show advice"
+msgstr "Hinweis anzeigen"
+
+msgctxt "ai advice"
+msgid "Switched to %s with its recommended model."
+msgstr "Zu %s mit dem empfohlenen Modell gewechselt."
+
+msgctxt "ai advice"
+msgid "Undo"
+msgstr "Rückgängig"
+
+msgid "In our tests, posts written with Gemini contained more invented details. Each campaign shows how to switch in its AI engine section."
+msgstr "In unseren Tests enthielten mit Gemini geschriebene Beiträge mehr erfundene Details. Jede Kampagne zeigt im Bereich AI Engine, wie du wechseln kannst."
+
+msgid "Review campaigns"
+msgstr "Kampagnen prüfen"
+
+msgid "{{count}} campaign on {{site}} writes with Gemini"
+msgid_plural "{{count}} campaigns on {{site}} write with Gemini"
+msgstr[0] "{{count}} Kampagne auf {{site}} schreibt mit Gemini"
+msgstr[1] "{{count}} Kampagnen auf {{site}} schreiben mit Gemini"
+
+msgid "Too many AI requests from this workspace. Try again in a minute, or tomorrow if you have made a lot of requests today."
+msgstr "Zu viele KI-Anfragen aus diesem Workspace. Versuche es in einer Minute erneut, oder morgen, wenn du heute schon sehr viele Anfragen gestellt hast."
+
+#. translators: %s: language name, e.g. "German".
+msgid "Redraft the campaign in %s?"
+msgstr "Kampagne auf %s neu entwerfen?"

@@ -1499,6 +1499,12 @@ class Task_Runner
         // as a belt-and-suspenders safeguard in case this method is ever
         // invoked against a post that was not created by insert_wordpress_post.
         update_post_meta($post_id, '_structura_campaign_id', $campaign_id);
+        // Keep the content language after draft approval or campaign edits.
+        $content_language = $campaign['intelligence']['language'] ?? 'default';
+        if ($content_language === '' || $content_language === 'default') {
+            $content_language = get_bloginfo('language');
+        }
+        update_post_meta($post_id, '_structura_content_language', sanitize_text_field($content_language));
 
         // Bump 'structura_stat_generated_posts' for analytics
         $total = (int)get_option('structura_stat_generated_posts', 0);

@@ -7,7 +7,7 @@ const BASE: PlanCardProps = {
   price: 39,
   currency: "eur",
   description: "Managed AI, fully hosted.",
-  features: ["Managed AI", "2M tokens"],
+  features: ["Managed AI", "30 posts per site / month"],
   labels: { unit: "/ site / month", mostPopular: "Most Popular", premiumBadge: "Top Tier" },
   ctaLabel: "Generate posts in the cloud",
   ctaHref: "https://app.example.com/checkout",

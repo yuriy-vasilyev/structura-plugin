@@ -313,6 +313,23 @@ export interface Campaign {
    * site, or when the plugin build is older than 1.20.0.
    */
   lastRun?: CampaignLastRunSignal;
+  /**
+   * Provider advice state (specs/byok-ai-guidance.md §4). Optional: absent
+   * on campaigns that never hid the advice, on plugin builds before 2.28.0
+   * and on clouds deployed before 2026-10-02.
+   */
+  aiAdvice?: CampaignAiAdvice;
+}
+
+/** Whether the "Gemini isn't recommended" advice is hidden on a campaign. */
+export interface CampaignAiAdvice {
+  /** The text provider the advice was hidden for, or `null` when it shows. */
+  hidden: { textProvider: AIProvider } | null;
+  /**
+   * Form state only: the user hid or showed the advice in this session, so
+   * `flattenCampaign` sends `ai_advice` with the save. Never on the wire.
+   */
+  dirty?: boolean;
 }
 
 /**

@@ -21,6 +21,11 @@ import { __, sprintf } from "@wordpress/i18n";
  * The friendly copy below names the provider, hints at the cause, and
  * points at the "switch providers" escape hatch.
  *
+ * Managed plans (Cloud / Cloud Pro) get the same branches without the
+ * provider name or the "switch provider / check your key" advice: their
+ * customers never see a provider and have no key or provider to change
+ * (specs/managed-ai-lineup.md §3.3, 2026-10-01).
+ *
  * Codes we deliberately DON'T branch on (passed through verbatim):
  *   - `tier_quota_exceeded` — the cloud's own copy already explains
  *     the cap and the upgrade path; restating it here would diverge.
@@ -52,10 +57,33 @@ interface SuggestionErrorEnvelope {
   code?: string;
 }
 
-export function humanizeSuggestionError(error: unknown): string {
+export function humanizeSuggestionError(
+  error: unknown,
+  options: { isManagedAiPlan?: boolean } = {}
+): string {
   const e = (error ?? {}) as SuggestionErrorEnvelope;
   const code = e.data?.code;
   const provider = e.data?.provider;
+
+  // The cloud's per-workspace AI call limit (2026-10-02,
+  // `workspaces.aiCallRateLimited`): same copy on every plan.
+  if (code === "ai_rate_limited") {
+    return __(
+      "Too many AI requests from this workspace. Try again in a minute, or tomorrow if you have made a lot of requests today.",
+      "structura"
+    );
+  }
+
+  if (options.isManagedAiPlan && code === "provider_transient") {
+    return __(
+      "The AI service is experiencing high demand right now. Try again in a moment.",
+      "structura"
+    );
+  }
+
+  if (options.isManagedAiPlan && code === "provider_error") {
+    return __("The AI service couldn't complete the request. Please try again.", "structura");
+  }
 
   if (code === "provider_transient") {
     return sprintf(

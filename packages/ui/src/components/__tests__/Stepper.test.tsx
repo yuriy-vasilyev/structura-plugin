@@ -68,4 +68,51 @@ describe("Stepper", () => {
     expect(screen.getByRole("button", { name: /Strategy/ })).toHaveTextContent("2");
     expect(screen.getByRole("button", { name: /Discovery/ })).not.toHaveTextContent("3");
   });
+
+  describe("contrast and ARIA (specs/article-delivery-connect-flow.md §7)", () => {
+    const circle = (name: RegExp) =>
+      screen.getByRole("button", { name }).querySelector("span") as HTMLElement;
+
+    it("marks only the active step with aria-current=step", () => {
+      render(<Stepper steps={STEPS} activeIndex={2} />);
+      expect(screen.getByRole("button", { name: /Discovery/ })).toHaveAttribute(
+        "aria-current",
+        "step"
+      );
+      for (const name of [/Interview/, /Strategy/, /Rhythm/, /Summary/]) {
+        expect(screen.getByRole("button", { name })).not.toHaveAttribute("aria-current");
+      }
+    });
+
+    it("fills done circles with emerald-600, not emerald-500", () => {
+      render(<Stepper steps={STEPS} activeIndex={2} />);
+      expect(circle(/Interview/)).toHaveClass("bg-emerald-600");
+      expect(circle(/Interview/)).not.toHaveClass("bg-emerald-500");
+    });
+
+    it("keeps the active circle brand-600 in dark mode too", () => {
+      render(<Stepper steps={STEPS} activeIndex={2} />);
+      expect(circle(/Discovery/)).toHaveClass("bg-brand-600");
+      expect(circle(/Discovery/).className).not.toMatch(/dark:bg-brand-500/);
+    });
+
+    it("gives upcoming circles readable numbers in both modes", () => {
+      render(<Stepper steps={STEPS} activeIndex={2} />);
+      expect(circle(/Summary/)).toHaveClass(
+        "bg-neutral-100",
+        "text-neutral-600",
+        "dark:bg-neutral-700",
+        "dark:text-neutral-300"
+      );
+      expect(circle(/Summary/)).not.toHaveClass("text-neutral-400");
+    });
+
+    it("renders inactive labels in neutral-500 and the active one in neutral-900", () => {
+      render(<Stepper steps={STEPS} activeIndex={2} />);
+      expect(screen.getByText("Summary")).toHaveClass("text-neutral-500");
+      expect(screen.getByText("Interview")).toHaveClass("text-neutral-500");
+      expect(screen.getByText("Summary")).not.toHaveClass("text-neutral-400");
+      expect(screen.getByText("Discovery")).toHaveClass("text-neutral-900");
+    });
+  });
 });

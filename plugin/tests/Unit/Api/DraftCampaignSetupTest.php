@@ -85,6 +85,24 @@ class DraftCampaignSetupTest extends TestCase
         $this->assertSame('draft_failed', $out['result']->get_error_code());
     }
 
+    /** @test */
+    public function it_forwards_the_ai_call_limit_code_and_status(): void
+    {
+        // 2026-10-02: the cloud refuses with 429 and `code: "ai_rate_limited"`;
+        // wp-admin maps that code to the limit's own message.
+        $out = $this->run_proxy([], [
+            'code' => 429,
+            'body' => ['success' => false, 'error' => 'Too many AI requests.', 'code' => 'ai_rate_limited'],
+        ]);
+
+        $this->assertInstanceOf(\WP_Error::class, $out['result']);
+        $this->assertSame('draft_failed', $out['result']->get_error_code());
+        $this->assertSame(
+            ['status' => 429, 'code' => 'ai_rate_limited'],
+            $out['result']->get_error_data()
+        );
+    }
+
     /** @param array<string, mixed> $params */
     private function make_request(array $params): object
     {

@@ -230,6 +230,14 @@ class Campaign_Validator
             $clean['referral_links'] = $params['referral_links'];
         }
 
+        // 9. Provider advice hidden / shown again (specs/byok-ai-guidance.md
+        // §4). Pass-through, present only when the SPA sent it (it sends it
+        // only after the user hid or showed the advice); whitelisted in
+        // Campaign_Shape_Transformer::normalize_ai_advice_write.
+        if (array_key_exists('ai_advice', $params)) {
+            $clean['ai_advice'] = $params['ai_advice'];
+        }
+
         if ( ! empty($errors)) {
             return new WP_Error('validation_failed', __('Configuration errors.', 'structura'), [
                 'status' => 422,

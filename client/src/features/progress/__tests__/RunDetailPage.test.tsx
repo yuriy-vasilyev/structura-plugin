@@ -54,8 +54,11 @@ vi.mock("@wordpress/i18n", () => ({
 // RunDetailPage uses useCampaignRunQuery, which now gates on
 // `useLicense().hasUsableLicense`. Stub to "bound" so the per-run poll
 // fires and the render-branch assertions still trip.
+// The plan is swappable: managed plans hide the provider rows
+// (2026-10-01, specs/managed-ai-lineup.md §3.3). Default BYOK.
+const licenseMock = vi.hoisted(() => ({ plan: "byok" }));
 vi.mock("@/features/settings/api/useLicense", () => ({
-  useLicense: () => ({ hasUsableLicense: true, hasWorkspace: true }),
+  useLicense: () => ({ plan: licenseMock.plan, hasUsableLicense: true, hasWorkspace: true }),
 }));
 
 import { RunDetailPage } from "../routes/RunDetailPage";
@@ -138,6 +141,7 @@ const PERSONAS_FIXTURE = [
 ];
 
 beforeEach(() => {
+  licenseMock.plan = "byok";
   apiFetchMock.mockReset();
   // Path-aware default — `/personas` always returns the fixture; any
   // other path falls through to per-test `mockResolvedValueOnce`
@@ -288,6 +292,63 @@ describe("RunDetailPage", () => {
     expect(screen.getByText(/\(gpt-4o\)/)).toBeInTheDocument();
     expect(screen.getByText(/Gemini/)).toBeInTheDocument();
     expect(screen.getByText(/\(imagen-3.0-fast\)/)).toBeInTheDocument();
+  });
+
+  it("hides the AI Intelligence rows on a managed plan (2026-10-01)", async () => {
+    // Runs written before the cloud stopped writing `inputs.providers`
+    // for managed plans still carry the names; the page must not show them.
+    licenseMock.plan = "cloud";
+    apiFetchMock.mockResolvedValueOnce({ success: true, run: BASE_SUCCESS_RUN });
+    renderRunDetail();
+
+    await screen.findByRole("heading", { level: 1 });
+    expect(screen.getByText("Run Configuration")).toBeInTheDocument();
+    expect(screen.getByText("headless wordpress")).toBeInTheDocument();
+    expect(screen.queryByText("AI Intelligence")).not.toBeInTheDocument();
+    expect(screen.queryByText(/OpenAI/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/gpt-4o/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/imagen-3.0-fast/)).not.toBeInTheDocument();
+  });
+
+  it("renders no empty provider row or empty parens when the cloud sends blank names (BYOK)", async () => {
+    // A blank provider id renders no row; a blank model renders the
+    // provider name without "()".
+    apiFetchMock.mockResolvedValueOnce({
+      success: true,
+      run: {
+        ...BASE_SUCCESS_RUN,
+        inputs: {
+          ...SAMPLE_INPUTS,
+          providers: {
+            text: { id: "", model: "" },
+            image: { id: "gemini", model: "" },
+          },
+        },
+      },
+    });
+    renderRunDetail();
+
+    await screen.findByRole("heading", { level: 1 });
+    expect(screen.getByText("AI Intelligence")).toBeInTheDocument();
+    expect(screen.queryByText("Text Provider")).not.toBeInTheDocument();
+    expect(screen.getByText("Image Provider")).toBeInTheDocument();
+    expect(screen.getByText("Gemini")).toBeInTheDocument();
+    expect(screen.queryByText("()")).not.toBeInTheDocument();
+  });
+
+  it("renders no AI Intelligence block when every provider slot is blank", async () => {
+    apiFetchMock.mockResolvedValueOnce({
+      success: true,
+      run: {
+        ...BASE_SUCCESS_RUN,
+        inputs: { ...SAMPLE_INPUTS, providers: { text: { id: "", model: "" } } },
+      },
+    });
+    renderRunDetail();
+
+    await screen.findByRole("heading", { level: 1 });
+    expect(screen.getByText("Run Configuration")).toBeInTheDocument();
+    expect(screen.queryByText("AI Intelligence")).not.toBeInTheDocument();
   });
 
   it("renders the inputs card empty-state for a pre-rollout run (no inputs snapshot)", async () => {

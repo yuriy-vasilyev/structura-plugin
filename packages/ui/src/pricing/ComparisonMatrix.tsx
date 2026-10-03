@@ -228,15 +228,19 @@ export const ComparisonMatrix: FC<ComparisonMatrixProps> = ({
     className="mx-auto mt-20 w-full max-w-7xl min-w-0"
   >
     <div className="mb-10 text-center">
-      <p className="mb-3 text-xs font-bold tracking-widest text-brand-600 uppercase dark:text-brand-400">
-        {labels.eyebrow}
-      </p>
+      {/* The eyebrow carries the query and is the heading; the display line
+          is copy. Same rule as www's SectionHeading (site-wide since
+          2026-09-26) — kept inline here because this package cannot import
+          from www. */}
       <h2
         id="comparison-matrix-title"
-        className="font-display text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl dark:text-white"
+        className="mb-3 text-xs font-bold tracking-widest text-brand-600 uppercase dark:text-brand-400"
       >
-        {labels.title}
+        {labels.eyebrow}
       </h2>
+      <p className="font-display text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl dark:text-white">
+        {labels.title}
+      </p>
       {labels.description && (
         <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
           {labels.description}

@@ -17,7 +17,7 @@ const TIER_LABELS: Record<string, string> = {
   free: "Free",
   byok: "Pro",
   cloud: "Cloud",
-  cloud_pro: "Agency",
+  cloud_pro: "Cloud Pro",
 };
 
 const TIER_FEATURES: Record<string, string[]> = {

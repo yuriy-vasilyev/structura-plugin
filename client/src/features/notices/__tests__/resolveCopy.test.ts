@@ -41,6 +41,15 @@ describe("resolveCopy", () => {
     expect(body).not.toContain("{{provider}}");
   });
 
+  it("pluralises the gemini-text title on the count param (2026-10-02)", () => {
+    expect(resolveCopy("notices.byok.geminiText.title", { count: "1", site: "blog.test" })).toBe(
+      "1 campaign on blog.test writes with Gemini",
+    );
+    expect(resolveCopy("notices.byok.geminiText.title", { count: "3", site: "blog.test" })).toBe(
+      "3 campaigns on blog.test write with Gemini",
+    );
+  });
+
   it("falls back to the raw key for a key outside the contract", () => {
     expect(resolveCopy("notices.some.future.key")).toBe(
       "notices.some.future.key",

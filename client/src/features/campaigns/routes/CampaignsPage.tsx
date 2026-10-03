@@ -329,6 +329,7 @@ export const CampaignsPage = () => {
               campaign={campaign}
               personaName={getPersonaLabel(campaign.intelligence.personaId, personaMap)}
               onClick={() => navigate(`/campaigns/${campaign.id}`)}
+              isManagedAiPlan={isManagedAiPlan}
             />
           ))}
         </div>
@@ -387,10 +388,13 @@ export const CampaignCard = ({
   campaign,
   personaName,
   onClick,
+  isManagedAiPlan = false,
 }: {
   campaign: Campaign;
   personaName: string;
   onClick: () => void;
+  /** Hides the text provider and model line (specs/managed-ai-lineup.md §3.3). */
+  isManagedAiPlan?: boolean;
 }) => {
   const { identity, intelligence, schedule, stats, lastRun } = campaign;
   const isQuota = schedule.endCondition.type === "quota";
@@ -421,6 +425,7 @@ export const CampaignCard = ({
   const providerVis = getProviderVisual(intelligence.textProvider);
   const ModeIcon = MODE_ICONS[identity.campaignMode ?? ""] ?? Layers;
   const ProviderIcon = providerVis.icon;
+  const showProvider = !isManagedAiPlan && !!intelligence.textProvider;
 
   return (
     <button
@@ -530,23 +535,29 @@ export const CampaignCard = ({
           {/* Meta pills row */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-neutral-400 dark:text-neutral-500">
             {/* Provider */}
-            <span className="flex items-center gap-1.5">
-              <ProviderIcon
-                size={14}
-                className={isActive ? providerVis.color : "text-neutral-400 dark:text-neutral-500"}
-              />
-              <span className="font-semibold">{providerVis.label}</span>
-              {intelligence.textModel && (
-                <>
-                  <span className="text-neutral-300 dark:text-neutral-700">·</span>
-                  <span className="text-neutral-400 dark:text-neutral-500">
-                    {intelligence.textModel}
-                  </span>
-                </>
-              )}
-            </span>
+            {showProvider && (
+              <>
+                <span className="flex items-center gap-1.5">
+                  <ProviderIcon
+                    size={14}
+                    className={
+                      isActive ? providerVis.color : "text-neutral-400 dark:text-neutral-500"
+                    }
+                  />
+                  <span className="font-semibold">{providerVis.label}</span>
+                  {intelligence.textModel && (
+                    <>
+                      <span className="text-neutral-300 dark:text-neutral-700">·</span>
+                      <span className="text-neutral-400 dark:text-neutral-500">
+                        {intelligence.textModel}
+                      </span>
+                    </>
+                  )}
+                </span>
 
-            <span className="text-neutral-200 dark:text-neutral-700">|</span>
+                <span className="text-neutral-200 dark:text-neutral-700">|</span>
+              </>
+            )}
 
             {/* Persona */}
             <span className="flex items-center gap-1.5">

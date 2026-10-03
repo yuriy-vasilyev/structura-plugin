@@ -12,6 +12,7 @@ import { Timestamp } from "firebase-admin/firestore";
 
 export * from "./videoVoices";
 
+export * from "./channelIntegrations";
 
 /**
  * CORE IDENTITY
@@ -83,6 +84,10 @@ export interface UserAttribution {
   utmSource?: string | null;
   utmMedium?: string | null;
   utmCampaign?: string | null;
+  /** Free SEO tool whose signup or sign-in link brought the visitor in
+   *  (spec blogseo-gap-analysis §4.9.6). Last touch. Optional: portal builds
+   *  before 2026-10-02 never send it. */
+  tool?: "seo-checker" | "authority" | "keywords" | null;
   /** First URL the portal saw, for debugging attribution gaps. */
   landingUrl?: string | null;
   /** ISO timestamp the attribution was captured. */
@@ -584,6 +589,18 @@ export interface License {
    * Per-activation image cap — same shape as `maxTokensPerActivation`.
    */
   maxImagesPerActivation: number | null;
+  /**
+   * Per-activation monthly post quota on managed plans, copied from
+   * `product.metadata.max_posts` by the Stripe webhook (Cloud 30, Cloud Pro
+   * 100; spec `specs/managed-ai-lineup.md` §4). `null` / absent on BYOK and
+   * Free, and on managed licenses written before the field: readers resolve
+   * it through `managedPostQuota()` (`functions/src/billing/quotas.ts`),
+   * which falls back to the catalog value for the plan. Optional until the
+   * backfill script has run against production and functions deployed
+   * after 2026-10-01 have written it on every managed license; then the
+   * webhook and admin paths keep it populated.
+   */
+  maxPostsPerActivation?: number | null;
   /**
    * @deprecated Use `maxTokensPerActivation`. Mirrors the same value
    * during the per-activation rollout for one release window so older
@@ -1222,6 +1239,25 @@ export interface ReferralLink {
   anchorText?: string;
 }
 
+/**
+ * A customer hid the provider advice on one campaign (spec:
+ * specs/byok-ai-guidance.md §4). `textProvider` is the provider the advice
+ * was about, `at` an ISO timestamp, `by` the authenticated principal that
+ * hid it (a Firebase uid from the portal, `activation:{activationId}` from
+ * the plugin). The cloud stamps `at` and `by`; clients send only
+ * `textProvider`. Optional wire field since 2026-10-01; old clients omit it.
+ */
+export interface CampaignAiAdviceHidden {
+  textProvider: AIProvider;
+  at: string;
+  by: string;
+}
+
+/** `Campaign.aiAdvice`. Absent `hidden` means the advice shows. */
+export interface CampaignAiAdvice {
+  hidden?: CampaignAiAdviceHidden;
+}
+
 export interface LicenseActivation {
   /**
    * UUID activation id. Same value as the Firestore doc id; stamped on
@@ -1405,6 +1441,16 @@ export interface LicenseActivation {
     textModel: string;
     imageProvider: AIProvider | null;
     imageModel: string;
+    /**
+     * `auto` while the text default follows the site's connected keys:
+     * on every key bind or unbind the cloud recomputes it to
+     * `bestConnected("text", bound)` on its recommended tier (`mid` for a
+     * provider without one); the image default is never touched. Any
+     * manual pick sets `user`. Absent means `user`, so no existing site
+     * moves. Optional wire field since 2026-10-01; old clients omit it.
+     * Spec: specs/byok-ai-guidance.md §4.
+     */
+    source?: "auto" | "user";
   };
 
   /**
@@ -2106,6 +2152,41 @@ export interface CampaignRunOutputs {
  * reasonable window. Aggregate timing is rolled up separately to
  * `/licenses/{l}/runAggregates/{yyyy-mm}` (Phase 2, progress-stream §6.2).
  */
+/**
+ * Research behind one generated post: what the writer was shown and what the
+ * delivered post cites. Built at delivery from `gatherResearch` output, the
+ * keyphrase provenance and the delivered body; no page text is stored. On the
+ * headless post doc and the run doc; never public. Spec:
+ * `specs/source-check.md` §2.2.
+ */
+export interface PostResearchSnapshot {
+  /** The focus keyphrase. */
+  phrase: string;
+  /** True when the keyphrase came from the campaign's search-data pool. */
+  fromSearchData: boolean;
+  /** Monthly search volume of the pool entry, when known. */
+  monthlyVolume?: number;
+  /** Median word count of the readable ranking pages, when computed. */
+  typicalWords?: number;
+  /** Average H2 count of the readable ranking pages, when computed. */
+  typicalSections?: number;
+  /** Up to 5 ranking pages in SERP order. */
+  ranking: Array<{
+    position: number;
+    url: string;
+    site: string;
+    title?: string;
+    /** True when the page could not be read (no outline). */
+    failed: boolean;
+    /** Outline headings, levels 2-4, at most 60. */
+    headings?: Array<{ level: 2 | 3 | 4; text: string }>;
+  }>;
+  /** Official pages read (0-3), numbered as in the prompt. */
+  official: Array<{ url: string; site: string; title: string; readAt: Timestamp }>;
+  /** External links present in the delivered body. */
+  cited: Array<{ url: string; site: string; title: string }>;
+}
+
 export interface CampaignRunDoc {
   schemaVersion: 1;
   /** UUID. Matches the `campaign_run_id` the plugin sent in the generate payload. */
@@ -2222,6 +2303,13 @@ export interface CampaignRunDoc {
     textFromStock: boolean;
     imagesFromStock: boolean;
   };
+  /**
+   * The research behind the post this run produced (search phrase, ranking
+   * pages with outlines, official pages read, sources cited). Written with
+   * the terminal `succeed()` write; absent on free/anonymous runs, failed
+   * runs and runs before 2026-10 (spec: `specs/source-check.md` §2.2).
+   */
+  research?: PostResearchSnapshot;
   /**
    * Which generation pipeline produced this run. Drives the timeline
    * step set rendered by the SPA. Absent on legacy runs (treat as

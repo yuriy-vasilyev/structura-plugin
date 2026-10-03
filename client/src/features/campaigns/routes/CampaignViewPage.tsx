@@ -43,6 +43,8 @@ import { Campaign } from "@/features/campaigns";
 import { campaignStatusLabel, postStatusLabel } from "@/features/campaigns/labels";
 import { getProviderVisual } from "@/features/campaigns/constants";
 import { useAvailableModelsQuery } from "@/features/ai-engine/api/useAvailableModelsQuery";
+import { useLicense } from "@/features/settings";
+import { isManagedPlan, type PlanId } from "@structura/types";
 import dayjs from "@/libs/dayjs";
 import { cronToHuman } from "@/utils/cronUtils";
 import { getBadgeIntentByCampaignStatus } from "@/utils/helpers";
@@ -530,9 +532,14 @@ const getDialogContent = (
 
 // ─── Overview Tab ──────────────────────────────────────────────────────
 
-const OverviewTab = ({ campaign }: { campaign: Campaign }) => {
+// Exported for unit testing (the managed-plan "AI Providers" row);
+// consumers render it through CampaignViewPage.
+export const OverviewTab = ({ campaign }: { campaign: Campaign }) => {
   const navigate = useNavigate();
   const { identity, intelligence, schedule, stats, keywords, authority } = campaign;
+  // Managed plans see no provider or model names (specs/managed-ai-lineup.md §3.3).
+  const { plan } = useLicense();
+  const isManagedAiPlan = isManagedPlan(plan as PlanId);
   const isQuota = schedule.endCondition.type === "quota";
   const isDate = schedule.endCondition.type === "date";
 
@@ -667,23 +674,25 @@ const OverviewTab = ({ campaign }: { campaign: Campaign }) => {
             />
           )}
           <InfoRow label={__("Mode", "structura")} value={formatMode(identity.campaignMode)} />
-          <InfoRow
-            label={__("AI Providers", "structura")}
-            value={
-              <div className="space-y-1.5">
-                <ProviderLine
-                  providerId={intelligence.textProvider}
-                  model={intelligence.textModel}
-                  kind="text"
-                />
-                <ProviderLine
-                  providerId={intelligence.imageProvider}
-                  model={intelligence.imageModel}
-                  kind="image"
-                />
-              </div>
-            }
-          />
+          {!isManagedAiPlan && (
+            <InfoRow
+              label={__("AI Providers", "structura")}
+              value={
+                <div className="space-y-1.5">
+                  <ProviderLine
+                    providerId={intelligence.textProvider}
+                    model={intelligence.textModel}
+                    kind="text"
+                  />
+                  <ProviderLine
+                    providerId={intelligence.imageProvider}
+                    model={intelligence.imageModel}
+                    kind="image"
+                  />
+                </div>
+              }
+            />
+          )}
           <InfoRow
             label={__("Language", "structura")}
             value={

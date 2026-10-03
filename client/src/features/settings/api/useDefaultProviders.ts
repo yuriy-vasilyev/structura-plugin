@@ -3,13 +3,16 @@ import { useAiConnections } from "./useAiConnections";
 import { useLicense } from "./useLicense";
 import { AIProvider } from "@/features/campaigns/types";
 import { getProvidersForTier, isManagedPlan, type PlanId } from "@structura/types";
+import { bestConnected } from "@structura/model-catalog";
 
 /**
  * Resolves the effective default text and image providers.
  *
  * Priority:
  *  1. User-configured default (settings.ai.defaults)
- *  2. First connected provider with matching capability
+ *  2. Text: the best connected provider the plan allows (`bestConnected`,
+ *     specs/byok-ai-guidance.md §9). Image: the first connected provider
+ *     with image capability.
  *  3. "gemini" as ultimate fallback (cheapest for Cloud, most common)
  *
  * Key flags:
@@ -49,7 +52,17 @@ export const useDefaultProviders = () => {
     return (capabilityProviders[0] ?? activeProviders[0] ?? "gemini") as AIProvider;
   };
 
-  const defaultTextProvider = resolveProvider(hasExplicitTextDefault, defaults?.text_provider, textProviders);
+  // 2026-10-02: with no explicit default, new campaigns and one-off posts
+  // start on the best connected provider, not the first connected one.
+  const tierAllowedText = new Set<string>(getProvidersForTier(plan));
+  const bestText = bestConnected(
+    "text",
+    textProviders.filter((p) => tierAllowedText.has(p)) as AIProvider[],
+  );
+  const defaultTextProvider =
+    hasExplicitTextDefault || isCloud || !bestText
+      ? resolveProvider(hasExplicitTextDefault, defaults?.text_provider, textProviders)
+      : bestText;
   const defaultImageProvider = resolveProvider(hasExplicitImageDefault, defaults?.image_provider, imageProviders);
 
   // Available providers list (for campaign-level overrides).

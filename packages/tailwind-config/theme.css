@@ -92,6 +92,24 @@
     --shadow-glow-brand: 0 0 0 4px rgba(91, 63, 229, 0.14);
 
     /* ================================================================
+       AI GUIDANCE ALIASES (light values; dark values below @theme)
+       Recommended label (`rec`) and inline advice (`adv`) from the AI
+       guidance handoff. Built only from palette tokens so they follow any
+       palette change. Emitted as `text-rec-ink`, `bg-adv-bg`, ... utilities.
+       Deliberately NOT `@theme inline`: utilities must read the variable
+       at runtime so the `.dark` override below can swap it.
+       Spec: specs/byok-ai-guidance.md §5.
+       ================================================================ */
+    --color-rec-ink: var(--color-emerald-700);
+    --color-rec-soft: var(--color-emerald-50);
+    --color-rec-line: var(--color-emerald-200);
+    --color-adv-bg: var(--color-amber-50);
+    --color-adv-line: var(--color-amber-200);
+    --color-adv-ink: var(--color-amber-800);
+    --color-adv-icon: var(--color-amber-600);
+    --color-adv-quiet: var(--color-amber-800);
+
+    /* ================================================================
        BREAKPOINTS
        ================================================================ */
     --breakpoint-xs: 30rem;
@@ -365,4 +383,20 @@
             transform: translateX(0);
         }
     }
+}
+
+/*
+ * Dark values for the AI guidance aliases above. Every app's `dark:`
+ * variant is `.dark` on an ancestor (`@custom-variant dark`), so the
+ * aliases switch on the same class.
+ */
+.dark {
+    --color-rec-ink: var(--color-emerald-300);
+    --color-rec-soft: color-mix(in srgb, var(--color-emerald-950) 45%, transparent);
+    --color-rec-line: color-mix(in srgb, var(--color-emerald-800) 60%, transparent);
+    --color-adv-bg: color-mix(in srgb, var(--color-amber-950) 30%, transparent);
+    --color-adv-line: color-mix(in srgb, var(--color-amber-900) 50%, transparent);
+    --color-adv-ink: var(--color-amber-200);
+    --color-adv-icon: var(--color-amber-400);
+    --color-adv-quiet: var(--color-amber-300);
 }

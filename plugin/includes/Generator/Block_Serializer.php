@@ -515,7 +515,13 @@ class Block_Serializer
                 continue;
             }
 
-            $li_body = '<strong>' . esc_html($name) . '</strong> — ' . $this->sanitize_inline_markdown($text);
+            // `name: text`, not `name — text` (2026-10-02): the dash join put
+            // hundreds of em-dashes into posts whose prose is scrubbed of
+            // them everywhere else. A name that already ends in punctuation
+            // ("Why?") takes a space, no colon. Same rule as the headless
+            // path (functions/src/headless/posts/deliver.ts).
+            $separator = preg_match('/\p{P}$/u', $name) ? ' ' : ': ';
+            $li_body   = '<strong>' . esc_html($name) . '</strong>' . $separator . $this->sanitize_inline_markdown($text);
             $items_html .= self::wrap_block('list-item', '<li>' . wp_kses_post($li_body) . '</li>');
         }
 

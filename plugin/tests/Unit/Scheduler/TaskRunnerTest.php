@@ -39,6 +39,24 @@ use Structura\Tests\Unit\TestCase;
  */
 class TaskRunnerTest extends TestCase
 {
+    /** @test */
+    public function article_delivery_keeps_the_generated_language_for_later_draft_approval(): void
+    {
+        $saved = [];
+        Functions\when('get_bloginfo')->justReturn('en-US');
+        Functions\when('update_post_meta')->alias(function ($post_id, $key, $value) use (&$saved) {
+            $saved[$key] = $value;
+            return true;
+        });
+        $method = new \ReflectionMethod(Task_Runner::class, 'apply_post_metadata');
+        $method->setAccessible(true);
+        $runner = new Task_Runner();
+        foreach (['de' => 'de', 'default' => 'en-US', '' => 'en-US'] as $language => $expected) {
+            $method->invoke($runner, 42, [], ['id' => 'campaign-one', 'intelligence' => ['language' => $language]]);
+            $this->assertSame($expected, $saved['_structura_content_language']);
+        }
+    }
+
     protected function tearDown(): void
     {
         // Mockery alias mocks persist across tests within the same process,

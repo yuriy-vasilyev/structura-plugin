@@ -49,14 +49,48 @@ export interface ModelManifest {
   ratios?: string[];
 }
 
+/** USD per million tokens at one context-length band. Undefined = not published. */
+export interface TokenRates {
+  inputUsdPerMTok?: number;
+  /** Output, including thinking/reasoning tokens (all three providers bill them as output). */
+  outputUsdPerMTok?: number;
+  batchInputUsdPerMTok?: number;
+  batchOutputUsdPerMTok?: number;
+}
+
+/**
+ * List prices for one text model as the provider's pricing page showed them on
+ * `pricedAt`. A field the page did not show stays undefined rather than
+ * guessed. Registry-only: never served on the wire catalog.
+ */
+export interface ModelPricing extends TokenRates {
+  /** ISO date the prices were read from the provider's page. */
+  pricedAt: string;
+  /**
+   * Higher rates the provider charges when a request's input exceeds
+   * `aboveInputTokens` (Gemini 3.1 Pro above 200k, GPT-6 long context).
+   * `aboveInputTokens` undefined = the page did not state the threshold, so
+   * the rates cannot be applied.
+   */
+  longContext?: TokenRates & { aboveInputTokens?: number };
+  /** Pricing caveat shown on the page (introductory rate, promotion). */
+  note?: string;
+}
+
+/** A provider's announced deprecation or retirement for one model. */
+export interface ModelDeprecation {
+  /** ISO date the provider shuts the model down, when it gave one. */
+  retiresOn?: string;
+  note: string;
+}
+
 /**
  * One catalog entry — the single record every other structure derives from.
  *
- * Flags are independent booleans rather than a single `tier` enum because the
- * real product choices don't collapse to a linear rank: Anthropic's role
- * default (Sonnet) is a *different* model from its recommended top (Opus), and
- * Gemini deliberately *recommends the cheaper* image model (Flash Image) over
- * the pricier one (Pro Image). See the derivation rules on `MODEL_CATALOG`.
+ * `tier` ranks a model within its `(provider, role)`; the independent flags
+ * below mark the role default and internal role bindings. What the product
+ * recommends to customers lives in `RECOMMENDATIONS`, not here
+ * (specs/byok-ai-guidance.md §3).
  */
 export interface CatalogModel {
   /** Exact provider API id used in requests. */
@@ -67,27 +101,19 @@ export interface CatalogModel {
   role: ModelRole;
   /**
    * Quality/cost rank within `(provider, role)` — read by the registry binding
-   * layer (`getRegistryModelId`). Additive to the legacy `default`/`recommended`
-   * /`fast` flags below, which still drive the served `MODEL_CATALOG` shape
-   * unchanged during the slice-1→slice-2 transition.
+   * layer (`getRegistryModelId`).
    */
   tier?: ModelTier;
   /**
-   * Role default — feeds `MODEL_CATALOG.defaults[role]` and `getDefaultModel`.
-   * Exactly one text model and (per image-capable provider) one image model
-   * carries this. The `fast` model is the default for the synthetic "fast"
-   * role.
+   * Role default — feeds `MODEL_CATALOG.defaults.text|image` and
+   * `getDefaultModel`. Exactly one listed text model (the Standard tier since
+   * 2026-10-01) and, per image-capable provider, one image model carry this.
    */
   default?: boolean;
   /**
-   * The provider's quality-top text (or recommended image) model — what the
-   * BYOK picker tags "Recommended" and what `getRecommendedModel` returns.
-   */
-  recommended?: boolean;
-  /**
    * Fast / cheap variant. Hidden from the BYOK picker (fast models
-   * underperform on long-form content) and used as `defaults.fast` for
-   * internal quick-task callers.
+   * underperform on long-form content). The served `defaults.fast` comes
+   * from the frozen `resolveFastModelId`, not from this flag.
    */
   fast?: boolean;
   /** Optional UI warning, e.g. "Requires org verification". */
@@ -97,8 +123,76 @@ export interface CatalogModel {
    * batch cost estimator sums for burn-rate circuit breaking. Present only for
    * models we actually submit through the batch pipeline; absent for models
    * whose cost is metered elsewhere (all image models) or not yet wired.
+   * Must equal `pricing.batchInputUsdPerMTok` where both exist (tested); kept
+   * as its own field because the estimator's coverage is a separate decision
+   * from what the provider charges.
    */
   batchInputUsdPerMTok?: number;
+  /**
+   * Output token budget for one text generation (`max_tokens` /
+   * `maxOutputTokens` / `max_completion_tokens`). Thinking tokens count
+   * against it on reasoning models. Absent = `TEXT_OUTPUT_BUDGET`. Set only
+   * where the model's own maximum is lower. Registry-only: not served on the
+   * wire catalog (the served `manifest.max_output_tokens` is a separate,
+   * legacy plugin field).
+   */
+  maxOutputTokens?: number;
+  /**
+   * True when the model accepts only its default temperature and answers
+   * 400 to any explicit value (gpt-5-nano, 2026-10-01; Anthropic Opus 4.7 and
+   * later, per Anthropic's docs). Callers then omit the parameter.
+   * Registry-only.
+   */
+  fixedTemperature?: boolean;
+  /**
+   * True when the model accepts its provider's low reasoning setting
+   * (Gemini `thinkingConfig.thinkingLevel: LOW`, Anthropic
+   * `output_config.effort: "low"`, OpenAI `reasoning_effort: "low"`). Set
+   * only where a real call confirmed it (2026-10-01: Gemini 3.8 Flash takes
+   * LOW and answers 400 to MINIMAL; Opus 5.5 takes low). A caller asking
+   * for low effort on any other model sends nothing. Registry-only.
+   */
+  lowEffort?: true;
+  /**
+   * Grounding-audit role this model fills, read only by
+   * `resolveGroundingAuditModel` (at most one model per role, tested).
+   * `premium` audits Cloud Pro, `standard` every other audited tier. An
+   * internal binding: it may point at an `unlisted` model without making it
+   * customer-visible. Registry-only.
+   */
+  auditor?: "premium" | "standard";
+  /**
+   * Managed-lineup writer role this model fills, read only by
+   * `resolveManagedWriterLineup` (at most one model per role, tested).
+   * `primary` writes every Cloud and Cloud Pro post; `failover` takes over
+   * live synthesis when the primary fails transiently or times out. Same
+   * pattern as `auditor`: an internal binding that may point at an
+   * `unlisted` model without making it customer-visible. Registry-only.
+   * Spec: specs/managed-ai-lineup.md §2.
+   */
+  managedWriter?: "primary" | "failover";
+  /** List prices (registry-only). See {@link ModelPricing}. */
+  pricing?: ModelPricing;
+  /** Provider deprecation / retirement notice (registry-only). */
+  deprecation?: ModelDeprecation;
+  /**
+   * Known to the registry (prices, capabilities) but NOT offered: left out of
+   * the served `MODEL_CATALOG` (plugin pickers, defaults, manifest) and never
+   * tiered, so no plan or picker can reach it. Only explicit ids select it:
+   * the eval harness (to test a model before binding it), a role flag
+   * (`auditor`, `managedWriter`) and the frozen bindings that pin a
+   * superseded model (2026-10-01 catalog refresh).
+   */
+  unlisted?: true;
+  /**
+   * Set on an `unlisted` text model that used to hold this BYOK tier and was
+   * replaced by a newer model (2026-10-01 refresh). A campaign, schedule or
+   * request that stores only this concrete id runs the tier's current model
+   * (`resolveSupersededTextModelId`), and pickers open on this tier
+   * (`tierForModelId`). The id itself stays callable for the frozen bindings.
+   * Spec: specs/byok-ai-guidance.md §2.
+   */
+  supersededTier?: Exclude<ModelTier, "cheap">;
   /** Runtime routing + capability metadata. */
   manifest: ModelManifest;
 }

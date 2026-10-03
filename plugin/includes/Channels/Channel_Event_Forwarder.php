@@ -45,6 +45,9 @@ class Channel_Event_Forwarder implements Channel_Event_Forwarder_Interface
      */
     private const ENDPOINT = '/channelsPostPublished';
 
+    private const ARTICLE_DELIVERY_HOOK = 'structura/channels/article_delivery_queued';
+    private const ARTICLE_DELIVERY_ID = 'webhook-deliver';
+
     /**
      * Register WP hooks. Called from Core\Loader during plugin bootstrap.
      *
@@ -54,6 +57,8 @@ class Channel_Event_Forwarder implements Channel_Event_Forwarder_Interface
     public function init(): void
     {
         add_action('structura/post/inserted', [$this, 'on_structura_post_inserted'], 10, 1);
+        add_action('structura/post/published', [$this, 'on_structura_post_published'], 10, 1);
+        add_action(self::ARTICLE_DELIVERY_HOOK, [$this, 'deliver_approved_article'], 10, 1);
     }
 
     /**
@@ -97,10 +102,35 @@ class Channel_Event_Forwarder implements Channel_Event_Forwarder_Interface
         $this->forward_post_event($context);
     }
 
+    /** Queues article delivery after a human publishes a Structura draft. */
+    public function on_structura_post_published($context): void
+    {
+        $post_id = is_array($context) ? (int)($context['post_id'] ?? 0) : 0;
+        if ($post_id <= 0) {
+            return;
+        }
+        // Keep Gutenberg's save request independent of the receiver's latency.
+        if (function_exists('as_enqueue_async_action')) {
+            as_enqueue_async_action(self::ARTICLE_DELIVERY_HOOK, [$post_id], STRUCTURA_AS_GROUP, true);
+        } else {
+            wp_schedule_single_event(time(), self::ARTICLE_DELIVERY_HOOK, [$post_id]);
+        }
+    }
+
+    /** Delivers the latest approved article to article receivers only. */
+    public function deliver_approved_article(int $post_id): void
+    {
+        // A queued approval may have been reverted before this worker starts.
+        if (get_post_field('post_status', $post_id) !== 'publish') {
+            return;
+        }
+        $this->forward_post_published($post_id, [self::ARTICLE_DELIVERY_ID]);
+    }
+
     /**
      * @inheritDoc
      */
-    public function forward_post_published(int $post_id): void
+    public function forward_post_published(int $post_id, ?array $allowed_integration_ids = null): void
     {
         // Back-compat entry point retained for callers / tests that still
         // invoke the forwarder imperatively. Re-builds a minimal context
@@ -131,6 +161,7 @@ class Channel_Event_Forwarder implements Channel_Event_Forwarder_Interface
         // posts inserted outside Structura's normal pipeline.
         $campaign_run_id = (string)get_post_meta($post_id, '_structura_campaign_run_id', true);
         $this->forward_post_event([
+            'allowed_integration_ids' => $allowed_integration_ids,
             'post_id'         => $post_id,
             'campaign_id'     => $campaign_id,
             'campaign_run_id' => $campaign_run_id,
@@ -288,9 +319,9 @@ class Channel_Event_Forwarder implements Channel_Event_Forwarder_Interface
     }
 
     /**
-     * Build the cloud payload from the hook context. We deliberately do NOT
-     * send the full post content — the dispatcher fetches it on demand (or
-     * via REST callback) so we keep the WP→cloud hop small and PII-light.
+     * Build the cloud payload, including final article content for published posts.
+     * The article is never included for drafts or written to activity logs.
+     * Spec: specs/article-delivery-webhook.md.
      *
      * Auth model matches the rest of the cloud surface
      * (see executeCloudCampaignStep, syncPluginVersion):
@@ -354,7 +385,7 @@ class Channel_Event_Forwarder implements Channel_Event_Forwarder_Interface
             ? (string)get_post_meta($post_id, '_structura_persona_name', true)
             : '';
 
-        return [
+        $payload = [
             'event'             => 'post_published',
             'license_key'       => $license_key,
             'activation_secret' => $secret,
@@ -387,5 +418,81 @@ class Channel_Event_Forwarder implements Channel_Event_Forwarder_Interface
             'primary_keyword'     => $primary_keyword,
             'persona_name'        => $persona_name,
         ];
+        if (isset($context['allowed_integration_ids'])) {
+            // Older cloud builds reject this event instead of ignoring the new allowlist.
+            $payload['event'] = 'article_delivery_requested';
+            $payload['allowed_integration_ids'] = $context['allowed_integration_ids'];
+        }
+        if ($status === 'publish') {
+            $article = $this->published_article($post_id, $payload);
+            if ($article !== null) {
+                $payload['article'] = $article;
+            }
+        }
+        return $payload;
     }
+
+    /** Returns the final published article for the cloud delivery channel. */
+    private function published_article(int $post_id, array $payload): ?array
+    {
+        if (get_post_field('post_status', $post_id) !== 'publish' ||
+            (string)get_post_field('post_password', $post_id) !== '') {
+            return null;
+        }
+        $content = (string)get_post_field('post_content', $post_id);
+        if (trim($content) === '') {
+            return null;
+        }
+        $author_id = (int)get_post_field('post_author', $post_id);
+        $thumb_id = (int)get_post_thumbnail_id($post_id);
+        $schema = get_post_meta($post_id, '_structura_schema', true);
+        $focus = (string)get_post_meta($post_id, '_yoast_wpseo_focuskw', true);
+        if ($focus === '') {
+            $focus = (string)get_post_meta($post_id, 'rank_math_focus_keyword', true);
+        }
+        $description = $this->expanded_seo_meta($post_id, '_yoast_wpseo_metadesc', 'rank_math_description');
+        $title = $this->expanded_seo_meta($post_id, '_yoast_wpseo_title', 'rank_math_title');
+        $language = (string)get_post_meta($post_id, '_structura_content_language', true);
+        if ($language === '' || $language === 'default') {
+            $language = $payload['locale'];
+        }
+        return [
+            'id' => $post_id,
+            'slug' => sanitize_title((string)get_post_field('post_name', $post_id)),
+            'title' => sanitize_text_field($payload['post_title']),
+            'html' => wp_kses_post(apply_filters('the_content', $content)),
+            'excerpt' => sanitize_textarea_field($payload['excerpt']),
+            'metaTitle' => sanitize_text_field($title),
+            'metaDescription' => sanitize_textarea_field($description),
+            'focusKeyword' => sanitize_text_field($focus),
+            'locale' => sanitize_text_field($language),
+            'publishedAt' => $payload['published_at'],
+            'updatedAt' => get_post_modified_time('c', true, $post_id) ?: $payload['published_at'],
+            'canonicalUrl' => esc_url_raw((string)$payload['post_url']),
+            'featuredImage' => $payload['featured_image_url'] !== '' ? [
+                'url' => esc_url_raw($payload['featured_image_url']),
+                'alt' => sanitize_text_field((string)get_post_meta($thumb_id, '_wp_attachment_image_alt', true)),
+            ] : null,
+            'author' => $author_id > 0 ? [
+                'name' => sanitize_text_field((string)get_the_author_meta('display_name', $author_id)),
+                'bio' => sanitize_textarea_field((string)get_the_author_meta('description', $author_id)),
+                'url' => esc_url_raw((string)get_the_author_meta('user_url', $author_id)),
+            ] : null,
+            'jsonLd' => is_array($schema) ? $schema : [],
+        ];
+    }
+
+    /** Returns expanded Yoast or Rank Math metadata. */
+    private function expanded_seo_meta(int $post_id, string $yoast_key, string $rank_math_key): string
+    {
+        $value = (string)get_post_meta($post_id, $yoast_key, true);
+        if ($value !== '') {
+            return function_exists('wpseo_replace_vars')
+                ? (string)wpseo_replace_vars($value, get_post($post_id)) : $value;
+        }
+        $value = (string)get_post_meta($post_id, $rank_math_key, true);
+        return $value !== '' && is_callable(['\RankMath\Helper', 'replace_vars'])
+            ? (string)\RankMath\Helper::replace_vars($value, get_post($post_id)) : $value;
+    }
+
 }

@@ -1,6 +1,7 @@
-import { __ } from "@wordpress/i18n";
-import { Image, Lock, Plus, Type } from "lucide-react";
-import { Button, cn } from "@structura/ui";
+import { __, _x } from "@wordpress/i18n";
+import { ArrowUpRight, Image, Lock, Plus, Type } from "lucide-react";
+import { Button, cn, RecommendedLabel } from "@structura/ui";
+import { isRecommendedTextProvider, recommendedForTextWord } from "@/features/campaigns/aiGuidance";
 import { getProviderMeta } from "@/utils/providerMeta";
 import { getProviderVisual } from "@/features/campaigns/constants";
 
@@ -36,6 +37,14 @@ interface AvailableProviderCardProps {
    * to the per-tier-cap framing — see {@link ProviderLockReason}.
    */
   lockReason?: ProviderLockReason;
+  /**
+   * Plans page in the customer portal. When set, a card locked behind the
+   * Pro License (`minTier` "byok", e.g. Anthropic on None / Free) shows the
+   * plain line "Needs a Pro License" instead of the lock chip, and its
+   * button becomes a "Compare plans" link opening this URL in a new tab
+   * (specs/byok-ai-guidance.md §5, 2026-10-02). Other locks are unchanged.
+   */
+  comparePlansHref?: string;
 }
 
 // Capability labels & tier labels are wrapped at render-time, not at
@@ -85,9 +94,11 @@ export const AvailableProviderCard = ({
   minTier,
   onSetUp,
   lockReason = "tier",
+  comparePlansHref,
 }: AvailableProviderCardProps) => {
   const isLocked = !available;
   const isCapLock = isLocked && lockReason === "cap";
+  const needsProLicense = isLocked && !isCapLock && minTier === "byok" && !!comparePlansHref;
   const meta = getProviderMeta(id);
 
   // Cap-lock badge always points to the next paid surface for the
@@ -124,11 +135,14 @@ export const AvailableProviderCard = ({
           </div>
 
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 gap-y-1">
               <h3 className="m-0! truncate text-sm leading-tight font-bold text-neutral-900 dark:text-neutral-100">
                 {name}
               </h3>
-              {isLocked && (
+              {isRecommendedTextProvider(id) && (
+                <RecommendedLabel label={recommendedForTextWord()} />
+              )}
+              {isLocked && !needsProLicense && (
                 <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-600 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
                   <Lock size={8} />
                   {tierLabel(badgeTier)}
@@ -138,6 +152,12 @@ export const AvailableProviderCard = ({
             <p className="mt-0.5 mb-0! line-clamp-2 text-[11px] leading-relaxed text-neutral-400 dark:text-neutral-500">
               {description}
             </p>
+            {needsProLicense && (
+              <p className="mt-1! mb-0! flex items-center gap-1 text-[11px] font-medium text-neutral-500 dark:text-neutral-400">
+                <Lock size={11} aria-hidden="true" />
+                {_x("Needs a Pro License", "ai advice", "structura")}
+              </p>
+            )}
           </div>
         </div>
 
@@ -179,24 +199,33 @@ export const AvailableProviderCard = ({
         )}
 
         {/* CTA */}
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={onSetUp}
-          className="mt-auto w-full justify-center"
-        >
-          {isCapLock ? (
-            <>
-              <Lock size={14} className="mr-2" strokeWidth={2} />
-              {__("Get Free License", "structura")}
-            </>
-          ) : (
-            <>
-              <Plus size={14} className="mr-2" strokeWidth={2} />
-              {__("Connect", "structura")}
-            </>
-          )}
-        </Button>
+        {needsProLicense ? (
+          <Button asChild variant="secondary" size="sm" className="mt-auto w-full justify-center">
+            <a href={comparePlansHref} target="_blank" rel="noopener noreferrer">
+              {_x("Compare plans", "ai advice", "structura")}
+              <ArrowUpRight size={14} className="ml-1.5" aria-hidden="true" />
+            </a>
+          </Button>
+        ) : (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onSetUp}
+            className="mt-auto w-full justify-center"
+          >
+            {isCapLock ? (
+              <>
+                <Lock size={14} className="mr-2" strokeWidth={2} />
+                {__("Get Free License", "structura")}
+              </>
+            ) : (
+              <>
+                <Plus size={14} className="mr-2" strokeWidth={2} />
+                {__("Connect", "structura")}
+              </>
+            )}
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -11,9 +11,10 @@ import {
   ShieldCheck,
   Star,
 } from "lucide-react";
-import { Badge, Button, ConfirmDialog, Tooltip, cn } from "@structura/ui";
+import { Badge, Button, ConfirmDialog, RecommendedLabel, Tooltip, cn } from "@structura/ui";
 import { getProviderMeta } from "@/utils/providerMeta";
 import { getProviderVisual } from "@/features/campaigns/constants";
+import { isRecommendedTextProvider, recommendedForTextWord } from "@/features/campaigns/aiGuidance";
 import { useProviderPulse } from "../api/useProviderPulse";
 import { useDisconnectProvider } from "../api/useDisconnectProvider";
 
@@ -104,10 +105,16 @@ export const InstalledProviderCard = ({
             </div>
 
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 gap-y-1">
                 <h3 className="m-0! truncate text-sm leading-tight font-bold text-neutral-900 dark:text-neutral-100">
                   {name}
                 </h3>
+                {/* 2026-10-02: the label stays once the provider is connected,
+                    so a site with every provider connected still shows which
+                    one we recommend (copy.csv: wp-admin provider cards). */}
+                {!isCloud && isRecommendedTextProvider(id) && (
+                  <RecommendedLabel label={recommendedForTextWord()} />
+                )}
                 {incomplete ? (
                   <Tooltip
                     title={__(

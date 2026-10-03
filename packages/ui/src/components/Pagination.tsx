@@ -100,7 +100,9 @@ export const Pagination: FC<PaginationProps> = ({
       aria-label={labels.ariaLabel}
       className={cn("mt-12 flex justify-center lg:mt-20", className)}
     >
-      <ul className="flex list-none items-center gap-2 p-0 text-sm font-bold">
+      {/* Wraps: with ~9 pages a middle page shows 11 chips (~500px), wider
+       *  than a phone's content column (www changelog, 2026-09-30). */}
+      <ul className="flex list-none flex-wrap items-center justify-center gap-2 p-0 text-sm font-bold">
         <li>
           {hasPrev ? (
             <a

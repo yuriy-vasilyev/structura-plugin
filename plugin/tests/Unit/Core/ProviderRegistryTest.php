@@ -121,18 +121,14 @@ class ProviderRegistryTest extends TestCase
     // ──────────────────────────────────────────────────────────────────────
 
     /** @test */
-    public function none_tier_gets_openai_and_gemini(): void
+    public function none_tier_gets_openai_only(): void
     {
-        // Phase 1.8 lowered Gemini's `min_tier` to `none` so anonymous
-        // installs can pick between OpenAI or Gemini for their single
-        // active provider. Anthropic stays gated to the BYOK / paid
-        // tiers; the upgrade story for `none` is "pick another text
-        // model on Pro" not "swap to a different free provider".
+        // 2026-10-02 owner decision, matching the cloud's
+        // PROVIDERS_FOR_TIER.none: without an account only OpenAI.
+        // Gemini needs Free, Anthropic a paid tier.
         $providers = Provider_Registry::get_providers_for_tier('none');
 
-        $this->assertArrayHasKey('openai', $providers);
-        $this->assertArrayHasKey('gemini', $providers);
-        $this->assertArrayNotHasKey('anthropic', $providers);
+        $this->assertSame(['openai'], array_keys($providers));
     }
 
     /** @test */
@@ -177,11 +173,9 @@ class ProviderRegistryTest extends TestCase
     {
         $providers = Provider_Registry::get_providers_for_tier('unknown_tier');
 
-        // Unknown tier → level 0 (`none`) → openai + gemini after the
-        // Phase 1.8 reclassification (see `none_tier_gets_openai_and_gemini`).
-        $this->assertArrayHasKey('openai', $providers);
-        $this->assertArrayHasKey('gemini', $providers);
-        $this->assertCount(2, $providers);
+        // Unknown tier → level 0 (`none`) → OpenAI only (see
+        // `none_tier_gets_openai_only`).
+        $this->assertSame(['openai'], array_keys($providers));
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -205,10 +199,9 @@ class ProviderRegistryTest extends TestCase
         $image_free = Provider_Registry::get_providers_by_capability('image', 'free');
         $image_pro  = Provider_Registry::get_providers_by_capability('image', 'byok');
 
-        // Post Phase 1.8 — Gemini is image-capable and available at
-        // `none`, so the none-tier image set matches the free-tier set.
-        // Anthropic remains text-only at every tier.
-        $this->assertCount(2, $image_none);  // openai + gemini
+        // `none` is OpenAI only (2026-10-02); Anthropic remains
+        // text-only at every tier.
+        $this->assertCount(1, $image_none);  // openai
         $this->assertCount(2, $image_free);  // openai + gemini
         $this->assertCount(2, $image_pro);   // openai + gemini
     }
@@ -235,12 +228,10 @@ class ProviderRegistryTest extends TestCase
     }
 
     /** @test */
-    public function it_validates_gemini_available_at_every_tier(): void
+    public function it_validates_gemini_requires_free_tier(): void
     {
-        // Phase 1.8 — Gemini's floor dropped to `none` so anonymous
-        // installs can pick it. Validate the full tier ladder all
-        // returns true.
-        $this->assertTrue(Provider_Registry::validate_provider_access('gemini', 'none'));
+        // 2026-10-02 owner decision: no Gemini without an account.
+        $this->assertFalse(Provider_Registry::validate_provider_access('gemini', 'none'));
         $this->assertTrue(Provider_Registry::validate_provider_access('gemini', 'free'));
         $this->assertTrue(Provider_Registry::validate_provider_access('gemini', 'byok'));
     }

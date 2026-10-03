@@ -14,7 +14,7 @@
  * pipeline alongside the rest of the wp-admin strings.
  */
 
-import { __, sprintf } from "@wordpress/i18n";
+import { __, _n, sprintf } from "@wordpress/i18n";
 import type { Notice, NoticeCtaHref, NoticeSeverity } from "./types";
 
 /**
@@ -48,6 +48,12 @@ function copyDict(): Record<string, string> {
       "structura",
     ),
     "notices.byok.key_rejected.cta": __("Update key", "structura"),
+    // Title is plural on `count`: see pluralCopy() (specs/byok-ai-guidance.md §4).
+    "notices.byok.geminiText.body": __(
+      "In our tests, posts written with Gemini contained more invented details. Each campaign shows how to switch in its AI engine section.",
+      "structura",
+    ),
+    "notices.byok.geminiText.cta": __("Review campaigns", "structura"),
     "notices.quota.managed.title": __("You've reached your generation quota", "structura"),
     "notices.quota.managed.body": __(
       "This site has used all of the included posts and images for this billing cycle. The quota refills at the start of the next cycle, or you can upgrade for a larger allowance now.",
@@ -187,8 +193,25 @@ function interpolate(template: string, params?: Record<string, string>): string 
   );
 }
 
+/**
+ * Returns the template for a key whose copy is plural on `params.count`, or
+ * null for every other key. `count` arrives as a string like every notice
+ * param.
+ */
+function pluralCopy(key: string, params?: Record<string, string>): string | null {
+  if (key === "notices.byok.geminiText.title") {
+    return _n(
+      "{{count}} campaign on {{site}} writes with Gemini",
+      "{{count}} campaigns on {{site}} write with Gemini",
+      Number(params?.count ?? 0),
+      "structura",
+    );
+  }
+  return null;
+}
+
 export function resolveCopy(key: string, params?: Record<string, string>): string {
-  const tpl = copyDict()[key] ?? key;
+  const tpl = pluralCopy(key, params) ?? copyDict()[key] ?? key;
   return interpolate(tpl, params);
 }
 

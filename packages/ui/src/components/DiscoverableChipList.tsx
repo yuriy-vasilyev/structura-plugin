@@ -25,7 +25,7 @@
  * with focus rings + aria labels.
  */
 import { type ReactNode } from "react";
-import { Loader2, Plus, RefreshCw, Sparkles, X, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Loader2, Plus, RefreshCw, Sparkles, X, type LucideIcon } from "lucide-react";
 
 import { cn } from "../utils";
 import { Button } from "./Button";
@@ -41,6 +41,8 @@ export interface DiscoverableChipItem {
   tooltip?: string;
   /** Optional dimmed inline count (competitor shared-keyword overlap). */
   count?: number;
+  /** Optional secondary text after the label ("· page title"), truncated. */
+  detail?: string;
 }
 
 /** A per-confirmed-chip metric badge (e.g. keyword volume, authority tier). */
@@ -86,8 +88,10 @@ export interface DiscoverableChipListProps {
   added: DiscoverableChipItem[];
   /** Suggested-but-not-added items (already filtered by the parent). */
   suggested: DiscoverableChipItem[];
-  onAdd: (value: string) => void;
-  onRemove: (value: string) => void;
+  /** Add a suggested item. Required unless `readOnly`. */
+  onAdd?: (value: string) => void;
+  /** Remove a confirmed item. Required unless `readOnly`. */
+  onRemove?: (value: string) => void;
   /** Renders "Add all" in the suggested header when provided. */
   onAddAll?: () => void;
   /** Renders a discover button (AI suggest / Re-discover) in the suggested header. */
@@ -132,6 +136,22 @@ export interface DiscoverableChipListProps {
   hideInput?: boolean;
   /** Translated strings; merged over English defaults. */
   labels?: Partial<DiscoverableChipLabels>;
+  /**
+   * Display-only list of pages (research handoff, B1): each confirmed chip
+   * is an external link to its `value` URL with no remove button, the
+   * favicon comes from that URL's host, and the suggested area and the
+   * add input are not rendered.
+   */
+  readOnly?: boolean;
+}
+
+/** Hostname of a URL without `www.`, or the input when it is not a URL. */
+function hostOf(value: string): string {
+  try {
+    return new URL(value).hostname.replace(/^www\./, "");
+  } catch {
+    return value;
+  }
 }
 
 /** "39125" → "39k" so a chip stays compact; small counts render verbatim. */
@@ -169,12 +189,13 @@ export function DiscoverableChipList({
   ariaLabel,
   hideInput = false,
   labels: labelOverrides,
+  readOnly = false,
 }: DiscoverableChipListProps) {
   const labels = { ...DEFAULT_LABELS, ...labelOverrides };
 
   const leading = (item: DiscoverableChipItem) =>
     kind === "domain" ? (
-      <Favicon domain={item.label} />
+      <Favicon domain={readOnly ? hostOf(item.value) : item.label} />
     ) : LeadingIcon ? (
       <LeadingIcon size={12} className="shrink-0" aria-hidden="true" />
     ) : null;
@@ -182,7 +203,28 @@ export function DiscoverableChipList({
   return (
     <div className="flex flex-col gap-4">
       {/* Confirmed items. */}
-      {added.length > 0 ? (
+      {readOnly && added.length > 0 ? (
+        <ul aria-label={ariaLabel} className="flex flex-wrap gap-2">
+          {added.map((item) => (
+            <li key={item.value} className="max-w-full">
+              <a
+                href={item.value}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={item.tooltip}
+                className="flex max-w-full items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 py-1 pr-3 pl-2.5 text-[13px] leading-snug text-brand-800 transition-colors hover:border-brand-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 dark:border-brand-900/40 dark:bg-brand-950/30 dark:text-brand-200 dark:hover:border-brand-400"
+              >
+                {leading(item)}
+                <span className="shrink-0 font-semibold whitespace-nowrap">{item.label}</span>
+                {item.detail ? (
+                  <span className="min-w-0 truncate opacity-85">· {item.detail}</span>
+                ) : null}
+                <ArrowUpRight size={12} className="shrink-0 opacity-70" aria-hidden="true" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : added.length > 0 ? (
         <ul aria-label={ariaLabel} className="flex flex-wrap gap-2">
           {added.map((item) => {
             const badge = chipBadges?.[item.value];
@@ -205,7 +247,7 @@ export function DiscoverableChipList({
                 ) : null}
                 <button
                   type="button"
-                  onClick={() => onRemove(item.value)}
+                  onClick={() => onRemove?.(item.value)}
                   aria-label={labels.remove(item.label)}
                   className="ml-0.5 shrink-0 cursor-pointer rounded text-brand-500 transition-colors hover:text-red-600 dark:text-brand-400"
                 >
@@ -224,7 +266,7 @@ export function DiscoverableChipList({
       ) : null}
 
       {/* Suggested items + discover. */}
-      {suggested.length > 0 || onDiscover ? (
+      {!readOnly && (suggested.length > 0 || onDiscover) ? (
         <div className="flex flex-col gap-2 rounded-md border border-dashed border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
           {suggestedNotice}
           <div className="flex items-center justify-between gap-3">
@@ -270,7 +312,7 @@ export function DiscoverableChipList({
                     key={item.value}
                     type="button"
                     onClick={() => {
-                      if (!disabled) onAdd(item.value);
+                      if (!disabled) onAdd?.(item.value);
                     }}
                     disabled={disabled}
                     className="flex cursor-pointer items-center gap-1.5 rounded-full border border-dashed border-neutral-300 bg-white px-3 py-1 text-xs text-neutral-700 transition-colors hover:border-brand-400 hover:bg-brand-50 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-brand-950/30"
@@ -299,7 +341,7 @@ export function DiscoverableChipList({
       ) : null}
 
       {/* Compact manual add. */}
-      {hideInput || !onAddManual ? null : (
+      {readOnly || hideInput || !onAddManual ? null : (
         <ChipAddInput
           label={inputPlaceholder ?? labels.addItem}
           placeholder={inputPlaceholder}

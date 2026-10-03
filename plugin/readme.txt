@@ -66,8 +66,8 @@ get a free license:
   authority-link verification.
 * **Cloud / Cloud Pro** (paid) — Structura provisions the AI provider
   for you, with one bill from Structura instead of separate provider
-  charges. Cloud Pro adds frontier AI models, photorealistic
-  imagery, and AI video generation (Shorts/TikTok/Reels). See
+  charges. Cloud Pro adds more posts and images per site and AI video
+  generation (Shorts/TikTok/Reels). See
   [structurawp.com/pricing](https://www.structurawp.com/pricing) for
   details.
 
@@ -323,6 +323,26 @@ logs, and settings unless you explicitly turn the toggle on first.
    managed inside wp-admin.
 
 == Changelog ==
+
+= 2.28.0 =
+* New: on Cloud and Cloud Pro, your plan now counts posts per site per
+  month (30 on Cloud, 100 on Cloud Pro) instead of tokens, and the usage
+  card shows exactly that. A post counts when it is delivered to you.
+* New: on own-key plans, the AI engine shows which provider and model we
+  recommend, warns when a campaign writes with a provider we do not
+  recommend, and offers a one-click switch with undo.
+* New: New Campaign opens with an empty form. Magic suggest drafts the
+  name and objective on request, on every plan.
+* Improved: action steps in generated posts read "Name: text", and
+  post titles stay short.
+* Fixed: saving a campaign from the edit form no longer reactivates a
+  paused campaign or resets its published-post count and keyword
+  position.
+* Fixed: Magic suggest works on PHP 7.4 again.
+* Fixed: a site with no connected provider no longer sees a warning
+  about a provider it never chose.
+* Fixed: without an account, only an OpenAI key can be connected, as the
+  Free plan screen already explained.
 
 = 2.24.0 =
 * Improved: the plugin's row on the Plugins screen — clearer

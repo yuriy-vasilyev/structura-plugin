@@ -19,7 +19,9 @@
  * "Data Fetch Error" balloon.
  */
 
+import { WEBHOOK_DELIVER_INTEGRATION_ID } from "@structura/types";
 import { useQuery } from "@tanstack/react-query";
+import { __ } from "@wordpress/i18n";
 import apiFetch from "@wordpress/api-fetch";
 import { channelKeys } from "./keys";
 import { useLicense } from "@/features/settings/api/useLicense";
@@ -32,6 +34,21 @@ export const useChannelCatalogQuery = () => {
   return useQuery<ListCatalogResponse>({
     queryKey: channelKeys.catalog(),
     staleTime: FIVE_MINUTES,
+    select: (response) => ({
+      ...response,
+      entries: response.entries.map((entry) =>
+        entry.id === WEBHOOK_DELIVER_INTEGRATION_ID
+          ? {
+              ...entry,
+              name: __("Article delivery", "structura"),
+              description: __(
+                "Publish complete articles to your Lovable, Bolt, v0, Replit or custom-built blog.",
+                "structura"
+              ),
+            }
+          : entry
+      ),
+    }),
     // See useChannelConnectionsQuery for the rationale: `null` means
     // "unknown, allow" so paid users don't wait on the heartbeat before
     // the catalog loads; `false` means "confirmed host mismatch, don't

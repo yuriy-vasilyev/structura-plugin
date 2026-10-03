@@ -88,15 +88,11 @@ class Provider_Registry
                 'id'           => 'gemini',
                 'name'         => 'Google Gemini',
                 'capabilities' => ['text', 'image'],
-                // Phase 1.8: Gemini becomes pickable at `none` tier
-                // alongside OpenAI. The SPA enforces a count cap of 1
-                // for `none` users (only one provider active at a
-                // time; user picks which) so this isn't a free
-                // upgrade — just gives anonymous users the same
-                // OpenAI-or-Gemini choice free users get, capped to 1.
-                // Spec: `specs/v2/multi-tenant-and-public-api.md`
-                // §Phase 1.8 feature matrix.
-                'min_tier'     => 'none',
+                // 2026-10-02 owner decision: Gemini needs at least the
+                // Free tier. Without an account only OpenAI, matching the
+                // cloud's `PROVIDERS_FOR_TIER.none` (functions/src/types/
+                // shared.ts), which already refused an anonymous Gemini key.
+                'min_tier'     => 'free',
                 'key_url'      => 'https://aistudio.google.com/apikey',
                 'description'  => 'Gemini models for text generation, Imagen for images.',
                 'schema_mode'  => 'strict',

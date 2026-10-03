@@ -3,9 +3,15 @@ import { Badge, Card, Tooltip } from "@structura/ui";
 import { Edit3, ExternalLink, FileText, Layout } from "lucide-react";
 import { useRecentPostsQuery } from "../api/useRecentPostsQuery";
 import { postStatusLabel } from "@/features/campaigns/labels";
+import { useLicense } from "@/features/settings";
+import { isManagedPlan, type PlanId } from "@structura/types";
 
 export const RecentBlueprints = () => {
   const { data: posts = [], isLoading } = useRecentPostsQuery();
+  // `post.model` carries the campaign's text provider id; managed plans
+  // never see it (specs/managed-ai-lineup.md §3.3), so the column goes.
+  const { plan } = useLicense();
+  const showIntelligence = !isManagedPlan(plan as PlanId);
 
   return (
     <Card className="overflow-hidden p-0! shadow-sm">
@@ -21,14 +27,17 @@ export const RecentBlueprints = () => {
             <tr>
               <th className="px-6 py-3">{__("Blueprint / Topic", "structura")}</th>
               <th className="px-6 py-3">{__("Persona", "structura")}</th>
-              <th className="px-6 py-3">{__("Intelligence", "structura")}</th>
+              {showIntelligence && <th className="px-6 py-3">{__("Intelligence", "structura")}</th>}
               <th className="px-6 py-3 text-right">{__("Actions", "structura")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-neutral-800">
             {posts.length === 0 && !isLoading ? (
               <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-xs text-gray-400 italic">
+                <td
+                  colSpan={showIntelligence ? 4 : 3}
+                  className="px-6 py-12 text-center text-xs text-gray-400 italic"
+                >
                   {__("No blueprints found in the database.", "structura")}
                 </td>
               </tr>
@@ -63,11 +72,15 @@ export const RecentBlueprints = () => {
                     </div>
                   </td>
                   <td className="min-w-30 px-6 py-4">{post.author}</td>
-                  <td className="px-6 py-4">
-                    <Badge variant="solid" intent="indigo">
-                      {post.model}
-                    </Badge>
-                  </td>
+                  {showIntelligence && (
+                    <td className="px-6 py-4">
+                      {post.model && (
+                        <Badge variant="solid" intent="indigo">
+                          {post.model}
+                        </Badge>
+                      )}
+                    </td>
+                  )}
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-1">
                       <Tooltip title={__("Edit Post", "structura")}>

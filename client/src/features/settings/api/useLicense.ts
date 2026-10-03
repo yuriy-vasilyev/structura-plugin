@@ -328,7 +328,7 @@ export const useLicense = () => {
    * simultaneously at the calling tier (source of truth:
    * `License_Manager::get_provider_count_cap`).
    *
-   *   - 1 for `none` (anonymous; pick openai OR gemini)
+   *   - 1 for `none` (anonymous; OpenAI only since 2026-10-02)
    *   - 2 for `free` (openai + gemini, no Anthropic)
    *   - 3 for `byok` / managed (all three providers)
    *

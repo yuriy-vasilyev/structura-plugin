@@ -2737,10 +2737,19 @@ class Rest_Api
 
         $body = $result['body'] ?? [];
         if (($result['code'] ?? 500) !== 200 || empty($body['draft'])) {
+            // The cloud's per-workspace AI call limit answers 429 with
+            // `code: "ai_rate_limited"` (2026-10-02). Forward both so the
+            // wp-admin Setup step shows the limit's own message instead of
+            // the generic failure.
+            $error_data = ['status' => (int) ($result['code'] ?? 0) === 429 ? 429 : 502];
+            if (isset($body['code']) && is_string($body['code'])) {
+                $error_data['code'] = sanitize_key($body['code']);
+            }
+
             return new \WP_Error(
                 'draft_failed',
                 $body['error'] ?? __('Could not draft the campaign.', 'structura'),
-                ['status' => 502],
+                $error_data,
             );
         }
 
@@ -3730,7 +3739,9 @@ class Rest_Api
             return new \WP_Error('cloud_suggestion_error', $message, $error_data);
         }
 
-        return rest_ensure_response([...$data, 'via' => 'cloud']);
+        // 2026-10-02: array_merge, not a spread: unpacking string keys is
+        // PHP 8.1+ and fatals on the PHP 7.4 sites the plugin supports.
+        return rest_ensure_response(array_merge($data, ['via' => 'cloud']));
     }
 
     public function get_provider_heartbeat($request)
@@ -6419,7 +6430,12 @@ class Rest_Api
         }
 
         $secret_data = Key_Manager::get_license_payload();
-        $cloud_shape = Campaign_Shape_Transformer::wp_input_to_cloud($validated);
+        // 2026-10-02: an update sends cloud-owned fields (status, progress
+        // counters, discovery stamps) only when the request carries them.
+        $cloud_shape = Campaign_Shape_Transformer::wp_update_to_cloud(
+            $validated,
+            is_array($params) ? $params : []
+        );
 
         $payload = [
             'license_key'       => $license['license_key'],

@@ -17,6 +17,7 @@ import { __ } from "@wordpress/i18n";
 import { getRegistryModel, getRegistryModelId, tierForModelId } from "@structura/model-catalog";
 
 import { AIProvider } from "@/features/campaigns/types";
+import { recommendedTextTier, recommendedWord } from "@/features/campaigns/aiGuidance";
 
 /** BYOK model quality tiers, in display order. */
 export const MODEL_TIERS = ["top", "mid"] as const;
@@ -31,11 +32,20 @@ export const tierLabel = (tier: ModelTier): string =>
  * concrete model name from the registry — e.g. "Top (Gemini 3.1 Pro)" /
  * "Standard (Gemini 3.5 Flash)". A tier the provider has no model for is
  * skipped (defensive — every provider carries top+mid today).
+ *
+ * The provider's recommended TEXT tier carries `recommended` (the
+ * "Recommended" chip in the open list, never in the closed trigger).
+ * Image tiers carry none (specs/byok-ai-guidance.md §3, §5, 2026-10-02).
  */
 export const buildTierOptions = (provider: AIProvider, capability: "text" | "image") =>
   MODEL_TIERS.flatMap((tier) => {
     const model = getRegistryModel(provider, capability, tier);
-    return model ? [{ value: tier, label: `${tierLabel(tier)} (${model.name})` }] : [];
+    if (!model) return [];
+    const recommended =
+      capability === "text" && recommendedTextTier(provider) === tier
+        ? { recommended: { label: recommendedWord() } }
+        : {};
+    return [{ value: tier, label: `${tierLabel(tier)} (${model.name})`, ...recommended }];
   });
 
 /**

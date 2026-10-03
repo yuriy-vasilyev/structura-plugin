@@ -122,3 +122,61 @@ describe("humanizeSuggestionError — fallback paths", () => {
     }
   });
 });
+
+describe("humanizeSuggestionError — managed plans (2026-10-01)", () => {
+  // Managed customers never see a provider name and have no key or
+  // provider to switch (specs/managed-ai-lineup.md §3.3).
+  const PROVIDER_NAMES = /Gemini|OpenAI|Claude|Anthropic/i;
+
+  it("transient: generic AI-service wording, no provider name, no switch advice", () => {
+    const out = humanizeSuggestionError(
+      {
+        message: "[Gemini Text Synthesis] This model is currently experiencing high demand.",
+        data: { code: "provider_transient", provider: "gemini", retriable: true },
+      },
+      { isManagedAiPlan: true },
+    );
+    expect(out).toMatch(/high demand/i);
+    expect(out).not.toMatch(PROVIDER_NAMES);
+    expect(out).not.toMatch(/different provider|Settings/i);
+  });
+
+  it("terminal: generic wording, no provider name, no API key advice", () => {
+    const out = humanizeSuggestionError(
+      { data: { code: "provider_error", provider: "anthropic", retriable: false } },
+      { isManagedAiPlan: true },
+    );
+    expect(out).toMatch(/couldn't complete the request/i);
+    expect(out).not.toMatch(PROVIDER_NAMES);
+    expect(out).not.toMatch(/API key/i);
+  });
+
+  it("BYOK (flag off) keeps the provider-named copy", () => {
+    const out = humanizeSuggestionError(
+      { data: { code: "provider_error", provider: "openai", retriable: false } },
+      { isManagedAiPlan: false },
+    );
+    expect(out).toMatch(/OpenAI/);
+    expect(out).toMatch(/API key/i);
+  });
+
+  it("still passes cloud-owned rejections through on managed plans", () => {
+    const out = humanizeSuggestionError(
+      { code: "tier_quota_exceeded", message: "You've reached this month's limit." },
+      { isManagedAiPlan: true },
+    );
+    expect(out).toBe("You've reached this month's limit.");
+  });
+});
+
+// 2026-10-02: the cloud's AI call limit (`code: "ai_rate_limited"`).
+describe("humanizeSuggestionError — AI call limit", () => {
+  it("shows the limit copy on every plan, without a provider name", () => {
+    const err = { code: "cloud_suggestion_error", message: "x", data: { code: "ai_rate_limited", status: 502 } };
+    for (const isManagedAiPlan of [true, false]) {
+      const out = humanizeSuggestionError(err, { isManagedAiPlan });
+      expect(out).toContain("Try again in a minute");
+      expect(out).not.toMatch(/gemini|openai|claude/i);
+    }
+  });
+});

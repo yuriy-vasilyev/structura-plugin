@@ -27,7 +27,7 @@
  *   where the wide button group pulls double duty as a primary CTA.
  */
 
-import { FC, useMemo } from "react";
+import { FC, ReactNode, Ref, useMemo, useRef } from "react";
 import { __ } from "@wordpress/i18n";
 import { AlertTriangle, Image as ImageIcon, Lock, Sparkles, Type, Zap } from "lucide-react";
 import { Select, Switch, Tooltip } from "@structura/ui";
@@ -40,6 +40,13 @@ import { useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { AIProvider } from "@/features/campaigns/types";
 import { getProviderVisual } from "@/features/campaigns/constants";
 import { type ModelTier, buildTierOptions, effectiveTier } from "@/features/campaigns/modelTier";
+import {
+  isRecommendedTextProvider,
+  orderTextProviders,
+  recommendedWord,
+} from "@/features/campaigns/aiGuidance";
+import { ProviderAdvice } from "@/features/campaigns/components/ProviderAdvice";
+import { RecommendedLabel } from "@structura/ui";
 
 /** Text-only providers cannot be selected as image providers or image fallbacks. */
 const TEXT_ONLY_PROVIDERS: AIProvider[] = ["anthropic"];
@@ -140,10 +147,13 @@ const PregenerationStrip: FC<{ enabled: boolean; onChange: (next: boolean) => vo
 
 // ─── Provider option helpers ────────────────────────────────────────────────
 
-const buildProviderOptions = (providers: AIProvider[]) =>
+const buildProviderOptions = (providers: AIProvider[], labelRecommended: boolean) =>
   providers.map((p) => ({
     value: p,
     label: getProviderVisual(p).label,
+    ...(labelRecommended && isRecommendedTextProvider(p)
+      ? { recommended: { label: recommendedWord() } }
+      : {}),
   }));
 
 // ─── Capability row ─────────────────────────────────────────────────────────
@@ -160,7 +170,7 @@ interface CapabilityRowProps {
   tier: ModelTier;
   onTierChange: (next: ModelTier) => void;
   /** Tier options for the chosen primary, labeled with the model name. */
-  tierOptions: { value: string; label: string }[];
+  tierOptions: { value: string; label: string; recommended?: { label: string } }[];
   /** Providers available as primary picks. */
   primaryCandidates: AIProvider[];
   /** Providers eligible to act as fallback (subset of primaryCandidates). */
@@ -175,6 +185,20 @@ interface CapabilityRowProps {
   isFallbackEligible: (p: AIProvider) => boolean;
   /** Whether the primary provider is incomplete (no key / no model). */
   primaryIncomplete: boolean;
+  /**
+   * Text row only: label the recommended provider and tier ("Recommended",
+   * specs/byok-ai-guidance.md §5). Never on the image row or the fallback.
+   */
+  labelRecommended?: boolean;
+  /** Text row only: the provider advice, between the model and the fallback. */
+  advice?: ReactNode;
+  /** Ref to the provider trigger, so Undo can return focus to it. */
+  providerTriggerRef?: Ref<HTMLButtonElement>;
+  /**
+   * Render the fallback control. False on managed plans, which show no
+   * fallback at all; the stored value is left as it is.
+   */
+  showFallback?: boolean;
 }
 
 const CapabilityRow: FC<CapabilityRowProps> = ({
@@ -193,6 +217,10 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
   fallbackLockedReason,
   isFallbackEligible,
   primaryIncomplete,
+  labelRecommended = false,
+  advice,
+  providerTriggerRef,
+  showFallback = true,
 }) => {
   const icon =
     capability === "text" ? (
@@ -240,20 +268,24 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
           {primaryCandidates.length <= 1 ? (
             <span className="flex flex-1 items-center gap-1.5 rounded-lg border border-neutral-200 bg-neutral-50/60 px-3 py-1.5 text-[11px] font-medium text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800/50 dark:text-neutral-300">
               {getProviderVisual(primary).label}
+              {labelRecommended && isRecommendedTextProvider(primary) && (
+                <RecommendedLabel label={recommendedWord()} />
+              )}
             </span>
           ) : (
             <Select
               className="flex-1"
               size="sm"
-              options={buildProviderOptions(primaryCandidates)}
+              options={buildProviderOptions(primaryCandidates, labelRecommended)}
               value={primary}
               onValueChange={(v) => onPrimaryChange(v as AIProvider)}
+              recommendedInTrigger={labelRecommended}
             >
-              <Select.Trigger />
+              <Select.Trigger ref={providerTriggerRef} />
               <Select.Content className="w-(--button-width)">
-                {primaryCandidates.map((p) => (
-                  <Select.Item key={p} value={p}>
-                    {getProviderVisual(p).label}
+                {buildProviderOptions(primaryCandidates, labelRecommended).map((o) => (
+                  <Select.Item key={o.value} value={o.value} recommended={o.recommended}>
+                    {o.label}
                   </Select.Item>
                 ))}
               </Select.Content>
@@ -280,7 +312,11 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
               <Select.Trigger placeholder={__("Select model...", "structura")} />
               <Select.Content className="w-(--button-width)">
                 {tierOptions.map((o) => (
-                  <Select.Item key={o.value} value={o.value}>
+                  <Select.Item
+                    key={o.value}
+                    value={o.value}
+                    recommended={labelRecommended ? o.recommended : undefined}
+                  >
                     {o.label}
                   </Select.Item>
                 ))}
@@ -289,48 +325,55 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
           </div>
         )}
 
+        {/* Provider advice — full width, after the model and before the
+            fallback (handoff DOM order: provider → model → advice →
+            fallback). Renders nothing unless the advice applies. */}
+        {advice}
+
         {/* Fallback */}
-        <div className="flex min-w-[150px] flex-1 items-center gap-2">
-          <span className="text-[9px] font-bold tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
-            {__("Fallback", "structura")}
-          </span>
-          {fallbackLocked ? (
-            <Tooltip
-              title={
-                fallbackLockedReason ??
-                __("Upgrade to Pro to unlock provider fallback.", "structura")
-              }
-              position="top"
-            >
-              <span className="flex flex-1 items-center justify-between gap-2 rounded-lg border border-neutral-200 bg-neutral-50/60 px-3 py-1.5 text-[11px] font-medium text-neutral-400 dark:border-neutral-800 dark:bg-neutral-800/50 dark:text-neutral-500">
-                <span className="flex items-center gap-1.5">
-                  <Lock size={10} />
-                  {__("Pro", "structura")}
+        {showFallback && (
+          <div className="flex min-w-[150px] flex-1 items-center gap-2">
+            <span className="text-[9px] font-bold tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
+              {__("Fallback", "structura")}
+            </span>
+            {fallbackLocked ? (
+              <Tooltip
+                title={
+                  fallbackLockedReason ??
+                  __("Upgrade to Pro to unlock provider fallback.", "structura")
+                }
+                position="top"
+              >
+                <span className="flex flex-1 items-center justify-between gap-2 rounded-lg border border-neutral-200 bg-neutral-50/60 px-3 py-1.5 text-[11px] font-medium text-neutral-400 dark:border-neutral-800 dark:bg-neutral-800/50 dark:text-neutral-500">
+                  <span className="flex items-center gap-1.5">
+                    <Lock size={10} />
+                    {__("Pro", "structura")}
+                  </span>
                 </span>
-              </span>
-            </Tooltip>
-          ) : (
-            <Select
-              className="flex-1"
-              size="sm"
-              options={fallbackOptions.map((o) => ({ value: o.value, label: o.label }))}
-              value={fallback ?? "__none__"}
-              onValueChange={(v) => {
-                const val = v as string;
-                onFallbackChange(val === "__none__" ? null : (val as AIProvider));
-              }}
-            >
-              <Select.Trigger />
-              <Select.Content className="w-(--button-width)">
-                {fallbackOptions.map((o) => (
-                  <Select.Item key={o.value} value={o.value}>
-                    {o.label}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select>
-          )}
-        </div>
+              </Tooltip>
+            ) : (
+              <Select
+                className="flex-1"
+                size="sm"
+                options={fallbackOptions.map((o) => ({ value: o.value, label: o.label }))}
+                value={fallback ?? "__none__"}
+                onValueChange={(v) => {
+                  const val = v as string;
+                  onFallbackChange(val === "__none__" ? null : (val as AIProvider));
+                }}
+              >
+                <Select.Trigger />
+                <Select.Content className="w-(--button-width)">
+                  {fallbackOptions.map((o) => (
+                    <Select.Item key={o.value} value={o.value}>
+                      {o.label}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select>
+            )}
+          </div>
+        )}
       </div>
 
       {primaryIncomplete && (
@@ -420,6 +463,34 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
     return capability === "text" ? !!info.text_model : !!info.image_model;
   };
 
+  // Switch from the provider advice: provider + its recommended tier (and the
+  // mirrored model on BYOK), clearing a fallback equal to the new provider.
+  // Returns the Undo, which restores all four and refocuses the provider
+  // trigger (spec: specs/byok-ai-guidance.md §5).
+  const providerTriggerRef = useRef<HTMLButtonElement>(null);
+  const switchTextProvider = (to: AIProvider, tier: ModelTier) => {
+    const previous = {
+      textProvider: intelligence.textProvider,
+      textTier: intelligence.textTier,
+      textModel: intelligence.textModel,
+      fallbackTextProvider: intelligence.fallbackTextProvider ?? null,
+    };
+    updateForm("intelligence", {
+      textProvider: to,
+      textTier: tier,
+      textModel: showModelSelector ? (getRegistryModelId(to, "text", tier) ?? "") : "",
+      ...(intelligence.fallbackTextProvider === to ? { fallbackTextProvider: null } : {}),
+    });
+    return () => {
+      updateForm("intelligence", previous);
+      providerTriggerRef.current?.focus();
+    };
+  };
+
+  // Hidden advice is stored per campaign and per provider; `dirty` sends it
+  // with the next save (flattenCampaign), so the portal sees it too.
+  const adviceHidden = formData.aiAdvice?.hidden?.textProvider === intelligence.textProvider;
+
   // Fallback candidate pools mirror the primary candidate pools, minus
   // text-only providers from the image row.
   const textFallbackCandidates = availableTextProviders;
@@ -435,24 +506,46 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
         onChange={(next) => updateForm("schedule", { pregenerationEnabled: next })}
       />
 
-      {/* Text capability row */}
-      <CapabilityRow
-        capability="text"
-        primary={intelligence.textProvider}
-        onPrimaryChange={(p) => changeProvider("text", p)}
-        fallback={intelligence.fallbackTextProvider ?? null}
-        onFallbackChange={(p) => updateForm("intelligence", { fallbackTextProvider: p })}
-        tier={textTier}
-        onTierChange={(t) => changeTier("text", t)}
-        tierOptions={buildTierOptions(intelligence.textProvider, "text")}
-        primaryCandidates={availableTextProviders}
-        fallbackCandidates={textFallbackCandidates}
-        showModelSelector={showModelSelector}
-        fallbackLocked={isFree}
-        fallbackLockedReason={__("Upgrade to Pro to unlock provider fallback.", "structura")}
-        isFallbackEligible={isFallbackEligibleFor("text")}
-        primaryIncomplete={isProviderIncomplete(intelligence.textProvider)}
-      />
+      {/* Text capability row — BYOK / Free only. Managed plans write with
+          one lineup chosen by Structura and never pick or see a text
+          provider (specs/managed-ai-lineup.md §3.3); the stored provider
+          is left as is. The image row stays on every plan. */}
+      {!isCloud && (
+        <CapabilityRow
+          capability="text"
+          primary={intelligence.textProvider}
+          onPrimaryChange={(p) => changeProvider("text", p)}
+          fallback={intelligence.fallbackTextProvider ?? null}
+          onFallbackChange={(p) => updateForm("intelligence", { fallbackTextProvider: p })}
+          tier={textTier}
+          onTierChange={(t) => changeTier("text", t)}
+          tierOptions={buildTierOptions(intelligence.textProvider, "text")}
+          primaryCandidates={orderTextProviders(availableTextProviders)}
+          fallbackCandidates={textFallbackCandidates}
+          showModelSelector={showModelSelector}
+          fallbackLocked={isFree}
+          fallbackLockedReason={__("Upgrade to Pro to unlock provider fallback.", "structura")}
+          isFallbackEligible={isFallbackEligibleFor("text")}
+          primaryIncomplete={isProviderIncomplete(intelligence.textProvider)}
+          labelRecommended
+          providerTriggerRef={providerTriggerRef}
+          advice={
+            <ProviderAdvice
+              className="basis-full"
+              provider={intelligence.textProvider}
+              onSwitch={switchTextProvider}
+              hidden={adviceHidden}
+              onHide={() =>
+                updateForm("aiAdvice", {
+                  hidden: { textProvider: intelligence.textProvider },
+                  dirty: true,
+                })
+              }
+              onShow={() => updateForm("aiAdvice", { hidden: null, dirty: true })}
+            />
+          }
+        />
+      )}
 
       {/* Image capability row — only for licensed users (Free has no
           image gen at all). */}
@@ -472,12 +565,16 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
           fallbackLocked={false}
           isFallbackEligible={isFallbackEligibleFor("image")}
           primaryIncomplete={isProviderIncomplete(intelligence.imageProvider)}
+          // Managed plans show no fallback controls (2026-10-02, matching the
+          // customer portal); the image provider choice stays.
+          showFallback={!isCloud}
         />
       )}
 
       {/* Footnote — fallback semantics (one line, replaces the two
-          paragraphs that used to live under each FallbackProviderRow). */}
-      {!isFree && (
+          paragraphs that used to live under each FallbackProviderRow).
+          No fallback control on managed plans, so no footnote either. */}
+      {!isFree && !isCloud && (
         <p className="m-0! px-1 text-[10px] leading-snug text-neutral-400 dark:text-neutral-500">
           {__(
             "If the primary provider is temporarily unavailable (rate-limit, timeout, or 5xx), we'll retry once through the fallback before failing the run.",

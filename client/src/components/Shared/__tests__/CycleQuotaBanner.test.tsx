@@ -20,6 +20,11 @@
  * The pre-2026-05-13 post/overage shape (`overageUnits`,
  * `estimatedOverageUsd`, `postsUsed`) is gone — see the banner
  * docblock for the refactor history.
+ *
+ * Since 2026-10-01 managed plans are metered by posts per site per
+ * month again (no overage either). Fixtures without `postsUsed` /
+ * `postsIncluded` below are responses of a cloud deployed before that
+ * and keep the token wording; the posts cases are at the end.
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -360,5 +365,82 @@ describe("CycleQuotaBanner — interaction", () => {
     );
     fireEvent.click(screen.getByText("View usage"));
     expect(navigateMock).toHaveBeenCalledWith("/");
+  });
+});
+
+describe("CycleQuotaBanner — posts quota (cloud after 2026-10-01)", () => {
+  // Tokens are still on the wire for old clients but no longer enforced
+  // on managed plans (specs/managed-ai-lineup.md §4).
+  const postsCycle = (row: {
+    postsUsed: number;
+    postsIncluded: number;
+    utilizationPercent: number;
+    tokensUsed?: number;
+    tokensIncluded?: number;
+  }) => ({
+    success: true,
+    cycleUsage: {
+      kind: "managed",
+      cycleMonth: "2026-10",
+      cycleResetsAt: 0,
+      daysLeftInCycle: 12,
+      unmetered: false,
+      workspace: {
+        tokensUsed: row.tokensUsed ?? 0,
+        tokensIncluded: row.tokensIncluded ?? 2_000_000,
+        imagesUsed: 0,
+        imagesIncluded: 90,
+        postsUsed: row.postsUsed,
+        postsIncluded: row.postsIncluded,
+        utilizationPercent: row.utilizationPercent,
+      },
+      activations: [],
+    },
+  });
+
+  it("INFO at 80%+ speaks posts, not tokens", () => {
+    setHook(postsCycle({ postsUsed: 25, postsIncluded: 30, utilizationPercent: 83 }));
+    const { container } = render(
+      <Wrap>
+        <CycleQuotaBanner />
+      </Wrap>,
+    );
+
+    expect(screen.getByText("Approaching cycle quota")).toBeTruthy();
+    expect(screen.getByText(/25 of its 30 posts for this month/)).toBeTruthy();
+    expect(container.textContent).not.toMatch(/token/i);
+  });
+
+  it("WARNING once the posts are used up", () => {
+    setHook(postsCycle({ postsUsed: 30, postsIncluded: 30, utilizationPercent: 100 }));
+    render(
+      <Wrap>
+        <CycleQuotaBanner />
+      </Wrap>,
+    );
+
+    expect(screen.getByText("Cycle quota reached")).toBeTruthy();
+    expect(screen.getByText(/30 of its 30 posts for this month/)).toBeTruthy();
+    expect(screen.queryByText("Approaching cycle quota")).toBeNull();
+  });
+
+  it("stays hidden when tokens exceed the old budget but posts are well under quota", () => {
+    // Tokens are no longer a cap on managed plans: a site over its old
+    // token figure with posts left must not be told it is blocked.
+    setHook(
+      postsCycle({
+        postsUsed: 10,
+        postsIncluded: 30,
+        utilizationPercent: 33,
+        tokensUsed: 2_500_000,
+        tokensIncluded: 2_000_000,
+      }),
+    );
+    const { container } = render(
+      <Wrap>
+        <CycleQuotaBanner />
+      </Wrap>,
+    );
+    expect(container.firstChild).toBeNull();
   });
 });

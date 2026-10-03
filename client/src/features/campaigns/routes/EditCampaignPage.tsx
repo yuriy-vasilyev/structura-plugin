@@ -93,6 +93,9 @@ const EditCampaignPage = () => {
     schedule: campaign.schedule,
     authority: campaign.authority,
     keywords: campaign.keywords,
+    // Read-only seed for the provider advice; written back only when the
+    // user hides or shows it (`dirty`).
+    ...(campaign.aiAdvice ? { aiAdvice: { hidden: campaign.aiAdvice.hidden ?? null } } : {}),
   };
 
   // Key on dataUpdatedAt so the provider (and all child state) resets

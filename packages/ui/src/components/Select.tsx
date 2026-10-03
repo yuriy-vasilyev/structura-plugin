@@ -3,14 +3,32 @@ import { Check, ChevronDown } from "lucide-react";
 import React, { createContext, useContext, useMemo } from "react";
 import { cn } from "../utils";
 import { formFieldLabelVariants, formFieldTriggerVariants } from "../variants/form-field";
+import { RecommendedLabel } from "./RecommendedLabel";
 
-type SelectOption = {
+/** A "Recommended" chip on a select option, with pre-translated strings. */
+export type SelectRecommendation = {
+  /** Visible word (e.g. "Recommended"). Becomes part of the option's accessible name. */
+  label: string;
+  /** Screen-reader scope, exposed as `aria-description` on the option (and the trigger). */
+  description?: string;
+};
+
+/** One entry of `Select`'s `options`. */
+export type SelectOption = {
+  /** Value passed to `onValueChange`. */
   value: string | number;
+  /** Visible, pre-translated option name. */
   label: string;
   /** Not selectable — rendered muted. Pair with `badge` to say why. */
   disabled?: boolean;
   /** Tiny uppercase chip after the label (e.g. "Pro" for tier-gated options). */
   badge?: string;
+  /**
+   * Shows a {@link RecommendedLabel} after the name in the open list.
+   * An option shows at most one chip: a disabled option or one with a
+   * `badge` never shows it (a locked "Pro" option keeps "Pro").
+   */
+  recommended?: SelectRecommendation;
 };
 type SelectContextValue = {
   value?: string | number;
@@ -18,7 +36,17 @@ type SelectContextValue = {
   size: "xs" | "sm" | "md";
   options: SelectOption[];
   error?: string;
+  recommendedInTrigger: boolean;
 };
+
+/**
+ * The recommendation an option actually shows: none when it is disabled
+ * or already carries a `badge`, so an option never shows two chips.
+ */
+const visibleRecommendation = (
+  option: Pick<SelectOption, "disabled" | "badge" | "recommended">
+): SelectRecommendation | undefined =>
+  option.disabled || option.badge ? undefined : option.recommended;
 
 const SelectContext = createContext<SelectContextValue | null>(null);
 
@@ -39,6 +67,13 @@ interface SelectProps {
   className?: string;
   size?: "xs" | "sm" | "md";
   error?: string;
+  /**
+   * Repeat the selected option's `recommended` chip in the closed trigger
+   * (the value truncates, the chip never does). Off by default: the AI
+   * guidance handoff shows it on provider selects only, never on model
+   * selects.
+   */
+  recommendedInTrigger?: boolean;
 }
 
 const SelectRoot: React.FC<SelectProps> = ({
@@ -50,10 +85,11 @@ const SelectRoot: React.FC<SelectProps> = ({
   error,
   disabled = false,
   size = "md",
+  recommendedInTrigger = false,
 }) => {
   const contextValue = useMemo(
-    () => ({ options, value, onValueChange, size, error }),
-    [options, value, onValueChange, size, error]
+    () => ({ options, value, onValueChange, size, error, recommendedInTrigger }),
+    [options, value, onValueChange, size, error, recommendedInTrigger]
   );
 
   return (
@@ -110,13 +146,16 @@ interface SelectTriggerProps {
 
 const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
   ({ className, placeholder = "Select an option...", trailingAdornment }, ref) => {
-    const { size, value, options, error } = useSelectContext();
+    const { size, value, options, error, recommendedInTrigger } = useSelectContext();
     const selectedOption = options.find((opt) => opt.value === value);
+    const recommendation =
+      recommendedInTrigger && selectedOption ? visibleRecommendation(selectedOption) : undefined;
 
     const button = (
       <ListboxButton
         ref={ref}
         aria-invalid={!!error}
+        aria-description={recommendation?.description}
         className={cn(
           formFieldTriggerVariants({
             size,
@@ -129,7 +168,12 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
           className
         )}
       >
-        {selectedOption ? (
+        {selectedOption && recommendation ? (
+          <span className="flex min-w-0 items-center gap-2">
+            <span className="min-w-0 truncate">{selectedOption.label}</span>{" "}
+            <RecommendedLabel label={recommendation.label} />
+          </span>
+        ) : selectedOption ? (
           <span className="truncate">{selectedOption.label}</span>
         ) : (
           <span className="truncate text-gray-400 dark:text-gray-500">{placeholder}</span>
@@ -172,7 +216,13 @@ const SelectContent: React.FC<
   const rendered =
     children ??
     options.map((opt) => (
-      <SelectItem key={opt.value} value={opt.value} disabled={opt.disabled} badge={opt.badge}>
+      <SelectItem
+        key={opt.value}
+        value={opt.value}
+        disabled={opt.disabled}
+        badge={opt.badge}
+        recommended={opt.recommended}
+      >
         {opt.label}
       </SelectItem>
     ));
@@ -206,6 +256,12 @@ interface SelectItemProps {
   disabled?: boolean;
   /** Tiny uppercase chip after the label (e.g. "Pro"). */
   badge?: string;
+  /**
+   * "Recommended" chip after the label, with its `description` as the
+   * option's `aria-description`. Ignored when `disabled` or `badge` is set:
+   * one chip per option, and the badge wins.
+   */
+  recommended?: SelectRecommendation;
 }
 
 const SelectItem: React.FC<SelectItemProps> = ({
@@ -214,19 +270,35 @@ const SelectItem: React.FC<SelectItemProps> = ({
   description,
   disabled,
   badge,
+  recommended,
 }) => {
+  const recommendation = visibleRecommendation({ disabled, badge, recommended });
   return (
     <ListboxOption
       value={value}
       disabled={disabled}
+      aria-description={recommendation?.description}
       className={cn(
         "group relative rounded-lg py-2 pr-4 pl-10 text-gray-700 transition-colors select-none data-focus:bg-gray-100 data-focus:text-gray-900 dark:text-gray-300 dark:data-focus:bg-gray-800 dark:data-focus:text-white",
         disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
       )}
     >
       <div>
-        <span className="flex items-center gap-2 truncate font-normal group-data-selected:font-bold group-data-selected:text-brand-600 dark:group-data-selected:text-brand-400">
-          {children}
+        <span
+          className={cn(
+            "flex items-center gap-2 font-normal group-data-selected:font-bold group-data-selected:text-brand-600 dark:group-data-selected:text-brand-400",
+            // A recommended option wraps the chip onto its own line rather
+            // than truncating the name (handoff: parent flex-wrap, row-gap 4).
+            recommendation ? "flex-wrap gap-y-1" : "truncate"
+          )}
+        >
+          {recommendation ? <span className="min-w-0">{children}</span> : children}
+          {recommendation && (
+            <>
+              {/* The space keeps "Name Recommended" as two words in the option's accessible name. */}{" "}
+              <RecommendedLabel label={recommendation.label} />
+            </>
+          )}
           {badge && (
             <span className="shrink-0 rounded-md bg-brand-100 px-1.5 py-0.5 text-[9px] font-black tracking-wider text-brand-700 uppercase dark:bg-brand-500/20 dark:text-brand-300">
               {badge}

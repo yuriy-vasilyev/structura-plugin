@@ -1,26 +1,26 @@
 /**
- * New campaign — the Setup step drafts itself (spec
+ * New campaign — the Setup step drafts only on request (spec
  * `campaign-language-and-smart-setup.md` §4.4).
  *
- * The Interview step is gone: the step runs a deterministic draft the moment
- * it mounts, and the AI pass runs only when a paid user presses Magic
- * suggest. What this pins:
+ * Rewritten 2026-10-02: the step used to run a deterministic draft the moment
+ * it mounted, and only paid plans had Magic suggest. It now mirrors the
+ * customer portal (2026-09-29): it opens empty, and one Magic suggest on
+ * every plan is one cloud call — `deterministic` on Free, `ai` on paid
+ * plans. What this pins:
  *
- *   1. The deterministic call goes out on mount, in the SITE's language, and
- *      its fields land on the form under the neutral "drafted from your site"
- *      pill.
- *   2. Nothing fires the `ai` stage on mount, on any tier. Pressing Magic
- *      suggest does, and swaps to the purple pill.
- *   3. A failed Magic suggest leaves the deterministic draft standing behind
- *      an Alert with Try again; free licenses never see the button at all.
- *   4. Edited fields get a confirmation before Magic suggest overwrites them.
- *   5. A failed draft is never a dead end — an error Alert with Try again
- *      over a form the user can still fill in themselves.
- *   6. The overlap notice names the sibling campaign and dismisses.
- *   7. The language seeds from the WP site language, including a regional
- *      variant (`de-AT` → `de_AT`) and an unsupported locale (`fa-IR` →
- *      `fa_IR`, which keeps writing through the "Other…" catalogue).
- *   8. Coded rationale renders as sentences, never as raw codes.
+ *   1. Mount makes no draft call, shows empty fields, no skeletons and no
+ *      rationale strip; the Magic suggest button is there on Free too.
+ *   2. One click is one call with the plan's stage, and its draft lands
+ *      under the matching pill.
+ *   3. A gated AI pass lands the templated draft and shows the inline error
+ *      with Try again; a failed call keeps whatever is in the fields.
+ *   4. The AI call limit refusal shows its own message and keeps the fields.
+ *   5. Edited fields get a confirmation before Magic suggest replaces them.
+ *   6. A language pick before any draft makes no call; after a draft it
+ *      asks "Redraft the campaign in X?" and then drafts in that language.
+ *   7. The overlap notice and the rationale sentences come with a draft.
+ *   8. The language seeds from the WP site language (`de-AT` → `de_AT`,
+ *      `fa-IR` → `fa_IR`) and the first suggestion is drafted in it.
  *
  * Only the network edge (`@wordpress/api-fetch`) and the settings / personas
  * data hooks are mocked. The real page, the real draft hook, the real form
@@ -35,6 +35,7 @@ import { ToastProvider } from "@structura/ui";
 
 vi.mock("@wordpress/i18n", () => ({
   __: (t: string) => t,
+  _x: (t: string) => t,
   _n: (single: string, plural: string, n: number) => (n === 1 ? single : plural),
   sprintf: (format: string, ...args: unknown[]) => {
     let i = 0;
@@ -54,6 +55,10 @@ const h = vi.hoisted(() => ({
   >,
   /** What `get_bloginfo('language')` reports for this install. */
   siteLanguage: "de-DE",
+  /** `useDefaultProviders` overrides for the inline provider block cases. */
+  providers: {} as Record<string, unknown>,
+  /** Text providers with a key behind them (`useAiConnections`). */
+  textProviders: ["openai"] as string[],
 }));
 
 vi.mock("@/features/settings", () => ({
@@ -63,6 +68,7 @@ vi.mock("@/features/settings", () => ({
     isLoading: false,
   }),
   useSeoRules: () => ({ rules: null, isLoading: false }),
+  useAiConnections: () => ({ textProviders: h.textProviders }),
   useDefaultProviders: () => ({
     defaultTextProvider: "openai",
     defaultImageProvider: "openai",
@@ -74,6 +80,7 @@ vi.mock("@/features/settings", () => ({
     hasMultipleProviders: false,
     isFullyConfigured: true,
     isCloud: false,
+    ...h.providers,
   }),
 }));
 
@@ -153,6 +160,8 @@ const renderWizard = () => {
 beforeEach(() => {
   h.license = { isPaidLicense: false, isLicensed: true, plan: "free" };
   h.siteLanguage = "de-DE";
+  h.providers = {};
+  h.textProviders = ["openai"];
   // The wizard resumes from localStorage; a leftover draft would pin the
   // language and short-circuit the seeding this file is about.
   useCampaignDraftStore.getState().discardDraft();
@@ -168,146 +177,165 @@ beforeEach(() => {
   });
 });
 
-describe("New campaign — Setup step", () => {
-  it("drafts deterministically on mount and shows the neutral pill", async () => {
+const nameField = () => screen.getByLabelText("Campaign Name") as HTMLInputElement;
+const magicSuggest = () => screen.getByRole("button", { name: /Magic suggest/ });
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+describe("New campaign — Setup step (no draft on mount, 2026-10-02)", () => {
+  it("opens empty with no draft call, no skeletons and no rationale strip", async () => {
     renderWizard();
 
-    await waitFor(() => expect(calls().length).toBeGreaterThan(0));
-    expect(calls()[0].data).toEqual({ stage: "deterministic", language: "de" });
-
-    expect(await screen.findByText("Drafted from your site")).toBeTruthy();
-    expect(
-      (screen.getByLabelText("Campaign Name") as HTMLInputElement).value,
-    ).toBe("Balkongarten auf kleinem Raum");
-
-    // Free tier stops at stage 1 — the AI pass is a paid feature, and there
-    // is no locked button or upsell standing in for it.
-    expect(calls().some((c) => c.data?.stage === "ai")).toBe(false);
-    expect(screen.queryByText("Drafted for you")).toBeNull();
-    expect(screen.queryByRole("button", { name: /Magic suggest/ })).toBeNull();
-  });
-
-  it("only runs the AI pass when Magic suggest is pressed", async () => {
-    h.license = { isPaidLicense: true, isLicensed: true, plan: "byok" };
-    renderWizard();
-
-    expect(await screen.findByText("Drafted from your site")).toBeTruthy();
-    // The expensive pass is opt-in — mounting the step must not spend a
-    // model call on a campaign the user may never launch.
-    expect(calls().map((c) => c.data?.stage)).toEqual(["deterministic"]);
-
-    fireEvent.click(screen.getByRole("button", { name: /Magic suggest/ }));
-
-    await waitFor(() =>
-      expect(calls().map((c) => c.data?.stage)).toEqual(["deterministic", "ai"]),
-    );
-    expect(await screen.findByText("Drafted for you")).toBeTruthy();
-    expect(
-      (screen.getByLabelText("Campaign Name") as HTMLInputElement).value,
-    ).toBe("Balkongarten-Guide");
+    expect(await screen.findByRole("button", { name: /Magic suggest/ })).toBeTruthy();
+    await wait(50);
+    expect(calls()).toEqual([]);
+    expect(nameField().value).toBe("");
+    expect(screen.queryByTestId("setup-name-skeleton")).toBeNull();
+    expect(screen.queryByTestId("setup-objective-skeleton")).toBeNull();
+    expect(screen.queryByText("Why these settings")).toBeNull();
     expect(screen.queryByText("Drafted from your site")).toBeNull();
   });
 
-  it("keeps the draft and offers Try again when Magic suggest fails", async () => {
+  it("Free: one click is one deterministic call; the draft lands under the neutral pill", async () => {
+    renderWizard();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
+    expect(await screen.findByText("Drafted from your site")).toBeTruthy();
+    expect(calls().map((c) => c.data)).toEqual([{ stage: "deterministic", language: "de" }]);
+    expect(nameField().value).toBe("Balkongarten auf kleinem Raum");
+    expect(screen.queryByText("Drafted for you")).toBeNull();
+  });
+
+  it("paid: one click is one AI call; the draft lands under the AI pill", async () => {
     h.license = { isPaidLicense: true, isLicensed: true, plan: "byok" };
-    apiFetchMock.mockImplementation(async (opts: { path?: string; data?: any }) => {
+    renderWizard();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
+    expect(await screen.findByText("Drafted for you")).toBeTruthy();
+    expect(calls().map((c) => c.data)).toEqual([{ stage: "ai", language: "de" }]);
+    expect(nameField().value).toBe("Balkongarten-Guide");
+  });
+
+  it("a gated AI pass lands the templated draft and offers Try again", async () => {
+    h.license = { isPaidLicense: true, isLicensed: true, plan: "byok" };
+    apiFetchMock.mockImplementation(async (opts: { path?: string }) => {
       if (opts?.path === DRAFT_PATH) {
-        if (opts.data?.stage === "ai") throw { message: "cloud_error" };
-        return { success: true, draft: deterministicDraft() };
+        return { success: true, draft: deterministicDraft({ aiReason: "plan_gated" }) };
       }
       return [];
     });
     renderWizard();
 
-    expect(await screen.findByText("Drafted from your site")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /Magic suggest/ }));
-
-    expect(
-      await screen.findByText("Couldn't refine this campaign — try again"),
-    ).toBeTruthy();
-    // The deterministic draft is still what the user is looking at.
-    expect(
-      (screen.getByLabelText("Campaign Name") as HTMLInputElement).value,
-    ).toBe("Balkongarten auf kleinem Raum");
+    fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
+    expect(await screen.findByText("Couldn't refine this campaign — try again")).toBeTruthy();
+    expect(nameField().value).toBe("Balkongarten auf kleinem Raum");
     expect(screen.getByText("Drafted from your site")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /Try again/ }));
-    await waitFor(() =>
-      expect(calls().filter((c) => c.data?.stage === "ai").length).toBe(2),
-    );
+    await waitFor(() => expect(calls().length).toBe(2));
+    expect(calls()[1].data).toEqual({ stage: "ai", language: "de" });
+  });
+
+  it("a failed call keeps the drafted fields and the inline error", async () => {
+    renderWizard();
+    fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
+    expect(await screen.findByText("Drafted from your site")).toBeTruthy();
+
+    apiFetchMock.mockImplementation(async (opts: { path?: string }) => {
+      if (opts?.path === DRAFT_PATH) throw { code: "draft_failed", message: "Could not draft the campaign." };
+      return [];
+    });
+    fireEvent.click(magicSuggest());
+
+    expect(await screen.findByText("Couldn't refine this campaign — try again")).toBeTruthy();
+    expect(nameField().value).toBe("Balkongarten auf kleinem Raum");
+  });
+
+  it("the AI call limit refusal shows its own message and keeps the fields", async () => {
+    apiFetchMock.mockImplementation(async (opts: { path?: string }) => {
+      if (opts?.path === DRAFT_PATH) {
+        // What the plugin's draft-setup route forwards for the cloud's 429.
+        throw {
+          code: "draft_failed",
+          message: "Too many AI requests.",
+          data: { status: 429, code: "ai_rate_limited" },
+        };
+      }
+      return [];
+    });
+    renderWizard();
+
+    fireEvent.change(await screen.findByLabelText("Campaign Name"), {
+      target: { value: "Hand-written campaign" },
+    });
+    fireEvent.click(magicSuggest());
+    fireEvent.click(await screen.findByRole("button", { name: "Replace" }));
+
+    expect(
+      await screen.findByText(
+        "Too many AI requests from this workspace. Try again in a minute, or tomorrow if you have made a lot of requests today.",
+      ),
+    ).toBeTruthy();
+    expect(nameField().value).toBe("Hand-written campaign");
   });
 
   it("asks before Magic suggest replaces fields the user edited", async () => {
     h.license = { isPaidLicense: true, isLicensed: true, plan: "byok" };
     renderWizard();
 
-    expect(await screen.findByText("Drafted from your site")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("Campaign Name"), {
+    fireEvent.change(await screen.findByLabelText("Campaign Name"), {
       target: { value: "My own name" },
     });
-
-    fireEvent.click(screen.getByRole("button", { name: /Magic suggest/ }));
+    fireEvent.click(magicSuggest());
     expect(await screen.findByText("Replace your edits?")).toBeTruthy();
-    expect(calls().some((c) => c.data?.stage === "ai")).toBe(false);
+    expect(calls()).toEqual([]);
 
     fireEvent.click(screen.getByRole("button", { name: "Replace" }));
-    await waitFor(() =>
-      expect(calls().some((c) => c.data?.stage === "ai")).toBe(true),
-    );
-    // Confirmed, so the AI draft wins over the edit it was warned about.
-    await waitFor(() =>
-      expect(
-        (screen.getByLabelText("Campaign Name") as HTMLInputElement).value,
-      ).toBe("Balkongarten-Guide"),
-    );
+    await waitFor(() => expect(nameField().value).toBe("Balkongarten-Guide"));
+    expect(calls().length).toBe(1);
   });
 
   it("keeps the user's edits when the Magic suggest confirmation is declined", async () => {
-    h.license = { isPaidLicense: true, isLicensed: true, plan: "byok" };
     renderWizard();
 
-    expect(await screen.findByText("Drafted from your site")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("Campaign Name"), {
+    fireEvent.change(await screen.findByLabelText("Campaign Name"), {
       target: { value: "My own name" },
     });
-
-    fireEvent.click(screen.getByRole("button", { name: /Magic suggest/ }));
+    fireEvent.click(magicSuggest());
     fireEvent.click(await screen.findByRole("button", { name: "Keep mine" }));
 
-    expect(calls().some((c) => c.data?.stage === "ai")).toBe(false);
-    expect(
-      (screen.getByLabelText("Campaign Name") as HTMLInputElement).value,
-    ).toBe("My own name");
+    expect(calls()).toEqual([]);
+    expect(nameField().value).toBe("My own name");
   });
 
-  it("keeps the form usable behind an error alert when the draft fails", async () => {
-    apiFetchMock.mockImplementation(async (opts: { path?: string }) => {
-      if (opts?.path === DRAFT_PATH) throw { message: "cloud_error" };
-      return [];
-    });
+  it("a language pick before any draft makes no call", async () => {
     renderWizard();
+    await screen.findByRole("button", { name: /Magic suggest/ });
 
-    expect(
-      await screen.findByText(
-        "Couldn't draft this campaign — fill it in yourself or try again.",
-      ),
-    ).toBeTruthy();
+    fireEvent.click(screen.getAllByRole("combobox")[0]);
+    fireEvent.click((await screen.findAllByRole("option", { name: /^English/ }))[0]);
 
-    // The empty form still accepts input — the step is never a dead end.
-    const nameField = screen.getByLabelText("Campaign Name") as HTMLInputElement;
-    expect(nameField.value).toBe("");
-    fireEvent.change(nameField, { target: { value: "Hand-written campaign" } });
-    expect(
-      (screen.getByLabelText("Campaign Name") as HTMLInputElement).value,
-    ).toBe("Hand-written campaign");
-
-    const before = calls().length;
-    fireEvent.click(screen.getByRole("button", { name: /Try again/ }));
-    await waitFor(() => expect(calls().length).toBeGreaterThan(before));
+    await wait(50);
+    expect(calls()).toEqual([]);
+    expect(screen.queryByText(/Redraft the campaign in/)).toBeNull();
   });
 
-  it("names the overlapping campaign and dismisses the notice", async () => {
-    apiFetchMock.mockImplementation(async (opts: { path?: string; data?: any }) => {
+  it("a language pick after a draft asks to redraft, then drafts in that language", async () => {
+    renderWizard();
+    fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
+    expect(await screen.findByText("Drafted from your site")).toBeTruthy();
+
+    fireEvent.click(screen.getAllByRole("combobox")[0]);
+    fireEvent.click((await screen.findAllByRole("option", { name: /^English/ }))[0]);
+    expect(await screen.findByText("Redraft the campaign in English?")).toBeTruthy();
+    expect(calls().length).toBe(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Redraft" }));
+    await waitFor(() => expect(calls().length).toBe(2));
+    expect(calls()[1].data).toEqual({ stage: "deterministic", language: "en" });
+  });
+
+  it("names the overlapping campaign after a draft and dismisses the notice", async () => {
+    apiFetchMock.mockImplementation(async (opts: { path?: string }) => {
       if (opts?.path === DRAFT_PATH) {
         return {
           success: true,
@@ -320,23 +348,17 @@ describe("New campaign — Setup step", () => {
                 postsPerWeek: 2,
               },
             ],
-            rationale: [
-              {
-                code: "overlap_sibling_campaign",
-                params: { name: "Frühlingstipps für den Garten" },
-              },
-            ],
           }),
         };
       }
       return [];
     });
     renderWizard();
+    fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
 
     expect(
       await screen.findByText(/Frühlingstipps für den Garten.*already running/),
     ).toBeTruthy();
-
     fireEvent.click(screen.getByRole("button", { name: "Continue anyway" }));
     await waitFor(() =>
       expect(screen.queryByRole("button", { name: "Continue anyway" })).toBeNull(),
@@ -346,8 +368,9 @@ describe("New campaign — Setup step", () => {
   it("seeds the campaign language from the WordPress site language", async () => {
     h.siteLanguage = "de-AT";
     renderWizard();
+    fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
 
-    await waitFor(() => expect(calls().length).toBeGreaterThan(0));
+    await waitFor(() => expect(calls().length).toBe(1));
     // The Austrian variant is its own picker option, not collapsed to `de`.
     expect(calls()[0].data).toEqual({ stage: "deterministic", language: "de_AT" });
   });
@@ -358,13 +381,15 @@ describe("New campaign — Setup step", () => {
     // English (spec §3.3, `ai_only`).
     h.siteLanguage = "fa-IR";
     renderWizard();
+    fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
 
-    await waitFor(() => expect(calls().length).toBeGreaterThan(0));
+    await waitFor(() => expect(calls().length).toBe(1));
     expect(calls()[0].data).toEqual({ stage: "deterministic", language: "fa_IR" });
   });
 
-  it("renders the rationale codes as sentences, never as codes", async () => {
+  it("renders the rationale codes as sentences after a draft, never as codes", async () => {
     renderWizard();
+    fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
 
     expect(
       await screen.findByText("Writing in German, your site's language."),
@@ -375,5 +400,68 @@ describe("New campaign — Setup step", () => {
       ),
     ).toBeTruthy();
     expect(screen.queryByText(/language_from_site/)).toBeNull();
+  });
+});
+
+describe("New campaign — provider advice under the inline provider block (2026-10-02)", () => {
+  // Without explicit plugin defaults the Setup step shows the provider block
+  // inline; picking Gemini there shows the same advice as the campaign form,
+  // with no hide control (specs/byok-ai-guidance.md §5, setup wizard).
+  const inlineByok = (overrides: Record<string, unknown> = {}) => {
+    h.license = { isPaidLicense: true, isLicensed: true, plan: "byok" };
+    h.textProviders = ["openai", "gemini"];
+    h.providers = {
+      availableProviders: ["openai", "gemini"],
+      availableImageProviders: ["openai", "gemini"],
+      hasExplicitDefaults: false,
+      hasMultipleProviders: true,
+      isFullyConfigured: false,
+      ...overrides,
+    };
+  };
+  const LEAD = "Gemini isn’t recommended for writing.";
+
+  it("shows no advice on the best provider; picking Gemini shows it with Switch and no hide", async () => {
+    inlineByok();
+    renderWizard();
+
+    const gemini = await waitFor(() => {
+      const el = document.querySelector<HTMLElement>('[data-text-provider="gemini"]');
+      expect(el).not.toBeNull();
+      return el!;
+    });
+    expect(screen.queryByText(LEAD)).toBeNull();
+
+    fireEvent.click(gemini);
+    expect(await screen.findAllByText(LEAD)).not.toHaveLength(0);
+    expect(screen.getByRole("button", { name: "Switch to OpenAI" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Connect Claude for the best results" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /hide/i })).toBeNull();
+  });
+
+  it("Switch moves back to OpenAI and Undo restores Gemini", async () => {
+    inlineByok({ defaultTextProvider: "gemini" });
+    renderWizard();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Switch to OpenAI" }));
+    const undo = await screen.findByRole("button", { name: /Undo/ });
+    expect(
+      document.querySelector('[data-text-provider="openai"]')!.className,
+    ).toContain("ring-2");
+
+    fireEvent.click(undo);
+    await waitFor(() =>
+      expect(document.querySelector('[data-text-provider="gemini"]')!.className).toContain("ring-2"),
+    );
+    expect(document.activeElement).toBe(document.querySelector('[data-text-provider="gemini"]'));
+  });
+
+  it("no advice for a Gemini default with no key behind it", async () => {
+    inlineByok({ defaultTextProvider: "gemini", availableProviders: ["openai"] });
+    h.textProviders = ["openai"];
+    renderWizard();
+
+    expect(await screen.findByText("Text Provider")).toBeTruthy();
+    expect(screen.queryByText(LEAD)).toBeNull();
   });
 });

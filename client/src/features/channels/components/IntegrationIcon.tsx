@@ -19,6 +19,7 @@
  * lockstep: same rounded corners, same bg ring, same fallback treatment.
  */
 
+import { WEBHOOK_DELIVER_INTEGRATION_ID } from "@structura/types";
 import type { ComponentType, ReactNode } from "react";
 import { Plug, Webhook, type LucideProps } from "lucide-react";
 import { cn, VideoChannelGlyph } from "@structura/ui";
@@ -105,6 +106,8 @@ const BRAND_MONOGRAMS: Record<string, BrandMonogram | undefined> = {
     icon: Webhook,
   },
 };
+
+BRAND_MONOGRAMS[WEBHOOK_DELIVER_INTEGRATION_ID] = BRAND_MONOGRAMS["webhook-ping"];
 
 export const IntegrationIcon = ({
   integrationId,

@@ -166,6 +166,10 @@ export const ERROR_KEYS = {
     // surfaces when key resolution or rate-limiting blocks a run.
     credentialsMissing: "workspaces.credentialsMissing",
     tierQuotaExceeded: "workspaces.tierQuotaExceeded",
+    // 2026-10-02: per-workspace burst and daily limit on AI calls that run
+    // on Structura's keys without counting against a quota (suggestions,
+    // onboarding). functions/src/ai/aiCallLimit.ts.
+    aiCallRateLimited: "workspaces.aiCallRateLimited",
     // cloud-only-generation Phase 5 — portal-side credential
     // management endpoints (create / revoke). The provider/api-key
     // validation guards live at the wire boundary so a portal compromise

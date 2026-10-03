@@ -1,11 +1,16 @@
 import { FC } from "react";
 import { __ } from "@wordpress/i18n";
 import { AlertTriangle, Bot, Type, Image } from "lucide-react";
-import { Select, Tooltip, cn } from "@structura/ui";
+import { RecommendedLabel, Select, Tooltip, cn } from "@structura/ui";
 import { useLicense, useDefaultProviders } from "@/features/settings";
 import { AIProvider } from "@/features/campaigns/types";
 import { getProviderVisual } from "@/features/campaigns/constants";
 import { type ModelTier, buildTierOptions } from "@/features/campaigns/modelTier";
+import {
+  isRecommendedTextProvider,
+  orderTextProviders,
+  recommendedWord,
+} from "@/features/campaigns/aiGuidance";
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -16,16 +21,34 @@ interface ProviderButtonProps {
   title: string;
   /** When true, shows a warning indicator and disables the button. */
   incomplete?: boolean;
+  /**
+   * Text buttons only: the "Recommended" chip after the title, part of the
+   * button's name (specs/byok-ai-guidance.md §5). Not on disabled buttons.
+   */
+  recommended?: boolean;
+  /** Text buttons only: the provider id, so Undo can refocus this button. */
+  textProviderId?: string;
 }
 
-const ProviderButton: FC<ProviderButtonProps> = ({ selected, onClick, icon, title, incomplete }) => {
+const ProviderButton: FC<ProviderButtonProps> = ({
+  selected,
+  onClick,
+  icon,
+  title,
+  incomplete,
+  recommended,
+  textProviderId,
+}) => {
   const button = (
     <button
       type="button"
+      data-text-provider={textProviderId}
       onClick={incomplete ? undefined : onClick}
       disabled={incomplete}
       className={cn(
-        "relative flex flex-1 items-center justify-center gap-2 rounded-lg border py-2 transition-all",
+        // flex-wrap: the "Recommended" chip moves under the name rather
+        // than overflowing a narrow button.
+        "relative flex flex-1 flex-wrap items-center justify-center gap-2 gap-y-1 rounded-lg border py-2 transition-all",
         incomplete
           ? "cursor-not-allowed border-neutral-100 bg-neutral-50/50 text-neutral-300 opacity-60 dark:border-neutral-700 dark:bg-neutral-800/50 dark:text-neutral-600"
           : selected
@@ -43,6 +66,12 @@ const ProviderButton: FC<ProviderButtonProps> = ({ selected, onClick, icon, titl
         {icon}
       </div>
       <span className="text-[10px] font-black tracking-widest uppercase">{title}</span>
+      {recommended && !incomplete && (
+        <>
+          {" "}
+          <RecommendedLabel label={recommendedWord()} />
+        </>
+      )}
       {incomplete && (
         <AlertTriangle size={11} className="absolute top-1 right-1 text-amber-500 dark:text-amber-400" />
       )}
@@ -150,10 +179,24 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
   onImageTierChange,
 }) => {
   const { isLicensed } = useLicense();
-  const { isProviderIncomplete } = useDefaultProviders();
+  const { isProviderIncomplete, isCloud } = useDefaultProviders();
+
+  // Pickers describe a provider the customer has (2026-10-02): with no text
+  // provider connected nothing is selected, so there is no text row and no
+  // text model picker — only the caller's "connect a provider" message.
+  // The image row follows the same rule through `availableImageProviders`.
+  const hasTextProvider = availableTextProviders.length > 0;
+
+  // Managed plans never pick or see a text provider; the image provider
+  // stays until image models move to the lineup (specs/managed-ai-lineup.md
+  // §3, §3.3). The caller keeps `textProvider` on the form, hidden.
+  const showTextSection = !isCloud && hasTextProvider;
 
   // Image generation requires at least a Free license
   const showImageSection = isLicensed && availableImageProviders.length > 0;
+
+  const showTierGrid = showTierSelectors && (hasTextProvider || showImageSection);
+  if (!showTextSection && !showImageSection && !showTierGrid) return null;
 
   // Check if the currently selected providers are incomplete
   const isTextProviderIncomplete = isProviderIncomplete(textProvider);
@@ -165,37 +208,53 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
   const showTextToggle = availableTextProviders.length > 1;
   const showImageToggle = availableImageProviders.length > 1;
 
+  // One provider (2026-10-02): its name sits in the heading row as plain
+  // text, so the row is never an empty label with nothing to choose.
+  const singleTextProvider =
+    availableTextProviders.length === 1 ? availableTextProviders[0] : null;
+  const singleImageProvider =
+    availableImageProviders.length === 1 ? availableImageProviders[0] : null;
+
   return (
     <div className="space-y-0 divide-y divide-neutral-100 rounded-xl border border-neutral-200 bg-neutral-50/30 overflow-hidden dark:divide-neutral-800 dark:border-neutral-700 dark:bg-neutral-900/30">
-      {/* ── Text Provider ─────────────────────────────────────────── */}
-      <div className="space-y-0">
-        <div className="flex items-center gap-2 bg-neutral-50/50 px-3 py-2 dark:bg-neutral-800/30">
-          <Type size={12} className="text-blue-500" />
-          <span className="text-[9px] font-black tracking-widest text-neutral-400 uppercase">
-            {__("Text Provider", "structura")}
-          </span>
+      {/* ── Text Provider (hidden on managed plans) ───────────────── */}
+      {showTextSection && (
+        <div className="space-y-0">
+          <div className="flex items-center gap-2 bg-neutral-50/50 px-3 py-2 dark:bg-neutral-800/30">
+            <Type size={12} className="text-blue-500" />
+            <span className="text-[9px] font-black tracking-widest text-neutral-400 uppercase">
+              {__("Text Provider", "structura")}
+            </span>
+            {singleTextProvider && (
+              <span className="ml-auto text-[10px] font-bold text-neutral-700 dark:text-neutral-200">
+                {getProviderVisual(singleTextProvider).label}
+              </span>
+            )}
+          </div>
+          {showTextToggle && (
+            <div className="flex gap-1.5 px-1.5 pb-1.5">
+              {orderTextProviders(availableTextProviders as AIProvider[]).map((p) => (
+                <ProviderButton
+                  key={p}
+                  selected={textProvider === p}
+                  onClick={() => onTextProviderChange(p)}
+                  icon={getProviderIcon(p)}
+                  title={getProviderVisual(p).label}
+                  incomplete={isProviderIncomplete(p)}
+                  recommended={isRecommendedTextProvider(p)}
+                  textProviderId={p}
+                />
+              ))}
+            </div>
+          )}
+          {isTextProviderIncomplete && (
+            <div className="flex items-center gap-1.5 px-3 pb-2 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+              <AlertTriangle size={11} />
+              {__("Model not selected — complete setup in AI Engine settings", "structura")}
+            </div>
+          )}
         </div>
-        {showTextToggle && (
-          <div className="flex gap-1.5 px-1.5 pb-1.5">
-            {(availableTextProviders as AIProvider[]).map((p) => (
-              <ProviderButton
-                key={p}
-                selected={textProvider === p}
-                onClick={() => onTextProviderChange(p)}
-                icon={getProviderIcon(p)}
-                title={getProviderVisual(p).label}
-                incomplete={isProviderIncomplete(p)}
-              />
-            ))}
-          </div>
-        )}
-        {isTextProviderIncomplete && (
-          <div className="flex items-center gap-1.5 px-3 pb-2 text-[10px] font-medium text-amber-600 dark:text-amber-400">
-            <AlertTriangle size={11} />
-            {__("Model not selected — complete setup in AI Engine settings", "structura")}
-          </div>
-        )}
-      </div>
+      )}
 
       {/* ── Image Provider (hidden for unlicensed users — no image gen) ── */}
       {showImageSection && (
@@ -205,6 +264,11 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
             <span className="text-[9px] font-black tracking-widest text-neutral-400 uppercase">
               {__("Image Provider", "structura")}
             </span>
+            {singleImageProvider && (
+              <span className="ml-auto text-[10px] font-bold text-neutral-700 dark:text-neutral-200">
+                {getProviderVisual(singleImageProvider).label}
+              </span>
+            )}
           </div>
           {showImageToggle && (
             <div className="flex gap-1.5 px-1.5 pb-1.5">
@@ -230,7 +294,7 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
       )}
 
       {/* ── Model quality tier (BYOK/free only) ───────────────────── */}
-      {showTierSelectors && (
+      {showTierGrid && (
         <div className="p-3 space-y-3">
           <div className="flex items-center gap-2">
             <Bot size={13} className="text-brand-600 dark:text-brand-400" />
@@ -241,27 +305,29 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
 
           <div className={cn(
             "grid grid-cols-1 gap-2.5",
-            showImageSection && "sm:grid-cols-2"
+            hasTextProvider && showImageSection && "sm:grid-cols-2"
           )}>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[9px] font-bold tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
-                {__("Text Model", "structura")}
-              </span>
-              <Select
-                options={textTierOptions}
-                value={textTier}
-                onValueChange={(val) => onTextTierChange?.(val as ModelTier)}
-              >
-                <Select.Trigger />
-                <Select.Content className="w-(--button-width)">
-                  {textTierOptions.map((o) => (
-                    <Select.Item key={o.value} value={o.value}>
-                      {o.label}
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select>
-            </div>
+            {hasTextProvider && (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[9px] font-bold tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
+                  {__("Text Model", "structura")}
+                </span>
+                <Select
+                  options={textTierOptions}
+                  value={textTier}
+                  onValueChange={(val) => onTextTierChange?.(val as ModelTier)}
+                >
+                  <Select.Trigger />
+                  <Select.Content className="w-(--button-width)">
+                    {textTierOptions.map((o) => (
+                      <Select.Item key={o.value} value={o.value} recommended={o.recommended}>
+                        {o.label}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select>
+              </div>
+            )}
 
             {showImageSection && (
               <div className="flex flex-col gap-1.5">

@@ -4,6 +4,7 @@ import { useToast } from "@structura/ui";
 import { __ } from "@wordpress/i18n";
 import { AIProvider } from "@/features/campaigns";
 import { useLicense } from "@/features/settings";
+import { isManagedPlan, type PlanId } from "@structura/types";
 import { humanizeSuggestionError } from "@/hooks/humanizeSuggestionError";
 
 export type SuggestionMode = "persona" | "campaign" | "visual" | "topic_chips";
@@ -24,7 +25,7 @@ interface SuggestionOptions {
 export const useMagicSuggest = () => {
   const [isSuggesting, setIsSuggesting] = useState(false);
   const { errorToast } = useToast();
-  const { isPaidLicense } = useLicense();
+  const { isPaidLicense, plan } = useLicense();
 
   /**
    * Triggers the architectural suggestion engine.
@@ -76,7 +77,7 @@ export const useMagicSuggest = () => {
       // provider-aware toast instead of the leaky raw message.
       // Network / auth / unknown shapes fall through to the original
       // generic copy.
-      errorToast(humanizeSuggestionError(e));
+      errorToast(humanizeSuggestionError(e, { isManagedAiPlan: isManagedPlan(plan as PlanId) }));
       return null;
     } finally {
       setIsSuggesting(false);

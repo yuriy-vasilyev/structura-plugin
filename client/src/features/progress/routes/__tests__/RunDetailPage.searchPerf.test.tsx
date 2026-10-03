@@ -30,6 +30,12 @@ vi.mock("../../api/useCampaignRunQuery", () => ({
   useCampaignRunQuery: () => runQueryMock.current,
 }));
 
+// The page reads the plan to hide provider and model names on managed
+// plans (2026-10-01); this suite runs on a BYOK plan.
+vi.mock("@/features/settings/api/useLicense", () => ({
+  useLicense: () => ({ plan: "byok", hasUsableLicense: true, hasWorkspace: true }),
+}));
+
 vi.mock("@/features/personas", () => ({
   usePersonasQuery: () => ({ data: [] }),
 }));

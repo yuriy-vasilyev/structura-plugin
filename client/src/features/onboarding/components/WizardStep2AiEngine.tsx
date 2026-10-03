@@ -30,6 +30,7 @@ import { Plug, Unplug } from "lucide-react";
 import { useAiSettingsQuery } from "@/features/ai-engine";
 import { useLicense } from "@/features/settings";
 import { isManagedPlan, type PlanId } from "@structura/types";
+import { buildPortalSignupUrl } from "@/utils/portalLinks";
 import { InstalledProviderCard } from "@/features/ai-engine/components/InstalledProviderCard";
 import { AvailableProviderCard } from "@/features/ai-engine/components/AvailableProviderCard";
 import { ProviderSetupWizard } from "@/features/ai-engine/components/ProviderSetupWizard";
@@ -64,6 +65,16 @@ interface WizardTarget {
 export const WizardStep2AiEngine = () => {
   const { data: settings, isLoading } = useAiSettingsQuery();
   const { plan, providerCountCap } = useLicense();
+
+  // Plans page in the customer portal for the Pro-locked provider card
+  // ("Compare plans", specs/byok-ai-guidance.md §5).
+  const comparePlansHref = (providerId: string) =>
+    buildPortalSignupUrl({
+      intent: "unlock_provider",
+      domain: typeof window !== "undefined" ? window.location.hostname : undefined,
+      plan,
+      providerId,
+    });
   const setStepValid = useWizardStore((s) => s.setStepValid);
   const setStep2Draft = useWizardStore((s) => s.setStep2Draft);
 
@@ -263,6 +274,7 @@ export const WizardStep2AiEngine = () => {
                   available={cardAvailable}
                   minTier={meta.min_tier}
                   lockReason={isCapLocked ? "cap" : "tier"}
+                  comparePlansHref={comparePlansHref(id)}
                   onSetUp={() => {
                     if (cardAvailable) {
                       openWizard(id);

@@ -74,7 +74,8 @@ const meta = (name: string) => ({
   name,
   description: `${name} desc`,
   capabilities: ["text"],
-  min_tier: name === "Anthropic Claude" ? "byok" : "free",
+  // Mirrors Provider_Registry (2026-10-02): OpenAI on `none`, Gemini Free+.
+  min_tier: name === "Anthropic Claude" ? "byok" : name === "Google Gemini" ? "free" : "none",
   key_url: "",
 });
 
@@ -105,7 +106,7 @@ beforeEach(() => {
 });
 
 describe("WizardStep2AiEngine — cap locking", () => {
-  it("none tier (cap 1): OpenAI connectable, Gemini cap-locked from the start", () => {
+  it("cap 1 with two tier providers: the first connectable, the second cap-locked from the start", () => {
     licenseMock.current = { plan: "none", providerCountCap: 1 };
     settingsMock.current = settings({ cap: 1, tierProviders: ["openai", "gemini"] });
 
@@ -117,6 +118,20 @@ describe("WizardStep2AiEngine — cap locking", () => {
     expect(screen.getByTestId("avail-gemini").getAttribute("data-lock")).toBe("cap");
     // Anthropic is a tier lock (not offered at all on `none`), not a cap lock.
     expect(screen.getByTestId("avail-anthropic").getAttribute("data-available")).toBe("false");
+    expect(screen.getByTestId("avail-anthropic").getAttribute("data-lock")).toBe("tier");
+  });
+
+  it("none tier (2026-10-02): only OpenAI is offered; Gemini is tier-locked like Anthropic", () => {
+    // The plugin's tier-filtered `providers` for `none` is OpenAI only,
+    // matching the cloud's PROVIDERS_FOR_TIER.none.
+    licenseMock.current = { plan: "none", providerCountCap: 1 };
+    settingsMock.current = settings({ cap: 1, tierProviders: ["openai"] });
+
+    render(<WizardStep2AiEngine />);
+
+    expect(screen.getByTestId("avail-openai").getAttribute("data-available")).toBe("true");
+    expect(screen.getByTestId("avail-gemini").getAttribute("data-available")).toBe("false");
+    expect(screen.getByTestId("avail-gemini").getAttribute("data-lock")).toBe("tier");
     expect(screen.getByTestId("avail-anthropic").getAttribute("data-lock")).toBe("tier");
   });
 

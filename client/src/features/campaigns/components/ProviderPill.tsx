@@ -24,13 +24,11 @@ interface ProviderPillProps {
  * Compact provider dropdown selector.
  *
  * Visibility rules:
- * - Managed-tier (Cloud/Agency) with multiple providers → ALWAYS shown.
- *   The pricing copy promises per-campaign provider switching ("Gemini
- *   Flash by default. Swap to OpenAI or Claude per post"), and the cloud
- *   honors the campaign's textProvider regardless of saved defaults. The
- *   default is the *starting point*, not a lock-in. Pre-2026-04-28 we
- *   hid the pill once explicit defaults were saved, which silently took
- *   away the per-campaign swap users explicitly paid for.
+ * - Managed tier (Cloud / Cloud Pro) → NEVER shown. Since 2026-10-01
+ *   managed customers neither pick nor see a text provider
+ *   (specs/managed-ai-lineup.md §1 decision 2, §3.3). This reverses the
+ *   2026-04-28 "always shown on managed" rule, which existed for the
+ *   per-campaign provider swap the plans no longer offer.
  * - BYOK with multiple providers + no explicit default → shown so users
  *   can pick. With an explicit default, hidden (the saved default is the
  *   user's already-chosen single provider — switching means setting a
@@ -55,10 +53,10 @@ export const ProviderPill: FC<ProviderPillProps> = ({
   const Icon = meta.icon;
   const incomplete = isProviderIncomplete(provider);
 
+  if (isCloud) return null;
+
   // BYOK only — hide when defaults are set (they're used silently).
-  // Managed tiers always see the pill so per-campaign swaps stay one
-  // click away.
-  if (hasExplicitDefaults && !isCloud && !forceInteractive) return null;
+  if (hasExplicitDefaults && !forceInteractive) return null;
 
   // Single provider or no providers — nothing to show
   if (!hasMultipleProviders && !forceInteractive) return null;

@@ -4,6 +4,7 @@ import { Alert, Button } from "@structura/ui";
 import { ArrowRight, Gauge, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router";
 import {
+  managedPostsUsage,
   selectOwnActivationUsage,
   useUsageAnalytics,
 } from "@/features/dashboard/api/useUsageAnalytics";
@@ -44,6 +45,12 @@ import {
  * a site that was already blocked) — re-scoped to the calling
  * activation 2026-06-07, alongside the "overage rates" copy fix
  * (caps are hard blocks; nothing is billed past them).
+ *
+ * Since 2026-10-01 managed plans are metered by posts per site per
+ * month and tokens are no longer enforced (specs/managed-ai-lineup.md
+ * §4). When the view carries `postsUsed` / `postsIncluded` the banner
+ * speaks posts and ignores tokens; a cloud deployed before that sends
+ * no posts fields and keeps the token wording.
  */
 export const CycleQuotaBanner: FC = () => {
   const navigate = useNavigate();
@@ -67,9 +74,12 @@ export const CycleQuotaBanner: FC = () => {
         ? window.structuraConfig?.activation_id
         : undefined,
     ) ?? cycle.workspace;
+  const posts = managedPostsUsage(usage);
   const isOverQuota =
     usage.utilizationPercent >= 100 ||
-    usage.tokensUsed > usage.tokensIncluded;
+    (posts
+      ? posts.postsUsed >= posts.postsIncluded
+      : usage.tokensUsed > usage.tokensIncluded);
   const isApproaching = !isOverQuota && usage.utilizationPercent >= 80;
   if (!isOverQuota && !isApproaching) return null;
 
@@ -80,15 +90,25 @@ export const CycleQuotaBanner: FC = () => {
           <TrendingUp />
           <Alert.Title>{__("Cycle quota reached", "structura")}</Alert.Title>
           <Alert.Description>
-            {sprintf(
-              /* translators: 1: tokens used (compact e.g. "1.2M"), 2: tokens included. */
-              __(
-                "This site has used %1$s of its %2$s included tokens. Generation is paused until the cycle resets — upgrade to keep posting.",
-                "structura"
-              ),
-              formatTokens(usage.tokensUsed),
-              formatTokens(usage.tokensIncluded)
-            )}
+            {posts
+              ? sprintf(
+                  /* translators: 1: posts used this month, 2: posts included per month. */
+                  __(
+                    "This site has used %1$d of its %2$d posts for this month. New posts resume when the month resets. Upgrade to keep posting.",
+                    "structura"
+                  ),
+                  posts.postsUsed,
+                  posts.postsIncluded
+                )
+              : sprintf(
+                  /* translators: 1: tokens used (compact e.g. "1.2M"), 2: tokens included. */
+                  __(
+                    "This site has used %1$s of its %2$s included tokens. Generation is paused until the cycle resets — upgrade to keep posting.",
+                    "structura"
+                  ),
+                  formatTokens(usage.tokensUsed),
+                  formatTokens(usage.tokensIncluded)
+                )}
           </Alert.Description>
           <Alert.Action>
             <Button size="sm" variant="secondary" onClick={() => navigate("/")}>
@@ -108,16 +128,26 @@ export const CycleQuotaBanner: FC = () => {
         <Gauge />
         <Alert.Title>{__("Approaching cycle quota", "structura")}</Alert.Title>
         <Alert.Description>
-          {sprintf(
-            /* translators: 1: utilisation percent, 2: tokens used, 3: tokens included. */
-            __(
-              "This site has used %1$d%% of its cycle token budget (%2$s of %3$s). Generation pauses once the included amount is used up.",
-              "structura"
-            ),
-            Math.round(usage.utilizationPercent),
-            formatTokens(usage.tokensUsed),
-            formatTokens(usage.tokensIncluded)
-          )}
+          {posts
+            ? sprintf(
+                /* translators: 1: posts used this month, 2: posts included per month. */
+                __(
+                  "This site has used %1$d of its %2$d posts for this month. New posts pause once all of them are used.",
+                  "structura"
+                ),
+                posts.postsUsed,
+                posts.postsIncluded
+              )
+            : sprintf(
+                /* translators: 1: utilisation percent, 2: tokens used, 3: tokens included. */
+                __(
+                  "This site has used %1$d%% of its cycle token budget (%2$s of %3$s). Generation pauses once the included amount is used up.",
+                  "structura"
+                ),
+                Math.round(usage.utilizationPercent),
+                formatTokens(usage.tokensUsed),
+                formatTokens(usage.tokensIncluded)
+              )}
         </Alert.Description>
         <Alert.Action>
           <Button size="sm" variant="secondary" onClick={() => navigate("/")}>

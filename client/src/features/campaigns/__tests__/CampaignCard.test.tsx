@@ -333,3 +333,47 @@ describe("CampaignCard — failure indicator", () => {
     window.location.hash = originalHash;
   });
 });
+
+describe("CampaignCard — provider and model line by plan (2026-10-01)", () => {
+  // Managed plans never see a text provider or model name
+  // (specs/managed-ai-lineup.md §3.3); BYOK keeps the line.
+  it("BYOK: shows the text provider label and the model", () => {
+    renderCard(
+      <CampaignCard campaign={BASE_CAMPAIGN} personaName="Editor" onClick={() => {}} />,
+    );
+
+    expect(screen.getByText("gemini-1.5-pro")).toBeInTheDocument();
+    expect(screen.getByText("Editor")).toBeInTheDocument();
+  });
+
+  it("managed: hides the provider label and the model, keeps the persona", () => {
+    const { container } = renderCard(
+      <CampaignCard
+        campaign={BASE_CAMPAIGN}
+        personaName="Editor"
+        onClick={() => {}}
+        isManagedAiPlan
+      />,
+    );
+
+    expect(screen.queryByText("gemini-1.5-pro")).not.toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/gemini/i);
+    expect(screen.getByText("Editor")).toBeInTheDocument();
+  });
+
+  it("BYOK with a blank text provider renders no empty provider pill", () => {
+    const { container } = renderCard(
+      <CampaignCard
+        campaign={{
+          ...BASE_CAMPAIGN,
+          intelligence: { ...BASE_CAMPAIGN.intelligence, textProvider: "" as never, textModel: "" },
+        }}
+        personaName="Editor"
+        onClick={() => {}}
+      />,
+    );
+
+    expect(container.querySelector("span.font-semibold:empty")).toBeNull();
+    expect(screen.getByText("Editor")).toBeInTheDocument();
+  });
+});

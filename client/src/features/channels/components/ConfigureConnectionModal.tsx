@@ -59,6 +59,7 @@
  * control.
  */
 
+import { WEBHOOK_DELIVER_INTEGRATION_ID } from "@structura/types";
 import { useEffect, useRef, useState } from "react";
 import { __, sprintf } from "@wordpress/i18n";
 import { Link } from "react-router";
@@ -239,7 +240,7 @@ const StandardConfigureConnectionModal = ({
   // cloud side ("notificationLocale is only meaningful on the webhook/notify
   // side today") and video is generative — so neither shows the control.
   const supportsNotificationLocale =
-    !isVideo && connection.integrationId !== "linkedin";
+    !isVideo && connection.integrationId !== "linkedin" && connection.integrationId !== WEBHOOK_DELIVER_INTEGRATION_ID;
 
   // LinkedIn posting target. `availableOrganizations` is populated at connect
   // time only when the user granted company access — so the picker shows up

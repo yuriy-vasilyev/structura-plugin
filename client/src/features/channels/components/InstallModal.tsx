@@ -24,16 +24,13 @@
  * branch. The branches are just the body slot.
  */
 
+import { WEBHOOK_DELIVER_INTEGRATION_ID } from "@structura/types";
 import { useState } from "react";
 import { __, sprintf } from "@wordpress/i18n";
 import { useNavigate } from "react-router";
 import { Alert, Button, Dialog, cn, toast } from "@structura/ui";
 import { EyeOff, ExternalLink, Loader2, X } from "lucide-react";
-import {
-  GSC_INTEGRATION_ID,
-  type ConnectionSummary,
-  type IntegrationCatalogEntry,
-} from "../types";
+import { GSC_INTEGRATION_ID, type ConnectionSummary, type IntegrationCatalogEntry } from "../types";
 import { useChannelConnectionMutations } from "../api/useChannelConnectionMutations";
 import { useSiteIndexingStatusQuery } from "../../settings/api/useSiteIndexingStatusQuery";
 import { usePublicSiteProfile } from "../../settings/api/usePublicSiteProfile";
@@ -54,23 +51,18 @@ interface InstallModalProps {
   editingConnection?: ConnectionSummary;
 }
 
-export const InstallModal = ({
-  entry,
-  open,
-  onClose,
-  editingConnection,
-}: InstallModalProps) => {
+export const InstallModal = ({ entry, open, onClose, editingConnection }: InstallModalProps) => {
   const isEdit = Boolean(editingConnection);
   const title = isEdit
     ? sprintf(
         // translators: %s is the integration name, e.g. "Edit Slack"
         __("Edit %s", "structura"),
-        entry.name,
+        entry.name
       )
     : sprintf(
         // translators: %s is the integration name, e.g. "Install Slack"
         __("Install %s", "structura"),
-        entry.name,
+        entry.name
       );
 
   return (
@@ -88,7 +80,7 @@ export const InstallModal = ({
           type="button"
           onClick={onClose}
           aria-label={__("Close", "structura")}
-          className="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 dark:text-neutral-400 dark:hover:bg-neutral-700/60 dark:hover:text-neutral-200"
+          className="focus-visible:ring-brand-400 absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 focus:outline-none focus-visible:ring-2 dark:text-neutral-400 dark:hover:bg-neutral-700/60 dark:hover:text-neutral-200"
         >
           <X size={16} />
         </button>
@@ -108,11 +100,7 @@ export const InstallModal = ({
         </Dialog.Header>
 
         <Dialog.Body>
-          <InstallBody
-            entry={entry}
-            onClose={onClose}
-            editingConnection={editingConnection}
-          />
+          <InstallBody entry={entry} onClose={onClose} editingConnection={editingConnection} />
         </Dialog.Body>
       </Dialog.Content>
     </Dialog.Root>
@@ -142,14 +130,8 @@ function InstallBody({
   // Fresh installs only — edits already happen where the modal lives.
   const handleCredentialSuccess = (connection?: ConnectionSummary) => {
     onClose();
-    if (
-      entry.id === "video" &&
-      !editingConnection &&
-      connection?.connectionId
-    ) {
-      navigate(
-        `/channels/connections?configure=${encodeURIComponent(connection.connectionId)}`,
-      );
+    if (entry.id === "video" && !editingConnection && connection?.connectionId) {
+      navigate(`/channels/connections?configure=${encodeURIComponent(connection.connectionId)}`);
     }
   };
 
@@ -227,20 +209,18 @@ function IndexNowVisibilityWarning() {
     return (
       <Alert variant="warning">
         <EyeOff />
-        <Alert.Title>
-          {__("This site is hidden from search engines", "structura")}
-        </Alert.Title>
+        <Alert.Title>{__("This site is hidden from search engines", "structura")}</Alert.Title>
         <Alert.Description>
           <p>
             {__(
               "WordPress is currently set to discourage search engines from indexing this site, so IndexNow pings will be ignored.",
-              "structura",
+              "structura"
             )}
           </p>
           <p className="mt-2">
             {__(
               "To fix this, go to Settings → Reading and uncheck \u201cDiscourage search engines from indexing this site\u201d.",
-              "structura",
+              "structura"
             )}
           </p>
         </Alert.Description>
@@ -255,22 +235,19 @@ function IndexNowVisibilityWarning() {
       <Alert variant="warning">
         <EyeOff />
         <Alert.Title>
-          {__(
-            "Your WordPress install is exposed to search engines",
-            "structura",
-          )}
+          {__("Your WordPress install is exposed to search engines", "structura")}
         </Alert.Title>
         <Alert.Description>
           <p>
             {__(
               "You\u2019re running in headless mode, so your public website lives elsewhere — but this WordPress install isn\u2019t currently set to discourage indexing. Search engines may crawl your CMS alongside your public site and split SEO authority between the two.",
-              "structura",
+              "structura"
             )}
           </p>
           <p className="mt-2">
             {__(
               "To fix this, go to Settings → Reading and check \u201cDiscourage search engines from indexing this site\u201d.",
-              "structura",
+              "structura"
             )}
           </p>
         </Alert.Description>
@@ -329,8 +306,7 @@ function OAuthConnectPanel({
         setIsConnecting(false);
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : __("Connection failed.", "structura");
+      const message = err instanceof Error ? err.message : __("Connection failed.", "structura");
       setError(message);
       setIsConnecting(false);
       toast.error(message);
@@ -344,9 +320,9 @@ function OAuthConnectPanel({
           // translators: %s is the integration name, e.g. "LinkedIn"
           __(
             "Click the button below to connect your %s account. You\u2019ll be redirected to authorize Structura, then brought back here automatically.",
-            "structura",
+            "structura"
           ),
-          entry.name,
+          entry.name
         )}
       </p>
 
@@ -354,7 +330,7 @@ function OAuthConnectPanel({
         <p className="text-sm text-neutral-600 dark:text-neutral-300">
           {__(
             "Access is read-only and free on every plan — Structura only reads your search performance data and never posts or changes anything.",
-            "structura",
+            "structura"
           )}
         </p>
       )}
@@ -390,8 +366,8 @@ function OAuthConnectPanel({
                   className={cn(
                     "flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors",
                     checked
-                      ? "border-brand-500 bg-brand-50 text-neutral-900 dark:border-brand-400 dark:bg-brand-950/40 dark:text-neutral-100"
-                      : "border-neutral-200 text-neutral-600 hover:border-neutral-300 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-600",
+                      ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-950/40 text-neutral-900 dark:text-neutral-100"
+                      : "border-neutral-200 text-neutral-600 hover:border-neutral-300 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-600"
                   )}
                 >
                   {/* appearance-none overrides wp-admin's native radio styling
@@ -402,7 +378,7 @@ function OAuthConnectPanel({
                     name="linkedin-post-as"
                     checked={checked}
                     onChange={() => setPostAsOrg(opt.org)}
-                    className="m-0! size-4 shrink-0 appearance-none rounded-full border border-neutral-300 bg-white checked:border-brand-600 checked:bg-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1 dark:border-neutral-600 dark:bg-neutral-800 dark:checked:border-brand-500 dark:checked:bg-brand-500"
+                    className="checked:border-brand-600 checked:bg-brand-600 focus-visible:ring-brand-500 dark:checked:border-brand-500 dark:checked:bg-brand-500 m-0! size-4 shrink-0 appearance-none rounded-full border border-neutral-300 bg-white focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none dark:border-neutral-600 dark:bg-neutral-800"
                   />
                   <span>{opt.label}</span>
                 </label>
@@ -412,19 +388,11 @@ function OAuthConnectPanel({
         </div>
       )}
 
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       <div className="flex items-center justify-between gap-2">
         {entry.docsUrl ? (
-          <Button
-            variant="link"
-            size="sm"
-            href={entry.docsUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
+          <Button variant="link" size="sm" href={entry.docsUrl} target="_blank" rel="noreferrer">
             <ExternalLink size={14} className="mr-1.5" />
             {__("Read the docs", "structura")}
           </Button>
@@ -435,19 +403,12 @@ function OAuthConnectPanel({
           <Button variant="secondary" size="sm" onClick={onClose}>
             {__("Cancel", "structura")}
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleConnect}
-            disabled={isConnecting}
-          >
-            {isConnecting && (
-              <Loader2 size={14} className="mr-1.5 animate-spin" />
-            )}
+          <Button variant="primary" size="sm" onClick={handleConnect} disabled={isConnecting}>
+            {isConnecting && <Loader2 size={14} className="mr-1.5 animate-spin" />}
             {sprintf(
               // translators: %s is the integration name, e.g. "LinkedIn"
               __("Connect %s", "structura"),
-              entry.name,
+              entry.name
             )}
           </Button>
         </div>
@@ -465,9 +426,7 @@ function OAuthConnectPanel({
  * Falls back to generic-but-not-wrong copy for any future webhook integration
  * we haven't special-cased yet.
  */
-function webhookOptionForEntry(
-  entry: IntegrationCatalogEntry,
-): WebhookFormIntegrationOption {
+function webhookOptionForEntry(entry: IntegrationCatalogEntry): WebhookFormIntegrationOption {
   // Placeholders deliberately read as *hints* ("e.g. …") rather than
   // channel-name-looking strings — earlier copy used literal `#deploys` /
   // `#general`, which users mistook for default/auto-filled values (several
@@ -490,6 +449,15 @@ function webhookOptionForEntry(
       displayNamePlaceholder: __("e.g. #deploys channel", "structura"),
     };
   }
+  if (entry.id === WEBHOOK_DELIVER_INTEGRATION_ID) {
+    return {
+      id: entry.id,
+      label: entry.name,
+      webhookUrlPlaceholder: "https://example.com/api/structura",
+      displayNamePlaceholder: __("e.g. My website blog", "structura"),
+      requireSigningSecret: true,
+    };
+  }
   if (entry.id === "webhook-ping") {
     // Generic signed webhook — any HTTPS endpoint. Canonical first use case
     // is a headless-WP revalidator; the hint shows that shape while staying
@@ -504,4 +472,3 @@ function webhookOptionForEntry(
   }
   return { id: entry.id, label: entry.name };
 }
-

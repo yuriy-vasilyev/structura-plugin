@@ -373,7 +373,7 @@ const ComboboxPanel: React.FC<PanelProps> = ({
     );
   };
 
-  const renderGroup = ({ group, total, matched }: (typeof view)[number]) => {
+  const renderGroup = ({ group, total, matched }: (typeof view)[number], index: number) => {
     const headerId = `${baseId}-group-${group.id}`;
     const gated = group.gate != null;
     const count = gated || !q ? total : (searchCountLabel?.(matched.length, total) ?? `${matched.length} of ${total}`);
@@ -384,10 +384,15 @@ const ComboboxPanel: React.FC<PanelProps> = ({
             <span id={headerId} className="sr-only">
               {group.label}
             </span>
-            <div
-              role="presentation"
-              className="mx-1 my-1 border-t border-neutral-100 dark:border-neutral-700"
-            />
+            {/* A divider separates this group from the one above; the first
+                rendered group has nothing above it (2026-10-01, single-group
+                voice list on managed plans). */}
+            {index > 0 && (
+              <div
+                role="presentation"
+                className="mx-1 my-1 border-t border-neutral-100 dark:border-neutral-700"
+              />
+            )}
           </>
         ) : (
         <div className="sticky top-0 z-10 flex items-center justify-between gap-2 rounded-md bg-white/95 px-2.5 pt-2 pb-1 backdrop-blur-sm dark:bg-neutral-800/95">

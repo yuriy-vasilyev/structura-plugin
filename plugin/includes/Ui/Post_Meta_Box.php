@@ -511,6 +511,42 @@ class Post_Meta_Box
         return $rows;
     }
 
+    /**
+     * Returns the "Generation Stats" model id and token total to show for
+     * a post's `_structura_generation_meta`; '' and 0 mean "no line".
+     *
+     * Managed plans (Cloud, Cloud Pro) show neither: their customers never
+     * see a model name and are metered by posts, not tokens
+     * (specs/managed-ai-lineup.md §3.3, 2026-10-01). The cloud also sends a
+     * blank model for them; a blank model never renders a line on any plan.
+     *
+     * @param mixed  $gen_meta Raw post meta value.
+     * @param string $plan     License plan id.
+     *
+     * @return array{model: string, tokens: int}
+     */
+    public static function generation_stats_lines($gen_meta, string $plan): array
+    {
+        if ( ! is_array($gen_meta) || in_array($plan, ['cloud', 'cloud_pro'], true)) {
+            return ['model' => '', 'tokens' => 0];
+        }
+
+        $tokens = 0;
+        if ( ! empty($gen_meta['usage']) && is_array($gen_meta['usage'])) {
+            $u          = $gen_meta['usage'];
+            $tokens_in  = (int)($u['inputTokens'] ?? $u['promptTokens'] ?? 0);
+            $tokens_out = (int)($u['outputTokens'] ?? $u['completionTokens'] ?? 0);
+            $tokens     = $tokens_in + $tokens_out;
+        }
+
+        $model = $gen_meta['model'] ?? '';
+
+        return [
+            'model'  => is_string($model) ? trim($model) : '',
+            'tokens' => $tokens,
+        ];
+    }
+
     public static function post_is_structura_generated(int $post_id): bool
     {
         if (get_post_meta($post_id, '_structura_campaign_id', true)) {
@@ -672,17 +708,14 @@ class Post_Meta_Box
             $keyphrase = get_post_meta($post->ID, 'rank_math_focus_keyword', true);
         }
 
-        // Token usage — pre-compute for the badge
-        $tokens_total = 0;
-        if (is_array($gen_meta) && ! empty($gen_meta['usage']) && is_array($gen_meta['usage'])) {
-            $u            = $gen_meta['usage'];
-            $tokens_in    = (int)($u['inputTokens'] ?? $u['promptTokens'] ?? 0);
-            $tokens_out   = (int)($u['outputTokens'] ?? $u['completionTokens'] ?? 0);
-            $tokens_total = $tokens_in + $tokens_out;
-        }
-
-        // Model — friendly short name
-        $model_raw = is_array($gen_meta) ? ($gen_meta['model'] ?? '') : '';
+        // Model line and token total for Generation Stats; both blank on
+        // managed plans.
+        $stats        = self::generation_stats_lines($gen_meta, License_Manager::get_plan());
+        $model_raw    = $stats['model'];
+        $tokens_total = $stats['tokens'];
+        // Keeps the generated date visible when the model and token lines
+        // are hidden (managed plans, or a cloud that sent neither).
+        $has_generated_at = is_array($gen_meta) && ! empty($gen_meta['generated_at']);
 
         ?>
         <div class="structura-mb">
@@ -767,10 +800,10 @@ class Post_Meta_Box
 
             <!-- Generation Stats -->
             <?php
-            if (is_array($gen_meta) && ($model_raw || $tokens_total)): ?>
+            if (is_array($gen_meta) && ($model_raw !== '' || $tokens_total || $has_generated_at)): ?>
                 <div class="structura-mb__stats">
                     <?php
-                    if ($model_raw): ?>
+                    if ($model_raw !== ''): ?>
                         <div class="structura-mb__stat">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -800,7 +833,7 @@ class Post_Meta_Box
                     <?php
                     endif; ?>
                     <?php
-                    if ( ! empty($gen_meta['generated_at'])): ?>
+                    if ($has_generated_at): ?>
                         <div class="structura-mb__stat">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

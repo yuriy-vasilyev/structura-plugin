@@ -251,7 +251,7 @@ class License_Manager
      * simultaneously at the calling tier — Phase 1.8 §1.8.4 + Phase
      * 1.0m feature matrix.
      *
-     *   - none  → 1 (user picks openai OR gemini; Anthropic visible+locked)
+     *   - none  → 1 (OpenAI only since 2026-10-02; Gemini and Anthropic visible+locked)
      *   - free  → 2 (openai + gemini both pickable; Anthropic
      *               visible+locked)
      *   - byok / cloud / cloud_pro → 3 (all three pickable;

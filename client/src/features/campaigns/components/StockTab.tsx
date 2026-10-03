@@ -235,7 +235,9 @@ const StockEntryRow: FC<{
   onDelete: () => void;
   onRetry: () => void;
   isRestocking: boolean;
-}> = ({ entry, onDelete, onRetry, isRestocking }) => (
+  /** Managed plans never see the model name (specs/managed-ai-lineup.md §3.3). */
+  hideModel: boolean;
+}> = ({ entry, onDelete, onRetry, isRestocking, hideModel }) => (
   <div className="group flex items-start gap-4 px-5 py-4 transition-colors hover:bg-neutral-50/50 sm:px-6 dark:hover:bg-neutral-800/30">
     {/* Thumbnail — placeholder when images are off / not ready */}
     {entry.featuredImageUrl ? (
@@ -269,7 +271,7 @@ const StockEntryRow: FC<{
       )}
       <p className="mt-1! mb-0! text-[11px] text-neutral-400 dark:text-neutral-500">
         {entry.createdAt ? dayjs(entry.createdAt).fromNow() : null}
-        {entry.textModel ? <span> · {entry.textModel}</span> : null}
+        {entry.textModel && !hideModel ? <span> · {entry.textModel}</span> : null}
       </p>
     </div>
 
@@ -311,6 +313,7 @@ const StockEntryRow: FC<{
 
 export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
   const pregenEnabled = campaign.schedule.pregenerationEnabled ?? true;
+  const { isCloud } = useDefaultProviders();
   const { data, isLoading } = useStockListQuery(campaign.id, {
     enabled: pregenEnabled,
   });
@@ -369,12 +372,15 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
                     )
                   : ""}
               </p>
-              <p className="mt-1! mb-0! text-xs leading-relaxed text-amber-700 dark:text-amber-400">
-                {__(
-                  "If this keeps happening, try switching this campaign's AI provider in AI Engine settings.",
-                  "structura"
-                )}
-              </p>
+              {/* Managed plans have no provider to switch. */}
+              {!isCloud && (
+                <p className="mt-1! mb-0! text-xs leading-relaxed text-amber-700 dark:text-amber-400">
+                  {__(
+                    "If this keeps happening, try switching this campaign's AI provider in AI Engine settings.",
+                    "structura"
+                  )}
+                </p>
+              )}
             </div>
           </div>
         </Card>
@@ -464,6 +470,7 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
                     onDelete={() => setConfirm({ type: "delete", stockId: entry.stockId })}
                     onRetry={() => void restock()}
                     isRestocking={isRestocking}
+                    hideModel={isCloud}
                   />
                 ))}
               </div>

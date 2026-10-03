@@ -24,6 +24,7 @@
  * integration this is for, so asking again is noise.
  */
 
+import { WEBHOOK_DELIVER_INTEGRATION_ID } from "@structura/types";
 import { FormEvent, useMemo, useState } from "react";
 import { __ } from "@wordpress/i18n";
 import { Plus, RefreshCcw, Save } from "lucide-react";
@@ -110,6 +111,13 @@ const DEFAULT_INTEGRATIONS: WebhookFormIntegrationOption[] = [
     displayNamePlaceholder: "Next.js revalidator",
     requireSigningSecret: true,
   },
+  {
+    id: WEBHOOK_DELIVER_INTEGRATION_ID,
+    label: __("Article delivery", "structura"),
+    webhookUrlPlaceholder: "https://example.com/api/structura",
+    displayNamePlaceholder: __("e.g. My website blog", "structura"),
+    requireSigningSecret: true,
+  },
 ];
 
 /**
@@ -172,7 +180,7 @@ export const AddWebhookForm = ({
   // re-pastes it even for a display-name change so the same submit path
   // covers both "rename" and "rotate URL" without a separate endpoint.
   const [integrationId, setIntegrationId] = useState(
-    editingConnection?.integrationId ?? availableIntegrations[0]?.id ?? "",
+    editingConnection?.integrationId ?? availableIntegrations[0]?.id ?? ""
   );
   const [webhookUrl, setWebhookUrl] = useState("");
   // Signing secret is never echoed back by the cloud (stored encrypted), so
@@ -183,13 +191,11 @@ export const AddWebhookForm = ({
   // the consumer needs the new value too. handleSubmit + the cloud share
   // this contract; the amber hint above the field surfaces it to the user.
   const [signingSecret, setSigningSecret] = useState("");
-  const [displayName, setDisplayName] = useState(
-    editingConnection?.displayName ?? "",
-  );
+  const [displayName, setDisplayName] = useState(editingConnection?.displayName ?? "");
   // Default to `"system"` — same semantics as campaign settings: follow the
   // site locale at dispatch time unless the user explicitly overrides it.
   const [notificationLocale, setNotificationLocale] = useState<string>(
-    editingConnection?.notificationLocale ?? "system",
+    editingConnection?.notificationLocale ?? "system"
   );
   // Per-campaign binding filter. `null` means "all campaigns" — the wire
   // default and what a fresh install always starts as. Seeded from the
@@ -198,12 +204,10 @@ export const AddWebhookForm = ({
   // landed ship the field as `undefined` / `null` which both coerce to `null`
   // here — same as "all campaigns" semantically.
   const [boundCampaignIds, setBoundCampaignIds] = useState<(string | number)[] | null>(
-    editingConnection?.boundCampaignIds ?? null,
+    editingConnection?.boundCampaignIds ?? null
   );
   // "Every Nth post" cadence. See CadencePicker + ConnectionSummary.postCadenceN.
-  const [postCadenceN, setPostCadenceN] = useState<number>(
-    editingConnection?.postCadenceN ?? 1,
-  );
+  const [postCadenceN, setPostCadenceN] = useState<number>(editingConnection?.postCadenceN ?? 1);
 
   const { saveWebhook, isSaving, saveError } = useChannelConnectionMutations();
 
@@ -212,7 +216,7 @@ export const AddWebhookForm = ({
   // in the sibling InputField inputs.
   const selectOptions = useMemo(
     () => availableIntegrations.map((opt) => ({ value: opt.id, label: opt.label })),
-    [availableIntegrations],
+    [availableIntegrations]
   );
 
   // Same stability trick for the notification-language list. The System entry
@@ -223,9 +227,9 @@ export const AddWebhookForm = ({
       NOTIFICATION_LOCALE_OPTIONS.map((opt) =>
         "labelKey" in opt
           ? { value: opt.value, label: __(opt.labelKey, "structura") }
-          : { value: opt.value, label: opt.label },
+          : { value: opt.value, label: opt.label }
       ),
-    [],
+    []
   );
 
   // When there's only one integration to install (e.g. the modal scoped this
@@ -274,11 +278,10 @@ export const AddWebhookForm = ({
         // "keep existing" — we send `undefined` so the cloud's preserve path
         // kicks in rather than submitting a would-be-rejected empty value.
         // Slack/Discord never forward the field either way.
-        signing_secret:
-          requiresSigningSecret && trimmedSecret !== ""
-            ? trimmedSecret
-            : undefined,
-        display_name: displayName.trim() || undefined,
+        signing_secret: requiresSigningSecret && trimmedSecret !== "" ? trimmedSecret : undefined,
+        display_name:
+          displayName.trim() ||
+          (integrationId === WEBHOOK_DELIVER_INTEGRATION_ID ? selectedOption?.label : undefined),
         // Always post the locale — the cloud normalizes unknown/empty to
         // "system" so sending it unconditionally keeps the wire payload
         // explicit about user intent.
@@ -320,7 +323,7 @@ export const AddWebhookForm = ({
       className={cn(
         "space-y-4",
         !isModal &&
-          "rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800",
+          "rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800"
       )}
     >
       {!isModal && (
@@ -331,7 +334,7 @@ export const AddWebhookForm = ({
           <p className="mt-1! mb-0! text-xs text-neutral-500 dark:text-neutral-400">
             {__(
               "Paste an incoming-webhook URL from Slack or Discord. Structura will post a notification each time a campaign publishes.",
-              "structura",
+              "structura"
             )}
           </p>
         </div>
@@ -381,7 +384,7 @@ export const AddWebhookForm = ({
           <p className="m-0! rounded-md bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
             {__(
               "Paste the webhook URL again to save changes — we never display your saved URL for security.",
-              "structura",
+              "structura"
             )}
           </p>
         )}
@@ -414,16 +417,13 @@ export const AddWebhookForm = ({
             <p className="m-0! rounded-md bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
               {__(
                 "Leave this blank to keep your current signing secret. Click Generate to rotate — your consumer will need the new value too.",
-                "structura",
+                "structura"
               )}
             </p>
           )}
           <InputField
             label={__("Signing secret", "structura")}
-            placeholder={__(
-              "64 hex characters — click Generate to mint",
-              "structura",
-            )}
+            placeholder={__("64 hex characters — click Generate to mint", "structura")}
             value={signingSecret}
             onChange={(event) => setSigningSecret(event.target.value)}
             // type=text on purpose so users can copy the generated value
@@ -445,7 +445,7 @@ export const AddWebhookForm = ({
             <p className="m-0! text-[11px] text-neutral-500 dark:text-neutral-400">
               {__(
                 "Your consumer verifies each delivery against this secret. At least 16 characters; Generate mints 32 bytes of random.",
-                "structura",
+                "structura"
               )}
             </p>
             <Button
@@ -467,31 +467,30 @@ export const AddWebhookForm = ({
           WP installs want. Explicit locales let an agency decouple the
           reviewer team's language from the client site's language (e.g.
           Spanish post → English Slack for a GB reviewer team). */}
-      <Select
-        value={notificationLocale}
-        onValueChange={(val) => setNotificationLocale(String(val))}
-        options={notificationLocaleOptions}
-      >
-        <Select.Label>{__("Notification language", "structura")}</Select.Label>
-        <Select.Trigger placeholder={__("Choose a language…", "structura")} />
-        <Select.Content className="w-(--button-width)">
-          {notificationLocaleOptions.map((opt) => (
-            <Select.Item key={opt.value} value={opt.value}>
-              {opt.label}
-            </Select.Item>
-          ))}
-        </Select.Content>
-      </Select>
+      {integrationId !== WEBHOOK_DELIVER_INTEGRATION_ID && (
+        <Select
+          value={notificationLocale}
+          onValueChange={(val) => setNotificationLocale(String(val))}
+          options={notificationLocaleOptions}
+        >
+          <Select.Label>{__("Notification language", "structura")}</Select.Label>
+          <Select.Trigger placeholder={__("Choose a language…", "structura")} />
+          <Select.Content className="w-(--button-width)">
+            {notificationLocaleOptions.map((opt) => (
+              <Select.Item key={opt.value} value={opt.value}>
+                {opt.label}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select>
+      )}
 
       {/* Per-campaign binding filter. Default is "all campaigns" so a fresh
           install stays maximally useful; agencies running one connection
           across many client campaigns narrow it here. The campaign-edit
           "Channels" section is the second lens on the same field — both
           surfaces read/write `boundCampaignIds` on the connection doc. */}
-      <CampaignBindingsPicker
-        value={boundCampaignIds}
-        onChange={setBoundCampaignIds}
-      />
+      <CampaignBindingsPicker value={boundCampaignIds} onChange={setBoundCampaignIds} />
 
       {/* "Every Nth post" cadence — paired with the bindings filter. See
           CadencePicker for semantics. */}
@@ -502,12 +501,7 @@ export const AddWebhookForm = ({
             dismiss to. Rendered before Submit so keyboard users tab to
             Submit last (matches the visual primary-action ordering). */}
         {isModal && onCancel && (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onCancel}
-            disabled={isSaving}
-          >
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={isSaving}>
             {__("Cancel", "structura")}
           </Button>
         )}
@@ -522,9 +516,7 @@ export const AddWebhookForm = ({
             // still gates rotation attempts shorter than 16 chars so the user
             // sees an inert button instead of submitting a would-be-rejected
             // rotation.
-            (requiresSigningSecret &&
-              !isEdit &&
-              signingSecret.trim().length < 16) ||
+            (requiresSigningSecret && !isEdit && signingSecret.trim().length < 16) ||
             (requiresSigningSecret &&
               isEdit &&
               signingSecret.trim() !== "" &&
@@ -533,9 +525,7 @@ export const AddWebhookForm = ({
         >
           {isEdit ? <Save size={14} /> : <Plus size={14} />}
           <span className="ml-1">
-            {isEdit
-              ? __("Save changes", "structura")
-              : __("Connect channel", "structura")}
+            {isEdit ? __("Save changes", "structura") : __("Connect channel", "structura")}
           </span>
         </Button>
       </div>

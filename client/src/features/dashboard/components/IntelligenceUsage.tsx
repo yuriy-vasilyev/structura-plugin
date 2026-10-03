@@ -1,6 +1,7 @@
 import { __, sprintf } from "@wordpress/i18n";
 import { Card, cn } from "@structura/ui";
 import {
+  managedPostsUsage,
   selectOwnActivationUsage,
   useUsageAnalytics,
 } from "@/features/dashboard/api/useUsageAnalytics";
@@ -16,8 +17,9 @@ dayjs.extend(relativeTime);
  * Reads `cycleUsage` from `getUsageAnalytics` and renders one of three
  * branches off the discriminator:
  *
- *   - `managed` — Cloud / Cloud Pro: THIS SITE's token+image progress
- *     against its per-activation cap. Quotas are per activation (the
+ *   - `managed` — Cloud / Cloud Pro: THIS SITE's posts (tokens on a
+ *     cloud deployed before 2026-10-01, which sends no posts fields)
+ *     and images against its per-activation cap. Quotas are per activation (the
  *     generation gate hard-blocks each site independently — there is
  *     no shared workspace token pool), so wp-admin shows only the
  *     current activation; the multi-site rollup with per-site rows
@@ -79,6 +81,9 @@ const ManagedCycleCard = ({
       : undefined,
   );
   const usage = own ?? cycle.workspace;
+  // Managed plans are metered by posts since 2026-10-01
+  // (specs/managed-ai-lineup.md §4); an older cloud sends tokens only.
+  const posts = managedPostsUsage(usage);
   const isAtLimit = usage.utilizationPercent >= 100;
   const isNearingLimit = usage.utilizationPercent >= 80 && !isAtLimit;
   const cycleEndsAt = dayjs(cycle.cycleResetsAt);
@@ -126,15 +131,27 @@ const ManagedCycleCard = ({
           </span>
         </div>
 
-        <h2 className="mt-0! text-3xl font-black tracking-tight text-gray-900 dark:text-white">
-          {formatTokens(usage.tokensUsed)}
-          <span className="text-sm font-medium text-gray-400">
-            {" "}
-            /{" "}
-            {formatTokens(usage.tokensIncluded)}{" "}
-            {__("tokens", "structura")}
-          </span>
-        </h2>
+        {posts ? (
+          <h2 className="mt-0! text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+            {posts.postsUsed.toLocaleString()}
+            <span className="text-sm font-medium text-gray-400">
+              {" "}
+              /{" "}
+              {posts.postsIncluded.toLocaleString()}{" "}
+              {__("posts", "structura")}
+            </span>
+          </h2>
+        ) : (
+          <h2 className="mt-0! text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+            {formatTokens(usage.tokensUsed)}
+            <span className="text-sm font-medium text-gray-400">
+              {" "}
+              /{" "}
+              {formatTokens(usage.tokensIncluded)}{" "}
+              {__("tokens", "structura")}
+            </span>
+          </h2>
+        )}
 
         <div className="relative h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-800">
           <div
@@ -150,7 +167,7 @@ const ManagedCycleCard = ({
           />
         </div>
 
-        {/* Image quota — same per-activation scope as the token bar.
+        {/* Image quota — same per-activation scope as the posts bar.
             Lived on the per-site rows before those moved to the
             portal; this site's count belongs on its own card. */}
         <p className="m-0! text-xs text-gray-400">

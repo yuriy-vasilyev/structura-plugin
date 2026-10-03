@@ -1,0 +1,19 @@
+{
+  "name": "@structura/builder-prompts",
+  "version": "1.0.0",
+  "description": "Builder prompts for Article delivery (Lovable, Bolt, v0, Replit) in every supported locale. One source for the docs site and the portal setup flow.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@structura/i18n-contracts": "workspace:*",
+    "@structura/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.9"
+  }
+}

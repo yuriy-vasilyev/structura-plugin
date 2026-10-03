@@ -1,6 +1,15 @@
 import type { AIProvider, PlanId } from "@structura/types";
 import type { ModelRole, ModelTier } from "./types";
-import { getRegistryModelId, getRecommendedModel } from "./catalog";
+import { getDefaultModel, getRegistryModelId } from "./catalog";
+import {
+  FROZEN_FAST_TEXT_MODELS,
+  FROZEN_LEGACY_DEFAULT_TEXT_MODELS,
+  FROZEN_MANAGED_TEXT_MODELS,
+  FROZEN_SOCIAL_COPY_TEXT_MODELS,
+  FROZEN_SUGGESTION_TEXT_MODELS,
+} from "./frozen";
+import { MODELS } from "./model-data";
+import { RECOMMENDATIONS } from "./recommendations";
 
 /**
  * Use-case binding layer (spec: `specs/model-tier-selection.md` §3). Each
@@ -8,20 +17,74 @@ import { getRegistryModelId, getRecommendedModel } from "./catalog";
  * so a model bump/retirement in `model-data.ts` flows to every consumer.
  *
  * Keyed by feature, not surface: the same feature on the onboarding wizard and
- * on a settings/special page resolves identically.
+ * on a settings/special page resolves identically. The exceptions are the
+ * FROZEN bindings, which pin the ids of `frozen.ts` until their own test
+ * moves them (2026-10-01, specs/byok-ai-guidance.md §2).
  */
 
 /**
- * Suggestions (campaign strategy, positioning, keywords, competitors, topics,
- * personas, visuals) resolve to the provider's TOP text model — best quality,
- * even on Cloud, because suggestions run rarely. Falls back to the catalog's
- * recommended entry if no `top` is tagged (defensive; every provider has one).
+ * Suggestions on BYOK and Free (campaign strategy, positioning, keywords,
+ * competitors, topics, personas, visuals, the onboarding wizard) resolve to
+ * the quality-top model of 2026-04-28, because suggestions run rarely and
+ * quality matters there. FROZEN pending its own test: the 2026-10-01 tier
+ * refresh does not move it (specs/byok-ai-guidance.md §2).
  */
 export function resolveSuggestionModelId(provider: AIProvider): string {
-  return (
-    getRegistryModelId(provider, "text", "top") ??
-    getRecommendedModel(provider, "text")
-  );
+  return FROZEN_SUGGESTION_TEXT_MODELS[provider];
+}
+
+/**
+ * The text model for a BYOK or Free post that stores no tier and no model,
+ * and for a non-managed campaign's fallback provider: the provider's
+ * Standard tier, as a primary would get (2026-10-01).
+ */
+export function resolveByokDefaultTextModelId(provider: AIProvider): string {
+  return getRegistryModelId(provider, "text", "mid") ?? getDefaultModel(provider, "text");
+}
+
+/**
+ * The model a stored concrete text id runs on a BYOK or Free post: the
+ * current model of the tier a superseded id held, else the id unchanged
+ * (a current model, or one that never had a tier such as `gpt-4o`).
+ * Spec: specs/byok-ai-guidance.md §2.
+ */
+export function resolveSupersededTextModelId(provider: AIProvider, modelId: string): string {
+  const m = MODELS.find((x) => x.provider === provider && x.role === "text" && x.id === modelId);
+  if (!m?.supersededTier) return modelId;
+  return getRegistryModelId(provider, "text", m.supersededTier) ?? modelId;
+}
+
+/**
+ * The recommended text tier for a provider (`RECOMMENDATIONS.text.model`),
+ * or `mid` for a provider without one (Gemini), and that tier's model.
+ */
+export function resolveRecommendedTextModel(provider: AIProvider): { tier: "top" | "mid"; model: string } {
+  const tier = RECOMMENDATIONS.text.model[provider] ?? "mid";
+  return { tier, model: getRegistryModelId(provider, "text", tier) ?? resolveByokDefaultTextModelId(provider) };
+}
+
+/**
+ * The pre-refresh default text model, for internal utility callers that
+ * used `defaults.text` (keyword and authority discovery, keyphrase
+ * extraction) and for a managed-AI license on a non-managed plan.
+ * FROZEN pending its own test.
+ */
+export function resolveLegacyDefaultTextModelId(provider: AIProvider): string {
+  return FROZEN_LEGACY_DEFAULT_TEXT_MODELS[provider];
+}
+
+/**
+ * The model BYOK and Free social copy and video scripts run on, from the
+ * writer model the post was generated with: the pre-refresh model of the
+ * same provider and tier, else the writer model. FROZEN pending its own test.
+ */
+export function resolveSocialCopyModelId(provider: AIProvider, writerModelId: string): string {
+  return FROZEN_SOCIAL_COPY_TEXT_MODELS[provider][writerModelId] ?? writerModelId;
+}
+
+/** The fast text model (the authority ranker, served `defaults.fast`). FROZEN pending its own test. */
+export function resolveFastModelId(provider: AIProvider): string {
+  return FROZEN_FAST_TEXT_MODELS[provider];
 }
 
 /**
@@ -35,8 +98,65 @@ export function resolveUtilityModelId(provider: AIProvider): string {
   return (
     getRegistryModelId(provider, "text", "cheap") ??
     getRegistryModelId(provider, "text", "mid") ??
-    getRecommendedModel(provider, "text")
+    getDefaultModel(provider, "text")
   );
+}
+
+/**
+ * True for the plans whose AI lineup Structura owns (Cloud, Cloud Pro).
+ * Mirrors `isManagedPlan` in `@structura/types`, which this package may only
+ * import as a type (see `types.ts`).
+ */
+function isManagedLineupPlan(plan: PlanId | "none" | null | undefined): boolean {
+  return plan === "cloud" || plan === "cloud_pro";
+}
+
+/**
+ * The post-generation grounding audit (`functions/src/ai/grounding-audit.ts`)
+ * model for a plan: Cloud and Cloud Pro get the `premium` auditor, every
+ * other tier that is audited (BYOK, free single posts with research
+ * documents) the `standard` one. Platform-paid in every case. Owner
+ * decisions 2026-10-01: Gemini 3.5 Flash (the previous auditor) failed 15 of
+ * 33 audits in the shortlist matrix on 2x100 s timeouts and was the only
+ * strong auditor that removed a must-keep sentence; later the same day the
+ * premium auditor moved to Cloud too (Opus 5.5 found 7 real problems in 12
+ * drafts where Gemini 3.8 Flash found none). Spec:
+ * `specs/grounding-audit.md` §2.2, §3; `specs/managed-ai-lineup.md` §2.
+ */
+export function resolveGroundingAuditModel(
+  plan: PlanId | "none" | null | undefined,
+): { provider: AIProvider; model: string } {
+  const role = isManagedLineupPlan(plan) ? "premium" : "standard";
+  const m = MODELS.find((x) => x.auditor === role);
+  if (!m) throw new Error(`model-catalog: no ${role} grounding auditor`);
+  return { provider: m.provider, model: m.id };
+}
+
+/** One model of the managed lineup. */
+export interface ManagedLineupModel {
+  provider: AIProvider;
+  model: string;
+}
+
+/**
+ * The managed writer lineup for a plan: `writer` writes every Cloud and
+ * Cloud Pro post (live synthesis, stock batch, Run now, single post) and
+ * `failover` takes over live synthesis when the writer fails transiently or
+ * times out. Returns `undefined` for every other plan, whose writer stays
+ * the campaign's own provider and model. Both plans share one lineup: the
+ * model tier is no longer what separates Cloud from Cloud Pro (owner
+ * decision 2026-10-01). Spec: `specs/managed-ai-lineup.md` §2.
+ */
+export function resolveManagedWriterLineup(
+  plan: PlanId | "none" | null | undefined,
+): { writer: ManagedLineupModel; failover: ManagedLineupModel } | undefined {
+  if (!isManagedLineupPlan(plan)) return undefined;
+  const pick = (role: "primary" | "failover"): ManagedLineupModel => {
+    const m = MODELS.find((x) => x.managedWriter === role);
+    if (!m) throw new Error(`model-catalog: no managed ${role} writer`);
+    return { provider: m.provider, model: m.id };
+  };
+  return { writer: pick("primary"), failover: pick("failover") };
 }
 
 /**
@@ -83,10 +203,13 @@ export function resolveManagedTier(
 
 /**
  * The concrete model a managed campaign runs for `(plan, capability, provider)`
- * — replaces the `PLAN_DEFAULTS` pin table (the ids are now derived from the
- * registry tier). Returns `undefined` only if the provider carries no model at
- * the resolved tier or its `mid` fallback; managed callers then fall back to
- * the provider's catalog default.
+ * — replaces the `PLAN_DEFAULTS` pin table. Images derive from the registry
+ * tier. Text is the legacy managed mapping, FROZEN pending its own test at
+ * the pre-2026-10-01 ids (frozen.ts): it feeds suggestions and social copy
+ * on managed plans, and posts there use the managed lineup instead. Returns
+ * `undefined` only if the provider carries no model at the resolved tier or
+ * its `mid` fallback; managed callers then fall back to the provider's
+ * catalog default.
  */
 export function resolveManagedModelId(
   plan: PlanId,
@@ -97,9 +220,40 @@ export function resolveManagedModelId(
   // wins. Only Cloud / Cloud Pro resolve a server-owned model here. Returning
   // undefined lets callers fall through to their provider-default path.
   if (plan !== "cloud" && plan !== "cloud_pro") return undefined;
+  if (capability === "text") return FROZEN_MANAGED_TEXT_MODELS[plan][provider];
   const tier = resolveManagedTier(plan, capability, provider);
   return (
     getRegistryModelId(provider, capability, tier) ??
     getRegistryModelId(provider, capability, "mid")
   );
+}
+
+/**
+ * Default output token budget for one text generation: the stock batch path's
+ * 64k (room for a reasoning model's thinking plus a long blueprint). Models
+ * with a lower maximum carry `maxOutputTokens`.
+ */
+export const TEXT_OUTPUT_BUDGET = 65536;
+
+/**
+ * Output token budget for one text generation with this model, shared by the
+ * engine's direct callers and the stock batch path so they never disagree.
+ * 2026-10-01: Sonnet 5's adaptive thinking spent the direct path's whole
+ * 16,384-token `max_tokens` and returned no JSON, while batch (65,536) worked.
+ */
+export function resolveTextOutputBudget(provider: AIProvider, modelId: string): number {
+  return (
+    MODELS.find((m) => m.provider === provider && m.role === "text" && m.id === modelId)?.maxOutputTokens ??
+    TEXT_OUTPUT_BUDGET
+  );
+}
+
+/** False when the model rejects any explicit temperature (`fixedTemperature`); true otherwise, including unknown ids. */
+export function acceptsTemperature(provider: AIProvider, modelId: string): boolean {
+  return !MODELS.find((m) => m.provider === provider && m.id === modelId)?.fixedTemperature;
+}
+
+/** True when the model accepts its provider's low reasoning setting (`lowEffort`); false for unknown ids. */
+export function acceptsLowEffort(provider: AIProvider, modelId: string): boolean {
+  return !!MODELS.find((m) => m.provider === provider && m.id === modelId)?.lowEffort;
 }

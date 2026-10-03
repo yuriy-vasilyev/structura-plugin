@@ -15,7 +15,8 @@ import { Badge, Button, cn } from "@structura/ui";
 import { PageContainer } from "@/components/Layout/PageContainer";
 import { PageTitle } from "@/components/Layout/PageTitle";
 import { PageDescription } from "@/components/Layout/PageSubtitle";
-import type { RunStatusSerialized } from "@structura/types";
+import { isManagedPlan, type PlanId, type RunStatusSerialized } from "@structura/types";
+import { useLicense } from "@/features/settings/api/useLicense";
 import { useCampaignRunQuery } from "@/features/progress/api/useCampaignRunQuery";
 import { RunTimeline } from "@/features/progress/components/RunTimeline";
 import { SearchPerformanceSection } from "@/features/channels/components/SearchPerformanceSection";
@@ -227,6 +228,10 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
   const navigate = useNavigate();
   const { generatePost, isGenerating } = useCampaignMutations();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // Managed plans never see the text provider or any model name; the image
+  // provider is the customer's own choice and stays (specs/managed-ai-lineup.md §3.3).
+  const { plan } = useLicense();
+  const isManagedAiPlan = isManagedPlan(plan as PlanId);
   const isTerminal = TERMINAL_STATUSES.has(run.status);
   const isSuccess =
     run.status === "succeeded" || run.status === "succeeded_with_warnings";
@@ -313,9 +318,10 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
     return model ? `${provider} · ${model}` : provider;
   };
 
-  // Provider rows for the confirm modal — text always, image when set.
+  // Provider rows for the confirm modal — text when set, image when set.
+  // Managed plans get no text row and no image model.
   const runProviders = [
-    textProvider && {
+    !isManagedAiPlan && textProvider && {
       key: "text",
       role: "text" as const,
       providerId: textProvider,
@@ -325,7 +331,7 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
       key: "image",
       role: "image" as const,
       providerId: imageProvider,
-      value: providerModelValue(imageProvider, imageModel),
+      value: providerModelValue(imageProvider, isManagedAiPlan ? "" : imageModel),
     },
   ].filter(Boolean) as {
     key: string;
@@ -447,7 +453,7 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
             {campaignMode && (
               <Field label={__("Mode", "structura")} value={String(campaignMode)} />
             )}
-            {textProvider && (
+            {textProvider && !isManagedAiPlan && (
               <Field
                 label={__("Text provider", "structura")}
                 value={String(textProvider)}

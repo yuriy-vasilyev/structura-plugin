@@ -64,12 +64,13 @@ export const WorkspaceKeysPicker = ({ providerLabels }: WorkspaceKeysPickerProps
 
   // Auto-default wiring. When binding a sibling-site key leaves this
   // site with exactly ONE connected provider, promote it to the
-  // explicit text default (and image default when it can generate
-  // images) so the operator doesn't have to open the provider config
-  // dialog just to pick the only option that exists. We never clobber
-  // an explicit choice the user already made — only fill the gap.
+  // explicit image default when it can generate images. We never
+  // clobber an explicit choice the user already made — only fill the gap.
+  // 2026-10-02: no automatic text default any more: an absent one
+  // already resolves to the best connected provider, and a written one
+  // read as the customer's choice (specs/byok-ai-guidance.md §9).
   const { activeProviders, imageProviders } = useAiConnections();
-  const { hasExplicitTextDefault, hasExplicitImageDefault } = useDefaultProviders();
+  const { hasExplicitImageDefault } = useDefaultProviders();
   const { mutate: updateAiSettings } = useUpdateAiSettings();
   // The provider whose bind we're waiting to see reflected in the
   // refetched connection state. A ref (not state) so setting it
@@ -87,7 +88,6 @@ export const WorkspaceKeysPicker = ({ providerLabels }: WorkspaceKeysPickerProps
     if (activeProviders.length !== 1) return;
 
     const defaults: Record<string, string> = {};
-    if (!hasExplicitTextDefault) defaults.text_provider = provider;
     if (!hasExplicitImageDefault && imageProviders.includes(provider)) {
       defaults.image_provider = provider;
     }
@@ -97,7 +97,6 @@ export const WorkspaceKeysPicker = ({ providerLabels }: WorkspaceKeysPickerProps
   }, [
     activeProviders,
     imageProviders,
-    hasExplicitTextDefault,
     hasExplicitImageDefault,
     updateAiSettings,
   ]);

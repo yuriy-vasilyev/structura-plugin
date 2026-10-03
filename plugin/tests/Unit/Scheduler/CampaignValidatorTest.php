@@ -547,6 +547,23 @@ class CampaignValidatorTest extends TestCase
         $this->assertArrayNotHasKey('image_tier', $result);
     }
 
+    /** @test */
+    public function it_passes_ai_advice_through_only_when_sent(): void
+    {
+        // 2026-10-02: the provider advice's hide / show is sent only after
+        // the user touched it; the transformer whitelists the value.
+        $hide = Campaign_Validator::validate($this->validPayload([
+            'ai_advice' => ['hidden' => ['textProvider' => 'gemini']],
+        ]));
+        $this->assertSame(['hidden' => ['textProvider' => 'gemini']], $hide['ai_advice']);
+
+        $show = Campaign_Validator::validate($this->validPayload(['ai_advice' => ['hidden' => null]]));
+        $this->assertSame(['hidden' => null], $show['ai_advice']);
+
+        $untouched = Campaign_Validator::validate($this->validPayload());
+        $this->assertArrayNotHasKey('ai_advice', $untouched);
+    }
+
     // ──────────────────────────────────────────────────────────────────────
     //  FIXTURE
     // ──────────────────────────────────────────────────────────────────────

@@ -78,6 +78,7 @@ import { SimpleStepRhythm } from "@/features/campaigns/components/steps/SimpleSt
 import { TaxonomySection } from "@/features/campaigns/components/TaxonomySection";
 import { AIProvider } from "@/features/campaigns/types";
 import { ProviderToggle } from "@/features/campaigns/components/ProviderToggle";
+import { ProviderAdvice } from "@/features/campaigns/components/ProviderAdvice";
 import { mirrorModelForTier } from "@/features/campaigns/modelTier";
 import { CampaignAiEngineSection } from "@/features/campaigns/components/CampaignAiEngineSection";
 import { CoreContentSettings } from "@/features/campaigns/components/CoreContentSettings";
@@ -113,7 +114,7 @@ interface StepDef {
 
 // The Interview step is gone (spec `campaign-language-and-smart-setup.md`
 // §4.1): the questions it asked are all answerable from the site itself, so
-// Setup arrives drafted instead of blank.
+// Setup's Magic suggest drafts them from the site on request.
 const ALL_STEPS: StepDef[] = [
   { id: "setup", label: __("Setup", "structura"), icon: Compass },
   { id: "keywords", label: __("Keywords", "structura"), icon: Key },
@@ -237,7 +238,7 @@ const CreateCampaignInner = () => {
   const navigate = useNavigate();
   const { formData, updateForm, isValid } = useCampaignForm();
   const { createCampaign, isCreating } = useCampaignMutations();
-  const { isPaidLicense } = useLicense();
+  const { isPaidLicense, plan } = useLicense();
 
   const hasAuthorityRule = formData.intelligence.seoRules?.outbound_link_authority === true;
 
@@ -358,19 +359,15 @@ const CreateCampaignInner = () => {
 
   // ── Setup draft (spec §4.4) ───────────────────────────────────────────
   //
-  // Two stages: a deterministic draft everyone gets the instant the step
-  // mounts, then an AI refinement that replaces the same fields in place.
-  // The refinement is paid-only and never automatic — it burns a model call
-  // to rewrite prose the user may already be editing, so it waits for Magic
-  // suggest (owner decision 2026-09-23).
+  // Nothing drafts on its own: Magic suggest runs the deterministic draft on
+  // Free and the AI pass on paid plans, one cloud call per click
+  // (2026-10-02; the on-mount deterministic draft went, as in the portal).
 
   const { isLoading: loadingProfile } = usePublicSiteProfile();
   const siteLanguage = useSiteContentLanguage();
-  const language = formData.intelligence.language;
 
-  // A new campaign starts in the site's own language. Seeded BEFORE the draft
-  // call so the cloud drafts in the right language on the first pass instead
-  // of drafting in English and being asked again.
+  // A new campaign starts in the site's own language, so the first Magic
+  // suggest drafts in it without asking.
   //
   // Two details this effect has to survive. It writes UNTOUCHED, because
   // opening the wizard is not a draft anybody asked to resume. And it keys on
@@ -392,43 +389,17 @@ const CreateCampaignInner = () => {
     updateFormStore("intelligence", { language: siteLanguage }, { markTouched: false });
   }, [languageSeeded, loadingProfile, formData, siteLanguage, updateFormStore]);
 
-  // Latched, not `activeStep === "setup"`: flipping this back and forth would
-  // re-fire the draft every time the user walks back up the strip and clobber
-  // what they wrote.
-  const [setupEntered, setSetupEntered] = useState(activeStep === "setup");
-  useEffect(() => {
-    if (activeStep === "setup") setSetupEntered(true);
-  }, [activeStep]);
-
-  // What the last accepted draft wrote, so a field the user has since edited
-  // survives the AI pass landing on top of it.
-  const draftedRef = useRef<{ name: string; objective: string } | null>(null);
-  // Set when the user confirms a language change: they asked for a redraft,
-  // so it replaces their edits (the ConfirmDialog says so).
-  const forceDraftRef = useRef(false);
-
   const applyDraft = useCallback(
     (draft: CampaignSetupDraft) => {
       // Read the live store, not the render closure: the draft lands
       // asynchronously, long after this callback was created.
       const identity = useCampaignDraftStore.getState().formData.identity;
-      const previous = draftedRef.current;
-      // An `ai` draft only ever arrives because the user pressed Magic
-      // suggest and — if they had edits — confirmed losing them, so it is
-      // always a replacement. Deriving it from the stage rather than a flag
-      // set at click time means a failed run can't leave the flag armed for
-      // some later, unrelated draft.
-      const force = forceDraftRef.current || draft.stage === "ai";
-      forceDraftRef.current = false;
-      draftedRef.current = { name: draft.name, objective: draft.objective };
-
-      const keepName = !force && identity.name.length > 0 && identity.name !== previous?.name;
-      const keepObjective =
-        !force && identity.objective.length > 0 && identity.objective !== previous?.objective;
-
+      // Every draft is one the user asked for (Magic suggest, or a confirmed
+      // redraft in another language), and edits were confirmed before the
+      // call went out, so it replaces the name and objective outright.
       updateForm("identity", {
-        ...(keepName ? {} : { name: draft.name }),
-        ...(keepObjective ? {} : { objective: draft.objective }),
+        name: draft.name,
+        objective: draft.objective,
         // An explicit override in Advanced outranks the inference for good.
         ...(identity.campaignModeSource === "user"
           ? {}
@@ -440,26 +411,18 @@ const CreateCampaignInner = () => {
     [updateForm]
   );
 
-  const {
-    draft,
-    isDrafting,
-    isRefining,
-    error: draftError,
-    refineError,
-    redraft,
-    refine,
-  } = useCampaignSetupDraft({
-    language,
-    enabled: languageSeeded && setupEntered,
+  // Nothing drafts on mount (2026-10-02, aligned with the customer portal's
+  // 2026-09-29 change, spec §4.4): the step opens empty and one Magic suggest
+  // click is one cloud call — the templated draft on Free, the AI pass on
+  // paid plans.
+  const { draft, isSuggesting, error: suggestError, suggest } = useCampaignSetupDraft({
     onDraft: applyDraft,
   });
-
-  const changeLanguage = useCallback(
-    (code: string) => {
-      forceDraftRef.current = true;
-      updateForm("intelligence", { language: code });
-    },
-    [updateForm]
+  const suggestStage: "deterministic" | "ai" =
+    plan === "free" || plan === "none" ? "deterministic" : "ai";
+  const runSuggest = useCallback(
+    (lang: string) => suggest(lang, suggestStage),
+    [suggest, suggestStage]
   );
 
 
@@ -574,13 +537,9 @@ const CreateCampaignInner = () => {
         {activeStep === "setup" && (
           <SetupSection
             draft={draft}
-            isDrafting={isDrafting}
-            isRefining={isRefining}
-            error={draftError}
-            refineError={refineError}
-            onRetry={redraft}
-            onRefine={refine}
-            onLanguageChange={changeLanguage}
+            isSuggesting={isSuggesting}
+            error={suggestError}
+            onSuggest={runSuggest}
             onConfirm={confirmSetup}
           />
         )}
@@ -1268,29 +1227,24 @@ const OverlapNotice = ({
 
 /**
  * Step 1 — Setup. The old Strategy step with the language lifted to the top
- * and the fields arriving drafted instead of blank (spec §4.1). The writing
- * approach is no longer asked for here; it lives in Advanced as an override
- * over the inferred value.
+ * (spec §4.1). It opens empty and fully editable; Magic suggest, on every
+ * plan, drafts the name and objective in place (spec §4.4, 2026-10-02). The
+ * writing approach is not asked for here; it lives in Advanced as an
+ * override over the inferred value.
  */
 const SetupSection = ({
   draft,
-  isDrafting,
-  isRefining,
+  isSuggesting,
   error,
-  refineError,
-  onRetry,
-  onRefine,
-  onLanguageChange,
+  onSuggest,
   onConfirm,
 }: {
   draft: CampaignSetupDraft | null;
-  isDrafting: boolean;
-  isRefining: boolean;
+  isSuggesting: boolean;
+  /** Translated message from the last failed or gated suggestion. */
   error: string | null;
-  refineError: string | null;
-  onRetry: () => void;
-  onRefine: () => void;
-  onLanguageChange: (code: string) => void;
+  /** Runs one suggestion in the given campaign language. */
+  onSuggest: (language: string) => void;
   onConfirm: () => void;
 }) => {
   const { formData, updateForm } = useCampaignForm();
@@ -1323,21 +1277,22 @@ const SetupSection = ({
 
   const requestLanguage = (code: string) => {
     if (code === language) return;
-    // Redrafting replaces the objective, so the user gets asked first when
-    // there is work of theirs to lose.
-    if (hasOwnEdits) {
+    // A drafted objective is in the old language, so the pick offers a
+    // redraft first. Nothing drafted yet → only the language changes and no
+    // call is made.
+    if (draft && objective.trim().length > 0) {
       setPendingLanguage(code);
       return;
     }
-    onLanguageChange(code);
+    updateForm("intelligence", { language: code });
   };
 
-  const requestRefine = () => {
+  const requestSuggest = () => {
     if (hasOwnEdits) {
       setConfirmRefine(true);
       return;
     }
-    onRefine();
+    onSuggest(language);
   };
 
   return (
@@ -1357,51 +1312,32 @@ const SetupSection = ({
             </p>
           </div>
         </div>
-        {/* Paid only — and no upsell on free: the deterministic draft is a
-            complete answer, so a locked button here would frame it as the
-            broken half of a feature (owner decision 2026-09-23). */}
-        {isPaidLicense && (
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={requestRefine}
-            loading={isRefining}
-            disabled={isDrafting}
-          >
-            <Sparkles size={14} />
-            {__("Magic suggest", "structura")}
-          </Button>
-        )}
+        {/* Every plan (2026-10-02): the templated draft on Free, the AI
+            pass on paid plans — one cloud call per click. */}
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={requestSuggest}
+          loading={isSuggesting}
+          disabled={isSuggesting}
+        >
+          <Sparkles size={14} />
+          {__("Magic suggest", "structura")}
+        </Button>
       </div>
 
-      {/* A failed draft must never be a dead end — the form below stays
-          fully usable, the user just fills it in themselves. */}
+      {/* The suggestion failed or was gated. Whatever is in the fields is
+          still there — this only explains why it didn't change. */}
       {error && (
         <Alert variant="error">
-          <Alert.Description>
-            {__(
-              "Couldn't draft this campaign — fill it in yourself or try again.",
-              "structura"
-            )}
-          </Alert.Description>
+          <Alert.Description>{error}</Alert.Description>
           <div className="mt-2">
-            <Button size="sm" variant="secondary" onClick={onRetry}>
-              <RefreshCw size={14} className="mr-1.5" />
-              {__("Try again", "structura")}
-            </Button>
-          </div>
-        </Alert>
-      )}
-
-      {/* Magic suggest failed or the cloud declined it. Whatever was in the
-          fields is still there — this only explains why it didn't change. */}
-      {!error && refineError && (
-        <Alert variant="error">
-          <Alert.Description>
-            {__("Couldn't refine this campaign — try again", "structura")}
-          </Alert.Description>
-          <div className="mt-2">
-            <Button size="sm" variant="secondary" onClick={requestRefine} disabled={isRefining}>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => onSuggest(language)}
+              disabled={isSuggesting}
+            >
               <RefreshCw size={14} className="mr-1.5" />
               {__("Try again", "structura")}
             </Button>
@@ -1428,7 +1364,7 @@ const SetupSection = ({
       {/* Campaign name. Magic suggest rewrites both fields outright — the
           user either had no edits or confirmed losing them — so the skeleton
           is unconditional while it runs. */}
-      {isRefining ? (
+      {isSuggesting ? (
         <div className="space-y-1.5" data-testid="setup-name-skeleton">
           <span className="block text-[10px] font-black tracking-widest text-neutral-400 uppercase">
             {__("Campaign Name", "structura")}
@@ -1452,7 +1388,7 @@ const SetupSection = ({
           </span>
           {draft && <DraftedPill stage={draft.stage} />}
         </div>
-        {isRefining ? (
+        {isSuggesting ? (
           <Skeleton className="h-28 w-full rounded-xl" data-testid="setup-objective-skeleton" />
         ) : (
           <TextArea
@@ -1511,24 +1447,58 @@ const SetupSection = ({
           />
         </Card>
       )}
+      {/* 2026-10-02: the same provider advice under the inline block, so a
+          caution text provider picked here gets it too. No hide control in
+          the setup wizard (specs/byok-ai-guidance.md §5). */}
+      {!isFullyConfigured && availableProviders.length > 0 && (
+        <ProviderAdvice
+          provider={formData.intelligence.textProvider}
+          onSwitch={(to, tier) => {
+            const previous = {
+              textProvider: formData.intelligence.textProvider,
+              textTier: formData.intelligence.textTier,
+              textModel: formData.intelligence.textModel,
+              fallbackTextProvider: formData.intelligence.fallbackTextProvider ?? null,
+            };
+            updateForm("intelligence", {
+              textProvider: to,
+              textTier: tier,
+              textModel: mirrorModelForTier(to, "text", tier) ?? "",
+              ...(formData.intelligence.fallbackTextProvider === to
+                ? { fallbackTextProvider: null }
+                : {}),
+            });
+            return () => {
+              updateForm("intelligence", previous);
+              document
+                .querySelector<HTMLElement>(`[data-text-provider="${previous.textProvider}"]`)
+                ?.focus();
+            };
+          }}
+        />
+      )}
 
       {/* Persona / post length / post status — the language field above owns
           the language, so it is hidden here. */}
       <CoreContentSettings showLanguage={false} />
 
-      <SetupRationaleStrip
-        title={__("Why these settings", "structura")}
-        items={rationaleItems}
-        loading={isDrafting || isRefining}
-        footer={
-          isPaidLicense
-            ? __(
-                "Structura decided these from your site. Change anything — nothing here is locked.",
-                "structura"
-              )
-            : undefined
-        }
-      />
+      {/* Only once a suggestion runs or has landed — an empty step has no
+          settings to explain. */}
+      {(isSuggesting || rationaleItems.length > 0) && (
+        <SetupRationaleStrip
+          title={__("Why these settings", "structura")}
+          items={rationaleItems}
+          loading={isSuggesting}
+          footer={
+            isPaidLicense
+              ? __(
+                  "Structura decided these from your site. Change anything — nothing here is locked.",
+                  "structura"
+                )
+              : undefined
+          }
+        />
+      )}
 
       {/* Advanced Settings */}
       <AdvancedSettings />
@@ -1549,9 +1519,16 @@ const SetupSection = ({
         onConfirm={() => {
           const next = pendingLanguage;
           setPendingLanguage(null);
-          if (next) onLanguageChange(next);
+          if (next) {
+            updateForm("intelligence", { language: next });
+            onSuggest(next);
+          }
         }}
-        title={__("Redraft this campaign?", "structura")}
+        title={sprintf(
+          /* translators: %s: language name, e.g. "German". */
+          __("Redraft the campaign in %s?", "structura"),
+          contentLanguageLabel(pendingLanguage ?? language, adminUiLocale())
+        )}
         description={__(
           "Switching the language drafts the campaign again. Your edits to the name and objective will be replaced.",
           "structura"
@@ -1565,7 +1542,7 @@ const SetupSection = ({
         onClose={() => setConfirmRefine(false)}
         onConfirm={() => {
           setConfirmRefine(false);
-          onRefine();
+          onSuggest(language);
         }}
         title={__("Replace your edits?", "structura")}
         description={__(

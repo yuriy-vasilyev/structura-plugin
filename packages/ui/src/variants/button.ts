@@ -60,7 +60,9 @@ export const buttonVariants = cva(
       variant: {
         primary:
           // Structura Primary: Electric Indigo. Text is white in both modes.
-          "bg-brand-600 text-white! visited:text-white! hover:text-white! focus:text-white! active:text-white! border border-transparent hover:bg-brand-700 shadow-lg shadow-brand-600/20 hover:-translate-y-0.5 active:translate-y-0 dark:bg-brand-500 dark:hover:bg-brand-400 dark:shadow-brand-500/20",
+          // Same brand-600 fill in dark: white on brand-500 is 4.47:1, under AA
+          // for 14px bold (specs/article-delivery-connect-flow.md §7).
+          "bg-brand-600 text-white! visited:text-white! hover:text-white! focus:text-white! active:text-white! border border-transparent hover:bg-brand-700 shadow-lg shadow-brand-600/20 hover:-translate-y-0.5 active:translate-y-0 dark:shadow-brand-500/20",
 
         accent:
           // Structura Obsidian: Deep Gray/Black. White text in light mode,

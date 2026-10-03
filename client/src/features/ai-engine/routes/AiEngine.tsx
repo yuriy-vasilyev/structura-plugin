@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Navigate } from "react-router";
 import { __ } from "@wordpress/i18n";
 import { Image, Plug, ShieldCheck, Type, Unplug } from "lucide-react";
 import { Badge, PageLoader } from "@structura/ui";
@@ -10,6 +11,7 @@ import { PageContainer } from "@/components/Layout/PageContainer";
 import { useAiSettingsQuery } from "@/features/ai-engine";
 import { useLicense } from "@/features/settings";
 import { isManagedPlan, type PlanId } from "@structura/types";
+import { buildPortalSignupUrl } from "@/utils/portalLinks";
 
 // Components
 import { InstalledProviderCard } from "../components/InstalledProviderCard";
@@ -62,6 +64,16 @@ function capsForTier(capabilities: Array<"text" | "image">, plan: string): Array
 export const AiEngine = () => {
   const { data: settings, isLoading } = useAiSettingsQuery();
   const { plan, providerCountCap } = useLicense();
+
+  // Plans page in the customer portal for the Pro-locked provider card
+  // ("Compare plans", specs/byok-ai-guidance.md §5).
+  const comparePlansHref = (providerId: string) =>
+    buildPortalSignupUrl({
+      intent: "unlock_provider",
+      domain: typeof window !== "undefined" ? window.location.hostname : undefined,
+      plan,
+      providerId,
+    });
 
   const isCloud = isManagedPlan(plan as PlanId);
   // Phase 1.8 §1.8.4 — convenience flag for "single provider" UX:
@@ -130,6 +142,13 @@ export const AiEngine = () => {
     return Object.values(providers).filter((p) => p.connected && p.capabilities.includes("image"))
       .length;
   }, [providers]);
+
+  // Managed plans have no providers to manage and never see provider
+  // names; the nav entry is hidden, and a direct visit lands on the
+  // dashboard (specs/managed-ai-lineup.md §3.3).
+  if (isCloud) {
+    return <Navigate to="/" replace />;
+  }
 
   if (isLoading || !settings || !catalog || !providers || !defaults) {
     return <PageLoader label={__("Syncing AI Vault…", "structura")} size="lg" padding="lg" />;
@@ -321,6 +340,7 @@ export const AiEngine = () => {
                     available={cardAvailable}
                     minTier={meta.min_tier}
                     lockReason={isCapLocked ? "cap" : "tier"}
+                    comparePlansHref={comparePlansHref(id)}
                     onSetUp={() => {
                       if (cardAvailable) {
                         openWizard(id);

@@ -86,6 +86,7 @@ export const Stepper: FC<StepperProps> = ({
               // unambiguous for tooling that reads aria-* only (connect-
               // stepper visual review, 2026-09-03).
               aria-disabled={!clickable || undefined}
+              aria-current={state === "active" ? "step" : undefined}
               onClick={() => clickable && onStepClick(step.id, i)}
               title={labelMode === "active" ? step.label : undefined}
               className={cn(
@@ -96,11 +97,15 @@ export const Stepper: FC<StepperProps> = ({
               <span
                 className={cn(
                   "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold transition-all duration-200",
-                  state === "done" && "bg-emerald-500 text-white",
+                  // Contrast floors from specs/article-delivery-connect-flow.md §7:
+                  // white on emerald-500 is 2.54:1 and on brand-500 4.47:1, both
+                  // under AA; an upcoming circle on neutral-800 vanished on the
+                  // neutral-800 dialog panel in dark.
+                  state === "done" && "bg-emerald-600 text-white",
                   state === "active" &&
-                    "bg-brand-600 text-white ring-4 ring-brand-500/20 dark:bg-brand-500",
+                    "bg-brand-600 text-white ring-4 ring-brand-500/20",
                   state === "upcoming" &&
-                    "bg-neutral-100 text-neutral-400 dark:bg-neutral-800"
+                    "bg-neutral-100 text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300"
                 )}
               >
                 {step.locked ? (
@@ -117,7 +122,7 @@ export const Stepper: FC<StepperProps> = ({
                     "text-xs font-bold whitespace-nowrap",
                     state === "active"
                       ? "text-neutral-900 dark:text-white"
-                      : "text-neutral-400",
+                      : "text-neutral-500 dark:text-neutral-400",
                     clickable && "transition-colors group-hover:text-neutral-700 dark:group-hover:text-neutral-200"
                   )}
                 >

@@ -24,9 +24,12 @@ const useDefaultProvidersMock = vi.hoisted(() => vi.fn());
 const useAiSettingsQueryMock = vi.hoisted(() => vi.fn());
 const useCampaignFormMock = vi.hoisted(() => vi.fn());
 
+const connectedMock = vi.hoisted(() => ({ text: ["gemini", "openai"] as string[] }));
 vi.mock("@/features/settings", () => ({
   useLicense: useLicenseMock,
   useDefaultProviders: useDefaultProvidersMock,
+  // The provider advice reads the site's connected text providers.
+  useAiConnections: () => ({ textProviders: connectedMock.text }),
 }));
 vi.mock("@/features/ai-engine", () => ({
   useAiSettingsQuery: useAiSettingsQueryMock,
@@ -177,5 +180,231 @@ describe("<CampaignAiEngineSection> model tier picker", () => {
     expect(
       screen.queryByRole("button", { name: new RegExp(`\\(${GEMINI_TEXT_TOP}\\)`) }),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("<CampaignAiEngineSection> text provider row by plan (2026-10-01)", () => {
+  // Managed plans write with one lineup chosen by Structura: no text
+  // provider or text fallback picker. The image provider stays
+  // (specs/managed-ai-lineup.md §3.3).
+  it("managed: renders the image row only", () => {
+    setup({ isCloud: true });
+    expect(screen.queryByText("Text")).not.toBeInTheDocument();
+    expect(screen.getByText("Image")).toBeInTheDocument();
+    // One provider picker: the image row's.
+    expect(screen.getAllByText("Provider")).toHaveLength(1);
+    // Flipped 2026-10-02: managed plans show no fallback control at all,
+    // the image fallback included (it was the one left here before).
+    expect(screen.queryByText("Fallback")).not.toBeInTheDocument();
+  });
+
+  it("BYOK: renders both the text and the image row", () => {
+    setup({ isCloud: false });
+    expect(screen.getByText("Text")).toBeInTheDocument();
+    expect(screen.getByText("Image")).toBeInTheDocument();
+    expect(screen.getAllByText("Provider")).toHaveLength(2);
+  });
+});
+
+// ─── AI guidance: labels and advice (2026-10-02) ─────────────────────────────
+//
+// specs/byok-ai-guidance.md §5 (wp-admin): text provider options best first,
+// "Recommended" on the recommended provider (option and closed trigger) and on
+// the recommended text tier option (never its closed trigger); none on the
+// image row or the fallback. The provider advice sits after the text model and
+// before the text fallback, Switch sets provider + recommended tier, × writes
+// `aiAdvice.hidden` through the form.
+
+function setupGuidance(opts: {
+  textProvider: "gemini" | "openai" | "anthropic";
+  textTier?: "top" | "mid";
+  connected: string[];
+  fallbackTextProvider?: "gemini" | "openai" | "anthropic" | null;
+  aiAdvice?: { hidden: { textProvider: "gemini" | "openai" | "anthropic" } | null };
+}) {
+  const updateForm = vi.fn();
+  connectedMock.text = opts.connected;
+  useLicenseMock.mockReturnValue({ isLicensed: true, plan: "byok", isPaidLicense: true });
+  useDefaultProvidersMock.mockReturnValue({ isCloud: false, isProviderIncomplete: () => false });
+  useAiSettingsQueryMock.mockReturnValue({ data: { providers: {} } });
+  useCampaignFormMock.mockReturnValue({
+    formData: {
+      intelligence: {
+        textProvider: opts.textProvider,
+        imageProvider: "gemini",
+        textModel: getRegistryModelId(opts.textProvider, "text", opts.textTier ?? "mid"),
+        imageModel: getRegistryModelId("gemini", "image", "mid"),
+        textTier: opts.textTier ?? "mid",
+        imageTier: "mid",
+        fallbackTextProvider: opts.fallbackTextProvider ?? null,
+        fallbackImageProvider: null,
+      },
+      schedule: { pregenerationEnabled: true },
+      structure: { featuredImage: true, bodyImages: false },
+      ...(opts.aiAdvice ? { aiAdvice: opts.aiAdvice } : {}),
+    },
+    updateForm,
+  });
+
+  render(
+    <CampaignAiEngineSection
+      availableTextProviders={["gemini", "openai", "anthropic"]}
+      availableImageProviders={["gemini", "openai"]}
+    />,
+  );
+  return { updateForm };
+}
+
+describe("<CampaignAiEngineSection> AI guidance labels (2026-10-02)", () => {
+  it("orders text providers best first and labels Anthropic in the list and the closed trigger", () => {
+    setupGuidance({ textProvider: "anthropic", connected: ["anthropic", "openai", "gemini"] });
+
+    const trigger = screen.getByRole("button", { name: /^Claude/ });
+    expect(within(trigger).getByText("Recommended")).toBeInTheDocument();
+
+    fireEvent.click(trigger);
+    const options = within(screen.getByRole("listbox")).getAllByRole("option");
+    expect(options.map((o) => o.textContent)).toEqual(["Claude Recommended", "OpenAI", "Gemini"]);
+  });
+
+  it("labels the recommended text tier option but never the closed model trigger", () => {
+    setupGuidance({ textProvider: "openai", connected: ["openai", "gemini"] });
+    const OPENAI_MID = getRegistryModel("openai", "text", "mid")!.name;
+
+    // Closed trigger: the tier name only.
+    const tierTrigger = screen.getByRole("button", {
+      name: new RegExp(`Standard \\(${OPENAI_MID}\\)`),
+    });
+    expect(within(tierTrigger).queryByText("Recommended")).toBeNull();
+    // OpenAI is not the recommended provider: no chip on its trigger.
+    expect(within(screen.getByRole("button", { name: /^OpenAI/ })).queryByText("Recommended")).toBeNull();
+
+    fireEvent.click(tierTrigger);
+    const listbox = screen.getByRole("listbox");
+    expect(within(listbox).getByRole("option", { name: /Standard.*Recommended/ })).toBeInTheDocument();
+    expect(within(listbox).getByRole("option", { name: /^Top/ }).textContent).not.toContain(
+      "Recommended",
+    );
+  });
+
+  it("puts no label on the image row or the fallback select", () => {
+    setupGuidance({ textProvider: "anthropic", connected: ["anthropic", "openai", "gemini"] });
+
+    // One chip only: the closed Anthropic trigger.
+    expect(screen.getAllByText("Recommended")).toHaveLength(1);
+
+    // Text fallback options carry no chip.
+    fireEvent.click(screen.getAllByRole("button", { name: /None/ })[0]);
+    expect(within(screen.getByRole("listbox")).queryByText("Recommended")).toBeNull();
+  });
+});
+
+describe("<CampaignAiEngineSection> provider advice (2026-10-02)", () => {
+  it("shows the advice for Gemini text between the model and the fallback", () => {
+    setupGuidance({ textProvider: "gemini", connected: ["gemini", "openai"] });
+
+    const advice = screen.getByText("Gemini isn’t recommended for writing.");
+    const fallbackLabel = screen.getAllByText("Fallback")[0];
+    const modelLabel = screen.getAllByText("Model")[0];
+    // DOM order: model → advice → fallback.
+    expect(modelLabel.compareDocumentPosition(advice) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(advice.compareDocumentPosition(fallbackLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("Switch sets provider, recommended tier and model, and clears an equal fallback", () => {
+    const { updateForm } = setupGuidance({
+      textProvider: "gemini",
+      connected: ["gemini", "openai"],
+      textTier: "top",
+      fallbackTextProvider: "openai",
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Switch to OpenAI" }));
+    expect(updateForm).toHaveBeenCalledWith("intelligence", {
+      textProvider: "openai",
+      textTier: "mid",
+      textModel: getRegistryModelId("openai", "text", "mid"),
+      fallbackTextProvider: null,
+    });
+  });
+
+  it("× writes aiAdvice.hidden for the current provider, marked to save", () => {
+    const { updateForm } = setupGuidance({ textProvider: "gemini", connected: ["gemini", "openai"] });
+
+    fireEvent.click(screen.getByRole("button", { name: "Hide this advice for this campaign" }));
+    expect(updateForm).toHaveBeenCalledWith("aiAdvice", {
+      hidden: { textProvider: "gemini" },
+      dirty: true,
+    });
+  });
+
+  it("a campaign hidden for Gemini opens collapsed; Show advice marks it to save", () => {
+    const { updateForm } = setupGuidance({
+      textProvider: "gemini",
+      connected: ["gemini", "openai"],
+      aiAdvice: { hidden: { textProvider: "gemini" } },
+    });
+
+    expect(screen.queryByRole("button", { name: "Switch to OpenAI" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Show advice" }));
+    expect(updateForm).toHaveBeenCalledWith("aiAdvice", { hidden: null, dirty: true });
+  });
+
+  it("an old campaign without aiAdvice (older cloud or plugin) shows the advice open", () => {
+    setupGuidance({ textProvider: "gemini", connected: ["gemini", "openai"] });
+    expect(screen.getByRole("button", { name: "Switch to OpenAI" })).toBeInTheDocument();
+  });
+
+  it("managed plans see no advice and no labels", () => {
+    setup({ isCloud: true });
+    expect(screen.queryByText("Gemini isn’t recommended for writing.")).toBeNull();
+    expect(screen.queryByText("Recommended")).toBeNull();
+  });
+});
+
+describe("<CampaignAiEngineSection> fallback controls on managed plans (2026-10-02)", () => {
+  // Managed plans: the image provider choice stays, every fallback control
+  // and the fallback footnote go; a stored fallback is left untouched.
+  const FOOTNOTE = /we'll retry once through the fallback/;
+
+  it("managed: no image fallback, no footnote, stored image fallback not cleared", () => {
+    const updateForm = vi.fn();
+    connectedMock.text = [];
+    useLicenseMock.mockReturnValue({ isLicensed: true, plan: "cloud_pro", isPaidLicense: true });
+    useDefaultProvidersMock.mockReturnValue({ isCloud: true, isProviderIncomplete: () => false });
+    useAiSettingsQueryMock.mockReturnValue({ data: { providers: {} } });
+    useCampaignFormMock.mockReturnValue({
+      formData: {
+        intelligence: {
+          textProvider: "gemini",
+          imageProvider: "gemini",
+          textModel: "",
+          imageModel: "",
+          fallbackTextProvider: null,
+          fallbackImageProvider: "openai",
+        },
+        schedule: { pregenerationEnabled: true },
+        structure: { featuredImage: true, bodyImages: false },
+      },
+      updateForm,
+    });
+    render(
+      <CampaignAiEngineSection
+        availableTextProviders={["gemini", "openai", "anthropic"]}
+        availableImageProviders={["gemini", "openai"]}
+      />,
+    );
+
+    expect(screen.getByText("Image")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Gemini/ })).toBeInTheDocument();
+    expect(screen.queryByText("Fallback")).not.toBeInTheDocument();
+    expect(screen.queryByText(FOOTNOTE)).not.toBeInTheDocument();
+    expect(updateForm).not.toHaveBeenCalled();
+  });
+
+  it("BYOK keeps both fallback controls and the footnote", () => {
+    setup({});
+    expect(screen.getAllByText("Fallback")).toHaveLength(2);
+    expect(screen.getByText(FOOTNOTE)).toBeInTheDocument();
   });
 });

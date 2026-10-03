@@ -82,13 +82,16 @@ export const Account = () => {
       theme:
         "text-violet-600 bg-violet-50 ring-violet-100 dark:text-violet-400 dark:bg-violet-950/30 dark:ring-violet-900/50",
     },
-    // Cloud Pro: top-tier managed plan with per-post model swaps and
-    // bundled Channels. Uses amber to distinguish from Cloud's violet in
-    // the dashboard — see specs/design-guide.md on premium-tier accents.
+    // Cloud Pro: the larger managed plan (more posts and images per site,
+    // AI video, bundled Channels, dedicated support). Since 2026-10-01 both
+    // managed plans share one AI lineup, so the model is no longer the
+    // difference (specs/managed-ai-lineup.md §5). Uses amber to distinguish
+    // from Cloud's violet in the dashboard — see specs/design-guide.md on
+    // premium-tier accents.
     cloud_pro: {
       title: __("Cloud Pro Architect", "structura"),
       desc: __(
-        "Top-tier managed AI models with per-post model swaps and bundled Channels distribution.",
+        "More posts and images per site, AI video, bundled Channels distribution and a dedicated support channel.",
         "structura"
       ),
       icon: <Award className="h-7 w-7" />,

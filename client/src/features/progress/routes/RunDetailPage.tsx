@@ -25,7 +25,8 @@ import type { BadgeProps } from "@structura/ui";
 import { Badge, Button, cn, PageLoader } from "@structura/ui";
 import { PageContainer } from "@/components/Layout/PageContainer";
 import { PageTitle } from "@/components/Layout/PageTitle";
-import type { RunStatusSerialized } from "@structura/types";
+import { isManagedPlan, type PlanId, type RunStatusSerialized } from "@structura/types";
+import { useLicense } from "@/features/settings/api/useLicense";
 import { useCampaignRunQuery } from "../api/useCampaignRunQuery";
 import { milestoneHeadline, milestoneOrderForFlow } from "../milestones";
 import { formatDuration } from "../formatDuration";
@@ -362,6 +363,11 @@ export function authorityChipLabel(a: { url?: unknown; title?: unknown }): strin
 
 const RunInputsCard = ({ run }: { run: RunStatusSerialized }) => {
   const inputs = run.inputs;
+  // Managed plans never see provider or model names; the cloud stops
+  // writing `inputs.providers` for them, but runs written before still
+  // carry them (spec: specs/managed-ai-lineup.md §3.3).
+  const { plan } = useLicense();
+  const isManaged = isManagedPlan(plan as PlanId);
   // Pre-inputs-snapshot fallback: runs older than this feature's ship
   // date don't have an `inputs` blob. Render a calm empty state so the
   // card doesn't look broken. Once the 30d TTL window has elapsed this
@@ -398,10 +404,13 @@ const RunInputsCard = ({ run }: { run: RunStatusSerialized }) => {
 
   const hasKeywords = (inputs.keywords?.length ?? 0) > 0;
   const hasPersona = !!personaId;
-  const textProvider = inputs.providers?.text;
-  const imageProvider = inputs.providers?.image;
-  const textFallback = inputs.fallbackProviders?.text;
-  const imageFallback = inputs.fallbackProviders?.image;
+  // A slot with a blank provider id renders no row on any plan.
+  const shownSlot = <T extends { id: string }>(slot: T | undefined): T | undefined =>
+    !isManaged && slot?.id ? slot : undefined;
+  const textProvider = shownSlot(inputs.providers?.text);
+  const imageProvider = shownSlot(inputs.providers?.image);
+  const textFallback = shownSlot(inputs.fallbackProviders?.text);
+  const imageFallback = shownSlot(inputs.fallbackProviders?.image);
   const hasAnyProvider = textProvider || imageProvider || textFallback || imageFallback;
   const hasAudience = !!inputs.targetAudience;
   const hasRhythm = !!inputs.rhythm;
@@ -564,7 +573,7 @@ const ProviderRow = ({
 }: {
   slotLabel: string;
   providerId: string;
-  model: string;
+  model?: string;
   secondary?: boolean;
 }) => {
   const name = PROVIDER_LABELS[providerId] ?? providerId;
@@ -577,10 +586,15 @@ const ProviderRow = ({
     >
       <span className="text-xs font-medium text-neutral-500">{slotLabel}</span>
       <span className="text-xs font-bold dark:text-neutral-200">
-        {name}{" "}
-        <span className="font-mono text-[11px] font-normal text-neutral-500 dark:text-neutral-400">
-          ({model})
-        </span>
+        {name}
+        {model && (
+          <>
+            {" "}
+            <span className="font-mono text-[11px] font-normal text-neutral-500 dark:text-neutral-400">
+              ({model})
+            </span>
+          </>
+        )}
       </span>
     </div>
   );

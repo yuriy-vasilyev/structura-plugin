@@ -1,6 +1,8 @@
 import type { AIProvider } from "@structura/types";
 import type { CatalogModel, ModelManifest, ModelRole, ModelTier } from "./types";
 import { MODELS } from "./model-data";
+import { FROZEN_FAST_TEXT_MODELS, FROZEN_RECOMMENDED_IMAGE_MODELS } from "./frozen";
+import { RECOMMENDATIONS } from "./recommendations";
 
 /**
  * One entry as served on `MODEL_CATALOG[provider].text/image`. Flags appear
@@ -29,10 +31,10 @@ export type ModelCatalog = Record<AIProvider, ProviderCatalog>;
 /** Fixed provider order — preserved into the served object for stable output. */
 const PROVIDER_ORDER: readonly AIProvider[] = ["openai", "gemini", "anthropic"];
 
-function toEntry(m: CatalogModel): CatalogModelEntry {
+function toEntry(m: CatalogModel, recommendedId: string | undefined): CatalogModelEntry {
   const entry: CatalogModelEntry = { id: m.id, name: m.name };
   if (m.default) entry.default = true;
-  if (m.recommended) entry.recommended = true;
+  if (m.id === recommendedId) entry.recommended = true;
   if (m.fast) entry.fast = true;
   if (m.warning !== undefined) entry.warning = m.warning;
   return entry;
@@ -42,8 +44,9 @@ function buildProvider(provider: AIProvider): ProviderCatalog {
   // Only text + image models are served to plugin pickers — `tts` is
   // registry-only, so it never leaks into defaults / arrays / manifest and the
   // wire contract stays byte-identical.
+  // `unlisted` entries (known, not offered) stay out the same way.
   const models = MODELS.filter(
-    (m) => m.provider === provider && (m.role === "text" || m.role === "image"),
+    (m) => m.provider === provider && (m.role === "text" || m.role === "image") && !m.unlisted,
   );
   const text = models.filter((m) => m.role === "text");
   const image = models.filter((m) => m.role === "image");
@@ -51,16 +54,27 @@ function buildProvider(provider: AIProvider): ProviderCatalog {
   const manifest: Record<string, ModelManifest> = {};
   for (const m of models) manifest[m.id] = m.manifest;
 
+  // Text `recommended` is derived from RECOMMENDATIONS since 2026-10-01:
+  // the recommended tier's model for Anthropic and OpenAI, nothing for
+  // Gemini (specs/byok-ai-guidance.md §2, §3). Image `recommended` stays
+  // the frozen legacy value so old clients preselect the same image model.
+  const textTier = RECOMMENDATIONS.text.model[provider];
+  const recommendedText = textTier ? text.find((m) => m.tier === textTier)?.id : undefined;
+  const recommendedImage = FROZEN_RECOMMENDED_IMAGE_MODELS[provider];
+
   return {
     // Empty-string image default for image-less providers (Anthropic) matches
     // the historical hand-authored catalog.
     defaults: {
       text: text.find((m) => m.default)?.id ?? "",
-      fast: text.find((m) => m.fast)?.id ?? "",
+      // Frozen at the pre-refresh fast models (frozen.ts): the superseded
+      // OpenAI and Gemini ones are unlisted now, so no listed entry carries
+      // their `fast` flag.
+      fast: FROZEN_FAST_TEXT_MODELS[provider],
       image: image.find((m) => m.default)?.id ?? "",
     },
-    text: text.map(toEntry),
-    image: image.map(toEntry),
+    text: text.map((m) => toEntry(m, recommendedText)),
+    image: image.map((m) => toEntry(m, recommendedImage)),
     manifest,
   };
 }
@@ -76,8 +90,10 @@ export const MODEL_CATALOG: ModelCatalog = Object.fromEntries(
 ) as ModelCatalog;
 
 /**
- * Single source of truth for default model ids per provider and role. Used by
- * the cloud engine for tier model resolution.
+ * The served default model id per provider and role: `text` is the Standard
+ * tier (the BYOK post default), `fast` the frozen fast model, `image` the
+ * image role default. Prefer the named bindings in `bindings.ts`, which say
+ * what a caller means.
  */
 export function getDefaultModel(
   provider: AIProvider,
@@ -87,14 +103,9 @@ export function getDefaultModel(
 }
 
 /**
- * The provider's quality-top text model — what BYOK suggestion calls route to
- * and what the SPA tags with a "Recommended" pill. Returns the entry flagged
- * `recommended`, falling back to the catalog default when none is marked.
- *
- * Why separate from {@link getDefaultModel}: for Anthropic, `default` lands on
- * Sonnet (mid) so existing BYOK saves keep working, while `recommended` is Opus
- * (top) — the model we want driving suggestions. For OpenAI and Gemini the two
- * point at the same entry.
+ * The served `recommended` text entry (derived from `RECOMMENDATIONS`), else
+ * the provider's default. No cloud caller reads it since 2026-10-01:
+ * suggestions resolve through the frozen `resolveSuggestionModelId`.
  */
 export function getRecommendedModel(provider: AIProvider, role: "text"): string {
   const recommended = MODEL_CATALOG[provider][role].find((m) => m.recommended);
@@ -159,7 +170,8 @@ export function getRegistryModel(
  * or `undefined` for a retired/unknown id. Legacy campaigns (pre-tier rollout)
  * store only a concrete model — pickers use this to open on the tier that
  * matches the stored model instead of assuming one, so a legacy Standard-model
- * campaign is never displayed (or silently re-saved) as Top.
+ * campaign is never displayed (or silently re-saved) as Top. A superseded id
+ * answers the tier it held (`supersededTier`), the tier it now runs on.
  */
 export function tierForModelId(
   provider: AIProvider,
@@ -167,9 +179,10 @@ export function tierForModelId(
   modelId: string | null | undefined,
 ): ModelTier | undefined {
   if (!modelId) return undefined;
-  return MODELS.find(
-    (m) => m.provider === provider && m.role === role && m.id === modelId,
-  )?.tier;
+  const m = MODELS.find(
+    (x) => x.provider === provider && x.role === role && x.id === modelId,
+  );
+  return m?.tier ?? m?.supersededTier;
 }
 
 /**

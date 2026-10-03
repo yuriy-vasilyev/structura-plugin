@@ -44,6 +44,13 @@ vi.mock("@/features/progress/api/useCampaignRunQuery", () => ({
   useCampaignRunQuery: () => runQueryMock.current,
 }));
 
+// Plan is swappable: managed plans hide the text provider and every model
+// name (2026-10-01, specs/managed-ai-lineup.md §3.3). Default BYOK.
+const licenseMock = vi.hoisted(() => ({ plan: "byok" }));
+vi.mock("@/features/settings/api/useLicense", () => ({
+  useLicense: () => ({ plan: licenseMock.plan, hasUsableLicense: true, hasWorkspace: true }),
+}));
+
 const generatePostMock = vi.hoisted(() => vi.fn());
 vi.mock("@/features/campaigns/api/useCampaignMutations", () => ({
   useCampaignMutations: () => ({
@@ -91,6 +98,7 @@ vi.mock("@structura/ui", () => {
       <button {...(p as Record<string, never>)}>{children as never}</button>
     ),
     cn: (...a: unknown[]) => a.filter(Boolean).join(" "),
+    getProviderLogo: () => null,
     Dialog: {
       // Render children only while open, under a `dialog` role so tests can
       // scope queries to the confirmation.
@@ -128,6 +136,7 @@ const makeRun = (over: Record<string, unknown>) => ({
 beforeEach(() => {
   navigateMock.mockReset();
   generatePostMock.mockReset();
+  licenseMock.plan = "byok";
 });
 
 describe("SinglePostRunDetailPage — success banner (#10)", () => {
@@ -307,5 +316,51 @@ describe("SinglePostRunDetailPage — research files echo (2026-08-01)", () => {
     await waitFor(() =>
       expect(generatePostMock).toHaveBeenCalledWith({ data: snapshotWithResearch }),
     );
+  });
+});
+
+describe("SinglePostRunDetailPage — provider and model names by plan (2026-10-01)", () => {
+  // Managed plans write with one lineup chosen by Structura: the customer
+  // never sees the text provider or any model name. The image provider is
+  // their own choice and stays (specs/managed-ai-lineup.md §3.3).
+  const snapshotWithProviders = {
+    identity: { objective: "A topic long enough to pass" },
+    structure: { postStatus: "publish" },
+    intelligence: {
+      textProvider: "openai",
+      textModel: "gpt-x",
+      imageProvider: "gemini",
+      imageModel: "imagen-x",
+    },
+  };
+
+  it("BYOK: shows the text provider, and provider · model rows in Run again", async () => {
+    runQueryMock.current = makeRun({ inputSnapshot: snapshotWithProviders });
+    render(<SinglePostRunDetailPage />);
+
+    expect(screen.getByText("Text provider")).toBeInTheDocument();
+    expect(screen.getByText("openai")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Run again/ }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("OpenAI · GPT-X")).toBeInTheDocument();
+    expect(within(dialog).getByText("Gemini · imagen-x")).toBeInTheDocument();
+  });
+
+  it("managed: no text provider and no model names, image provider kept", async () => {
+    licenseMock.plan = "cloud_pro";
+    runQueryMock.current = makeRun({ inputSnapshot: snapshotWithProviders });
+    render(<SinglePostRunDetailPage />);
+
+    expect(screen.queryByText("Text provider")).toBeNull();
+    expect(screen.queryByText("openai")).toBeNull();
+    expect(screen.getByText("Image provider")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Run again/ }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).queryByText("Text provider")).toBeNull();
+    expect(within(dialog).queryByText(/OpenAI|GPT-X|gpt-x|imagen-x/)).toBeNull();
+    // Image row: provider name only.
+    expect(within(dialog).getByText("Gemini")).toBeInTheDocument();
   });
 });

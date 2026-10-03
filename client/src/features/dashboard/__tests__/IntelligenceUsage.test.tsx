@@ -87,6 +87,10 @@ beforeEach(() => {
 // Threshold tests pass empty `activations` and no `activation_id`
 // config — the back-compat fallback path — so they exercise the rail
 // rules off the workspace numbers without caring about row matching.
+//
+// These fixtures carry no `postsUsed` / `postsIncluded`: they are the
+// response of a cloud deployed before 2026-10-01, which still meters
+// managed plans by tokens. The posts-quota cases are further down.
 function managedFixture(
   percent: number,
   opts: {
@@ -256,6 +260,109 @@ describe("IntelligenceUsage — managed cycle (per-activation scope)", () => {
 
     expect(screen.getByText("44% Used")).toBeTruthy();
     expect(screen.queryByText(/By site/)).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+//  managed branch — posts quota (cloud deployed after 2026-10-01)
+// ---------------------------------------------------------------------------
+
+describe("IntelligenceUsage — managed cycle (posts quota, 2026-10-01)", () => {
+  // Managed plans are metered by posts per site per month; tokens are
+  // still on the wire for old clients but no longer a quota
+  // (specs/managed-ai-lineup.md §4).
+  const postsFixture = () => ({
+    success: true,
+    plan: "cloud" as const,
+    cycleUsage: {
+      kind: "managed",
+      cycleMonth: "2026-10",
+      cycleResetsAt: Date.parse("2026-11-01T00:00:00Z"),
+      daysLeftInCycle: 20,
+      unmetered: false,
+      workspace: {
+        tokensUsed: 3_400_000,
+        tokensIncluded: 4_000_000,
+        imagesUsed: 30,
+        imagesIncluded: 180,
+        postsUsed: 30,
+        postsIncluded: 60,
+        utilizationPercent: 50,
+      },
+      activations: [
+        {
+          activationId: "act-sibling",
+          label: "sibling-site.example",
+          tokensUsed: 2_000_000,
+          tokensIncluded: 2_000_000,
+          imagesUsed: 18,
+          imagesIncluded: 90,
+          postsUsed: 18,
+          postsIncluded: 30,
+          utilizationPercent: 60,
+        },
+        {
+          activationId: "act-own",
+          label: "own-site.example",
+          tokensUsed: 1_400_000,
+          tokensIncluded: 2_000_000,
+          imagesUsed: 12,
+          imagesIncluded: 90,
+          postsUsed: 12,
+          postsIncluded: 30,
+          utilizationPercent: 40,
+        },
+      ],
+    },
+  });
+
+  it("renders THIS site's posts used of posts included, not tokens", () => {
+    useLicenseMock.mockReturnValue({ plan: "cloud" });
+    setActivationId("act-own");
+    setHook(postsFixture());
+
+    const { container } = render(
+      <Wrap>
+        <IntelligenceUsage />
+      </Wrap>,
+    );
+
+    expect(screen.getByText("40% Used")).toBeTruthy();
+    expect(screen.getByText("12")).toBeTruthy();
+    expect(screen.getByText(/\/ 30 posts/)).toBeTruthy();
+    expect(screen.getByText("12 / 90 images this cycle")).toBeTruthy();
+    expect(container.textContent).not.toMatch(/tokens/i);
+    expect(screen.queryByText("1.4M")).toBeNull();
+    expect(container.querySelector(".border-l-purple-500")).toBeTruthy();
+  });
+
+  it("falls back to the workspace posts when the own row can't be matched", () => {
+    useLicenseMock.mockReturnValue({ plan: "cloud" });
+    setActivationId(undefined);
+    setHook(postsFixture());
+
+    render(
+      <Wrap>
+        <IntelligenceUsage />
+      </Wrap>,
+    );
+
+    expect(screen.getByText("50% Used")).toBeTruthy();
+    expect(screen.getByText(/\/ 60 posts/)).toBeTruthy();
+  });
+
+  it("old cloud response (no posts fields) keeps the token display", () => {
+    useLicenseMock.mockReturnValue({ plan: "cloud" });
+    setHook(managedFixture(47));
+
+    render(
+      <Wrap>
+        <IntelligenceUsage />
+      </Wrap>,
+    );
+
+    expect(screen.getByText(/tokens/)).toBeTruthy();
+    expect(screen.queryByText(/posts/)).toBeNull();
   });
 });
 

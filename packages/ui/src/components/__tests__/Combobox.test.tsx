@@ -135,6 +135,20 @@ describe("Combobox", () => {
       );
     });
 
+    // 2026-10-01: a single header-less group (the managed voice list) drew a
+    // divider with nothing above it.
+    it("draws the header-less group's divider only below another group", () => {
+      renderCombobox({ groups: [{ ...GROUPS[0], hideHeader: true }] });
+      openPopover();
+      expect(screen.getByRole("listbox").querySelectorAll('[role="presentation"]')).toHaveLength(0);
+    });
+
+    it("keeps the divider when a header-less group follows another group", () => {
+      renderCombobox({ groups: [GROUPS[0], { ...GROUPS[1], hideHeader: true }] });
+      openPopover();
+      expect(screen.getByRole("listbox").querySelectorAll('[role="presentation"]')).toHaveLength(1);
+    });
+
     it("honors an explicit group count over options.length", () => {
       renderCombobox({ groups: [{ ...GROUPS[0], count: 9 }] });
       const listbox = openPopover();

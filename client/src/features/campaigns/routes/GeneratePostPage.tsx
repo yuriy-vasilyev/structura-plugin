@@ -31,7 +31,8 @@ import { PageDescription } from "@/components/Layout/PageSubtitle";
 import { DefaultPersonaAdvisory } from "@/components/Shared/DefaultPersonaAdvisory";
 import { NoPersonasBlocker } from "@/components/Shared/NoPersonasBlocker";
 import { ProviderToggle } from "@/features/campaigns/components/ProviderToggle";
-import { mirrorModelForTier } from "@/features/campaigns/modelTier";
+import { ProviderAdvice } from "@/features/campaigns/components/ProviderAdvice";
+import { mirrorModelForTier, type ModelTier } from "@/features/campaigns/modelTier";
 import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutations";
 import { useSingleGenQuota } from "@/features/campaigns/api/useSingleGenQuota";
 import {
@@ -234,6 +235,16 @@ const GeneratePostPage = () => {
   // "Cloud Pro gets a per-post picker" differentiator, which the server
   // stopped honoring in b682d66bd). Only BYOK-style plans choose models.
   const showPerPostModelPicker = !isManagedAiPlan;
+  // Managed plans store and send no concrete model (specs/managed-ai-lineup.md
+  // §3.3). The text provider stays on the form, hidden: the plugin's
+  // /post/generate requires one and the cloud keeps it for utility calls.
+  // Both the pre-2026-10-01 cloud (resolves the model from plan + provider)
+  // and the current one (one managed writer) ignore a managed model anyway.
+  const mirrorModel = (
+    provider: AIProvider,
+    capability: "text" | "image",
+    tier: ModelTier
+  ): string => (isManagedAiPlan ? "" : (mirrorModelForTier(provider, capability, tier) ?? ""));
 
   // Initialize form with license-aware defaults. The one-off "Generate a Post"
   // flow uses the SAME top/mid tier picker as the campaign form (BYOK/free),
@@ -284,10 +295,8 @@ const GeneratePostPage = () => {
         ...prev.intelligence,
         textProvider: defaultTextProvider,
         imageProvider: defaultImageProvider,
-        textModel:
-          mirrorModelForTier(defaultTextProvider, "text", prev.intelligence.textTier ?? "mid") ?? "",
-        imageModel:
-          mirrorModelForTier(defaultImageProvider, "image", prev.intelligence.imageTier ?? "mid") ?? "",
+        textModel: mirrorModel(defaultTextProvider, "text", prev.intelligence.textTier ?? "mid"),
+        imageModel: mirrorModel(defaultImageProvider, "image", prev.intelligence.imageTier ?? "mid"),
       },
     }));
   }, [
@@ -624,14 +633,13 @@ const GeneratePostPage = () => {
           onTextProviderChange={(p) =>
             update("intelligence", {
               textProvider: p,
-              textModel: mirrorModelForTier(p, "text", formData.intelligence.textTier ?? "mid") ?? "",
+              textModel: mirrorModel(p, "text", formData.intelligence.textTier ?? "mid"),
             })
           }
           onImageProviderChange={(p) =>
             update("intelligence", {
               imageProvider: p,
-              imageModel:
-                mirrorModelForTier(p, "image", formData.intelligence.imageTier ?? "mid") ?? "",
+              imageModel: mirrorModel(p, "image", formData.intelligence.imageTier ?? "mid"),
             })
           }
           availableTextProviders={
@@ -655,6 +663,31 @@ const GeneratePostPage = () => {
                 mirrorModelForTier(formData.intelligence.imageProvider, "image", t) ?? "",
             })
           }
+        />
+
+        {/* Provider advice for a caution text provider (Free / BYOK only).
+            No hide control on this page (cut for v1). Spec:
+            specs/byok-ai-guidance.md §5. */}
+        <ProviderAdvice
+          provider={formData.intelligence.textProvider}
+          onSwitch={(to, tier) => {
+            const previous = {
+              textProvider: formData.intelligence.textProvider,
+              textTier: formData.intelligence.textTier,
+              textModel: formData.intelligence.textModel,
+            };
+            update("intelligence", {
+              textProvider: to,
+              textTier: tier,
+              textModel: mirrorModel(to, "text", tier),
+            });
+            return () => {
+              update("intelligence", previous);
+              document
+                .querySelector<HTMLElement>(`[data-text-provider="${previous.textProvider}"]`)
+                ?.focus();
+            };
+          }}
         />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -28,6 +28,8 @@ import { MemoryRouter, Route, Routes } from "react-router";
 
 vi.mock("@wordpress/i18n", () => ({
   __: (t: string) => t,
+  // The provider advice and "Recommended" labels use `_x` (context "ai advice").
+  _x: (t: string) => t,
   _n: (single: string, plural: string, n: number) => (n === 1 ? single : plural),
   sprintf: (format: string, ...args: unknown[]) => {
     let i = 0;

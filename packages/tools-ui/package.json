@@ -1,0 +1,73 @@
+{
+  "name": "@structura/tools-ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "The free SEO tools' UI, shared by the marketing site and the customer portal: tool form, report frame, the SEO, DR and keyword reports, the pure result helpers and the run-state hook. Source-only; consumers transpile it. Spec: specs/blogseo-gap-analysis.md §4.9.4.",
+  "exports": {
+    "./types": {
+      "types": "./src/lib/types.ts",
+      "import": "./src/lib/types.ts"
+    },
+    "./response": {
+      "types": "./src/lib/response.ts",
+      "import": "./src/lib/response.ts"
+    },
+    "./format": {
+      "types": "./src/lib/format.ts",
+      "import": "./src/lib/format.ts"
+    },
+    "./score": {
+      "types": "./src/lib/score.ts",
+      "import": "./src/lib/score.ts"
+    },
+    "./keywords": {
+      "types": "./src/lib/keywords.ts",
+      "import": "./src/lib/keywords.ts"
+    },
+    "./tasks": {
+      "types": "./src/lib/tasks.ts",
+      "import": "./src/lib/tasks.ts"
+    },
+    "./links": {
+      "types": "./src/lib/links.ts",
+      "import": "./src/lib/links.ts"
+    },
+    "./learn": {
+      "types": "./src/lib/learn.ts",
+      "import": "./src/lib/learn.ts"
+    },
+    "./validate": {
+      "types": "./src/lib/validate.ts",
+      "import": "./src/lib/validate.ts"
+    },
+    "./tool-ui": {
+      "types": "./src/ToolUi.tsx",
+      "import": "./src/ToolUi.tsx"
+    },
+    "./use-tool-run": {
+      "types": "./src/useToolRun.ts",
+      "import": "./src/useToolRun.ts"
+    },
+    "./seo-checker": {
+      "types": "./src/SeoChecker.tsx",
+      "import": "./src/SeoChecker.tsx"
+    },
+    "./domain-rating-checker": {
+      "types": "./src/DomainRatingChecker.tsx",
+      "import": "./src/DomainRatingChecker.tsx"
+    },
+    "./keyword-generator": {
+      "types": "./src/KeywordGenerator.tsx",
+      "import": "./src/KeywordGenerator.tsx"
+    }
+  },
+  "peerDependencies": {
+    "react": "^18.3.1"
+  },
+  "dependencies": {
+    "@structura/i18n-contracts": "workspace:*",
+    "@structura/ui": "workspace:*",
+    "lucide-react": "^0.539.0"
+  }
+}

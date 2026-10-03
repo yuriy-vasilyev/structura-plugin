@@ -748,4 +748,42 @@ class Campaign_Shape_Transformer_Test extends TestCase
         $this->assertNull($wp['identity']['campaignModeSource']);
         $this->assertNull($wp['identity']['setupRationale']);
     }
+
+    /**
+     * Provider advice hidden / shown again (2026-10-02,
+     * specs/byok-ai-guidance.md §4): forwarded as `aiAdvice` only when the
+     * SPA sent `ai_advice`; the cloud stamps `at` / `by` itself.
+     */
+    public function test_ai_advice_hide_and_show_are_forwarded_only_when_sent()
+    {
+        $hide = Campaign_Shape_Transformer::wp_input_to_cloud([
+            'name'      => 'X',
+            'ai_advice' => ['hidden' => ['textProvider' => 'gemini', 'at' => 'spoofed', 'by' => 'spoofed']],
+        ]);
+        $this->assertSame(['hidden' => ['textProvider' => 'gemini']], $hide['aiAdvice']);
+
+        $show = Campaign_Shape_Transformer::wp_input_to_cloud(['name' => 'X', 'ai_advice' => ['hidden' => null]]);
+        $this->assertSame(['hidden' => null], $show['aiAdvice']);
+
+        $untouched = Campaign_Shape_Transformer::wp_input_to_cloud(['name' => 'X']);
+        $this->assertArrayNotHasKey('aiAdvice', $untouched);
+
+        $malformed = Campaign_Shape_Transformer::wp_input_to_cloud([
+            'name'      => 'X',
+            'ai_advice' => ['hidden' => ['textProvider' => 'mistral']],
+        ]);
+        $this->assertArrayNotHasKey('aiAdvice', $malformed);
+    }
+
+    public function test_cloud_to_wp_reads_ai_advice_and_old_cloud_docs_without_it()
+    {
+        $hidden = Campaign_Shape_Transformer::cloud_to_wp([
+            'campaignId' => 'c',
+            'aiAdvice'   => ['hidden' => ['textProvider' => 'gemini', 'at' => '2026-10-02T08:00:00Z', 'by' => 'uid']],
+        ]);
+        $this->assertSame(['hidden' => ['textProvider' => 'gemini']], $hidden['aiAdvice']);
+
+        $old = Campaign_Shape_Transformer::cloud_to_wp(['campaignId' => 'c']);
+        $this->assertNull($old['aiAdvice']);
+    }
 }

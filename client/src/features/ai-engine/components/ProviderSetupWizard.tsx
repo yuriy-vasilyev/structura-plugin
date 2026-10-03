@@ -132,7 +132,11 @@ export const ProviderSetupWizard = ({
   // When the tier forces defaults, the toggles are always on and
   // user clicks are ignored. Initial values still seed the displayed
   // checked state in the non-forced case.
-  const [setDefaultText, setSetDefaultText] = useState(!isConnected || isDefaultText);
+  // 2026-10-02: the text toggle no longer starts on for a new connection.
+  // Left pre-checked, it saved an explicit default the customer never
+  // chose, which then outranked the best connected provider
+  // (specs/byok-ai-guidance.md §9). Only switching it on writes one.
+  const [setDefaultText, setSetDefaultText] = useState(isDefaultText);
   const [setDefaultImage, setSetDefaultImage] = useState(!isConnected || isDefaultImage);
   const effectiveDefaultText = forceDefaults ? true : setDefaultText;
   const effectiveDefaultImage = forceDefaults ? true : setDefaultImage;

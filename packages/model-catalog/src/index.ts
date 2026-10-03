@@ -11,3 +11,4 @@ export { MODELS } from "./model-data";
 export * from "./catalog";
 export * from "./bindings";
 export * from "./pricing";
+export * from "./recommendations";

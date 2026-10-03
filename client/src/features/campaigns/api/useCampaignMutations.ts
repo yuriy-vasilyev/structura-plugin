@@ -185,6 +185,10 @@ export const flattenCampaign = (data: CampaignFormData) => {
     // carry whatever the form has (client can't know server plan rules for
     // every edge case, so the server remains the source of truth).
     fallback_text_provider: intelligence.fallbackTextProvider ?? "",
+    // Provider advice hidden / shown again — sent only when the user changed
+    // it in this form, so a save never re-stamps or wipes the stored value
+    // (specs/byok-ai-guidance.md §4).
+    ...(data.aiAdvice?.dirty ? { ai_advice: { hidden: data.aiAdvice.hidden } } : {}),
     fallback_image_provider: intelligence.fallbackImageProvider ?? "",
     persona_id: intelligence.personaId,
     language: intelligence.language,

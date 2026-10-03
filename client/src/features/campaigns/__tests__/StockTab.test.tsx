@@ -257,4 +257,48 @@ describe("<StockTab>", () => {
       screen.queryByText(/Pre-generation paused/i),
     ).not.toBeInTheDocument();
   });
+
+  // 2026-10-01: managed plans never see a model name or provider advice
+  // (specs/managed-ai-lineup.md §3.3); BYOK keeps both.
+  it("shows the model subtitle on a BYOK entry", () => {
+    setup({ isCloud: false, entries: [makeEntry()] });
+    render(<StockTab campaign={makeCampaign(true)} />);
+
+    expect(screen.getByText(/gemini-3\.1-pro-preview/)).toBeInTheDocument();
+  });
+
+  it("hides the model subtitle on a managed entry, including an older one that still carries it", () => {
+    setup({ isCloud: true, entries: [makeEntry()] });
+    render(<StockTab campaign={makeCampaign(true)} />);
+
+    expect(screen.getByText("Stocked Post")).toBeInTheDocument();
+    expect(screen.queryByText(/gemini-3\.1-pro-preview/)).not.toBeInTheDocument();
+  });
+
+  it("renders no model separator when the cloud sends a blank model (BYOK)", () => {
+    setup({ isCloud: false, entries: [makeEntry({ textModel: "" })] });
+    const { container } = render(<StockTab campaign={makeCampaign(true)} />);
+
+    expect(container.textContent).not.toMatch(/ · $/m);
+    expect(screen.queryByText(/·/)).not.toBeInTheDocument();
+  });
+
+  it("drops the switch-provider advice from the paused banner on managed plans", () => {
+    const pregen = {
+      paused: true,
+      reason: "failure_cap" as const,
+      failureCount: 12,
+      failureCap: 10,
+      resetsAt: null,
+    };
+    setup({ isCloud: true, entries: [], pregen });
+    const { unmount } = render(<StockTab campaign={makeCampaign(true)} />);
+    expect(screen.getByText(/Pre-generation paused — provider errors/i)).toBeInTheDocument();
+    expect(screen.queryByText(/switching this campaign's AI provider/i)).not.toBeInTheDocument();
+    unmount();
+
+    setup({ isCloud: false, entries: [], pregen });
+    render(<StockTab campaign={makeCampaign(true)} />);
+    expect(screen.getByText(/switching this campaign's AI provider/i)).toBeInTheDocument();
+  });
 });

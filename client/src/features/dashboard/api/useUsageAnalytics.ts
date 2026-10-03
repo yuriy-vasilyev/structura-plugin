@@ -26,6 +26,15 @@ export type CycleUsageView =
         tokensIncluded: number;
         imagesUsed: number;
         imagesIncluded: number;
+        /**
+         * Posts delivered this month across the workspace's sites. Optional:
+         * absent from functions deployed before 2026-10-01, which still meter
+         * managed plans by tokens.
+         */
+        postsUsed?: number;
+        /** Post quota per site × site count. Optional, same window as `postsUsed`. */
+        postsIncluded?: number;
+        /** Posts-based when the posts fields are present, tokens-based before. */
         utilizationPercent: number;
       };
       activations: Array<{
@@ -35,6 +44,10 @@ export type CycleUsageView =
         tokensIncluded: number;
         imagesUsed: number;
         imagesIncluded: number;
+        /** Posts delivered to this site this month. Optional until functions after 2026-10-01. */
+        postsUsed?: number;
+        /** This site's monthly post quota. Optional until functions after 2026-10-01. */
+        postsIncluded?: number;
         utilizationPercent: number;
       }>;
     }
@@ -108,6 +121,20 @@ export function selectOwnActivationUsage(
   return (
     cycle.activations.find((a) => a.activationId === activationId) ?? null
   );
+}
+
+/**
+ * Returns the posts used and included for a managed usage row, or null when
+ * the cloud predates the posts quota (2026-10-01) and only sends tokens.
+ * Spec: specs/managed-ai-lineup.md §4.
+ */
+export function managedPostsUsage(
+  usage: Pick<ManagedActivationUsage, "postsUsed" | "postsIncluded">,
+): { postsUsed: number; postsIncluded: number } | null {
+  if (typeof usage.postsUsed !== "number" || typeof usage.postsIncluded !== "number") {
+    return null;
+  }
+  return { postsUsed: usage.postsUsed, postsIncluded: usage.postsIncluded };
 }
 
 export const useUsageAnalytics = (campaignId?: number) => {

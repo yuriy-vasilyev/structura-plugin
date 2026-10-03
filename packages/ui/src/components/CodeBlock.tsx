@@ -1,6 +1,7 @@
 import React from "react";
 import { Check, Copy } from "lucide-react";
 import { cn } from "../utils";
+import { Button } from "./Button";
 
 export interface CodeBlockProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
@@ -19,7 +20,8 @@ export interface CodeBlockProps
    */
   size?: "sm" | "md";
   /**
-   * Accessible label for the copy button in its idle state.
+   * Accessible label for the copy button in its idle state, and its
+   * visible text in the panel layout (see `title`).
    * Defaults to `"Copy"` for back-compat with non-localized
    * callers; pass a translated string in production.
    */
@@ -41,6 +43,25 @@ export interface CodeBlockProps
    * URLs or anything you'd rather keep one line tall.
    */
   truncate?: boolean;
+  /**
+   * Heading for a stand-alone block such as a builder prompt. Setting it
+   * switches to the panel layout: title and a visible text copy button
+   * (`copyLabel` / `copiedLabel` as its text) above a `<pre>` body. The
+   * chip layout is used when it is absent.
+   */
+  title?: string;
+  /**
+   * Panel layout only. Caps the body height (CSS length, or px when a
+   * number) and scrolls the rest. The scroller is focusable and named by
+   * `title` so keyboard users can scroll it.
+   */
+  maxHeight?: number | string;
+  /**
+   * Panel layout only. `true` (default) wraps long lines; `false` keeps
+   * `white-space: pre` and scrolls sideways, for prompts whose line breaks
+   * matter.
+   */
+  wrap?: boolean;
 }
 
 /**
@@ -76,12 +97,16 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
       copiedLabel = "Copied!",
       resetMs = 2000,
       truncate = false,
+      title,
+      maxHeight,
+      wrap = true,
       className,
       ...props
     },
     ref,
   ) => {
     const [copied, setCopied] = React.useState(false);
+    const titleId = React.useId();
     const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     React.useEffect(() => {
@@ -100,6 +125,63 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
         timerRef.current = setTimeout(() => setCopied(false), resetMs);
       });
     }, [value, resetMs]);
+
+    if (title != null) {
+      // A focusable scroller is only needed when the body can actually
+      // scroll; otherwise it would be a tab stop that does nothing.
+      const scrolls = maxHeight != null || !wrap;
+      return (
+        <div
+          ref={ref}
+          className={cn(
+            "flex w-full max-w-full flex-col overflow-hidden rounded-lg border",
+            "border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900",
+            className,
+          )}
+          {...props}
+        >
+          <div className="flex items-center justify-between gap-3 border-b border-neutral-200 px-3 py-2 dark:border-neutral-700">
+            <span
+              id={titleId}
+              className="min-w-0 truncate text-xs font-bold text-neutral-700 dark:text-neutral-200"
+            >
+              {title}
+            </span>
+            <Button type="button" variant="secondary" size="sm" onClick={handleCopy}>
+              {copied ? (
+                <Check className="text-emerald-600 dark:text-emerald-400" />
+              ) : (
+                <Copy />
+              )}
+              {copied ? copiedLabel : copyLabel}
+            </Button>
+          </div>
+          <div
+            role={scrolls ? "region" : undefined}
+            aria-labelledby={scrolls ? titleId : undefined}
+            tabIndex={scrolls ? 0 : undefined}
+            style={maxHeight != null ? { maxHeight } : undefined}
+            className={cn(
+              scrolls && "overflow-auto",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500/40",
+            )}
+          >
+            <pre
+              className={cn(
+                "m-0 px-3 py-2 font-mono text-neutral-800 dark:text-neutral-100",
+                size === "md" ? "text-sm" : "text-xs",
+                wrap ? "whitespace-pre-wrap [overflow-wrap:anywhere]" : "w-max min-w-full whitespace-pre",
+              )}
+            >
+              {value}
+            </pre>
+          </div>
+          <span aria-live="polite" className="sr-only">
+            {copied ? copiedLabel : ""}
+          </span>
+        </div>
+      );
+    }
 
     const sizeClasses =
       size === "md"

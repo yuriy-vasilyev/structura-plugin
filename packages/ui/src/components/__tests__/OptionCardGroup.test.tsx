@@ -158,4 +158,101 @@ describe("OptionCardGroup", () => {
     fireEvent.keyDown(screen.getByRole("radiogroup"), { key: "ArrowRight" });
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it("renders descriptions at 12px neutral-500 (the 10px neutral-400 line failed contrast)", () => {
+    renderGroup();
+    const description = screen.getByText("Fast rankings");
+    expect(description).toHaveClass("text-xs", "text-neutral-500", "dark:text-neutral-400");
+    expect(description).not.toHaveClass("text-[10px]", "text-neutral-400");
+  });
+
+  it("borders unselected cards with neutral-700 in dark, so they stay visible on a neutral-800 dialog (2026-09-30)", () => {
+    // Regression: the Article delivery connect dialog (bg neutral-800) drew
+    // neutral-800 card borders, so its platform and check cards vanished in dark.
+    renderGroup({ value: "quick" });
+    const unselected = screen
+      .getAllByRole("radio")
+      .filter((radio) => radio.getAttribute("aria-checked") === "false");
+    expect(unselected.length).toBeGreaterThan(0);
+    for (const radio of unselected) {
+      expect(radio).toHaveClass("dark:border-neutral-700", "dark:hover:border-neutral-600");
+      expect(radio).not.toHaveClass("dark:border-neutral-800");
+    }
+  });
+
+  it("keeps the card layout by default: 2/4-column grid and a top-right check", () => {
+    renderGroup({ value: "quick" });
+    expect(screen.getByRole("radiogroup")).toHaveClass("grid-cols-2", "sm:grid-cols-4");
+    const selected = screen.getByRole("radio", { name: /Quick Wins/ });
+    expect(selected).toHaveClass("flex-col");
+    expect(selected.querySelector("svg.absolute")).not.toBeNull();
+  });
+
+  describe("media slot", () => {
+    const MEDIA_OPTIONS: ReadonlyArray<OptionCardOption<Mode>> = [
+      { value: "traffic", label: "Traffic Magnet", icon: TrendingUp, media: <i data-testid="mark-a" /> },
+      { value: "quick", label: "Quick Wins", icon: Zap },
+      { value: "authority", label: "Authority" },
+    ];
+
+    it("renders media in a 32px decorative tile before the label, in place of the icon", () => {
+      renderGroup({ options: MEDIA_OPTIONS, value: "quick" });
+      const card = screen.getByRole("radio", { name: "Traffic Magnet" });
+      const tile = card.querySelector('[data-slot="media"]') as HTMLElement;
+      expect(tile).not.toBeNull();
+      expect(tile).toHaveClass("size-8");
+      expect(tile).toHaveAttribute("aria-hidden", "true");
+      expect(tile).toContainElement(screen.getByTestId("mark-a"));
+      // The icon is replaced, not stacked: the unselected card has no svg.
+      expect(card.querySelector("svg")).toBeNull();
+      // Tile comes before the label in DOM order.
+      const label = screen.getByText("Traffic Magnet");
+      expect(tile.compareDocumentPosition(label) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it("leaves options without media on their icon", () => {
+      renderGroup({ options: MEDIA_OPTIONS, value: "traffic" });
+      const quick = screen.getByRole("radio", { name: "Quick Wins" });
+      expect(quick.querySelector('[data-slot="media"]')).toBeNull();
+      expect(quick.querySelector("svg")).not.toBeNull();
+    });
+  });
+
+  describe('layout="row"', () => {
+    function renderRow(value: Mode = "quick") {
+      render(
+        <OptionCardGroup
+          options={OPTIONS}
+          value={value}
+          onChange={vi.fn()}
+          ariaLabel="Writing approach"
+          layout="row"
+        />
+      );
+    }
+
+    it("stacks options in one column as 56px-minimum rows", () => {
+      renderRow();
+      const group = screen.getByRole("radiogroup");
+      expect(group).toHaveClass("grid-cols-1");
+      expect(group).not.toHaveClass("grid-cols-2");
+      for (const radio of screen.getAllByRole("radio")) {
+        expect(radio).toHaveClass("min-h-14", "flex-row", "items-center");
+      }
+    });
+
+    it("puts the check last in the row instead of pinning it top-right", () => {
+      renderRow("quick");
+      const selected = screen.getByRole("radio", { name: /Quick Wins/ });
+      const svgs = selected.querySelectorAll("svg");
+      const check = svgs[svgs.length - 1];
+      expect(selected.lastElementChild).toBe(check);
+      expect(check).not.toHaveClass("absolute");
+    });
+
+    it("keeps the radiogroup keyboard contract", () => {
+      renderRow("quick");
+      expect(screen.getAllByRole("radio").map((r) => r.tabIndex)).toEqual([-1, 0, -1]);
+    });
+  });
 });

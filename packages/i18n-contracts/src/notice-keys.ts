@@ -42,6 +42,16 @@ export const NOTICE_KEYS = {
       body: "notices.byok.key_rejected.body",
       cta: "notices.byok.key_rejected.cta",
     },
+    geminiText: {
+      // One per Free / BYOK site whose campaigns write text with a caution
+      // provider (specs/byok-ai-guidance.md §4). bodyParams: { count: string
+      // (the number of such campaigns), site: string }. The title is plural
+      // on `count` (`title_one` / `title_other`), so surfaces pass it as a
+      // number.
+      title: "notices.byok.geminiText.title",
+      body: "notices.byok.geminiText.body",
+      cta: "notices.byok.geminiText.cta",
+    },
   },
   quota: {
     managed: {
