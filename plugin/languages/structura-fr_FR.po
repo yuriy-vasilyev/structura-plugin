@@ -3519,11 +3519,11 @@ msgstr "Statut de l'article"
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:93
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:530
 msgid ""
-"Free and anonymous installs are capped at 500 words per post. Upgrade to Pro "
-"to publish longer posts."
+"Free and anonymous installs are capped at 500 words per post. Paid plans have "
+"no word limit."
 msgstr ""
 "Les installations Free et anonymes sont limitées à 500 mots par publication. "
-"Passez à Pro pour publier des articles plus longs."
+"Les forfaits payants n'ont aucune limite de mots."
 
 #: client/src/features/campaigns/components/FallbackProviderRow.tsx:170
 msgid "Fallback must differ from the primary provider."

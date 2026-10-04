@@ -61,7 +61,7 @@ export const StepArchitecture = () => {
             server-side clamp in `functions/src/ai/instruction-builder.ts`.
             Surface the ceiling in the input so the user sees the cap
             instead of typing 2700 and silently receiving ~500. Paid
-            tiers pick their own length (default 2700).
+            tiers pick their own length, with no upper limit.
           */}
           <InputField
             label={__("Target Word Count", "structura")}
@@ -85,7 +85,7 @@ export const StepArchitecture = () => {
           {!isPaidLicense && (
             <p className="mt-1.5! mb-0! text-[11px] leading-snug text-neutral-400 dark:text-neutral-500">
               {__(
-                "Free and anonymous installs are capped at 500 words per post. Upgrade to Pro to publish longer posts.",
+                "Free and anonymous installs are capped at 500 words per post. Paid plans have no word limit.",
                 "structura"
               )}
             </p>

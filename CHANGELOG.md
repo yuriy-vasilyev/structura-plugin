@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.29.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.28.0...v2.29.0) (2026-10-04)
+
+
+### Features
+
+* **campaigns:** new campaigns open on 1,200 words instead of 2,700 ([1a6a0c1](https://github.com/yuriy-vasilyev/structura-core/commit/1a6a0c14bac39e8f08b7ea1d9650b62b25621fd6))
+* **functions:** a campaign save raises the Gemini text notice for a site without one ([e64bb60](https://github.com/yuriy-vasilyev/structura-core/commit/e64bb60e04bd0e3f0ef9770f29a349201c7360a8))
+* **www:** the header links to Learn instead of Blog where a Learn hub exists ([8fd80d3](https://github.com/yuriy-vasilyev/structura-core/commit/8fd80d3d4d1aef4f92bd9db6db72a0c0eb99a7bb))
+
+
+### Bug Fixes
+
+* **functions:** merge plan keeps the status of an unpublished source post ([210e0e3](https://github.com/yuriy-vasilyev/structura-core/commit/210e0e32e24c9fdf956d47ab32229f3ebe6aface))
+* **www:** Learn links inside posts use the default link style ([fd9d013](https://github.com/yuriy-vasilyev/structura-core/commit/fd9d013a1ded1479726d18a9b6433b1be715a8c8))
+* **www:** redirect the 16 blog posts merged in the 2026-10 quality audit ([d6b0b05](https://github.com/yuriy-vasilyev/structura-core/commit/d6b0b05a299df377561983ad445166a61f7a4f4a))
+
 ## [2.28.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.27.0...v2.28.0) (2026-10-03)
 
 

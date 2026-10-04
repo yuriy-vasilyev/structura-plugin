@@ -735,8 +735,8 @@ const GeneratePostPage = () => {
             server-side clamp in `functions/src/ai/instruction-builder.ts`.
             Surface the ceiling in the input so the user sees the cap
             instead of typing 1700 and silently receiving ~500. Paid
-            tiers pick their own length (default 2700) and we don't
-            constrain the field. The explanatory help text lives in a
+            tiers pick their own length and we don't constrain the
+            field. The explanatory help text lives in a
             full-width block below the grid — the 4-col cell is too
             narrow to render a translated sentence without wrapping
             into an unreadable shape (German "Beitragslänge" copy
@@ -784,7 +784,7 @@ const GeneratePostPage = () => {
         {!isPaidLicense && (
           <p className="m-0! mt-3 text-[11px] leading-snug text-neutral-400 dark:text-neutral-500">
             {__(
-              "Free and anonymous installs are capped at 500 words per post. Upgrade to Pro to publish longer posts.",
+              "Free and anonymous installs are capped at 500 words per post. Paid plans have no word limit.",
               "structura"
             )}
           </p>

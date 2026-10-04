@@ -177,6 +177,18 @@ class CampaignValidatorTest extends TestCase
     // ──────────────────────────────────────────────────────────────────────
 
     /** @test */
+    public function it_defaults_a_missing_post_length_to_1200(): void
+    {
+        $payload = $this->validPayload();
+        unset($payload['post_length']);
+
+        $result = Campaign_Validator::validate($payload);
+
+        $this->assertIsArray($result);
+        $this->assertSame(1200, $result['post_length']);
+    }
+
+    /** @test */
     public function it_enforces_minimum_post_length(): void
     {
         $result = Campaign_Validator::validate($this->validPayload(['post_length' => 50]));

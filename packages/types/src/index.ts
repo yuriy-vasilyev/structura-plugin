@@ -444,6 +444,16 @@ export const isCadenceAllowedForTier = (
   return count <= cap;
 };
 
+/**
+ * Target word count a new paid campaign or single post opens on. Free and
+ * anonymous tiers are capped lower server-side. Lowered from 2700 on
+ * 2026-10-04: Google states no preferred word count and ranking / AI-cited
+ * articles sit around 1,150 to 1,450 words. Mirrored by
+ * `Campaign_Shape_Transformer::DEFAULT_POST_LENGTH` in the plugin and the
+ * single-post fallback in `functions/src/headless/posts/runNow.ts`.
+ */
+export const DEFAULT_POST_LENGTH = 1200;
+
 export type LicenseStatus = "active" | "expired" | "past_due" | "canceled" | "refunded";
 
 /**

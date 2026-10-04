@@ -2,6 +2,7 @@
 
 namespace Structura\Scheduler;
 
+use Structura\Api\Campaign_Shape_Transformer;
 use WP_Error;
 
 class Campaign_Validator
@@ -153,7 +154,7 @@ class Campaign_Validator
         // load-bearing, not stylistic.
         $clean['persona_id'] = self::normalize_persona_id($params['persona_id'] ?? null);
         $clean['language']    = sanitize_text_field($params['language'] ?? 'default');
-        $clean['post_length'] = max(300, (int)($params['post_length'] ?? 1000));
+        $clean['post_length'] = max(300, (int)($params['post_length'] ?? Campaign_Shape_Transformer::DEFAULT_POST_LENGTH));
 
         // SEO Rules & Images
         $clean['seo_optimization_rules'] = self::sanitize_rules($params['seo_optimization_rules'] ?? []);

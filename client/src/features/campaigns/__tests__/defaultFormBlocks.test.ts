@@ -58,6 +58,27 @@ describe("getCampaignFormDataForLicense — postStatus default", () => {
   });
 });
 
+describe("getCampaignFormDataForLicense — postLength default", () => {
+  // 2026-10-04: the paid default dropped from 2700 to 1200. Google states no
+  // preferred word count and ranking / AI-cited articles sit around
+  // 1,150 to 1,450 words; 2700 only chased Rank Math's content-length score.
+  it("paid tier opens on 1200 words", () => {
+    const { intelligence } = getCampaignFormDataForLicense({
+      isPaidLicense: true,
+      isLicensed: true,
+    });
+    expect(intelligence.postLength).toBe(1200);
+  });
+
+  it.each([
+    ["free", { isPaidLicense: false, isLicensed: true }],
+    ["none", { isPaidLicense: false, isLicensed: false }],
+  ] as const)("%s tier still opens on the 500-word cap", (_tier, license) => {
+    const { intelligence } = getCampaignFormDataForLicense(license);
+    expect(intelligence.postLength).toBe(500);
+  });
+});
+
 describe("normalizePostStatus", () => {
   it("keeps publish, and collapses everything else (incl. legacy pending) to draft", () => {
     expect(normalizePostStatus("publish")).toBe("publish");

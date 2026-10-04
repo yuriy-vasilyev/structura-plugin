@@ -1,6 +1,7 @@
 import dayjs from "@/libs/dayjs";
 import { __ } from "@wordpress/i18n";
 import { Bot } from "lucide-react";
+import { DEFAULT_POST_LENGTH } from "@structura/types";
 import { CampaignFormData } from "@/features/campaigns/types";
 import { SeoOptimizationRules } from "@/features/settings";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
@@ -117,7 +118,7 @@ export const DEFAULT_CAMPAIGN_FORM_DATA: CampaignFormData = {
     fallbackImageProvider: null,
     personaId: "random",
     language: "default",
-    postLength: 2700,
+    postLength: DEFAULT_POST_LENGTH,
     replaceLongDashes: true,
     disableEmojis: true,
     seoRules: DEFAULT_SEO_RULES,

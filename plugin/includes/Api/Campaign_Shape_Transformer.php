@@ -21,6 +21,9 @@ if ( ! defined('ABSPATH')) {
  */
 class Campaign_Shape_Transformer
 {
+    /** Target word count when a payload carries none. Mirrors DEFAULT_POST_LENGTH in @structura/types. */
+    public const DEFAULT_POST_LENGTH = 1200;
+
     /** Text providers the provider advice can be hidden for. */
     private const AI_ADVICE_PROVIDERS = ['openai', 'gemini', 'anthropic'];
 
@@ -74,7 +77,7 @@ class Campaign_Shape_Transformer
                 'language'              => $cloud['language'] ?? 'default',
                 'replaceLongDashes'     => (bool) ($cloud['replaceLongDashes'] ?? false),
                 'disableEmojis'         => (bool) ($cloud['disableEmojis'] ?? false),
-                'postLength'            => (int) ($cloud['postLength'] ?? 1000),
+                'postLength'            => (int) ($cloud['postLength'] ?? self::DEFAULT_POST_LENGTH),
                 'seoRules'              => (array) ($cloud['seoRules'] ?? []),
             ],
             'structure'    => [
@@ -256,7 +259,7 @@ class Campaign_Shape_Transformer
             'language'              => sanitize_text_field($wp_input['language'] ?? 'default'),
             'replaceLongDashes'     => (bool) ($wp_input['replace_long_dashes'] ?? false),
             'disableEmojis'         => (bool) ($wp_input['disable_emojis'] ?? false),
-            'postLength'            => (int) ($wp_input['post_length'] ?? 1000),
+            'postLength'            => (int) ($wp_input['post_length'] ?? self::DEFAULT_POST_LENGTH),
             'seoRules'              => (array) ($wp_input['seo_optimization_rules'] ?? []),
             'enabledBlocks'         => (array) ($wp_input['enabled_blocks'] ?? []),
             'featuredImage'         => (bool) ($wp_input['featured_image'] ?? false),
@@ -368,7 +371,7 @@ class Campaign_Shape_Transformer
             'language'              => $intelligence['language'] ?? 'default',
             'replaceLongDashes'     => (bool) ($intelligence['replaceLongDashes'] ?? false),
             'disableEmojis'         => (bool) ($intelligence['disableEmojis'] ?? false),
-            'postLength'            => (int) ($intelligence['postLength'] ?? 1000),
+            'postLength'            => (int) ($intelligence['postLength'] ?? self::DEFAULT_POST_LENGTH),
             'seoRules'              => (array) ($intelligence['seoRules'] ?? []),
             'enabledBlocks'         => (array) ($structure['enabledBlocks'] ?? []),
             'featuredImage'         => (bool) ($structure['featuredImage'] ?? false),

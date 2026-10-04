@@ -361,6 +361,24 @@ class Campaign_Shape_Transformer_Test extends TestCase
     }
 
     /**
+     * Test: A missing post length falls back to the product default (1200)
+     * in every direction, matching the SPA and portal defaults.
+     */
+    public function test_missing_post_length_falls_back_to_default()
+    {
+        $this->assertSame(1200, Campaign_Shape_Transformer::DEFAULT_POST_LENGTH);
+
+        $cloud = Campaign_Shape_Transformer::wp_input_to_cloud([]);
+        $this->assertSame(1200, $cloud['postLength']);
+
+        $wp = Campaign_Shape_Transformer::cloud_to_wp([]);
+        $this->assertSame(1200, $wp['intelligence']['postLength']);
+
+        $from_cluster = Campaign_Shape_Transformer::wp_cluster_to_cloud([]);
+        $this->assertSame(1200, $from_cluster['postLength']);
+    }
+
+    /**
      * Test: Persona ID 'random' is preserved, numeric stays numeric
      */
     public function test_persona_id_types()

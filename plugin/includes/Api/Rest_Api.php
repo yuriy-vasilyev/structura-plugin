@@ -2223,7 +2223,7 @@ class Rest_Api
                 'language'              => sanitize_text_field($params['language'] ?? 'default'),
                 'replaceLongDashes'     => filter_var($params['replace_long_dashes'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'disableEmojis'         => filter_var($params['disable_emojis'] ?? false, FILTER_VALIDATE_BOOLEAN),
-                'postLength'            => (int)($params['post_length'] ?? 1000),
+                'postLength'            => (int)($params['post_length'] ?? Campaign_Shape_Transformer::DEFAULT_POST_LENGTH),
                 'seoRules'              => (array)($params['seo_optimization_rules'] ?? []),
             ],
             'structure'    => [

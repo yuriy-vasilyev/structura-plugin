@@ -7,15 +7,15 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-03T07:27:04+00:00\n"
+"POT-Creation-Date: 2026-10-04T06:18:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: structura\n"
 
 #: .tmp-wporg/structura/includes/Api/Campaign_Shape_Transformer.php:132
 #: .tmp-wporg/structura/includes/Api/Campaign_Shape_Transformer.php:141
-#: plugin/includes/Api/Campaign_Shape_Transformer.php:169
-#: plugin/includes/Api/Campaign_Shape_Transformer.php:178
+#: plugin/includes/Api/Campaign_Shape_Transformer.php:172
+#: plugin/includes/Api/Campaign_Shape_Transformer.php:181
 msgid "Not Scheduled"
 msgstr ""
 
@@ -87,7 +87,7 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1615
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:50
 #: plugin/includes/Api/Rest_Api.php:2115
-#: plugin/includes/Scheduler/Campaign_Validator.php:50
+#: plugin/includes/Scheduler/Campaign_Validator.php:51
 msgid "A text provider is required."
 msgstr ""
 
@@ -95,21 +95,21 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1629
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:65
 #: plugin/includes/Api/Rest_Api.php:2129
-#: plugin/includes/Scheduler/Campaign_Validator.php:65
+#: plugin/includes/Scheduler/Campaign_Validator.php:66
 msgid "Provider \"%s\" does not support image generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1647
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:98
 #: plugin/includes/Api/Rest_Api.php:2147
-#: plugin/includes/Scheduler/Campaign_Validator.php:116
+#: plugin/includes/Scheduler/Campaign_Validator.php:117
 msgid "The fallback text provider must be different from the primary."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1658
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:110
 #: plugin/includes/Api/Rest_Api.php:2158
-#: plugin/includes/Scheduler/Campaign_Validator.php:128
+#: plugin/includes/Scheduler/Campaign_Validator.php:129
 msgid "The fallback image provider must be different from the primary."
 msgstr ""
 
@@ -117,7 +117,7 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1668
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:119
 #: plugin/includes/Api/Rest_Api.php:2168
-#: plugin/includes/Scheduler/Campaign_Validator.php:137
+#: plugin/includes/Scheduler/Campaign_Validator.php:138
 msgid "Fallback provider \"%s\" does not support image generation."
 msgstr ""
 
@@ -929,27 +929,27 @@ msgid "user_id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:19
-#: plugin/includes/Scheduler/Campaign_Validator.php:19
+#: plugin/includes/Scheduler/Campaign_Validator.php:20
 msgid "Name is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:22
-#: plugin/includes/Scheduler/Campaign_Validator.php:22
+#: plugin/includes/Scheduler/Campaign_Validator.php:23
 msgid "Objective too short."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:170
-#: plugin/includes/Scheduler/Campaign_Validator.php:198
+#: plugin/includes/Scheduler/Campaign_Validator.php:199
 msgid "Invalid deployment pulse format."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:180
-#: plugin/includes/Scheduler/Campaign_Validator.php:208
+#: plugin/includes/Scheduler/Campaign_Validator.php:209
 msgid "Quota must be positive."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:199
-#: plugin/includes/Scheduler/Campaign_Validator.php:242
+#: plugin/includes/Scheduler/Campaign_Validator.php:243
 msgid "Configuration errors."
 msgstr ""
 
@@ -3376,8 +3376,8 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:87
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:786
 msgid ""
-"Free and anonymous installs are capped at 500 words per post. Upgrade to Pro "
-"to publish longer posts."
+"Free and anonymous installs are capped at 500 words per post. Paid plans "
+"have no word limit."
 msgstr ""
 
 #: client/src/features/campaigns/components/FallbackProviderRow.tsx:170
@@ -5124,7 +5124,7 @@ msgid_plural "%d long-tail variants ready as per-post keyphrases"
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/src/features/campaigns/constants.ts:136
+#: client/src/features/campaigns/constants.ts:137
 msgid "This content was assisted by AI."
 msgstr ""
 

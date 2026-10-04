@@ -180,7 +180,7 @@ export const CoreContentSettings = ({ showLanguage = true }: CoreContentSettings
       {!isPaidLicense && (
         <p className="m-0! text-[11px] leading-snug text-neutral-400 dark:text-neutral-500">
           {__(
-            "Free and anonymous installs are capped at 500 words per post. Upgrade to Pro to publish longer posts.",
+            "Free and anonymous installs are capped at 500 words per post. Paid plans have no word limit.",
             "structura"
           )}
         </p>
