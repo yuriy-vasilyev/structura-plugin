@@ -155,8 +155,9 @@ export function useResetWizardMutation() {
 /**
  * Durably record that the user has finished or exited the setup wizard, so
  * the auto-redirect never resurrects it. Hits a plugin-LOCAL route (no cloud
- * dependency) — the only completion signal that works for the anonymous/none
- * tier, which has no license_key and so never reaches the cloud wizard state.
+ * dependency), so it holds even when the cloud is unreachable. Anonymous
+ * installs also reach the cloud wizard state through their activation bearer
+ * since 2026-10-06.
  *
  * Optimistically flips the localized bootstrap flag on success so the
  * in-session gate honours it immediately, without waiting for a page reload.

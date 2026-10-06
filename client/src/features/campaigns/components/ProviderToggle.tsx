@@ -129,6 +129,15 @@ export interface ProviderToggleProps {
   onTextTierChange?: (tier: ModelTier) => void;
   /** Called when the image tier changes. Consumer stores the tier + mirrors the model. */
   onImageTierChange?: (tier: ModelTier) => void;
+  /** Overrides `showTierSelectors` for the text model dropdown alone. */
+  showTextTierSelector?: boolean;
+  /** Overrides `showTierSelectors` for the image model dropdown alone. */
+  showImageTierSelector?: boolean;
+  /**
+   * When true, a capability with exactly one provider renders no provider
+   * row (Generate a Post, owner review 2026-10-06: nothing to choose).
+   */
+  hideSingleProviderRow?: boolean;
 }
 
 /**
@@ -177,6 +186,9 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
   imageTier = "top",
   onTextTierChange,
   onImageTierChange,
+  showTextTierSelector = showTierSelectors,
+  showImageTierSelector = showTierSelectors,
+  hideSingleProviderRow = false,
 }) => {
   const { isLicensed } = useLicense();
   const { isProviderIncomplete, isCloud } = useDefaultProviders();
@@ -187,20 +199,32 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
   // The image row follows the same rule through `availableImageProviders`.
   const hasTextProvider = availableTextProviders.length > 0;
 
-  // Managed plans never pick or see a text provider; the image provider
-  // stays until image models move to the lineup (specs/managed-ai-lineup.md
-  // §3, §3.3). The caller keeps `textProvider` on the form, hidden.
-  const showTextSection = !isCloud && hasTextProvider;
-
-  // Image generation requires at least a Free license
-  const showImageSection = isLicensed && availableImageProviders.length > 0;
-
-  const showTierGrid = showTierSelectors && (hasTextProvider || showImageSection);
-  if (!showTextSection && !showImageSection && !showTierGrid) return null;
-
   // Check if the currently selected providers are incomplete
   const isTextProviderIncomplete = isProviderIncomplete(textProvider);
   const isImageProviderIncomplete = isProviderIncomplete(imageProvider);
+
+  // A lone provider's row is only kept while it carries the "complete
+  // setup" warning.
+  const hideTextRow =
+    hideSingleProviderRow && availableTextProviders.length === 1 && !isTextProviderIncomplete;
+  const hideImageRow =
+    hideSingleProviderRow && availableImageProviders.length === 1 && !isImageProviderIncomplete;
+
+  // Managed plans never pick or see a text provider (specs/managed-ai-lineup.md
+  // §3, §3.3). The caller keeps `textProvider` on the form, hidden.
+  const showTextSection = !isCloud && hasTextProvider && !hideTextRow;
+
+  // Image generation requires at least a Free license. Managed plans pick no
+  // image provider either since 2026-10-06 (one image model bound by
+  // Structura); the caller keeps `imageProvider` on the form, hidden, so the
+  // image toggles still travel with a provider.
+  const hasImageProvider = !isCloud && isLicensed && availableImageProviders.length > 0;
+  const showImageSection = hasImageProvider && !hideImageRow;
+
+  const showTextTier = showTextTierSelector && hasTextProvider;
+  const showImageTier = showImageTierSelector && hasImageProvider;
+  const showTierGrid = showTextTier || showImageTier;
+  if (!showTextSection && !showImageSection && !showTierGrid) return null;
 
   const textTierOptions = buildTierOptions(textProvider, "text");
   const imageTierOptions = buildTierOptions(imageProvider, "image");
@@ -305,9 +329,9 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
 
           <div className={cn(
             "grid grid-cols-1 gap-2.5",
-            hasTextProvider && showImageSection && "sm:grid-cols-2"
+            showTextTier && showImageTier && "sm:grid-cols-2"
           )}>
-            {hasTextProvider && (
+            {showTextTier && (
               <div className="flex flex-col gap-1.5">
                 <span className="text-[9px] font-bold tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
                   {__("Text Model", "structura")}
@@ -329,7 +353,7 @@ export const ProviderToggle: FC<ProviderToggleProps> = ({
               </div>
             )}
 
-            {showImageSection && (
+            {showImageTier && (
               <div className="flex flex-col gap-1.5">
                 <span className="text-[9px] font-bold tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
                   {__("Image Model", "structura")}

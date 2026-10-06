@@ -185,17 +185,17 @@ describe("<CampaignAiEngineSection> model tier picker", () => {
 
 describe("<CampaignAiEngineSection> text provider row by plan (2026-10-01)", () => {
   // Managed plans write with one lineup chosen by Structura: no text
-  // provider or text fallback picker. The image provider stays
-  // (specs/managed-ai-lineup.md §3.3).
-  it("managed: renders the image row only", () => {
+  // provider or text fallback picker (specs/managed-ai-lineup.md §3.3).
+  // Flipped 2026-10-06: the image row goes too; Structura binds one image
+  // model on managed plans, so no image provider, model or fallback.
+  it("managed: renders no text row and no image row", () => {
     setup({ isCloud: true });
     expect(screen.queryByText("Text")).not.toBeInTheDocument();
-    expect(screen.getByText("Image")).toBeInTheDocument();
-    // One provider picker: the image row's.
-    expect(screen.getAllByText("Provider")).toHaveLength(1);
-    // Flipped 2026-10-02: managed plans show no fallback control at all,
-    // the image fallback included (it was the one left here before).
+    expect(screen.queryByText("Image")).not.toBeInTheDocument();
+    expect(screen.queryByText("Provider")).not.toBeInTheDocument();
+    expect(screen.queryByText("Model")).not.toBeInTheDocument();
     expect(screen.queryByText("Fallback")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^(Gemini|OpenAI)/ })).not.toBeInTheDocument();
   });
 
   it("BYOK: renders both the text and the image row", () => {
@@ -363,11 +363,12 @@ describe("<CampaignAiEngineSection> provider advice (2026-10-02)", () => {
 });
 
 describe("<CampaignAiEngineSection> fallback controls on managed plans (2026-10-02)", () => {
-  // Managed plans: the image provider choice stays, every fallback control
-  // and the fallback footnote go; a stored fallback is left untouched.
+  // Managed plans: every provider, model and fallback control and the
+  // fallback footnote go (image provider too since 2026-10-06); stored
+  // values are left untouched.
   const FOOTNOTE = /we'll retry once through the fallback/;
 
-  it("managed: no image fallback, no footnote, stored image fallback not cleared", () => {
+  it("managed: no image provider or fallback, no footnote, stored image fields not cleared", () => {
     const updateForm = vi.fn();
     connectedMock.text = [];
     useLicenseMock.mockReturnValue({ isLicensed: true, plan: "cloud_pro", isPaidLicense: true });
@@ -395,8 +396,8 @@ describe("<CampaignAiEngineSection> fallback controls on managed plans (2026-10-
       />,
     );
 
-    expect(screen.getByText("Image")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^Gemini/ })).toBeInTheDocument();
+    expect(screen.queryByText("Image")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Gemini/ })).not.toBeInTheDocument();
     expect(screen.queryByText("Fallback")).not.toBeInTheDocument();
     expect(screen.queryByText(FOOTNOTE)).not.toBeInTheDocument();
     expect(updateForm).not.toHaveBeenCalled();

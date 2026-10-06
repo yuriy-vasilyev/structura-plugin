@@ -1,49 +1,41 @@
 import { describe, expect, it } from "vitest";
-import {
-  BYOK_PROVIDERS,
-  FREE_PROVIDERS,
-  PLUGIN_ONLY_PROVIDERS,
-  productFactTokens,
-  providerList,
-} from "../product-facts";
+import { OWN_KEY_PROVIDERS, productFactTokens, providerList } from "../product-facts";
 
 /**
  * Provider lists are interpolated into de/es/fr copy, which rendered an
- * English "or" ("OpenAI or Gemini") until 2026-10-03.
+ * English "or" ("OpenAI or Gemini") until 2026-10-03. Since 2026-10-06 every
+ * own-key plan (no account, Free, BYOK) takes the same three providers
+ * (specs/open-providers.md), so there is one list.
  */
 describe("providerList", () => {
   const cases = {
-    en: ["OpenAI", "OpenAI or Gemini", "OpenAI, Gemini, or Anthropic"],
-    de: ["OpenAI", "OpenAI oder Gemini", "OpenAI, Gemini oder Anthropic"],
-    es: ["OpenAI", "OpenAI o Gemini", "OpenAI, Gemini o Anthropic"],
-    fr: ["OpenAI", "OpenAI ou Gemini", "OpenAI, Gemini ou Anthropic"],
+    en: "OpenAI, Gemini or Claude",
+    de: "OpenAI, Gemini oder Claude",
+    es: "OpenAI, Gemini o Claude",
+    fr: "OpenAI, Gemini ou Claude",
   } as const;
 
-  for (const [locale, [pluginOnly, free, byok]] of Object.entries(cases)) {
-    it(`[${locale}] joins each plan's providers in the locale`, () => {
-      expect(providerList(locale, "pluginOnly")).toBe(pluginOnly);
-      expect(providerList(locale, "free")).toBe(free);
-      expect(providerList(locale, "byok")).toBe(byok);
-    });
-
-    it(`[${locale}] feeds the provider tokens`, () => {
-      const tokens = productFactTokens(locale);
-      expect([tokens.pluginOnlyProviders, tokens.freeProviders, tokens.byokProviders]).toEqual([
-        pluginOnly,
-        free,
-        byok,
-      ]);
+  for (const [locale, list] of Object.entries(cases)) {
+    it(`[${locale}] joins the providers in the locale and feeds the token`, () => {
+      expect(providerList(locale)).toBe(list);
+      expect(productFactTokens(locale).byokProviders).toBe(list);
     });
   }
 
   it("normalises composite locales and falls back to English", () => {
-    expect(providerList("de_AT", "free")).toBe("OpenAI oder Gemini");
-    expect(providerList("es-419", "byok")).toBe("OpenAI, Gemini o Anthropic");
-    expect(providerList("it", "free")).toBe("OpenAI or Gemini");
+    expect(providerList("de_AT")).toBe("OpenAI, Gemini oder Claude");
+    expect(providerList("es-419")).toBe("OpenAI, Gemini o Claude");
+    expect(providerList("it")).toBe("OpenAI, Gemini or Claude");
   });
 
-  it("keeps the English constants and the default tokens in English", () => {
-    expect([PLUGIN_ONLY_PROVIDERS, FREE_PROVIDERS, BYOK_PROVIDERS]).toEqual(cases.en);
-    expect(productFactTokens().freeProviders).toBe(FREE_PROVIDERS);
+  it("keeps the English constant and the default token in English", () => {
+    expect(OWN_KEY_PROVIDERS).toBe(cases.en);
+    expect(productFactTokens().byokProviders).toBe(OWN_KEY_PROVIDERS);
+  });
+
+  it("no longer serves per-plan provider tokens (the split ended 2026-10-06)", () => {
+    const tokens = productFactTokens();
+    expect(tokens).not.toHaveProperty("freeProviders");
+    expect(tokens).not.toHaveProperty("pluginOnlyProviders");
   });
 });

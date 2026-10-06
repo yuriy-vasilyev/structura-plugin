@@ -13,6 +13,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 
 vi.mock("@wordpress/i18n", () => ({
   __: (text: string) => text,
+  _x: (text: string) => text,
   sprintf: (format: string, ...args: unknown[]) => {
     let i = 0;
     return format.replace(/%[sd]/g, () => String(args[i++]));

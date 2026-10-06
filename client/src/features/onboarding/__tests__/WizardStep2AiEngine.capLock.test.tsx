@@ -1,18 +1,17 @@
 /**
- * WizardStep2AiEngine — pre-emptive provider cap locking.
+ * WizardStep2AiEngine — no provider locks (2026-10-06, specs/open-providers.md).
  *
- * Regression (Yurii wp.org testing 2026-07-08): on a `none` tier
- * (provider cap 1) with nothing connected yet, BOTH OpenAI and Gemini
- * rendered as freely connectable — implying the user could connect two —
- * and Gemini only flipped to the "Free License" cap-lock AFTER OpenAI was
- * connected. The cap lock now applies up front: the first `slotsLeft`
- * tier-eligible providers (catalog order) stay connectable; the rest read
- * as cap-locked from the start.
+ * Until 2026-10-06 the anonymous (`none`) step offered OpenAI only and the
+ * per-plan provider count cap locked the extras up front (wp.org testing
+ * 2026-07-08). Every plan may now connect every provider: no card is
+ * locked, providers list Claude, OpenAI, Gemini, and the capability chips
+ * show what a provider can do, not what the plan allows (OpenAI and Gemini
+ * keep "Images" on anonymous).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-vi.mock("@wordpress/i18n", () => ({ __: (t: string) => t }));
+vi.mock("@wordpress/i18n", () => ({ __: (t: string) => t, _x: (t: string) => t }));
 vi.mock("@structura/types", () => ({
   isManagedPlan: (p: string) => p === "cloud" || p === "cloud_pro",
 }));
@@ -22,7 +21,7 @@ vi.mock("@structura/ui", () => ({
 }));
 
 const licenseMock = vi.hoisted(() => ({
-  current: { plan: "none" as string, providerCountCap: 1 },
+  current: { plan: "none" as string },
 }));
 vi.mock("@/features/settings", () => ({ useLicense: () => licenseMock.current }));
 
@@ -34,19 +33,12 @@ vi.mock("@/features/ai-engine", () => ({
 // Expose the props the cap logic drives as data attributes so we can
 // assert them directly.
 vi.mock("@/features/ai-engine/components/AvailableProviderCard", () => ({
-  AvailableProviderCard: ({
-    id,
-    available,
-    lockReason,
-  }: {
-    id: string;
-    available: boolean;
-    lockReason: string;
-  }) => (
+  AvailableProviderCard: (props: { id: string; capabilities: string[] } & Record<string, unknown>) => (
     <div
-      data-testid={`avail-${id}`}
-      data-available={String(available)}
-      data-lock={lockReason}
+      data-testid="avail"
+      data-id={props.id}
+      data-caps={props.capabilities.join(",")}
+      data-locked={String("available" in props || "lockReason" in props)}
     />
   ),
 }));
@@ -55,9 +47,6 @@ vi.mock("@/features/ai-engine/components/InstalledProviderCard", () => ({
 }));
 vi.mock("@/features/ai-engine/components/ProviderSetupWizard", () => ({
   ProviderSetupWizard: () => <div />,
-}));
-vi.mock("@/features/ai-engine/components/ProviderUpgradeDialog", () => ({
-  ProviderUpgradeDialog: () => <div />,
 }));
 vi.mock("@/features/ai-engine/components/WorkspaceKeysPicker", () => ({
   WorkspaceKeysPicker: () => <div />,
@@ -70,78 +59,58 @@ vi.mock("../state/wizardStore", () => ({
 
 import { WizardStep2AiEngine } from "../components/WizardStep2AiEngine";
 
-const meta = (name: string) => ({
+const meta = (name: string, capabilities: string[]) => ({
   name,
   description: `${name} desc`,
-  capabilities: ["text"],
-  // Mirrors Provider_Registry (2026-10-02): OpenAI on `none`, Gemini Free+.
-  min_tier: name === "Anthropic Claude" ? "byok" : name === "Google Gemini" ? "free" : "none",
+  capabilities,
   key_url: "",
 });
 
-/** catalog = all providers; providers = the tier-filtered subset. */
-const settings = (opts: {
-  cap: number;
-  tierProviders: string[];
-  connected?: string[];
-}) => {
-  const connected = new Set(opts.connected ?? []);
-  const catalogEntries: Record<string, unknown> = {
-    openai: meta("OpenAI"),
-    gemini: meta("Google Gemini"),
-    anthropic: meta("Anthropic Claude"),
+/** The plugin's settings payload: every provider on every plan since 2026-10-06. */
+const settings = (connected: string[] = []) => {
+  const catalog: Record<string, ReturnType<typeof meta>> = {
+    openai: meta("OpenAI", ["text", "image"]),
+    gemini: meta("Google Gemini", ["text", "image"]),
+    anthropic: meta("Anthropic Claude", ["text"]),
   };
   const providers: Record<string, unknown> = {};
-  for (const id of opts.tierProviders) {
-    providers[id] = {
-      connected: connected.has(id),
-      capabilities: ["text"],
-    };
+  for (const [id, m] of Object.entries(catalog)) {
+    providers[id] = { connected: connected.includes(id), capabilities: m.capabilities };
   }
-  return { catalog: catalogEntries, providers, defaults: { text_provider: "", image_provider: "" } };
+  return { catalog, providers, defaults: { text_provider: "", image_provider: "" } };
 };
 
+const cards = () =>
+  screen.getAllByTestId("avail").map((el) => ({
+    id: el.getAttribute("data-id"),
+    caps: el.getAttribute("data-caps"),
+    locked: el.getAttribute("data-locked"),
+  }));
+
 beforeEach(() => {
-  licenseMock.current = { plan: "none", providerCountCap: 1 };
+  licenseMock.current = { plan: "none" };
 });
 
-describe("WizardStep2AiEngine — cap locking", () => {
-  it("cap 1 with two tier providers: the first connectable, the second cap-locked from the start", () => {
-    licenseMock.current = { plan: "none", providerCountCap: 1 };
-    settingsMock.current = settings({ cap: 1, tierProviders: ["openai", "gemini"] });
+describe("WizardStep2AiEngine — every provider on every plan", () => {
+  it.each(["none", "free", "byok"])("%s: no card is locked and the order is Claude, OpenAI, Gemini", (plan) => {
+    licenseMock.current = { plan };
+    settingsMock.current = settings();
 
     render(<WizardStep2AiEngine />);
 
-    expect(screen.getByTestId("avail-openai").getAttribute("data-available")).toBe("true");
-    // The bug: Gemini used to be `true` here until OpenAI was connected.
-    expect(screen.getByTestId("avail-gemini").getAttribute("data-available")).toBe("false");
-    expect(screen.getByTestId("avail-gemini").getAttribute("data-lock")).toBe("cap");
-    // Anthropic is a tier lock (not offered at all on `none`), not a cap lock.
-    expect(screen.getByTestId("avail-anthropic").getAttribute("data-available")).toBe("false");
-    expect(screen.getByTestId("avail-anthropic").getAttribute("data-lock")).toBe("tier");
+    expect(cards()).toEqual([
+      { id: "anthropic", caps: "text", locked: "false" },
+      { id: "openai", caps: "text,image", locked: "false" },
+      { id: "gemini", caps: "text,image", locked: "false" },
+    ]);
   });
 
-  it("none tier (2026-10-02): only OpenAI is offered; Gemini is tier-locked like Anthropic", () => {
-    // The plugin's tier-filtered `providers` for `none` is OpenAI only,
-    // matching the cloud's PROVIDERS_FOR_TIER.none.
-    licenseMock.current = { plan: "none", providerCountCap: 1 };
-    settingsMock.current = settings({ cap: 1, tierProviders: ["openai"] });
+  it("anonymous with OpenAI connected still offers Gemini and Claude", () => {
+    settingsMock.current = settings(["openai"]);
 
     render(<WizardStep2AiEngine />);
 
-    expect(screen.getByTestId("avail-openai").getAttribute("data-available")).toBe("true");
-    expect(screen.getByTestId("avail-gemini").getAttribute("data-available")).toBe("false");
-    expect(screen.getByTestId("avail-gemini").getAttribute("data-lock")).toBe("tier");
-    expect(screen.getByTestId("avail-anthropic").getAttribute("data-lock")).toBe("tier");
-  });
-
-  it("free tier (cap 2): both OpenAI and Gemini stay connectable", () => {
-    licenseMock.current = { plan: "free", providerCountCap: 2 };
-    settingsMock.current = settings({ cap: 2, tierProviders: ["openai", "gemini"] });
-
-    render(<WizardStep2AiEngine />);
-
-    expect(screen.getByTestId("avail-openai").getAttribute("data-available")).toBe("true");
-    expect(screen.getByTestId("avail-gemini").getAttribute("data-available")).toBe("true");
+    expect(cards().map((c) => c.id)).toEqual(["anthropic", "gemini"]);
+    expect(cards().every((c) => c.locked === "false")).toBe(true);
   });
 });

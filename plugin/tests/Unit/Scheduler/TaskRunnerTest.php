@@ -14,9 +14,9 @@ use Structura\Tests\Unit\TestCase;
  * (media sideload, file I/O, HTTP calls to the cloud) to exercise in a
  * Brain-Monkey unit test. Instead we pin the small, testable seams:
  *
- *   1. `get_managed_image_default()` — the static map from plan to
- *      default image provider. Regression-guards the cloud↔plugin
- *      catalog alignment documented in MANAGED_IMAGE_FALLBACK.
+ *   1. `generate_post_images()` up to the `/executeCloudImageStep` call —
+ *      which image provider reaches the cloud on managed and own-key plans
+ *      (managed image binding, 2026-10-06).
  *
  *   2. `handle_as_single_post_task()` — the bridge from the manual
  *      "Generate Now" REST endpoint. Pins that AS args carry only a
@@ -67,112 +67,108 @@ class TaskRunnerTest extends TestCase
 
 
     // ──────────────────────────────────────────────────────────────────────
-    //  MANAGED-TIER IMAGE PROVIDER DEFAULTS
+    //  MANAGED IMAGE BINDING (2026-10-06, specs/managed-ai-lineup.md §2.4)
     //
-    //  These map plugin tiers → the image provider the managed cloud uses
-    //  by default. They must stay in lockstep with
-    //  `functions/src/ai/model-catalog.ts::PLAN_DEFAULTS`.
-    //
-    //  The real bug this class of tests is pinning: a user on the agency
-    //  plan selecting "Claude" for text would inherit `imageProvider =
-    //  anthropic` (text-only). Without a managed-tier substitution rule
-    //  the image step silently skipped — not an acceptable outcome for
-    //  a paying tier.
+    //  On Cloud and Cloud Pro the cloud picks the image model from the
+    //  managed binding and ignores the provider the plugin sends. The
+    //  plugin used to fill in its own managed default (`gemini` / `openai`)
+    //  when the campaign's image provider was missing or text-only; that
+    //  map no longer matched the binding. Now a managed plan sends no
+    //  provider in that case and the regen still runs. Own-key plans keep
+    //  the graceful skip.
     // ──────────────────────────────────────────────────────────────────────
 
-    /** @test */
-    public function agency_tier_falls_back_to_openai(): void
+    /**
+     * Run `generate_post_images` on `$plan` and return the payload sent to
+     * `/executeCloudImageStep`, or null when nothing was sent.
+     *
+     * The cloud call throws after capture so the sideload path never runs.
+     *
+     * @param string               $plan         License plan.
+     * @param array<string, mixed> $intelligence Campaign intelligence.
+     */
+    private function capture_image_payload(string $plan, array $intelligence): ?array
     {
-        // Cloud `PLAN_DEFAULTS.agency.image.provider` is "openai". If this
-        // ever drifts, the plugin would forward a provider the cloud has
-        // to silently re-route — which masks the original config bug
-        // and makes Cloud Logging harder to read.
-        $this->assertSame('openai', Task_Runner::get_managed_image_default('cloud_pro'));
-    }
+        Functions\when('wp_parse_url')->justReturn('example.test');
+        Functions\when('get_site_url')->justReturn('https://example.test');
+        Functions\when('esc_html')->returnArg();
+        $this->stub_log_service();
 
-    /** @test */
-    public function cloud_tier_falls_back_to_gemini(): void
-    {
-        // `PLAN_DEFAULTS.cloud.image.provider` is "gemini" (Imagen-backed).
-        $this->assertSame('gemini', Task_Runner::get_managed_image_default('cloud'));
-    }
+        $license_manager = Mockery::mock('alias:Structura\Core\License_Manager');
+        $license_manager->shouldReceive('get_license_data')
+            ->andReturn(['plan' => $plan, 'license_key' => 'lic']);
 
-    /** @test */
-    public function free_tier_has_no_managed_default(): void
-    {
-        // BYOK: auto-substituting would call a provider the user hasn't
-        // connected. Keep the graceful-skip behaviour.
-        $this->assertNull(Task_Runner::get_managed_image_default('free'));
-    }
+        $captured = null;
+        $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->zeroOrMoreTimes()
+            ->andReturnUsing(function ($route, $payload) use (&$captured) {
+                if ($route === '/executeCloudImageStep') {
+                    $captured = $payload;
+                }
+                throw new \RuntimeException('stop after capture');
+            });
 
-    /** @test */
-    public function pro_tier_has_no_managed_default(): void
-    {
-        // BYOK: same reasoning as free. Pro users explicitly pick a
-        // provider; we do not silently override their selection.
-        $this->assertNull(Task_Runner::get_managed_image_default('byok'));
-    }
-
-    /** @test */
-    public function none_tier_has_no_managed_default(): void
-    {
-        // `none` (unlicensed / expired) must never silently substitute
-        // — that would mask a licensing issue as an image-generation
-        // hiccup.
-        $this->assertNull(Task_Runner::get_managed_image_default('none'));
-    }
-
-    /** @test */
-    public function unknown_tier_has_no_managed_default(): void
-    {
-        // Defensive: any future or garbled tier string returns null
-        // rather than silently defaulting to a paid provider.
-        $this->assertNull(Task_Runner::get_managed_image_default('enterprise'));
-        $this->assertNull(Task_Runner::get_managed_image_default(''));
-    }
-
-    // ──────────────────────────────────────────────────────────────────────
-    //  CAPABILITY RATIONALE (Provider_Registry contract)
-    //
-    //  These assertions aren't redundant with ProviderRegistryTest — they
-    //  pin the specific capability mismatch that motivates the managed-
-    //  tier substitution. If the catalog ever marks anthropic as image-
-    //  capable (e.g. Claude gains an image model), the substitution logic
-    //  in generate_post_images becomes dead code and these tests will
-    //  flag it for removal.
-    // ──────────────────────────────────────────────────────────────────────
-
-    /** @test */
-    public function anthropic_is_text_only_so_substitution_is_required(): void
-    {
-        $meta = \Structura\Core\Provider_Registry::get_provider('anthropic');
-        $this->assertIsArray($meta);
-        $this->assertNotContains(
-            'image',
-            $meta['capabilities'],
-            'Anthropic claims image capability — the managed-tier substitution '
-            . 'in Task_Runner::generate_post_images is now dead code; remove it '
-            . 'or rewrite this test.'
-        );
-    }
-
-    /** @test */
-    public function managed_default_providers_are_image_capable(): void
-    {
-        // The map only points at image-capable providers — otherwise the
-        // substitution would trade one broken config for another.
-        foreach (['cloud' => 'gemini', 'cloud_pro' => 'openai'] as $tier => $expected_provider) {
-            $resolved = Task_Runner::get_managed_image_default($tier);
-            $this->assertSame($expected_provider, $resolved);
-
-            $meta = \Structura\Core\Provider_Registry::get_provider($resolved);
-            $this->assertIsArray($meta, "Provider '$resolved' missing from catalog");
-            $this->assertContains(
-                'image',
-                $meta['capabilities'],
-                "Provider '$resolved' used as managed-tier image default but isn't image-capable"
+        try {
+            (new Task_Runner())->generate_post_images(
+                42,
+                'featured',
+                ['topic' => 'A harbour at dawn'],
+                ['id' => 7, 'intelligence' => $intelligence]
             );
+        } catch (\RuntimeException $e) {
+            // Expected once the payload is captured.
         }
+
+        return $captured;
+    }
+
+    /** @test */
+    public function managed_plan_with_a_text_only_image_provider_sends_no_provider(): void
+    {
+        $payload = $this->capture_image_payload('cloud', [
+            'imageProvider' => 'anthropic',
+            'imageModel'    => 'claude-x',
+        ]);
+
+        $this->assertIsArray($payload, 'A managed regen must reach the cloud.');
+        $this->assertArrayNotHasKey('provider', $payload);
+        $this->assertNull($payload['model']);
+    }
+
+    /** @test */
+    public function managed_plan_without_an_image_provider_still_reaches_the_cloud(): void
+    {
+        foreach (['cloud', 'cloud_pro'] as $plan) {
+            $payload = $this->capture_image_payload($plan, []);
+
+            $this->assertIsArray($payload, $plan);
+            $this->assertArrayNotHasKey('provider', $payload, $plan);
+            Mockery::close();
+        }
+    }
+
+    /** @test */
+    public function managed_plan_keeps_forwarding_a_stored_image_capable_provider(): void
+    {
+        // Back-compat: the hidden stored provider still travels (§2.4).
+        $payload = $this->capture_image_payload('cloud_pro', ['imageProvider' => 'gemini']);
+
+        $this->assertSame('gemini', $payload['provider']);
+    }
+
+    /** @test */
+    public function own_key_plan_with_a_text_only_image_provider_still_skips(): void
+    {
+        $this->assertNull($this->capture_image_payload('byok', ['imageProvider' => 'anthropic']));
+    }
+
+    /** @test */
+    public function own_key_plan_forwards_its_image_provider(): void
+    {
+        $payload = $this->capture_image_payload('free', ['imageProvider' => 'openai']);
+
+        $this->assertSame('openai', $payload['provider']);
     }
 
     // ──────────────────────────────────────────────────────────────────────

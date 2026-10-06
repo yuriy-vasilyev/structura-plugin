@@ -18,13 +18,12 @@ if ( ! defined('ABSPATH')) {
  * (served by Structura Cloud) and cached locally with a fallback to
  * bundled defaults if the remote is unreachable.
  *
- * Tier handling:
- * - Providers have a `min_tier` that gates access.
- * - On tier downgrades (e.g. pro → free), providers above the new tier
- *   become unavailable. Campaigns referencing them will gracefully skip
- *   those capabilities rather than fail outright.
- * - The `validate_provider_access()` method is the single checkpoint
- *   used by Rest_Api, Task_Runner, and campaign validation.
+ * Plan handling: every plan may use every provider since 2026-10-06
+ * (owner decision, specs/open-providers.md; it mirrors the cloud's
+ * `PROVIDERS_FOR_TIER`). Until then each provider carried a `min_tier`
+ * (anonymous OpenAI only, Free OpenAI + Gemini). The tier-taking methods
+ * keep their signatures so callers keep one place to ask, and
+ * `validate_provider_access()` still rejects unknown provider ids.
  */
 class Provider_Registry
 {
@@ -52,18 +51,6 @@ class Provider_Registry
     private static bool $using_fallback = false;
 
     /**
-     * Tier hierarchy — index determines access level.
-     * A user at tier index N can access providers with min_tier at index ≤ N.
-     */
-    private const TIER_HIERARCHY = [
-        'none'   => 0,
-        'free'   => 1,
-        'byok'    => 2,
-        'cloud'  => 2,    // Same access as pro (pro features + managed keys)
-        'cloud_pro' => 3,
-    ];
-
-    /**
      * Provider catalog — structural metadata that rarely changes.
      * This IS hardcoded because it defines what adapters exist in the codebase.
      * Adding a new provider means adding code (adapter classes) anyway,
@@ -78,33 +65,28 @@ class Provider_Registry
                 'id'           => 'openai',
                 'name'         => 'OpenAI',
                 'capabilities' => ['text', 'image'],
-                'min_tier'     => 'none',
                 'key_prefix'   => 'sk-',
                 'key_url'      => 'https://platform.openai.com/api-keys',
-                'description'  => 'GPT models for text generation, DALL-E and GPT Image for images.',
+                // Descriptions name no models (2026-10-06): model names go
+                // stale with every catalog move.
+                'description'  => 'Text and images',
                 'schema_mode'  => 'strict',
             ],
             'gemini' => [
                 'id'           => 'gemini',
                 'name'         => 'Google Gemini',
                 'capabilities' => ['text', 'image'],
-                // 2026-10-02 owner decision: Gemini needs at least the
-                // Free tier. Without an account only OpenAI, matching the
-                // cloud's `PROVIDERS_FOR_TIER.none` (functions/src/types/
-                // shared.ts), which already refused an anonymous Gemini key.
-                'min_tier'     => 'free',
                 'key_url'      => 'https://aistudio.google.com/apikey',
-                'description'  => 'Gemini models for text generation, Imagen for images.',
+                'description'  => 'Text and images',
                 'schema_mode'  => 'strict',
             ],
             'anthropic' => [
                 'id'           => 'anthropic',
                 'name'         => 'Anthropic Claude',
                 'capabilities' => ['text'],
-                'min_tier'     => 'byok',
                 'key_prefix'   => 'sk-ant-',
                 'key_url'      => 'https://console.anthropic.com/settings/keys',
-                'description'  => 'Claude models for nuanced, high-quality text generation.',
+                'description'  => 'Text',
                 'schema_mode'  => 'strict',
             ],
         ];
@@ -129,18 +111,15 @@ class Provider_Registry
     }
 
     /**
-     * Providers accessible at the given plan tier.
-     * If no tier specified, uses the current user's plan.
+     * Providers accessible at the given plan tier: every provider on every
+     * plan since 2026-10-06 (the per-provider `min_tier` filter was
+     * deleted with the owner's decision, specs/open-providers.md).
+     *
+     * @param string|null $plan Kept for callers; no longer narrows the list.
      */
     public static function get_providers_for_tier(?string $plan = null): array
     {
-        $plan  = $plan ?? License_Manager::get_plan();
-        $level = self::TIER_HIERARCHY[$plan] ?? 0;
-
-        return array_filter(self::get_catalog(), function ($provider) use ($level) {
-            $required = self::TIER_HIERARCHY[$provider['min_tier']] ?? 0;
-            return $level >= $required;
-        });
+        return self::get_catalog();
     }
 
     /**
@@ -172,16 +151,9 @@ class Provider_Registry
      */
     public static function validate_provider_access(string $provider_id, ?string $plan = null): bool
     {
-        $provider = self::get_provider($provider_id);
-        if ( ! $provider) {
-            return false;
-        }
-
-        $plan  = $plan ?? License_Manager::get_plan();
-        $level = self::TIER_HIERARCHY[$plan] ?? 0;
-        $required = self::TIER_HIERARCHY[$provider['min_tier']] ?? 0;
-
-        return $level >= $required;
+        // 2026-10-06: the plan-level comparison was deleted (every plan may
+        // use every provider). Unknown provider ids still fail.
+        return self::get_provider($provider_id) !== null;
     }
 
     /**
@@ -203,16 +175,12 @@ class Provider_Registry
         $plan   = $plan ?? License_Manager::get_plan();
         $result = ['text_ok' => true, 'image_ok' => true, 'issues' => []];
 
-        // Text provider check
+        // Text provider check. Since 2026-10-06 only an unknown provider id
+        // fails here; the "requires <tier> or higher" branch was deleted.
         $text_provider = $intelligence['textProvider'] ?? null;
         if ($text_provider && ! self::validate_provider_access($text_provider, $plan)) {
             $result['text_ok']  = false;
-            $provider           = self::get_provider($text_provider);
-            $result['issues'][] = sprintf(
-                'Text provider "%s" requires %s tier or higher.',
-                $provider['name'] ?? $text_provider,
-                $provider['min_tier'] ?? 'unknown'
-            );
+            $result['issues'][] = sprintf('Text provider "%s" is not available.', $text_provider);
         }
 
         // Text provider must also be connected on this site —
@@ -232,11 +200,9 @@ class Provider_Registry
         if ($image_provider) {
             if ( ! self::validate_provider_access($image_provider, $plan)) {
                 $result['image_ok'] = false;
-                $provider           = self::get_provider($image_provider);
                 $result['issues'][] = sprintf(
-                    'Image provider "%s" requires %s tier or higher. Images will be skipped.',
-                    $provider['name'] ?? $image_provider,
-                    $provider['min_tier'] ?? 'unknown'
+                    'Image provider "%s" is not available. Images will be skipped.',
+                    $image_provider
                 );
             } elseif ( ! isset($bindings[$image_provider])) {
                 $result['image_ok'] = false;
@@ -255,9 +221,9 @@ class Provider_Registry
     // ─── Connection State ──────────────────────────────────────────
 
     /**
-     * All providers that are bound on this activation in the cloud.
-     * Filtered by tier — a binding for a provider above the user's
-     * tier doesn't count.
+     * All providers that are bound on this activation in the cloud. Until
+     * 2026-10-06 a binding for a provider above the user's tier did not
+     * count; every plan may now use every provider.
      *
      * Phase 5c — "connected" means the cloud's `aiBindings` map on
      * the activation doc carries an entry for the provider, not that

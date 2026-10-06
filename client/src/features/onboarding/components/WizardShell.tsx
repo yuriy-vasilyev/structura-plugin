@@ -226,7 +226,9 @@ export const WizardShell = ({
           <span className="contents dark:hidden">
             <Logo view="full" variant="dark" />
           </span>
-          <span className="hidden dark:contents">
+          {/* `s-hidden`, not `hidden`: wp-admin's unlayered `.hidden`
+              beats `dark:contents` and hid the dark logo (2026-10-06). */}
+          <span className="s-hidden dark:contents">
             <Logo view="full" variant="mono" />
           </span>
         </div>

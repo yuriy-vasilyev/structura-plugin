@@ -34,6 +34,11 @@ export interface TabItem {
    * disabled tab ("Analytics is coming soon").
    */
   title?: string;
+  /**
+   * Id of the panel this tab shows, set as `aria-controls`. Several tabs
+   * may control the same panel when the selection filters one list.
+   */
+  controls?: string;
 }
 
 export interface TabsProps {
@@ -139,6 +144,7 @@ export const Tabs: FC<TabsProps> = ({
             id={`${baseId}-${tab.id}`}
             title={tab.title}
             aria-selected={active}
+            aria-controls={tab.controls}
             aria-disabled={tab.disabled || undefined}
             tabIndex={active && !tab.disabled ? 0 : -1}
             onClick={tab.disabled ? undefined : () => onChange(tab.id)}

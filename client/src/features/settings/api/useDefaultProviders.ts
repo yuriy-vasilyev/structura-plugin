@@ -4,15 +4,16 @@ import { useLicense } from "./useLicense";
 import { AIProvider } from "@/features/campaigns/types";
 import { getProvidersForTier, isManagedPlan, type PlanId } from "@structura/types";
 import { bestConnected } from "@structura/model-catalog";
+import { orderTextProviders } from "@/features/campaigns/aiGuidance";
 
 /**
  * Resolves the effective default text and image providers.
  *
  * Priority:
  *  1. User-configured default (settings.ai.defaults)
- *  2. Text: the best connected provider the plan allows (`bestConnected`,
- *     specs/byok-ai-guidance.md §9). Image: the first connected provider
- *     with image capability.
+ *  2. Text: the best connected provider (`bestConnected`,
+ *     specs/byok-ai-guidance.md §9). Image: the best connected image
+ *     provider, Gemini before OpenAI (2026-10-06).
  *  3. "gemini" as ultimate fallback (cheapest for Cloud, most common)
  *
  * Key flags:
@@ -54,6 +55,8 @@ export const useDefaultProviders = () => {
 
   // 2026-10-02: with no explicit default, new campaigns and one-off posts
   // start on the best connected provider, not the first connected one.
+  // Every plan allows every provider since 2026-10-06; the filter stays so
+  // the plan matrix keeps one reader.
   const tierAllowedText = new Set<string>(getProvidersForTier(plan));
   const bestText = bestConnected(
     "text",
@@ -63,7 +66,13 @@ export const useDefaultProviders = () => {
     hasExplicitTextDefault || isCloud || !bestText
       ? resolveProvider(hasExplicitTextDefault, defaults?.text_provider, textProviders)
       : bestText;
-  const defaultImageProvider = resolveProvider(hasExplicitImageDefault, defaults?.image_provider, imageProviders);
+  // 2026-10-06 (specs/open-providers.md): images follow the image
+  // recommendation the same way, Gemini before OpenAI.
+  const bestImage = bestConnected("image", imageProviders as AIProvider[]);
+  const defaultImageProvider =
+    hasExplicitImageDefault || isCloud || !bestImage
+      ? resolveProvider(hasExplicitImageDefault, defaults?.image_provider, imageProviders)
+      : bestImage;
 
   // Available providers list (for campaign-level overrides).
   //
@@ -71,11 +80,10 @@ export const useDefaultProviders = () => {
   //   1. Connectivity — Cloud users get all 3 providers (we run the
   //      keys server-side); BYOK users see only providers they've
   //      actually connected.
-  //   2. Tier policy (2026-05-03 Yurii — `PROVIDERS_FOR_TIER`).
-  //      "On 'none' tier we only allow OpenAI; on Free —
-  //      OpenAI + Gemini; on any paid tier — everything." The matrix
-  //      lives in `@structura/types` so the cloud's
-  //      `validateProviderForTier` and this filter can't drift.
+  //   2. Tier policy (`PROVIDERS_FOR_TIER` in `@structura/types`, shared
+  //      with the cloud's `validateProviderForTier`). Every plan allows
+  //      every provider since 2026-10-06 (specs/open-providers.md); until
+  //      then `none` was OpenAI only and Free OpenAI + Gemini.
   //
   // Order matters: connectivity first, then tier intersect. This is
   // also the SECURITY boundary's mirror — the cloud will reject any
@@ -87,8 +95,10 @@ export const useDefaultProviders = () => {
   const connectivityProviders: string[] = isCloud
     ? ["gemini", "openai", "anthropic"]
     : activeProviders;
-  const availableProviders: string[] = connectivityProviders.filter((p) =>
-    tierAllowedSet.has(p),
+  // Claude, OpenAI, Gemini wherever providers are listed (owner review
+  // 2026-10-06), so every picker reads the same order.
+  const availableProviders: string[] = orderTextProviders(
+    connectivityProviders.filter((p) => tierAllowedSet.has(p)),
   );
 
   // Text-only providers (no image generation capability)

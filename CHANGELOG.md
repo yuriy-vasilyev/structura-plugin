@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.30.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.29.0...v2.30.0) (2026-10-06)
+
+
+### Features
+
+* **ai:** every own-key plan can connect all three providers ([6e49aff](https://github.com/yuriy-vasilyev/structura-core/commit/6e49aff821591938cb82427a6080a976a43b0074))
+* **ai:** Magic suggest on every plan ([4733fbf](https://github.com/yuriy-vasilyev/structura-core/commit/4733fbf5f51012daed13395a2992ece9ec6792a1))
+* **ai:** one image model on managed plans ([0f8fa77](https://github.com/yuriy-vasilyev/structura-core/commit/0f8fa7715e8ed93931855c04988c31b847a7e264))
+* **functions:** AI label on generated images ([030fcde](https://github.com/yuriy-vasilyev/structura-core/commit/030fcdece36d4c6454bb9c1cbf31f6212d881cdd))
+* **functions:** generated images follow the site's image medium and show only what the brief names ([c79093c](https://github.com/yuriy-vasilyev/structura-core/commit/c79093c4bf7d61efb005e22e4d37de3034945188))
+* **plugin:** a quieter Generate a Post page ([b1c75e7](https://github.com/yuriy-vasilyev/structura-core/commit/b1c75e7f72936848a075945734fd50baba875695))
+* **tools:** track portal tool runs, Learn link clicks and the tool behind a signup ([5e0218a](https://github.com/yuriy-vasilyev/structura-core/commit/5e0218a8489410c8f7b53359f9752a85978537fd))
+* **visuals:** image medium cards and an AI label switch, with a reminder in the campaign form ([2c4ff62](https://github.com/yuriy-vasilyev/structura-core/commit/2c4ff622df34d500ccb64e4cee822ad50085aff1))
+* **www:** draft the next three Learn pages of the authority cluster ([ac46b4d](https://github.com/yuriy-vasilyev/structura-core/commit/ac46b4d07e30437636c6660b7620d4c043ff450b))
+
+
+### Bug Fixes
+
+* **functions:** referral links to another domain are published as sponsored ([0f87413](https://github.com/yuriy-vasilyev/structura-core/commit/0f87413ecc1fee703924604ddae41c15ebe8df3d))
+* **functions:** titles and headings in sentence case ([50d85a1](https://github.com/yuriy-vasilyev/structura-core/commit/50d85a13f8d663ea053db6fb801fb9f575959338))
+* image switches, license sync, partial preset updates and wizard medium parity ([fd45ee9](https://github.com/yuriy-vasilyev/structura-core/commit/fd45ee98744dab0f4c6458fd2a2373ea5d153acb))
+* **plugin:** a preset update without the art direction keeps the stored text ([dec62a4](https://github.com/yuriy-vasilyev/structura-core/commit/dec62a4410ea1a057d73f1e0c0e45d5f98e1f2e4))
+* **plugin:** the setup wizard works on anonymous installs ([41bdfa5](https://github.com/yuriy-vasilyev/structura-core/commit/41bdfa5c190136b8fadf671928e4d59ab13c70dd))
+
 ## [2.29.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.28.0...v2.29.0) (2026-10-04)
 
 

@@ -47,6 +47,7 @@ import { CONTENT_BLOCKS } from "@/features/settings/constants";
 import { CoreContentSettings } from "@/features/campaigns/components/CoreContentSettings";
 import { WritingApproachOverride } from "@/features/campaigns/components/WritingApproachOverride";
 import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
+import { AiLabelReminder } from "@/features/campaigns/components/AiLabelReminder";
 import { normalizePostStatus } from "@/features/campaigns/helpers";
 import { getBadgeIntentByCampaignStatus } from "@/utils/helpers";
 import { campaignStatusLabel } from "@/features/campaigns/labels";
@@ -678,6 +679,12 @@ const EditAdvancedSettings = () => {
                 style is bound — the cloud falls back to a generic look. */}
             <VisualStyleFallbackNotice
               imagesEnabled={structure.featuredImage || structure.bodyImages}
+            />
+            {/* EU AI label reminder (specs/ai-image-label.md §7); after the
+                fallback notice when both show. */}
+            <AiLabelReminder
+              imagesEnabled={structure.featuredImage || structure.bodyImages}
+              language={intelligence.language}
             />
           </SettingsGroup>
 

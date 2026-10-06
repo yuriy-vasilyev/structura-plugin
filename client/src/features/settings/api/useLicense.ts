@@ -5,7 +5,7 @@ import apiFetch from "@wordpress/api-fetch";
 import { getMaxCampaignsForTier } from "@structura/types";
 import { useSettingsQuery } from "./useSettingsQuery";
 import { settingsKeys } from "./keys";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import type { LicenseEntitlementsBundle } from "@/features/account/types";
 
 /**
@@ -151,47 +151,7 @@ export function deriveHasAnonymousActivation(
 }
 
 /**
- * Read the provider count cap surfaced by PR7a (1 / 2 / 3 per
- * tier — see `License_Manager::get_provider_count_cap()` for the
- * source-of-truth mapping). Falls back to 3 on pre-PR7a plugin
- * builds where the field is missing — matches the legacy "no
- * cap layered on top of `Provider_Registry`" behaviour.
- */
-export function deriveProviderCountCap(
-  config:
-    | { provider_count_cap?: number }
-    | null
-    | undefined,
-): number {
-  if (!config) return 3;
-  return typeof config.provider_count_cap === "number"
-    ? config.provider_count_cap
-    : 3;
-}
-
-/**
- * Resolve the provider count cap, preferring the settings payload
- * (reactive — refetches after an in-SPA activation) over the
- * `structuraConfig` page-render snapshot (back-compat with plugin
- * builds predating the settings field, 2026-06-06).
- *
- * The snapshot-only read kept the anonymous 1-provider cap alive
- * after a paid key was activated in-SPA, wrongly cap-locking the AI
- * Engine surfaces until the next page load.
- */
-export function resolveProviderCountCap(
-  license: { provider_count_cap?: number } | null | undefined,
-  config: { provider_count_cap?: number } | null | undefined,
-): number {
-  if (typeof license?.provider_count_cap === "number") {
-    return license.provider_count_cap;
-  }
-  return deriveProviderCountCap(config);
-}
-
-/**
- * Resolve the anonymous-workspace flag with the same precedence as
- * {@link resolveProviderCountCap}: settings payload first (reactive),
+ * Resolve the anonymous-workspace flag: settings payload first (reactive),
  * `structuraConfig.is_anonymous` snapshot as the back-compat
  * fallback. Defaults to `false` when neither side carries the flag
  * (pre-PR7a plugin builds) so the legacy-licensed code path stays
@@ -223,13 +183,22 @@ export const shouldVerifyLicenseWithCloud = (
   license: { license_key?: string | null } | null | undefined,
 ): boolean => Boolean(license?.license_key && !license.license_key.includes("*"));
 
+/**
+ * Cloud plan last pushed to `/license/sync`, per query client (one per
+ * page load in wp-admin). Shared by every `useLicense()` instance so the
+ * sync fires once per load and once per real cloud plan change.
+ *
+ * 2026-10-06: the guard used to be a per-instance `useRef`, so each of the
+ * dozens of components calling `useLicense()` POSTed its own sync when the
+ * heartbeat landed, and every later mount POSTed again while the stored
+ * plan still read differently (about 28 calls in 15 seconds).
+ */
+const lastSyncedCloudPlan = new WeakMap<object, string>();
+
 export const useLicense = () => {
   const queryClient = useQueryClient();
   const { data: license, isLoading: isSettingsLoading } = useSettingsQuery((s) => s.license);
   const { successToast, errorToast } = useToast();
-
-  const isSyncing = useRef(false);
-
 
   const hasKey = shouldVerifyLicenseWithCloud(license);
 
@@ -307,9 +276,8 @@ export const useLicense = () => {
 
   /**
    * True when the active workspace is anonymous (bootstrapped via
-   * PR6 + PR7a, no license claimed yet). Drives the AI Engine
-   * page's provider count cap + Anthropic-locked teaser, and the
-   * Visuals page's permanent unlicensed teaser on `none` tier.
+   * PR6 + PR7a, no license claimed yet). Drives the Visuals page's
+   * permanent unlicensed teaser on `none` tier.
    *
    * Prefers the settings payload (2026-06-06) so the flag flips
    * REACTIVELY after an in-SPA activation — `activate()` invalidates
@@ -319,33 +287,6 @@ export const useLicense = () => {
    * matches what PHP computes: bearer bound + plan === "none").
    */
   const isAnonymous: boolean = resolveIsAnonymous(
-    license,
-    typeof window !== "undefined" ? window.structuraConfig : null,
-  );
-
-  /**
-   * Maximum number of AI providers the user can configure
-   * simultaneously at the calling tier (source of truth:
-   * `License_Manager::get_provider_count_cap`).
-   *
-   *   - 1 for `none` (anonymous; OpenAI only since 2026-10-02)
-   *   - 2 for `free` (openai + gemini, no Anthropic)
-   *   - 3 for `byok` / managed (all three providers)
-   *
-   * Prefers the settings payload (2026-06-06) over the
-   * `structuraConfig` page-render snapshot for the same reactivity
-   * reason as `isAnonymous` above — the snapshot kept the anonymous
-   * 1-provider cap alive after a paid key was activated in-SPA,
-   * wrongly cap-locking the AI Engine surfaces until the next page
-   * load.
-   *
-   * Falls back to 3 on pre-PR7a plugin builds — the cap is a
-   * UX restriction layered on top of the existing
-   * `Provider_Registry` tier gating, so an undefined value just
-   * means "no cap layered on top," which matches pre-PR7a
-   * behavior.
-   */
-  const providerCountCap: number = resolveProviderCountCap(
     license,
     typeof window !== "undefined" ? window.structuraConfig : null,
   );
@@ -460,21 +401,17 @@ export const useLicense = () => {
     const cloudPlan = cloudStatus.plan;
     if (!cloudPlan) return;
     if (cloudPlan === license?.plan) return;
-    if (isSyncing.current) return;
+    if (lastSyncedCloudPlan.get(queryClient) === cloudPlan) return;
 
-    isSyncing.current = true;
+    lastSyncedCloudPlan.set(queryClient, cloudPlan);
     apiFetch({
       path: "/structura/v1/license/sync",
       method: "POST",
       data: { plan: cloudPlan },
-    })
-      .then(() => {
-        queryClient.invalidateQueries({ queryKey: settingsKeys.all });
-        successToast(sprintf(__('Plan synchronized: "%s".', "structura"), cloudPlan));
-      })
-      .finally(() => {
-        isSyncing.current = false;
-      });
+    }).then(() => {
+      queryClient.invalidateQueries({ queryKey: settingsKeys.all });
+      successToast(sprintf(__('Plan synchronized: "%s".', "structura"), cloudPlan));
+    });
   }, [
     cloudStatus,
     cloudStatus?.plan,
@@ -584,19 +521,10 @@ export const useLicense = () => {
     hasWorkspace,
     /**
      * True when the active workspace is anonymous (bootstrapped via
-     * Phase 1.8 — bearer bound but no license). Drives the AI Engine
-     * page's provider count cap + Anthropic-locked teaser, and the
-     * Visuals page's permanent unlicensed teaser on `none` tier.
+     * Phase 1.8 — bearer bound but no license). Drives the Visuals
+     * page's permanent unlicensed teaser on `none` tier.
      */
     isAnonymous,
-    /**
-     * Maximum number of AI providers the user can configure
-     * simultaneously at the calling tier. Phase 1.8 §1.8.4 + the
-     * feature matrix in §Phase 1.8. Drives the AI Engine page's
-     * "add provider" CTA gating and the visibility of the
-     * default-for-text/images toggles (hidden when cap === 1).
-     */
-    providerCountCap,
     /**
      * Whether `window.location.hostname` is a registered activation of
      * this license, derived from the `checkLicenseStatus` heartbeat.

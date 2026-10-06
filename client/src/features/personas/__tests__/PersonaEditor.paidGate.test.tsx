@@ -1,10 +1,11 @@
 /**
- * PersonaEditor — Magic Suggest paid gate.
+ * PersonaEditor — Magic Suggest on every plan.
  *
- * Regression (2026-07-09, wp.org none-tier testing): the "Magic Suggest"
- * trigger in the Create/Edit Persona dialog ran the cloud AI suggestion
- * ("Reading your site… / Architecting…") on a none-tier install. It's now
- * a disabled "Pro" hint for non-paid, and only functional for paid.
+ * 2026-07-09 the trigger became a disabled "Pro" hint on none/free after it
+ * ran on a none-tier install. Since 2026-10-06 Magic suggest is open on every
+ * plan (specs/open-providers.md §8): the dialog shows the working control
+ * with no chip on every plan (owner report 2026-10-06: an anonymous site saw
+ * "Magic suggest" with a PRO chip, disabled).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
@@ -57,31 +58,23 @@ beforeEach(() => {
   licenseMock.current = { isPaidLicense: false };
 });
 
-describe("PersonaEditor — Magic Suggest paid gate", () => {
-  it("renders a disabled 'Pro' Magic Suggest for a non-paid tier and never calls suggest", () => {
-    licenseMock.current = { isPaidLicense: false };
+describe("PersonaEditor — Magic Suggest on every plan", () => {
+  it.each([
+    ["none", false],
+    ["free", false],
+    ["byok", true],
+  ])("renders the working Magic Suggest with no chip on the %s plan", (_plan, isPaidLicense) => {
+    licenseMock.current = { isPaidLicense };
     render(
       <PersonaEditor persona={null} users={[]} onClose={noop} onSave={noop} />,
     );
 
     const btn = screen.getByRole("button", { name: /Magic Suggest/ });
-    expect(btn).toBeDisabled();
-    expect(screen.getByText("Pro")).toBeInTheDocument();
-    // No provider picker on the locked variant.
-    expect(screen.queryByTestId("provider-pill")).toBeNull();
-
-    fireEvent.click(btn);
-    expect(suggestMock).not.toHaveBeenCalled();
-  });
-
-  it("renders the functional Magic Suggest for a paid tier", () => {
-    licenseMock.current = { isPaidLicense: true };
-    render(
-      <PersonaEditor persona={null} users={[]} onClose={noop} onSave={noop} />,
-    );
-
-    expect(screen.getByRole("button", { name: /Magic Suggest/ })).toBeEnabled();
+    expect(btn).toBeEnabled();
     expect(screen.getByTestId("provider-pill")).toBeInTheDocument();
     expect(screen.queryByText("Pro")).toBeNull();
+
+    fireEvent.click(btn);
+    expect(suggestMock).toHaveBeenCalledWith("persona", { provider: "openai" });
   });
 });

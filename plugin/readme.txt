@@ -41,9 +41,9 @@ repetitive work.
   Spanish, and French.
 
 **You can use Structura without creating an account.** A freshly
-installed Structura starts in **Anonymous Mode** — connect your own
-OpenAI key (BYOK) and you can manually generate posts inside
-wp-admin. The plugin sends nothing anywhere until you choose
+installed Structura starts in **Anonymous Mode** — bring your own
+OpenAI, Gemini or Claude key (BYOK) and you can manually generate
+posts inside wp-admin. The plugin sends nothing anywhere until you choose
 **Connect to Structura Cloud** on its first screen; see *External
 services* below for exactly what is shared after that. Anonymous Mode
 is intentionally limited:
@@ -52,17 +52,15 @@ is intentionally limited:
 * Posts capped at 500 words (all non-paid tiers share this cap).
 * A subset of the SEO protocol.
 * Manual generation only — no campaigns, no schedules.
-* OpenAI is the only provider available at this level.
 
 To unlock more, sign in (free) at **[app.structurawp.com](https://app.structurawp.com/)** and
 get a free license:
 
 * **Free license** — adds heading blocks, the persona engine, more SEO
-  rules, featured-image generation, and Google Gemini as a second BYOK
-  provider option.
+  rules, and featured-image generation.
 * **BYOK** (paid) — full Gutenberg block library, body-image
-  generation, the full 20+ point SEO protocol, Anthropic Claude as an
-  additional provider, scheduled campaigns, channel fan-out, and
+  generation, the full 20+ point SEO protocol, scheduled campaigns,
+  channel fan-out, and
   authority-link verification.
 * **Cloud / Cloud Pro** (paid) — Structura provisions the AI provider
   for you, with one bill from Structura instead of separate provider
@@ -86,8 +84,8 @@ repository's README for reproducible build instructions.
    what the plugin shares with Structura Cloud and asks for your OK —
    click **Connect to Structura Cloud** to continue (nothing is sent
    before that). The plugin then starts in **Anonymous Mode**, which
-   lets you connect an OpenAI key and manually generate posts right
-   away.
+   lets you bring your own OpenAI, Gemini or Claude key and manually
+   generate posts right away.
 4. (Optional, recommended) To unlock the persona engine, more block
    types, image generation, and scheduled campaigns, click *Account &
    License* and connect to
@@ -98,8 +96,8 @@ repository's README for reproducible build instructions.
 
 = Do I need a Structura account to use the plugin? =
 
-No. The plugin runs in **Anonymous Mode** out of the box: connect your
-own OpenAI key and manually generate posts. The trade-off is that
+No. The plugin runs in **Anonymous Mode** out of the box: bring your
+own OpenAI, Gemini or Claude key and manually generate posts. The trade-off is that
 Anonymous Mode is intentionally minimal (paragraph blocks only, no
 images, no campaigns). A free license unlocks meaningfully more.
 
@@ -323,6 +321,27 @@ logs, and settings unless you explicitly turn the toggle on first.
    managed inside wp-admin.
 
 == Changelog ==
+
+= 2.30.0 =
+* New: every own-key plan, including the plugin without an account, can
+  connect OpenAI, Gemini and Claude. Claude is recommended for text and
+  Gemini for images; the provider count limit is gone.
+* New: Magic suggest works on every plan: persona, image style, campaign
+  setup, positioning and keyword suggestions.
+* New: the provider wizard keeps the recommended model for you ("Use
+  recommended model"); switch it off to pick a model yourself.
+* New: the Visuals page has the image medium cards back (photography,
+  illustration, 3D render) and an AI label option that stamps the EU
+  "AI generated" badge on every image we create. Campaigns with photo-style
+  images in an EU language get a reminder.
+* Improved: the Generate a Post page shows fewer locked rows, hides the AI
+  engine when there is nothing to choose, and its single-persona note can
+  be dismissed. Titles and headings are written in sentence case.
+* Fixed: the setup wizard finishes on installs without a licence.
+* Fixed: a partial save of a visual preset no longer resets its other
+  fields; the plugin no longer syncs the licence plan dozens of times on
+  page load; single posts generate images from the image switches rather
+  than the image provider.
 
 = 2.28.0 =
 * New: on Cloud and Cloud Pro, your plan now counts posts per site per

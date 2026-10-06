@@ -113,12 +113,9 @@ describe("buildPortalSignupUrl — unlock_keyword_bank intent", () => {
   });
 
   it("does not regress existing intents", () => {
-    const url = buildPortalSignupUrl({
-      intent: "connect_more_providers",
-      providerId: "anthropic",
-    });
-    expect(url).toContain("intent=connect_more_providers");
-    expect(url).toContain("provider=anthropic");
+    const url = buildPortalSignupUrl({ intent: "unlock_images", plan: "none" });
+    expect(url).toContain("intent=unlock_images");
+    expect(url).toContain("plan=none");
   });
 });
 

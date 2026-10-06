@@ -46,6 +46,7 @@ vi.mock("@/features/site/api/useSiteAnalysis", () => ({
   useSiteAnalysisQuery: useSiteAnalysisQueryMock,
 }));
 
+import { getRegistryModelId } from "@structura/model-catalog";
 import { CampaignProvider, useCampaignForm } from "../context/CampaignContext";
 import { useCampaignDraftStore } from "../context/draftStore";
 import { DEFAULT_CAMPAIGN_FORM_DATA } from "../constants";
@@ -57,6 +58,8 @@ const Probe = () => {
     <div>
       <span data-testid="text-model">{formData.intelligence.textModel}</span>
       <span data-testid="image-model">{formData.intelligence.imageModel}</span>
+      <span data-testid="text-tier">{formData.intelligence.textTier}</span>
+      <span data-testid="image-tier">{formData.intelligence.imageTier}</span>
     </div>
   );
 };
@@ -90,8 +93,8 @@ const CATALOG = {
   image: [],
 };
 
-function setup(opts: { isCloud?: boolean; hydrated?: boolean } = {}) {
-  const { isCloud = false, hydrated = true } = opts;
+function setup(opts: { isCloud?: boolean; hydrated?: boolean; aiSettings?: unknown } = {}) {
+  const { isCloud = false, hydrated = true, aiSettings = AI_SETTINGS } = opts;
   useLicenseMock.mockReturnValue({
     isLicensed: true,
     isPaidLicense: true,
@@ -102,7 +105,7 @@ function setup(opts: { isCloud?: boolean; hydrated?: boolean } = {}) {
     defaultTextProvider: "openai",
     defaultImageProvider: "openai",
   });
-  useAiSettingsQueryMock.mockReturnValue({ data: hydrated ? AI_SETTINGS : undefined });
+  useAiSettingsQueryMock.mockReturnValue({ data: hydrated ? aiSettings : undefined });
   useAvailableModelsQueryMock.mockReturnValue({ data: hydrated ? CATALOG : undefined });
   useSiteAnalysisQueryMock.mockReturnValue({ data: undefined });
 }
@@ -166,6 +169,45 @@ describe("useModelBackfill — edit mode (LocalCampaignProvider)", () => {
     renderEdit({ textProvider: "openai", imageProvider: "openai", textModel: "", imageModel: "" });
     expect(screen.getByTestId("text-model").textContent).toBe("");
     expect(screen.getByTestId("image-model").textContent).toBe("");
+  });
+
+  // 2026-10-06 (specs/open-providers.md): a site whose provider wizard
+  // stores the recommended TIER seeds the campaign with that tier and the
+  // model it maps to today, so the campaign follows the catalog too.
+  it("seeds the tier and its current model from a provider that stores a tier", () => {
+    setup({
+      aiSettings: {
+        ...AI_SETTINGS,
+        providers: {
+          ...AI_SETTINGS.providers,
+          openai: {
+            ...AI_SETTINGS.providers.openai,
+            text_model: "gpt-stale-id",
+            text_tier: "top",
+            image_model: "gpt-stale-image",
+            image_tier: "top",
+          },
+        },
+      },
+    });
+    renderEdit({ textProvider: "openai", imageProvider: "openai", textModel: "", imageModel: "", textTier: "mid", imageTier: "mid" });
+    expect(screen.getByTestId("text-model").textContent).toBe(getRegistryModelId("openai", "text", "top"));
+    expect(screen.getByTestId("text-tier").textContent).toBe("top");
+    expect(screen.getByTestId("image-model").textContent).toBe(getRegistryModelId("openai", "image", "top"));
+    expect(screen.getByTestId("image-tier").textContent).toBe("top");
+  });
+
+  it("a site model with a known tier seeds that tier with the model", () => {
+    const topText = getRegistryModelId("openai", "text", "top") as string;
+    setup({
+      aiSettings: {
+        ...AI_SETTINGS,
+        providers: { ...AI_SETTINGS.providers, openai: { ...AI_SETTINGS.providers.openai, text_model: topText } },
+      },
+    });
+    renderEdit({ textProvider: "openai", imageProvider: "openai", textModel: "", imageModel: "", textTier: "mid" });
+    expect(screen.getByTestId("text-model").textContent).toBe(topText);
+    expect(screen.getByTestId("text-tier").textContent).toBe("top");
   });
 
   it("leaves models empty until sources hydrate (server fallback covers the gap)", () => {

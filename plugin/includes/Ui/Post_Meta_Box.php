@@ -95,27 +95,17 @@ class Post_Meta_Box
         $image_fallback_provider = (string) get_post_meta($post_id, '_structura_image_fallback_provider', true);
         $persona_id              = get_post_meta($post_id, '_structura_persona_id', true);
 
-        // Path 3 — back-compat fallback for posts that pre-date
-        // 2026-05-02 (when the per-post image-provenance meta
-        // started landing). Without a stamped provider, we
-        // synthesise one from the license's managed-tier default
-        // (Cloud → gemini, Agency → openai). For BYOK Pro we
-        // can't reach here without a stamped value because the
-        // local-gen path also stamps these now; the no-tier-
-        // default branch is what surfaces the error in that case
-        // (and is the right outcome — there's literally no way
-        // to know which provider the user wants on regen).
+        // Path 3 — a post with no stamped provider (pre-2026-05-02).
+        // Managed plans regenerate without one: the cloud's managed image
+        // binding picks the model (2026-10-06; this used to fill in a
+        // plugin-side default, Cloud → gemini, Cloud Pro → openai). Own-key
+        // plans have no way to know which provider the user wants, so the
+        // regen is refused.
         if ($image_provider === '') {
             $license_data = \Structura\Core\License_Manager::get_license_data();
-            $tier         = $license_data['plan'] ?? 'free';
-            $managed_default = \Structura\Scheduler\Task_Runner::get_managed_image_default($tier);
-            if ($managed_default) {
-                $image_provider = $managed_default;
+            if ( ! in_array($license_data['plan'] ?? 'free', ['cloud', 'cloud_pro'], true)) {
+                return null;
             }
-        }
-
-        if ($image_provider === '') {
-            return null;
         }
 
         return [
@@ -125,7 +115,7 @@ class Post_Meta_Box
                 'objective' => '',
             ],
             'intelligence' => array_filter([
-                'imageProvider'           => $image_provider,
+                'imageProvider'           => $image_provider !== '' ? $image_provider : null,
                 'imageModel'              => $image_model !== '' ? $image_model : null,
                 'fallbackImageProvider'   => $image_fallback_provider !== '' ? $image_fallback_provider : null,
                 'personaId'               => $persona_id !== '' ? $persona_id : null,
@@ -356,19 +346,6 @@ class Post_Meta_Box
      * "ours."
      */
     /**
-     * Wrapper around `Task_Runner::get_managed_image_default` that
-     * tolerates the class not being loaded — defensive for the
-     * `enqueue_assets` path which runs early in the admin lifecycle.
-     */
-    private static function get_managed_image_default_safe(string $tier): ?string
-    {
-        if ( ! class_exists(\Structura\Scheduler\Task_Runner::class)) {
-            return null;
-        }
-        return \Structura\Scheduler\Task_Runner::get_managed_image_default($tier);
-    }
-
-    /**
      * Validate a per-regen image provider override before forwarding
      * it to the cloud. Returns the provider id when the user has it
      * connected (i.e. it appears in `Provider_Registry::get_connected_providers`
@@ -456,11 +433,19 @@ class Post_Meta_Box
      * Extracted from the enqueue path so the derivation is unit-testable
      * without standing up admin enqueue.
      *
+     * Managed plans (Cloud, Cloud Pro) get no rows, so the modal hides its
+     * picker: since 2026-10-06 Structura binds the image model there and the
+     * cloud ignores a provider or tier sent with a managed regen
+     * (specs/managed-ai-lineup.md).
+     *
      * @param string $tier License plan id — scopes the connected-provider set.
      * @return array<int, array{provider:string, providerName:string, tier:string, modelName:string}>
      */
     private static function build_image_tier_catalog(string $tier): array
     {
+        if (in_array($tier, ['cloud', 'cloud_pro'], true)) {
+            return [];
+        }
         if ( ! class_exists(\Structura\Core\Provider_Registry::class)) {
             return [];
         }
@@ -610,13 +595,12 @@ class Post_Meta_Box
         // tiers, labeled with the model NAME so the user sees "Top (Gemini 3
         // Pro Image)". The cloud resolves the concrete model from (provider,
         // tier) at gen time, so a model bump auto-applies without a re-pick.
-        // The stamped provider (or the tier-managed default) rides along as
+        // The stamped provider rides along as
         // `preferredProvider` so the JS can pin it first / drive the implicit
         // "Use default" entry.
         $stamped_image_provider = (string) get_post_meta($post->ID, '_structura_image_provider', true);
-        $preferred_provider     = $stamped_image_provider !== ''
-            ? $stamped_image_provider
-            : (self::get_managed_image_default_safe($tier) ?? '');
+        // No managed-plan fill-in since 2026-10-06: the picker is hidden there.
+        $preferred_provider     = $stamped_image_provider;
 
         $image_tiers_catalog = self::build_image_tier_catalog($tier);
 

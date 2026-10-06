@@ -11,6 +11,7 @@ import { isManagedPlan, type PlanId } from "@structura/types";
 import { useAiSettingsQuery } from "@/features/ai-engine";
 import { ProviderSetupWizard } from "@/features/ai-engine/components/ProviderSetupWizard";
 import { useAiConnections, useLicense } from "@/features/settings";
+import { planHasImageGeneration } from "@/features/ai-engine/helpers";
 import { buildPortalSignupUrl } from "@/utils/portalLinks";
 import { ADVICE_PROVIDER_NAMES, recommendedTextTier } from "@/features/campaigns/aiGuidance";
 import type { AIProvider } from "@/features/campaigns/types";
@@ -54,17 +55,13 @@ const actionLabel = (action: AdviceAction): string => {
       return _x("Connect a Claude or OpenAI key", "ai advice", "structura");
     case "aiAdvice.connectAnthropicForBest":
       return _x("Connect Claude for the best results", "ai advice", "structura");
-    case "aiAdvice.connectOpenai":
-      return _x("Connect an OpenAI key", "ai advice", "structura");
     case "aiAdvice.upgradeCloud":
       return _x("Upgrade to Cloud, where we run the AI", "ai advice", "structura");
-    case "aiAdvice.upgradeFree":
-      return _x("Upgrade for Claude or managed AI", "ai advice", "structura");
   }
 };
 
 /**
- * The provider advice for Free and BYOK plans in wp-admin: an `InlineAdvice`
+ * The provider advice for own-key plans (anonymous, Free, BYOK) in wp-admin: an `InlineAdvice`
  * driven by the shared `adviceFor` resolver, shown when the text provider is
  * a caution provider (Gemini). Managed plans never see it.
  *
@@ -92,7 +89,7 @@ export const ProviderAdvice: FC<ProviderAdviceProps> = ({
   onShow,
   className,
 }) => {
-  const { plan, providerCountCap } = useLicense();
+  const { plan } = useLicense();
   const { textProviders } = useAiConnections();
   const { data: ai } = useAiSettingsQuery();
   const adviceRef = useRef<InlineAdviceHandle>(null);
@@ -191,9 +188,11 @@ export const ProviderAdvice: FC<ProviderAdviceProps> = ({
         isConnected={!!wizardStatus?.connected}
         currentTextModel={wizardStatus?.text_model}
         currentImageModel={wizardStatus?.image_model}
+        currentTextTier={wizardStatus?.text_tier}
+        currentImageTier={wizardStatus?.image_tier}
         isDefaultText={ai?.defaults?.text_provider === wizardFor}
         isDefaultImage={ai?.defaults?.image_provider === wizardFor}
-        providerCountCap={providerCountCap}
+        imagesAvailable={planHasImageGeneration(plan)}
       />
     ) : null;
 

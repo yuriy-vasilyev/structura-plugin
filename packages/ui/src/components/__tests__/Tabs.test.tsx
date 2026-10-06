@@ -190,3 +190,25 @@ describe("Tabs — size='xs' + stretch (platform-captions handoff)", () => {
     expect(onChange).toHaveBeenCalledWith("tt");
   });
 });
+
+describe("Tabs — panel wiring", () => {
+  it("points each tab at the panel it controls when `controls` is set", () => {
+    render(
+      <Tabs
+        items={[
+          { id: "mine", label: "Mine", controls: "panel-tokens" },
+          { id: "all", label: "All members", controls: "panel-tokens" },
+          { id: "plain", label: "Plain" },
+        ]}
+        value="mine"
+        onChange={() => undefined}
+      />
+    );
+    expect(screen.getByRole("tab", { name: "Mine" })).toHaveAttribute("aria-controls", "panel-tokens");
+    expect(screen.getByRole("tab", { name: "All members" })).toHaveAttribute(
+      "aria-controls",
+      "panel-tokens"
+    );
+    expect(screen.getByRole("tab", { name: "Plain" })).not.toHaveAttribute("aria-controls");
+  });
+});

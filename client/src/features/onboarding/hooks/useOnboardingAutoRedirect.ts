@@ -79,10 +79,10 @@ export const useOnboardingAutoRedirect = () => {
   // re-provision (new id) lost it and the wizard came back. The server-side
   // `onboarding_dismissed` wp_option (localized synchronously at page load) is
   // install-level and survives that drift, and — unlike the cloud
-  // `completedAt` — it also works for the anonymous/none tier, which has no
-  // license_key and so never gets a cloud wizard state. `completedAt` is kept
-  // as a secondary seal for licensed installs whose option hasn't been
-  // localized yet (self-heals on the next state read).
+  // `completedAt` — it also holds when the cloud is unreachable. `completedAt`
+  // is kept as a secondary seal for installs whose option hasn't been
+  // localized yet (self-heals on the next state read; anonymous installs get
+  // a real cloud state through their bearer since 2026-10-06).
   const onboardingDismissedServer =
     (typeof window !== "undefined" &&
       window.structuraConfig?.onboarding_dismissed === true) ||

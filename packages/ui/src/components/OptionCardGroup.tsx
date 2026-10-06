@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { Check } from "lucide-react";
+import React, { Fragment, useRef } from "react";
+import { Check, Lock } from "lucide-react";
 import { cn } from "../utils";
 
 /** Keys the radiogroup handles for roving selection. */
@@ -26,6 +26,24 @@ export interface OptionCardOption<V extends string = string> {
    * label names the card.
    */
   media?: React.ReactNode;
+  /**
+   * This option alone is unavailable: muted, not selectable, skipped by
+   * the arrow keys, and marked with a lock where the check would go. Say
+   * why in text near the group; the lock is not an explanation.
+   */
+  disabled?: boolean;
+  /**
+   * Rendered before this card as a separator inside the group, e.g. a
+   * labelled hairline that starts a riskier tier of options.
+   */
+  divider?: React.ReactNode;
+  /**
+   * Extra content shown under the card while it is selected, inside the
+   * card's frame but outside its radio button, so it may hold its own
+   * controls (a confirmation checkbox). Hidden when another option is
+   * selected.
+   */
+  detail?: React.ReactNode;
 }
 
 /**
@@ -94,15 +112,22 @@ export function OptionCardGroup<V extends string = string>({
     if (disabled || !NAVIGATION_KEYS.includes(event.key)) return;
     event.preventDefault();
 
+    // Per-option `disabled` cards are skipped; with none enabled, nothing moves.
+    const enabled = options.flatMap((option, index) => (option.disabled ? [] : [index]));
+    if (enabled.length === 0) return;
+
     let nextIndex: number;
     if (event.key === "Home") {
-      nextIndex = 0;
+      nextIndex = enabled[0];
     } else if (event.key === "End") {
-      nextIndex = options.length - 1;
+      nextIndex = enabled[enabled.length - 1];
     } else {
       const delta = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
+      const position = enabled.indexOf(selectedIndex);
       nextIndex =
-        selectedIndex === -1 ? 0 : (selectedIndex + delta + options.length) % options.length;
+        position === -1
+          ? enabled[0]
+          : enabled[(position + delta + enabled.length) % enabled.length];
     }
 
     const next = options[nextIndex];
@@ -125,16 +150,19 @@ export function OptionCardGroup<V extends string = string>({
       {options.map((option, index) => {
         const selected = option.value === value;
         const Icon = option.icon;
-        return (
+        const locked = !!option.disabled;
+        // With a visible detail, the selected border and tint move to a
+        // frame around card + detail so the two read as one card.
+        const framed = selected && option.detail != null;
+        const card = (
           <button
-            key={option.value}
             ref={(el) => {
               cardRefs.current[index] = el;
             }}
             type="button"
             role="radio"
             aria-checked={selected}
-            disabled={disabled}
+            disabled={disabled || locked}
             // Roving tabindex. Fallback: with no matching selection, the
             // first card stays tabbable so the group can't become
             // keyboard-unreachable.
@@ -146,12 +174,14 @@ export function OptionCardGroup<V extends string = string>({
               row ? "min-h-14 flex-row items-center gap-3" : "flex-col items-start gap-1.5",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40",
               "disabled:cursor-not-allowed disabled:opacity-55",
-              selected
-                ? "border-brand-400 bg-brand-50/60 dark:border-brand-500/50 dark:bg-brand-500/10"
-                : // Dark borders one step lighter than a page card's (design guide
-                  // §4 rule 3): the group also sits on neutral-800 dialogs, where
-                  // a neutral-800 border vanished.
-                  "border-neutral-200 hover:border-neutral-300 dark:border-neutral-700 dark:hover:border-neutral-600"
+              framed
+                ? "border-transparent"
+                : selected
+                  ? "border-brand-400 bg-brand-50/60 dark:border-brand-500/50 dark:bg-brand-500/10"
+                  : // Dark borders one step lighter than a page card's (design guide
+                    // §4 rule 3): the group also sits on neutral-800 dialogs, where
+                    // a neutral-800 border vanished.
+                    "border-neutral-200 hover:border-neutral-300 dark:border-neutral-700 dark:hover:border-neutral-600"
             )}
           >
             {selected && !row && (
@@ -183,7 +213,31 @@ export function OptionCardGroup<V extends string = string>({
             {selected && row && (
               <Check size={16} className="shrink-0 text-brand-500" aria-hidden="true" />
             )}
+            {locked && (
+              <Lock
+                data-slot="locked"
+                size={row ? 16 : 14}
+                className={cn("shrink-0 text-neutral-400", !row && "absolute top-2 right-2")}
+                aria-hidden="true"
+              />
+            )}
           </button>
+        );
+        return (
+          <Fragment key={option.value}>
+            {option.divider}
+            {framed ? (
+              <div
+                data-slot="option-frame"
+                className="rounded-xl border border-brand-400 bg-brand-50/60 dark:border-brand-500/50 dark:bg-brand-500/10"
+              >
+                {card}
+                <div className="px-3 pb-3 motion-safe:animate-slide-in-bottom">{option.detail}</div>
+              </div>
+            ) : (
+              card
+            )}
+          </Fragment>
         );
       })}
     </div>

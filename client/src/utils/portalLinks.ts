@@ -28,12 +28,11 @@
  * Recognized intents (kept tight on purpose; new intents need a portal
  * change anyway, so they should be added in lockstep):
  *
- *   - `connect_more_providers` — user hit the per-tier provider count
- *     cap (Phase 1.8 §1.8.4) and wants to add another. Portal copy:
- *     "Sign up for a Free license to connect a second provider."
- *   - `unlock_provider`       — user wants to connect a tier-locked
- *     provider (e.g. Anthropic at None / Free). Portal copy:
- *     "Upgrade to BYOK to connect Anthropic."
+ *   (`connect_more_providers` and `unlock_provider` were removed
+ *   2026-10-06 with the provider locks they served: every plan may
+ *   connect every provider, specs/open-providers.md. The portal sends
+ *   any `unlock_*` intent to billing and anything else to the dashboard,
+ *   so links from older plugin builds keep landing.)
  *   - `unlock_images`         — user hit the image-cap restriction at
  *     None / Free (Phase 1.8 image-side stripping). Portal copy:
  *     "Sign up for Free to unlock image generation."
@@ -71,8 +70,6 @@
  * `/?intent=…` switch in lockstep.
  */
 export type PortalIntent =
-  | "connect_more_providers"
-  | "unlock_provider"
   | "unlock_images"
   | "unlock_visuals"
   | "unlock_keyword_bank"
@@ -98,17 +95,6 @@ export interface PortalSignupLinkArgs {
    *  the upgrade path in plain words ("from Free to BYOK").
    */
   plan?: string;
-  /**
-   * Provider the user was trying to connect (or swap into) when the
-   * cap / lock fired. Portal can preselect-language the CTA.
-   */
-  providerId?: string;
-  /**
-   * Provider the user is currently using (only relevant for
-   * `connect_more_providers`). Lets the portal mention the swap
-   * scenario explicitly.
-   */
-  fromProviderId?: string;
   /**
    * Where to send the user back to after the portal flow completes.
    * The portal surfaces this as a "Back to {site}" link on its
@@ -140,8 +126,6 @@ export function buildPortalSignupUrl(args: PortalSignupLinkArgs): string {
   params.set("source", "plugin");
   if (args.domain) params.set("domain", args.domain);
   if (args.plan) params.set("plan", args.plan);
-  if (args.providerId) params.set("provider", args.providerId);
-  if (args.fromProviderId) params.set("from_provider", args.fromProviderId);
   if (args.returnTo) params.set("returnTo", args.returnTo);
   return `${PORTAL_BASE_URL}/?${params.toString()}`;
 }

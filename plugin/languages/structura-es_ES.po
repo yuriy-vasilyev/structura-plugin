@@ -10028,3 +10028,100 @@ msgstr "Demasiadas solicitudes de IA desde este espacio de trabajo. Inténtalo d
 #. translators: %s: language name, e.g. "German".
 msgid "Redraft the campaign in %s?"
 msgstr "¿Volver a redactar la campaña en %s?"
+
+msgid "AI label"
+msgstr "Etiqueta de IA"
+
+msgid "Label images as AI-generated"
+msgstr "Etiquetar las imágenes como generadas por IA"
+
+msgid "Adds the EU “AI generated” badge to the corner of every image we create with this preset. EU rules ask publishers to mark realistic AI images."
+msgstr "Añade la insignia de la UE «AI generated» en la esquina de cada imagen que creamos con este preajuste. Las normas de la UE piden a quienes publican que marquen las imágenes realistas creadas con IA."
+
+msgid "Images that already exist are not changed. Regenerating an image applies the current setting."
+msgstr "Las imágenes que ya existen no cambian. Al regenerar una imagen se aplica el ajuste actual."
+
+msgid "EU “AI generated” badge"
+msgstr "Insignia de la UE «AI generated»"
+
+msgid "Photo-style images may need an AI label"
+msgstr "Las imágenes de estilo fotográfico pueden necesitar una etiqueta de IA"
+
+msgid "EU rules ask publishers to mark realistic AI-generated images. The AI label is off for this site."
+msgstr "Las normas de la UE piden a quienes publican que marquen las imágenes realistas generadas por IA. La etiqueta de IA está desactivada para este sitio."
+
+msgid "Turn it on in Visuals"
+msgstr "Activarla en Visuals"
+
+msgid "Use recommended model"
+msgstr "Usar el modelo recomendado"
+
+msgid "We review new models regularly and move the recommendation when a better one proves itself. We suggest leaving this choice with us."
+msgstr "Revisamos los modelos nuevos con regularidad y cambiamos la recomendación cuando uno mejor demuestra su valía. Te sugerimos que dejes esta elección en nuestras manos."
+
+msgid "Image generation is not available on your current plan."
+msgstr "La generación de imágenes no está disponible en tu plan actual."
+
+msgctxt "ai advice"
+msgid "Recommended for images"
+msgstr "Recomendado para imágenes"
+
+msgid "This AI provider is not available."
+msgstr "Este proveedor de IA no está disponible."
+
+msgid "Connect an AI provider key under AI Engine to use Magic suggest."
+msgstr "Conecta una clave de un proveedor de IA en AI Engine para usar Magic suggest."
+
+msgid "Connect to Structura Cloud first."
+msgstr "Conéctate primero a Structura Cloud."
+
+msgid "Writing as %s"
+msgstr "Escribiendo como %s"
+
+msgid "Writing with your only persona"
+msgstr "Escribiendo con tu única persona"
+
+msgid "Every post uses your only persona. Add more if you want to vary the tone."
+msgstr "Todas las entradas usan tu única persona. Añade más si quieres variar el tono."
+
+msgid "More with a paid plan"
+msgstr "Más con un plan de pago"
+
+msgid "More with a free account or a paid plan"
+msgstr "Más con una cuenta gratuita o un plan de pago"
+
+msgid "Free account"
+msgstr "Cuenta gratuita"
+
+msgid "Paid plans"
+msgstr "Planes de pago"
+
+msgid "Featured images"
+msgstr "Imágenes destacadas"
+
+msgid "Headings"
+msgstr "Encabezados"
+
+msgid "A campaign that publishes every week"
+msgstr "Una campaña que publica cada semana"
+
+msgid "Every content block: lists, tables, quotes and more"
+msgstr "Todos los bloques de contenido: listas, tablas, citas y más"
+
+msgid "SEO targeting with live search data"
+msgstr "Segmentación SEO con datos de búsqueda en tiempo real"
+
+msgid "FAQ sections and action steps"
+msgstr "Secciones de preguntas frecuentes y pasos de acción"
+
+msgid "Internal and authority links"
+msgstr "Enlaces internos y de autoridad"
+
+msgid "E-E-A-T signals"
+msgstr "Señales E-E-A-T"
+
+msgid "Get free account"
+msgstr "Crear cuenta gratuita"
+
+msgid "See plans"
+msgstr "Ver planes"

@@ -162,15 +162,20 @@ beforeEach(() => {
 });
 
 describe("GeneratePostPage — managed plan (2026-10-01)", () => {
-  it("hides the text provider picker and keeps the image provider picker", () => {
+  // Flipped 2026-10-06: the image provider picker goes too (Structura binds
+  // one image model on managed plans). The seeded image provider still
+  // travels hidden, so the image toggles keep working on every cloud.
+  it("hides the text and the image provider pickers", () => {
     renderPage();
 
     expect(screen.queryByText("Text Provider")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Claude|Anthropic/i })).not.toBeInTheDocument();
-    expect(screen.getByText("Image Provider")).toBeInTheDocument();
+    expect(screen.queryByText("Image Provider")).not.toBeInTheDocument();
+    expect(screen.queryByText("Image Model")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^(Gemini|OpenAI)$/i })).not.toBeInTheDocument();
   });
 
-  it("sends the hidden text provider with no text or image model", async () => {
+  it("sends the hidden text and image providers with no text or image model", async () => {
     renderPage();
     const data = await submitAndReadWire();
 
@@ -182,12 +187,16 @@ describe("GeneratePostPage — managed plan (2026-10-01)", () => {
   });
 });
 
-describe("GeneratePostPage — BYOK plan (unchanged)", () => {
-  it("shows the text provider section and sends the tier's concrete model", async () => {
+describe("GeneratePostPage — BYOK plan", () => {
+  // Owner review 2026-10-06: one connected provider on its recommended
+  // model leaves nothing to choose, so the provider block is hidden; the
+  // request still carries the provider and the tier's concrete model.
+  it("hides the block for one provider on its recommended model and sends the tier's concrete model", async () => {
     planMock.managed = false;
     renderPage();
 
-    expect(screen.getByText("Text Provider")).toBeInTheDocument();
+    expect(screen.queryByText("Text Provider")).not.toBeInTheDocument();
+    expect(screen.queryByText("Text Model")).not.toBeInTheDocument();
 
     const data = await submitAndReadWire();
     expect(data.text_provider).toBe("openai");

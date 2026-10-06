@@ -127,8 +127,8 @@ export function useFinishWizard() {
           aspect_ratio: drafts.step4.aspectRatio,
           format: drafts.step4.format,
           optimize_on_upload: drafts.step4.optimizeOnUpload,
-          // Persist the rendering medium picked in the AI-suggest dropdown
-          // so the preset (and every generated image) matches it.
+          // Persist the rendering medium picked on the medium cards so the
+          // preset (and every generated image) matches it.
           medium: drafts.step4.medium as VisualMedium,
           // Video styling (video-visuals handoff §4) — keys are OMITTED
           // (not defaulted) when the draft carries none: the video row
@@ -186,9 +186,9 @@ export function useFinishWizard() {
       // persisted. Re-saving here would duplicate them.
 
       // ── Mark wizard complete (dashboard banner + tier tracking) ─
-      // Cloud-side workspace state + growth event. No-ops for anonymous (no
-      // license_key) — the durable local seal below is what actually stops
-      // the auto-redirect for every tier.
+      // Cloud-side workspace state + growth event. Works on anonymous
+      // installs through their activation bearer (2026-10-06); the durable
+      // local seal below is what stops the auto-redirect for every tier.
       try {
         await markStepComplete.mutateAsync(6);
       } catch (e) {

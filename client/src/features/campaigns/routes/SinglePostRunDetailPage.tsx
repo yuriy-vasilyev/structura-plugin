@@ -319,7 +319,8 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
   };
 
   // Provider rows for the confirm modal — text when set, image when set.
-  // Managed plans get no text row and no image model.
+  // Managed plans get no row: no text provider (2026-10-01) and, since
+  // 2026-10-06, no image provider either (Structura binds the image model).
   const runProviders = [
     !isManagedAiPlan && textProvider && {
       key: "text",
@@ -327,11 +328,11 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
       providerId: textProvider,
       value: providerModelValue(textProvider, textModel),
     },
-    imageProvider && {
+    !isManagedAiPlan && imageProvider && {
       key: "image",
       role: "image" as const,
       providerId: imageProvider,
-      value: providerModelValue(imageProvider, isManagedAiPlan ? "" : imageModel),
+      value: providerModelValue(imageProvider, imageModel),
     },
   ].filter(Boolean) as {
     key: string;
@@ -459,7 +460,7 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
                 value={String(textProvider)}
               />
             )}
-            {imageProvider && (
+            {imageProvider && !isManagedAiPlan && (
               <Field
                 label={__("Image provider", "structura")}
                 value={String(imageProvider)}

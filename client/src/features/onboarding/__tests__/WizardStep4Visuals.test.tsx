@@ -40,9 +40,13 @@ const presetsMock = vi.hoisted(() => ({
   } | undefined,
 }));
 
+const providersMock = vi.hoisted(() => ({
+  current: { defaultTextProvider: "openai" } as Record<string, unknown>,
+}));
+
 vi.mock("@/features/settings", () => ({
   useLicense: () => licenseMock.current,
-  useDefaultProviders: () => ({ defaultTextProvider: "openai" }),
+  useDefaultProviders: () => providersMock.current,
   usePublicSiteProfile: () => ({
     data: {
       name: "Acme",
@@ -70,8 +74,8 @@ vi.mock("@/features/channels/hooks/useVideoStylingEligibility", () => ({
   useVideoStylingEligibility: () => videoEligibilityMock.current,
 }));
 
-// SuggestStrategySection is the shared suggest panel (its own paid/locked
-// state + provider deps are covered with that component). Stub it to a
+// SuggestStrategySection is the shared suggest panel (its every-plan state
+// + provider deps are covered with that component). Stub it to a
 // button that fires onGenerate, so these tests stay focused on the wizard
 // step's own logic (auto-suggest / hydration / gating).
 vi.mock("@/features/campaigns/components/SuggestStrategySection", () => ({
@@ -80,7 +84,7 @@ vi.mock("@/features/campaigns/components/SuggestStrategySection", () => ({
   }: {
     onGenerate: (provider: string, context: unknown[], medium?: string) => void;
   }) => (
-    <button type="button" onClick={() => onGenerate("openai", [], "photography")}>
+    <button type="button" onClick={() => onGenerate("openai", [])}>
       Suggest Image Style
     </button>
   ),
@@ -101,6 +105,7 @@ beforeEach(() => {
   useWizardStore.getState().reset();
   suggestMock.fn.mockReset();
   licenseMock.current = { plan: "cloud", isPaidLicense: true };
+  providersMock.current = { defaultTextProvider: "openai" };
   presetsMock.current = { boundPresetId: null, presets: [] };
   videoEligibilityMock.current = "unknown";
 });
@@ -280,17 +285,135 @@ describe("WizardStep4Visuals", () => {
     );
   });
 
-  it("renders the shared suggest panel (medium switcher lives there)", async () => {
+  it("renders the shared suggest panel", async () => {
     renderStep();
     expect(
       await screen.findByRole("button", { name: /suggest image style/i }),
     ).toBeInTheDocument();
   });
 
+  // 2026-10-06: the medium used to be picked only inside the Suggest
+  // dropdown, so a user who wrote their own style never chose one. The
+  // step now has the same three medium cards as the Visuals page.
+  it("offers the three medium cards and saves the pick on the draft", async () => {
+    presetsMock.current = {
+      boundPresetId: "preset-1",
+      presets: [
+        {
+          presetId: "preset-1",
+          globalArtDirection: "Saved style",
+          aspectRatio: "16:9",
+          format: "webp",
+          optimizeOnUpload: true,
+        },
+      ],
+    };
+    renderStep();
+    await waitFor(() =>
+      expect(useWizardStore.getState().drafts.step4?.globalArtDirection).toBe(
+        "Saved style",
+      ),
+    );
+
+    const photo = screen.getByRole("button", { name: /^Photography/ });
+    const illus = screen.getByRole("button", { name: /^Illustration/ });
+    const render3d = screen.getByRole("button", { name: /^3D render/ });
+    expect(photo).toHaveAttribute("aria-pressed", "true");
+    expect(illus).toHaveAttribute("aria-pressed", "false");
+    expect(render3d).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(illus);
+    expect(useWizardStore.getState().drafts.step4?.medium).toBe("illustration");
+    expect(illus).toHaveAttribute("aria-pressed", "true");
+    expect(photo).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("drafts the style in the medium picked on the cards", async () => {
+    suggestMock.fn.mockResolvedValue({ prompt: "Isometric 3D brand style" });
+    presetsMock.current = {
+      boundPresetId: "preset-1",
+      presets: [
+        {
+          presetId: "preset-1",
+          globalArtDirection: "Saved style",
+          aspectRatio: "16:9",
+          format: "webp",
+          optimizeOnUpload: true,
+          medium: "photography",
+        },
+      ],
+    };
+    renderStep();
+    await waitFor(() =>
+      expect(useWizardStore.getState().drafts.step4?.globalArtDirection).toBe(
+        "Saved style",
+      ),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /^3D render/ }));
+    fireEvent.click(screen.getByRole("button", { name: /suggest image style/i }));
+
+    await waitFor(() => expect(suggestMock.fn).toHaveBeenCalledTimes(1));
+    expect(suggestMock.fn.mock.calls[0][1]).toMatchObject({ medium: "3d_render" });
+    await waitFor(() =>
+      expect(useWizardStore.getState().drafts.step4?.globalArtDirection).toBe(
+        "Isometric 3D brand style",
+      ),
+    );
+    expect(useWizardStore.getState().drafts.step4?.medium).toBe("3d_render");
+  });
+
+  it("hydrates the medium from the bound preset", async () => {
+    presetsMock.current = {
+      boundPresetId: "preset-1",
+      presets: [
+        {
+          presetId: "preset-1",
+          globalArtDirection: "Saved style",
+          aspectRatio: "16:9",
+          format: "webp",
+          optimizeOnUpload: true,
+          medium: "illustration",
+        },
+      ],
+    };
+    renderStep();
+    await waitFor(() =>
+      expect(useWizardStore.getState().drafts.step4?.medium).toBe("illustration"),
+    );
+    expect(screen.getByRole("button", { name: /^Illustration/ })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  // Magic suggest on every plan (2026-10-06, specs/open-providers.md §8).
+  it("free tier with a connected key: auto-suggests on land like a paid plan", async () => {
+    licenseMock.current = { plan: "free", isPaidLicense: false };
+    providersMock.current = { defaultTextProvider: "openai", isAutoResolved: true };
+    suggestMock.fn.mockResolvedValue({ prompt: "Free-plan brand style" });
+    renderStep();
+
+    await waitFor(() =>
+      expect(useWizardStore.getState().drafts.step4?.globalArtDirection).toBe(
+        "Free-plan brand style",
+      ),
+    );
+    expect(suggestMock.fn).toHaveBeenCalledTimes(1);
+  });
+
+  it("free tier with no key connected: no auto-suggest (the call could only fail)", async () => {
+    licenseMock.current = { plan: "free", isPaidLicense: false };
+    providersMock.current = { defaultTextProvider: "gemini", isAutoResolved: false, hasExplicitTextDefault: false };
+    renderStep();
+
+    await waitFor(() => expect(screen.getByText("Suggest Image Style")).toBeInTheDocument());
+    expect(suggestMock.fn).not.toHaveBeenCalled();
+  });
+
   it("free tier: visual options are Pro-gated", async () => {
-    // The suggest panel's own locked state is covered with
-    // SuggestStrategySection; here we only pin the wizard step's gated
-    // format + optimize controls.
+    // Format + optimize stay paid; the suggest panel is open on every plan
+    // since 2026-10-06 (MagicSuggestControls.everyPlan.test.tsx).
     licenseMock.current = { plan: "free", isPaidLicense: false };
     renderStep();
     await waitFor(() =>

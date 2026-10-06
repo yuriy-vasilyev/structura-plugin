@@ -46,6 +46,8 @@ export interface LearnTarget {
   newTab: boolean;
   /** Pages that exist; a link to any other slug does not render. */
   published: ReadonlySet<LearnSlug>;
+  /** Called when a reader follows a link, for the surface's analytics. */
+  onFollow?: (slug: LearnSlug) => void;
 }
 
 /** The Learn page that explains how to fix an SEO checker task. */

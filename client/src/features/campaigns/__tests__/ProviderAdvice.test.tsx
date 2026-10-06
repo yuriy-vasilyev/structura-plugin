@@ -7,7 +7,8 @@
  * separate modal with its own tests) are stubbed.
  *
  * Pinned:
- *   - the five situations of the spec §3 table, Free and BYOK;
+ *   - the three situations of the spec §3 table, on BYOK, Free and anonymous
+ *     alike (rows 4 and 5 retired 2026-10-06);
  *   - nothing on managed plans, nothing for a non-caution provider;
  *   - Switch: provider + recommended tier, confirmation, Undo focused and
  *     announced; Undo restores, refocuses the provider control and
@@ -28,7 +29,7 @@ const env = vi.hoisted(() => ({
 }));
 
 vi.mock("@/features/settings", () => ({
-  useLicense: () => ({ plan: env.plan, providerCountCap: 3 }),
+  useLicense: () => ({ plan: env.plan }),
   useAiConnections: () => ({ textProviders: env.connected }),
 }));
 
@@ -120,7 +121,7 @@ beforeEach(() => {
   env.connected = ["gemini"];
 });
 
-describe("ProviderAdvice — the five situations", () => {
+describe("ProviderAdvice — the situations", () => {
   it("1 · BYOK with Anthropic connected: Switch to Claude, nothing else", () => {
     env.connected = ["gemini", "anthropic"];
     render(<Harness />);
@@ -153,26 +154,25 @@ describe("ProviderAdvice — the five situations", () => {
     expect(upgrade.getAttribute("href")).toContain("intent=general_upgrade");
   });
 
-  it("4 · Free with OpenAI: Switch to OpenAI, Upgrade for Claude or managed AI (never Anthropic)", () => {
-    env.plan = "free";
+  // 2026-10-06 (specs/open-providers.md): Free and anonymous may connect
+  // Claude, so they get the same three situations as BYOK. The Free-only
+  // rows ("Connect an OpenAI key", "Upgrade for Claude or managed AI") are gone.
+  it.each(["free", "none"])("%s with Claude connected: Switch to Claude", (plan) => {
+    env.plan = plan;
     env.connected = ["gemini", "openai", "anthropic"];
     render(<Harness />);
 
-    expect(screen.getByRole("button", { name: "Switch to OpenAI" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Switch to Claude" })).toBeNull();
-    expect(
-      screen.getByRole("link", { name: /Upgrade for Claude or managed AI/ })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Switch to Claude" })).toBeInTheDocument();
+    expect(screen.queryByText(/Upgrade for Claude/)).toBeNull();
   });
 
-  it("5 · Free with only Gemini: Connect an OpenAI key, Upgrade for Claude or managed AI", () => {
-    env.plan = "free";
+  it.each(["free", "none"])("%s with only Gemini: Connect a Claude or OpenAI key, Upgrade to Cloud", (plan) => {
+    env.plan = plan;
     render(<Harness />);
 
-    expect(screen.getByRole("button", { name: "Connect an OpenAI key" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /Upgrade for Claude or managed AI/ })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Connect a Claude or OpenAI key" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Connect an OpenAI key" })).toBeNull();
+    expect(screen.getByRole("link", { name: /Upgrade to Cloud, where we run the AI/ })).toBeInTheDocument();
   });
 });
 

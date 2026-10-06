@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   ArrowRight,
   Copy,
+  ExternalLink,
   FileCode,
   Info,
   Lock,
@@ -12,6 +13,7 @@ import {
   Palette,
   Save,
   SearchCheck,
+  Stamp,
   Trash2,
 } from "lucide-react";
 import {
@@ -22,6 +24,7 @@ import {
   useVisualQuery,
 } from "@/features/settings";
 import {
+  AiGeneratedBadge,
   Badge,
   Button,
   Card,
@@ -30,22 +33,20 @@ import {
   InputField,
   PageLoader,
   Select,
+  Switch,
   TextArea,
 } from "@structura/ui";
 import { AIProvider } from "@/features/campaigns/types";
 import { PageTitle } from "@/components/Layout/PageTitle";
 import { PageDescription } from "@/components/Layout/PageSubtitle";
 import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
+import { docsUrl } from "@/utils/docsUrl";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
 import {
   ContextField,
   SuggestStrategySection,
 } from "@/features/campaigns/components/SuggestStrategySection";
-import type {
-  VisualContent,
-  VisualMedium,
-  VisualPresetWire,
-} from "@/features/settings/api/useVisualPresets";
+import type { VisualContent, VisualPresetWire } from "@/features/settings/api/useVisualPresets";
 import { MEDIUM_OPTIONS } from "../visualMediumOptions";
 import { useVideoStylingEligibility } from "@/features/channels/hooks/useVideoStylingEligibility";
 import { VideoPresetSection, VideoStylingGateTeaser } from "../components/VideoPresetSection";
@@ -76,6 +77,7 @@ function presetToDraft(p: VisualPresetWire, fallbackFormat: string): DraftState 
     format: p.format || fallbackFormat,
     optimize_on_upload: !!p.optimizeOnUpload,
     medium: p.medium ?? "photography",
+    ai_label: p.aiLabel ?? false,
     // Video fields ride verbatim — including `undefined`. The UI applies
     // the render defaults (clean / bottom) at display time only, so a
     // save can't materialize defaults onto a preset that never had the
@@ -95,6 +97,7 @@ function emptyDraft(fallbackFormat: string, paid: boolean): DraftState {
     format: paid ? fallbackFormat || "webp" : "png",
     optimize_on_upload: paid,
     medium: "photography",
+    ai_label: false,
   };
 }
 
@@ -117,7 +120,7 @@ export const VisualsPage = () => {
     isBinding,
   } = useVisualPresetMutations();
   const { suggest, isSuggesting } = useMagicSuggest();
-  const { defaultImageProvider } = useDefaultProviders();
+  const { defaultImageProvider, isCloud } = useDefaultProviders();
 
   const boundPreset = useMemo(() => {
     if (!presetsData) return null;
@@ -182,7 +185,10 @@ export const VisualsPage = () => {
     };
   }, [wantsVideoAnchor, videoSectionMounted]);
 
+  // Managed plans pick no image provider since 2026-10-06 (Structura binds
+  // the image model), so there is no provider to switch.
   const showOpenAIRatioHint =
+    !isCloud &&
     defaultImageProvider === "openai" &&
     (draft?.aspect_ratio === "16:9" || draft?.aspect_ratio === "9:16");
 
@@ -200,6 +206,7 @@ export const VisualsPage = () => {
     format: d.format,
     optimize_on_upload: d.optimize_on_upload,
     medium: d.medium ?? "photography",
+    ai_label: d.ai_label ?? false,
     // Video keys are omitted (not defaulted) when the draft carries
     // nothing — an untouched or plan-locked section must never overwrite
     // a preset's saved video styling. See VisualContent's docblock.
@@ -289,15 +296,11 @@ export const VisualsPage = () => {
     };
   };
 
-  const handleMagicStyle = async (provider: string, context: ContextField[], medium?: string) => {
-    // Medium is picked from the Suggest dropdown — persist it (drives Save
-    // + the "drafted as" badge) and draft the style in it.
-    const picked = (medium as VisualMedium | undefined) ?? draft?.medium ?? "photography";
-    updateDraft({ medium: picked });
+  const handleMagicStyle = async (provider: string, context: ContextField[]) => {
     const data = await suggest("visual", {
       provider: provider as AIProvider,
       context,
-      medium: picked,
+      medium: draft?.medium ?? "photography",
     });
     if (data?.prompt) {
       // One pass fills both siblings (handoff §1): the image prompt AND
@@ -450,13 +453,8 @@ export const VisualsPage = () => {
               </h3>
               <SuggestStrategySection
                 isStrategizing={isSuggesting}
-                onGenerate={async (provider, context, medium) => {
-                  await handleMagicStyle(provider, context, medium);
-                }}
-                mediumPicker={{
-                  heading: __("Image medium", "structura"),
-                  current: draft.medium ?? "photography",
-                  options: MEDIUM_OPTIONS,
+                onGenerate={async (provider, context) => {
+                  await handleMagicStyle(provider, context);
                 }}
                 toggleButtonLabel={__("Suggest Image Style", "structura")}
                 contextFieldLabel={__(
@@ -485,17 +483,49 @@ export const VisualsPage = () => {
               className="mb-6"
             />
 
-            {/* Current medium — set via the "Suggest Image Style" dropdown
-             * above (it's a parameter of the suggestion, not a standalone
-             * setting). Shown so it's clear what the style was drafted as. */}
-            <div className="mb-4 flex items-center gap-2">
-              <span className="text-xs font-medium tracking-widest text-gray-400 uppercase dark:text-gray-500">
-                {__("Image medium", "structura")}
-              </span>
-              <Badge intent="secondary">
-                {MEDIUM_OPTIONS.find((o) => o.value === (draft.medium ?? "photography"))?.label ??
-                  __("Photography", "structura")}
-              </Badge>
+            {/* Image medium — the look applied to every generated image
+             * (the image prompt reads it on every generation since
+             * 2026-10-05), and the medium "Suggest Image Style" drafts in.
+             * A saved setting on every plan, not a Suggest parameter. */}
+            <p className="mt-0! mb-2! text-xs font-medium tracking-widest text-gray-400 uppercase dark:text-gray-500">
+              {__("Image medium", "structura")}
+            </p>
+            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {MEDIUM_OPTIONS.map((opt) => {
+                const Icon = opt.icon;
+                const active = (draft.medium ?? "photography") === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => updateDraft({ medium: opt.value })}
+                    className={cn(
+                      "flex cursor-pointer flex-col gap-1.5 rounded-xl border p-3 text-left transition-all duration-200",
+                      active
+                        ? "border-brand-500 bg-brand-50/60 dark:border-brand-400 dark:bg-brand-950/30"
+                        : "hover:border-brand-300 dark:hover:border-brand-500/40 border-gray-200 hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-sm dark:border-neutral-800 dark:hover:bg-neutral-800/40"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "flex h-7 w-7 items-center justify-center rounded-lg",
+                        active
+                          ? "bg-brand-500 text-white"
+                          : "bg-gray-100 text-gray-500 dark:bg-neutral-800 dark:text-neutral-400"
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span className="text-[13px] font-bold text-gray-900 dark:text-white">
+                      {opt.label}
+                    </span>
+                    <span className="text-[11.5px] leading-snug text-gray-500 dark:text-neutral-400">
+                      {opt.desc}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             <p className="mt-0! mb-4! text-xs font-medium tracking-widest text-gray-400 uppercase dark:text-gray-500">
@@ -661,6 +691,57 @@ export const VisualsPage = () => {
                 ))}
               </Select.Content>
             </Select>
+          </Card>
+
+          {/* EU AI label (specs/ai-image-label.md §7): every plan, no plan
+           * check. The preview shows the pill the cloud stamps. */}
+          <Card className="p-6!">
+            <h3 className="mt-0! mb-4! flex! items-center gap-2 text-[10px] font-bold text-gray-400 uppercase dark:text-gray-500">
+              <Stamp className="text-brand-500 h-3.5 w-3.5" />
+              {__("AI label", "structura")}
+            </h3>
+            <Switch
+              label={__("Label images as AI-generated", "structura")}
+              checked={!!draft.ai_label}
+              onChange={(checked) => updateDraft({ ai_label: checked })}
+            />
+            <p className="mt-3! mb-0! text-xs leading-relaxed text-gray-600 dark:text-gray-300">
+              {__(
+                "Adds the EU “AI generated” badge to the corner of every image we create with this preset. EU rules ask publishers to mark realistic AI images.",
+                "structura"
+              )}
+            </p>
+            <p className="mt-2! mb-0! text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+              {__(
+                "Images that already exist are not changed. Regenerating an image applies the current setting.",
+                "structura"
+              )}
+            </p>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <AiGeneratedBadge
+                variant="black"
+                height={18}
+                label={__("EU “AI generated” badge", "structura")}
+                className="dark:hidden"
+              />
+              <AiGeneratedBadge
+                variant="white"
+                height={18}
+                label={__("EU “AI generated” badge", "structura")}
+                // `s-hidden`, not `hidden`: wp-admin's unlayered `.hidden`
+                // would beat `dark:block` and hide it in dark mode too.
+                className="s-hidden dark:block"
+              />
+              <a
+                href={docsUrl("using/generated-posts/visuals#ai-label")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-gray-500 underline-offset-2 hover:text-gray-700 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                {__("Learn more", "structura")}
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
           </Card>
 
           {/* SEO automation is always on: alt-text and SEO-friendly

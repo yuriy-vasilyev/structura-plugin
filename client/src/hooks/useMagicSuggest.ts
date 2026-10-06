@@ -25,20 +25,16 @@ interface SuggestionOptions {
 export const useMagicSuggest = () => {
   const [isSuggesting, setIsSuggesting] = useState(false);
   const { errorToast } = useToast();
-  const { isPaidLicense, plan } = useLicense();
+  const { plan } = useLicense();
 
   /**
    * Triggers the architectural suggestion engine.
    * Returns a parsed object or string depending on the mode.
    */
   const suggest = async (mode: SuggestionMode, options: SuggestionOptions) => {
-    // AI suggestions are a paid-tier feature. This central guard is the
-    // safety net BEHIND each surface's own UI gate (2026-07-09): even if
-    // a trigger is left ungated on some surface, it can never leak a
-    // cloud suggestion to a none/free install. Returns null so existing
-    // call sites (which already handle a null result) no-op cleanly.
-    if (!isPaidLicense) return null;
-
+    // Every plan since 2026-10-06 (specs/open-providers.md §8). The paid-only
+    // guard added 2026-07-09 is gone; the cloud's per-workspace AI call limit
+    // is the cost control.
     setIsSuggesting(true);
 
     try {

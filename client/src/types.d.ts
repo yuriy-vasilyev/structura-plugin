@@ -123,21 +123,15 @@ declare global {
        *     plan === "none" (i.e. anonymous shadow workspace
        *     post-bootstrap). Lets the SPA distinguish "anonymous
        *     workspace bootstrapped" from "licensed user", which
-       *     matters for the AI Engine page (provider count cap +
-       *     Anthropic locked teaser) and for the Visuals page's
-       *     permanent unlicensed teaser on `none` tier.
-       *   - `provider_count_cap`: 1 for none, 2 for free, 3 for paid.
-       *     The AI Engine SPA reads this to hide the
-       *     "default for text/images" toggles when cap === 1
-       *     (single provider, no choice) and to gate the "add
-       *     provider" CTA at the cap.
+       *     matters for the Visuals page's permanent unlicensed
+       *     teaser on `none` tier. (`provider_count_cap` was removed
+       *     2026-10-06: every plan may connect every provider.)
        *   - `activation_id`: the activation UUID — passed through so
        *     anonymous SPA queries can reference the activation
        *     without waiting for `useSettingsQuery` to resolve.
        *   - `plan`: one of "none" / "free" / "byok" / "cloud" /
        *     "cloud_pro" — read on first paint to drive the
-       *     `is_anonymous` derivation and the AI Engine's tier-
-       *     specific cap.
+       *     `is_anonymous` derivation.
        *
        * All five are optional for back-compat with plugin builds
        * predating PR7a — when missing, the SPA falls through to the
@@ -157,7 +151,6 @@ declare global {
        * Omitted on plugin builds predating the gate → no gate shown.
        */
       cloud_consent?: boolean;
-      provider_count_cap?: number;
       activation_id?: string;
       plan?: string;
       /**

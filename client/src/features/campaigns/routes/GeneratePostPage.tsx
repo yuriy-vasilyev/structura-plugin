@@ -1,25 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { __, _n, sprintf } from "@wordpress/i18n";
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpRight,
-  Crown,
-  Image,
-  Layout,
-  Lock,
-  Sparkles,
-  Zap,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Image, Layout, Sparkles, Zap } from "lucide-react";
 import {
   Badge,
   Button,
   cn,
   InputField,
-  OptionCardGroup,
   ResearchAttachments,
-  SectionGateTeaser,
   Select,
   Switch,
   TextArea,
@@ -44,16 +32,17 @@ import { CampaignLanguageField } from "@/features/campaigns/components/CampaignL
 import { SeoTargetingSection } from "@/features/campaigns/components/SeoTargetingSection";
 import { MagicSuggestButton } from "@/features/campaigns/components/MagicSuggestButton";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
-import type { AIProvider, CampaignFormData, CampaignMode, CampaignPostStatus, } from "@/features/campaigns/types";
+import type { AIProvider, CampaignFormData, CampaignPostStatus, } from "@/features/campaigns/types";
 import { useSitePersonasQuery } from "@/features/personas";
 import { useAiConnections, useDefaultProviders, useLicense } from "@/features/settings";
 import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
+import { AiLabelReminder } from "@/features/campaigns/components/AiLabelReminder";
 import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
 import type { SUPPORTED_BLOCK_TYPE } from "@/features/settings/types";
 import { useAiSettingsQuery } from "@/features/ai-engine";
+import { resolveDefaultTier, usesRecommendedModel } from "@/features/ai-engine/helpers";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
 import { getCampaignFormDataForLicense } from "@/features/campaigns/helpers";
-import { getCampaignModeMeta } from "@/utils/campaignModeMeta";
 import { isManagedPlan, type PlanId } from "@structura/types";
 
 const POST_STATUS_OPTIONS: Array<{ value: CampaignPostStatus; label: string }> = [
@@ -62,54 +51,136 @@ const POST_STATUS_OPTIONS: Array<{ value: CampaignPostStatus; label: string }> =
   // "Pending review" was removed 2026-07-09 — WP treated it as a draft.
 ];
 
-// ─── Campaign mode selector ──────────────────────────────────────────
-
-const MODES: CampaignMode[] = ["traffic_magnet", "quick_wins", "conversion", "authority"];
-
-const MODE_DESCRIPTIONS: Record<CampaignMode, string> = {
-  traffic_magnet: __("Maximize organic traffic with high-volume topics", "structura"),
-  quick_wins: __("Target low-competition keywords for fast rankings", "structura"),
-  conversion: __("Content designed to convert readers to customers", "structura"),
-  authority: __("Build topical authority with comprehensive coverage", "structura"),
-};
-
 // ─── Section wrapper ─────────────────────────────────────────────────
 
 const Section = ({
   title,
   children,
   className,
+  titleId,
 }: {
   title: string;
   children: React.ReactNode;
   className?: string;
-}) => (
-  <div
-    className={cn(
-      "space-y-4 rounded-2xl border border-neutral-200/60 bg-white p-5 shadow-sm sm:p-6 dark:border-neutral-800 dark:bg-neutral-900",
-      className
-    )}
-  >
-    <h3 className="mt-0! mb-2! text-xs font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
+  /** Makes the card a named region labelled by its title. */
+  titleId?: string;
+}) => {
+  const Tag = titleId ? "section" : "div";
+  return (
+    <Tag
+      aria-labelledby={titleId}
+      className={cn(
+        "space-y-4 rounded-2xl border border-neutral-200/60 bg-white p-5 shadow-sm sm:p-6 dark:border-neutral-800 dark:bg-neutral-900",
+        className
+      )}
+    >
+      <h3
+        id={titleId}
+        className="mt-0! mb-2! text-xs font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500"
+      >
+        {title}
+      </h3>
+      {children}
+    </Tag>
+  );
+};
+
+// ─── What a free account and a paid plan add ────────────────────────
+
+// Owner review 2026-10-06: no locked rows inside the form, one card above
+// the actions instead. Each line names a gate this page enforces:
+// featured images and Heading need a licence (`isLicensed`), campaigns
+// start at Free (one campaign, one post a week: MAX_CAMPAIGNS_FOR_TIER,
+// MAX_POSTS_PER_WEEK_FOR_TIER), everything in the paid column is
+// `isPaidLicense`. No plan named "Pro" exists (product-facts PLAN_NAMES).
+const FREE_ACCOUNT_ADDS = [
+  __("Featured images", "structura"),
+  __("Headings", "structura"),
+  __("A campaign that publishes every week", "structura"),
+];
+
+const PAID_PLAN_ADDS = [
+  __("Body images", "structura"),
+  __("Every content block: lists, tables, quotes and more", "structura"),
+  __("SEO targeting with live search data", "structura"),
+  __("Research material", "structura"),
+  __("FAQ sections and action steps", "structura"),
+  __("Internal and authority links", "structura"),
+  __("E-E-A-T signals", "structura"),
+];
+
+const PlanFeatureList = ({ id, title, items }: { id: string; title: string; items: string[] }) => (
+  <div className="space-y-2">
+    <p id={id} className="m-0! text-sm font-bold text-neutral-900 dark:text-white">
       {title}
-    </h3>
-    {children}
+    </p>
+    <ul aria-labelledby={id} className="m-0! flex list-none flex-col gap-1.5 p-0!">
+      {items.map((item) => (
+        <li
+          key={item}
+          className="m-0! flex items-start gap-2 text-sm text-neutral-600 dark:text-neutral-300"
+        >
+          <Check size={14} className="text-brand-500 dark:text-brand-400 mt-0.5 shrink-0" aria-hidden />
+          {item}
+        </li>
+      ))}
+    </ul>
   </div>
 );
 
-// ─── Locked feature row ──────────────────────────────────────────────
-
-const LockedFeature = ({ label, tier = "Pro" }: { label: string; tier?: string }) => (
-  <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 dark:bg-neutral-800/50">
-    <div className="flex items-center gap-2">
-      <Lock size={12} className="text-neutral-300 dark:text-neutral-600" />
-      <span className="text-xs text-neutral-400 dark:text-neutral-500">{label}</span>
-    </div>
-    <Badge variant="outline" intent="premium" className="text-[9px]">
-      {tier}
-    </Badge>
-  </div>
-);
+/** The one plan card on the page: what a free account (anonymous only) and a paid plan add. */
+const PlanUpsellCard = ({ isLicensed, plan }: { isLicensed: boolean; plan?: string }) => {
+  const domain = typeof window !== "undefined" ? window.location.hostname : undefined;
+  return (
+    <Section
+      titleId="generate-plan-upsell-title"
+      title={
+        isLicensed
+          ? __("More with a paid plan", "structura")
+          : __("More with a free account or a paid plan", "structura")
+      }
+    >
+      <div className={cn("grid grid-cols-1 gap-5", !isLicensed && "sm:grid-cols-2")}>
+        {!isLicensed && (
+          <PlanFeatureList
+            id="generate-plan-upsell-free"
+            title={__("Free account", "structura")}
+            items={FREE_ACCOUNT_ADDS}
+          />
+        )}
+        <PlanFeatureList
+          id="generate-plan-upsell-paid"
+          title={__("Paid plans", "structura")}
+          items={PAID_PLAN_ADDS}
+        />
+      </div>
+      <div className="flex flex-wrap items-center gap-3 pt-1">
+        {!isLicensed && (
+          <Button asChild size="sm">
+            <a
+              href={buildPortalSignupUrl({ intent: "general_upgrade", domain, plan })}
+              target="_blank"
+              rel="noreferrer"
+              className="text-white!"
+            >
+              {__("Get free account", "structura")}
+              <ArrowRight size={14} className="ml-1.5" />
+            </a>
+          </Button>
+        )}
+        <Button asChild variant="secondary" size="sm">
+          <a
+            href={buildMarketingPricingUrl({ intent: "general_upgrade", domain, plan })}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {__("See plans", "structura")}
+          </a>
+        </Button>
+      </div>
+    </Section>
+  );
+};
 
 // ─── Research material labels ────────────────────────────────────────
 
@@ -204,6 +275,7 @@ const GeneratePostPage = () => {
   const uploadsUnwritable = !!window.structuraConfig?.uploads_unwritable;
   const {
     activeProviders,
+    imageProviders,
     isLoading: connectionsLoading,
     isFetching: connectionsFetching,
   } = useAiConnections();
@@ -216,15 +288,12 @@ const GeneratePostPage = () => {
   // step uses (mode "campaign"): the cloud auto-detects the site's homepage +
   // key landing pages and drafts a focused objective + content goal. Fills the
   // topic textarea so the user can edit instead of starting from a blank box.
+  // The suggested writing approach is not applied: this page has no
+  // approach selector since 2026-10-06 and always sends the default mode.
   const generateStrategy = async (provider: AIProvider) => {
     const data = await suggest("campaign", { provider, context: [] });
     if (data?.strategy) {
-      update("identity", {
-        objective: data.strategy as string,
-        ...(data.campaign_mode && MODES.includes(data.campaign_mode as CampaignMode)
-          ? { campaignMode: data.campaign_mode as CampaignMode }
-          : {}),
-      });
+      update("identity", { objective: data.strategy as string });
     }
   };
 
@@ -245,6 +314,29 @@ const GeneratePostPage = () => {
     capability: "text" | "image",
     tier: ModelTier
   ): string => (isManagedAiPlan ? "" : (mirrorModelForTier(provider, capability, tier) ?? ""));
+
+  // The site's settings for a provider (AI Engine wizard, 2026-10-06): the
+  // tier its "Use recommended model" switch stored, or the model it picked.
+  const providerSettings = aiSettings?.providers;
+  /** Returns the tier the site uses for a provider, else `fallback`. */
+  const siteTier = (
+    provider: AIProvider,
+    capability: "text" | "image",
+    fallback: ModelTier
+  ): ModelTier =>
+    isManagedAiPlan
+      ? fallback
+      : (resolveDefaultTier({ provider, capability, providerSettings }) ?? fallback);
+  /** Returns true when the site picked a model for the provider (its switch is off). */
+  const sitePickedModel = (provider: AIProvider, capability: "text" | "image"): boolean => {
+    const settings = providerSettings?.[provider];
+    return !usesRecommendedModel(
+      provider,
+      capability,
+      capability === "text" ? settings?.text_tier : settings?.image_tier,
+      capability === "text" ? settings?.text_model : settings?.image_model
+    );
+  };
 
   // Initialize form with license-aware defaults. The one-off "Generate a Post"
   // flow uses the SAME top/mid tier picker as the campaign form (BYOK/free),
@@ -289,16 +381,25 @@ const GeneratePostPage = () => {
     // 2026-09-02).
     if (!isManagedAiPlan && (connectionsLoading || connectionsFetching)) return;
     hasSyncedProviders.current = true;
-    setFormData((prev) => ({
-      ...prev,
-      intelligence: {
-        ...prev.intelligence,
-        textProvider: defaultTextProvider,
-        imageProvider: defaultImageProvider,
-        textModel: mirrorModel(defaultTextProvider, "text", prev.intelligence.textTier ?? "mid"),
-        imageModel: mirrorModel(defaultImageProvider, "image", prev.intelligence.imageTier ?? "mid"),
-      },
-    }));
+    setFormData((prev) => {
+      // The site's own tier per provider (2026-10-06): the recommended one,
+      // or the tier of the model it picked, so a hidden model picker sends
+      // what the site uses and a shown one opens on it.
+      const textTier = siteTier(defaultTextProvider, "text", prev.intelligence.textTier ?? "mid");
+      const imageTier = siteTier(defaultImageProvider, "image", prev.intelligence.imageTier ?? "mid");
+      return {
+        ...prev,
+        intelligence: {
+          ...prev.intelligence,
+          textProvider: defaultTextProvider,
+          imageProvider: defaultImageProvider,
+          textTier,
+          imageTier,
+          textModel: mirrorModel(defaultTextProvider, "text", textTier),
+          imageModel: mirrorModel(defaultImageProvider, "image", imageTier),
+        },
+      };
+    });
   }, [
     aiSettings,
     defaultTextProvider,
@@ -441,6 +542,12 @@ const GeneratePostPage = () => {
   // "Random persona" only makes sense with 2+ personas to rotate
   // between; with a single persona it's noise (and that persona is
   // auto-pinned above), so omit it.
+  // Heading requires a Free License (any licensed install); other
+  // non-required blocks are Pro-only.
+  const isBlockLocked = (block: (typeof CONTENT_BLOCKS)[number]): boolean =>
+    (block.name === "core/heading" && !isLicensed) || (!!block.isPro && !isPaidLicense);
+  const hasSwitchableBlock = CONTENT_BLOCKS.some((b) => !b.isRequired && !isBlockLocked(b));
+
   const personaOptions = [
     ...(personas.length > 1 ? [{ value: "random", label: __("Random persona", "structura") }] : []),
     ...personas.map((p) => ({ value: String(p.id), label: p.name })),
@@ -556,30 +663,22 @@ const GeneratePostPage = () => {
           </p>
         )}
 
-        {/* Campaign mode */}
-        <div className="space-y-2">
-          <label className="mb-2 block text-xs font-bold text-neutral-500 dark:text-neutral-400">
-            {__("Writing approach", "structura")}
-          </label>
-          <OptionCardGroup
-            options={MODES.map((mode) => ({
-              value: mode,
-              label: getCampaignModeMeta(mode).label,
-              description: MODE_DESCRIPTIONS[mode],
-            }))}
-            value={formData.identity.campaignMode ?? "traffic_magnet"}
-            onChange={(mode) => update("identity", { campaignMode: mode })}
-            ariaLabel={__("Writing approach", "structura")}
-          />
-        </div>
+        {/* No writing approach selector (owner review 2026-10-06): the
+            form's default mode (`traffic_magnet`) travels on the request,
+            so the prompt's strategic-priority block is unchanged. The
+            campaign form keeps its override. */}
       </Section>
+
+      {/* Gated sections (Research material, SEO Targeting, the paid rows
+          further down) render only on plans that can use them; what the
+          other plans add is listed once in the card above the actions
+          (owner review 2026-10-06). Gated fields are neither rendered nor
+          fetched. */}
 
       {/* ── 1.2 Research material ────────────────────────────── */}
       {/* Placement per handoff: directly after the topic section, before
-          SEO Targeting. Paid gets the dropzone; None/Free get the shipped
-          SectionGateTeaser (same gate pattern as SEO Targeting below —
-          gated fields are neither rendered nor fetched behind it). */}
-      {isPaidLicense ? (
+          SEO Targeting. */}
+      {isPaidLicense && (
         <ResearchAttachments
           files={researchFiles}
           onFilesChange={setResearchFiles}
@@ -587,66 +686,52 @@ const GeneratePostPage = () => {
           labels={RESEARCH_ATTACHMENTS_LABELS}
           disabled={isGenerating}
         />
-      ) : (
-        <SectionGateTeaser
-          title={__("Research material", "structura")}
-          badge={__("Pro", "structura")}
-          line={__(
-            "Ground posts in your own PDFs, briefs and interview notes — attach up to 5 files per post.",
-            "structura"
-          )}
-          cta={
-            <Button asChild variant="secondary" size="sm">
-              <a
-                href={buildMarketingPricingUrl({
-                  intent: "general_upgrade",
-                  domain: typeof window !== "undefined" ? window.location.hostname : undefined,
-                  plan,
-                })}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {__("Upgrade plan", "structura")}
-                <ArrowUpRight size={14} className="ml-1.5" />
-              </a>
-            </Button>
-          }
-        />
       )}
 
       {/* ── 1.5 SEO Targeting ────────────────────────────────── */}
-      <Section title={__("SEO Targeting", "structura")}>
-        <SeoTargetingSection
-          formData={formData}
-          onChange={patch}
-          isPaidLicense={!!isPaidLicense}
-          isLicensed={!!isLicensed}
-          plan={plan}
-        />
-      </Section>
+      {isPaidLicense && (
+        <Section title={__("SEO Targeting", "structura")}>
+          <SeoTargetingSection formData={formData} onChange={patch} isPaidLicense />
+        </Section>
+      )}
 
       {/* ── 2. AI & Persona ──────────────────────────────────── */}
       <Section title={__("AI & Persona", "structura")}>
         <ProviderToggle
           textProvider={formData.intelligence.textProvider}
           imageProvider={formData.intelligence.imageProvider}
-          onTextProviderChange={(p) =>
+          onTextProviderChange={(p) => {
+            // A new provider brings its own site tier (its model picker may
+            // be hidden, 2026-10-06).
+            const textTier = siteTier(p, "text", "mid");
             update("intelligence", {
               textProvider: p,
-              textModel: mirrorModel(p, "text", formData.intelligence.textTier ?? "mid"),
-            })
-          }
-          onImageProviderChange={(p) =>
+              textTier,
+              textModel: mirrorModel(p, "text", textTier),
+            });
+          }}
+          onImageProviderChange={(p) => {
+            const imageTier = siteTier(p, "image", "mid");
             update("intelligence", {
               imageProvider: p,
-              imageModel: mirrorModel(p, "image", formData.intelligence.imageTier ?? "mid"),
-            })
-          }
+              imageTier,
+              imageModel: mirrorModel(p, "image", imageTier),
+            });
+          }}
           availableTextProviders={
             isManagedAiPlan ? ["gemini", "openai", "anthropic"] : activeProviders
           }
-          availableImageProviders={isManagedAiPlan ? ["gemini", "openai"] : activeProviders}
-          showTierSelectors={showPerPostModelPicker}
+          availableImageProviders={isManagedAiPlan ? ["gemini", "openai"] : imageProviders}
+          // Owner review 2026-10-06: only a choice the site can make. A lone
+          // provider has no row; a model picker only for a provider whose
+          // "Use recommended model" switch is off.
+          hideSingleProviderRow
+          showTextTierSelector={
+            showPerPostModelPicker && sitePickedModel(formData.intelligence.textProvider, "text")
+          }
+          showImageTierSelector={
+            showPerPostModelPicker && sitePickedModel(formData.intelligence.imageProvider, "image")
+          }
           textTier={formData.intelligence.textTier ?? "mid"}
           imageTier={formData.intelligence.imageTier ?? "mid"}
           onTextTierChange={(t) =>
@@ -756,6 +841,11 @@ const GeneratePostPage = () => {
                 postLength: !isPaidLicense ? Math.min(next, 500) : next,
               });
             }}
+            // Same height as the Persona / Language / Post status triggers
+            // (owner review 2026-10-06): a number input's line box is the
+            // font's height, not `leading-none`, so `py-2.5` made this field
+            // 4px taller (39px vs 35px measured in wp-admin).
+            inputClassName="!py-2"
             rightAdornment={
               <span className="text-[10px] font-bold text-neutral-400 uppercase">
                 {__("Words", "structura")}
@@ -795,7 +885,7 @@ const GeneratePostPage = () => {
       <Section title={__("Content Options", "structura")}>
         <div className="space-y-3">
           {/* Featured image - available for free license+ */}
-          {isLicensed ? (
+          {isLicensed && (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Image size={14} className="text-neutral-400" />
@@ -811,15 +901,10 @@ const GeneratePostPage = () => {
                 onChange={(checked) => update("structure", { featuredImage: checked })}
               />
             </div>
-          ) : (
-            <LockedFeature
-              label={__("Featured image", "structura")}
-              tier={__("Free License", "structura")}
-            />
           )}
 
           {/* Body images - Pro only */}
-          {isPaidLicense ? (
+          {isPaidLicense && (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Image size={14} className="text-neutral-400" />
@@ -835,8 +920,6 @@ const GeneratePostPage = () => {
                 onChange={(checked) => update("structure", { bodyImages: checked })}
               />
             </div>
-          ) : (
-            <LockedFeature label={__("Body images", "structura")} />
           )}
 
           {/* Image generation can't work while the uploads dir is
@@ -858,6 +941,14 @@ const GeneratePostPage = () => {
               </a>
             </p>
           )}
+
+          {/* EU AI label reminder (specs/ai-image-label.md §7). The
+              no-visual-style notice sits at the top of the page, so it
+              still comes first when both show. */}
+          <AiLabelReminder
+            imagesEnabled={wantsAnyImage}
+            language={formData.intelligence.language}
+          />
 
           {/* AI Disclosure */}
           <div className="flex items-center justify-between">
@@ -899,75 +990,64 @@ const GeneratePostPage = () => {
       {/*
         Mirrors the campaign-form Content Blocks panel: Paragraph is
         always required; Heading needs a Free License; everything else
-        is Pro. None tier (anonymous shadow workspace) sees every block
-        with the appropriate tier badge so the upgrade path is visible.
+        is Pro. Since the owner review of 2026-10-06 a plan sees only the
+        blocks it can switch, and the section disappears when only the
+        required Paragraph would be left (anonymous installs).
       */}
-      <Section title={__("Content Blocks", "structura")}>
-        <div className="space-y-3">
-          {CONTENT_BLOCKS.map((block) => {
-            const blockName = block.name as SUPPORTED_BLOCK_TYPE;
-            // Heading requires a Free License (any licensed install);
-            // other non-required blocks are Pro-only. Required blocks
-            // (paragraph) ship as a permanent on-state row.
-            const isFreeLocked = block.name === "core/heading" && !isLicensed;
-            const isProLocked = block.isPro && !isPaidLicense;
-            const isLocked = isFreeLocked || isProLocked;
+      {hasSwitchableBlock && (
+        <Section title={__("Content Blocks", "structura")}>
+          <div className="space-y-3">
+            {CONTENT_BLOCKS.map((block) => {
+              const blockName = block.name as SUPPORTED_BLOCK_TYPE;
 
-            if (block.isRequired) {
+              if (block.isRequired) {
+                return (
+                  <div
+                    key={block.name}
+                    className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 dark:bg-neutral-800/50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Layout size={12} className="text-neutral-400" />
+                      <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                        {block.label}
+                      </span>
+                    </div>
+                    <Badge variant="outline" className="text-[9px]">
+                      {__("Required", "structura")}
+                    </Badge>
+                  </div>
+                );
+              }
+
+              if (isBlockLocked(block)) return null;
+
+              const isEnabled = formData.structure.enabledBlocks.includes(blockName);
               return (
-                <div
-                  key={block.name}
-                  className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 dark:bg-neutral-800/50"
-                >
+                <div key={block.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Layout size={12} className="text-neutral-400" />
-                    <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                    <Layout size={14} className="text-neutral-400" />
+                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                       {block.label}
                     </span>
                   </div>
-                  <Badge variant="outline" className="text-[9px]">
-                    {__("Required", "structura")}
-                  </Badge>
+                  <Switch
+                    label={block.label}
+                    hiddenLabel
+                    checked={isEnabled}
+                    onChange={(checked) => {
+                      const cur = formData.structure.enabledBlocks;
+                      const next = checked
+                        ? [...cur.filter((b) => b !== blockName), blockName]
+                        : cur.filter((b) => b !== blockName);
+                      update("structure", { enabledBlocks: next });
+                    }}
+                  />
                 </div>
               );
-            }
-
-            if (isLocked) {
-              return (
-                <LockedFeature
-                  key={block.name}
-                  label={block.label}
-                  tier={isFreeLocked ? __("Free License", "structura") : __("Pro", "structura")}
-                />
-              );
-            }
-
-            const isEnabled = formData.structure.enabledBlocks.includes(blockName);
-            return (
-              <div key={block.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Layout size={14} className="text-neutral-400" />
-                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                    {block.label}
-                  </span>
-                </div>
-                <Switch
-                  label={block.label}
-                  hiddenLabel
-                  checked={isEnabled}
-                  onChange={(checked) => {
-                    const cur = formData.structure.enabledBlocks;
-                    const next = checked
-                      ? [...cur.filter((b) => b !== blockName), blockName]
-                      : cur.filter((b) => b !== blockName);
-                    update("structure", { enabledBlocks: next });
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </Section>
+            })}
+          </div>
+        </Section>
+      )}
 
       {/* ── 4. SEO features ──────────────────────────────────── */}
       {/*
@@ -976,145 +1056,62 @@ const GeneratePostPage = () => {
         internal/outbound links. Everything else (readability, keyphrase
         optimisation, SERP competitor analysis, meta fields) is now always-on
         per license tier, handled server-side. See ALWAYS_ON_RULES_BY_TIER
-        in functions/src/ai/instruction-builder.ts.
+        in functions/src/ai/instruction-builder.ts. Every toggle is paid, so
+        the section is paid only (owner review 2026-10-06).
       */}
-      <Section title={__("Content Features", "structura")}>
-        <div className="space-y-3">
-          <SeoToggle
-            label={__("FAQ section", "structura")}
-            checked={formData.intelligence.seoRules.include_faq_section}
-            onChange={(v) => updateSeoRule("include_faq_section", v)}
-            available={!!isPaidLicense}
-          />
-          <SeoToggle
-            label={__("Action steps", "structura")}
-            checked={formData.intelligence.seoRules.include_action_steps}
-            onChange={(v) => updateSeoRule("include_action_steps", v)}
-            available={!!isPaidLicense}
-          />
-          <SeoToggle
-            label={__("Supporting statistics", "structura")}
-            checked={formData.intelligence.seoRules.include_statistics}
-            onChange={(v) => updateSeoRule("include_statistics", v)}
-            available={!!isPaidLicense}
-          />
-          <SeoToggle
-            label={__("Internal linking", "structura")}
-            checked={formData.intelligence.seoRules.internal_link_optimization}
-            onChange={(v) => updateSeoRule("internal_link_optimization", v)}
-            available={!!isPaidLicense}
-          />
-          <SeoToggle
-            label={__("Authority outbound links", "structura")}
-            checked={formData.intelligence.seoRules.outbound_link_authority}
-            onChange={(v) => updateSeoRule("outbound_link_authority", v)}
-            available={!!isPaidLicense}
-          />
-          <SeoToggle
-            label={__("E-E-A-T writing signals", "structura")}
-            checked={formData.intelligence.seoRules.eeat_signals}
-            onChange={(v) => updateSeoRule("eeat_signals", v)}
-            available={!!isPaidLicense}
-          />
-          <SeoToggle
-            label={__("Entity coverage", "structura")}
-            checked={formData.intelligence.seoRules.entity_coverage}
-            onChange={(v) => updateSeoRule("entity_coverage", v)}
-            available={!!isPaidLicense}
-          />
-        </div>
+      {isPaidLicense && (
+        <Section title={__("Content Features", "structura")}>
+          <div className="space-y-3">
+            <SeoToggle
+              label={__("FAQ section", "structura")}
+              checked={formData.intelligence.seoRules.include_faq_section}
+              onChange={(v) => updateSeoRule("include_faq_section", v)}
+            />
+            <SeoToggle
+              label={__("Action steps", "structura")}
+              checked={formData.intelligence.seoRules.include_action_steps}
+              onChange={(v) => updateSeoRule("include_action_steps", v)}
+            />
+            <SeoToggle
+              label={__("Supporting statistics", "structura")}
+              checked={formData.intelligence.seoRules.include_statistics}
+              onChange={(v) => updateSeoRule("include_statistics", v)}
+            />
+            <SeoToggle
+              label={__("Internal linking", "structura")}
+              checked={formData.intelligence.seoRules.internal_link_optimization}
+              onChange={(v) => updateSeoRule("internal_link_optimization", v)}
+            />
+            <SeoToggle
+              label={__("Authority outbound links", "structura")}
+              checked={formData.intelligence.seoRules.outbound_link_authority}
+              onChange={(v) => updateSeoRule("outbound_link_authority", v)}
+            />
+            <SeoToggle
+              label={__("E-E-A-T writing signals", "structura")}
+              checked={formData.intelligence.seoRules.eeat_signals}
+              onChange={(v) => updateSeoRule("eeat_signals", v)}
+            />
+            <SeoToggle
+              label={__("Entity coverage", "structura")}
+              checked={formData.intelligence.seoRules.entity_coverage}
+              onChange={(v) => updateSeoRule("entity_coverage", v)}
+            />
+          </div>
 
-        {/* Reassurance note: everything SEO-critical is already on. */}
-        {isPaidLicense ? (
+          {/* Reassurance note: everything SEO-critical is already on. */}
           <p className="m-0! mt-4 text-xs leading-relaxed text-neutral-400 dark:text-neutral-500">
             {__(
               "Readability, keyphrase placement, SERP analysis, and meta fields are optimised automatically on every post.",
               "structura"
             )}
           </p>
-        ) : (
-          <div className="mt-4 flex items-center gap-3 rounded-xl border border-dashed border-neutral-200 bg-neutral-50/50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800/30">
-            <Crown size={16} className="text-brand-500 dark:text-brand-400 shrink-0" />
-            <div className="min-w-0 flex-1">
-              <p className="m-0! text-xs font-semibold text-neutral-600 dark:text-neutral-400">
-                {__("Unlock full SEO optimisation with Pro", "structura")}
-              </p>
-              <p className="mt-0.5! mb-0! text-[11px] text-neutral-500 dark:text-neutral-500">
-                {__(
-                  "Readability tuning, keyphrase placement, SERP-aware writing, and link validation.",
-                  "structura"
-                )}
-              </p>
-            </div>
-            <Button asChild variant="secondary" size="sm">
-              <a
-                href={buildMarketingPricingUrl({
-                  intent: "general_upgrade",
-                  domain: typeof window !== "undefined" ? window.location.hostname : undefined,
-                  plan,
-                })}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {__("Upgrade", "structura")}
-                <ArrowRight size={12} className="ml-1" />
-              </a>
-            </Button>
-          </div>
-        )}
-      </Section>
-
-      {/* ── Campaign upgrade teaser (for none plan) ───────────── */}
-      {!isLicensed && (
-        <div className="border-brand-200 dark:border-brand-900/30 rounded-2xl border border-dashed bg-white px-6 py-5 dark:bg-neutral-900">
-          <div className="flex items-start gap-4">
-            <div className="bg-brand-100 dark:bg-brand-950/40 flex size-10 shrink-0 items-center justify-center rounded-xl">
-              <Zap size={20} className="text-brand-500 dark:text-brand-400" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="m-0! text-sm font-bold text-neutral-900 dark:text-white">
-                {__("Want to automate this?", "structura")}
-              </h3>
-              <p className="mt-1! mb-0! text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
-                {__(
-                  "Create a free account to set up campaigns that automatically generate and publish posts on a schedule. No more manual work.",
-                  "structura"
-                )}
-              </p>
-              <div className="mt-3 flex items-center gap-3">
-                <Button asChild size="sm">
-                  <a
-                    href={buildPortalSignupUrl({
-                      intent: "general_upgrade",
-                      domain: typeof window !== "undefined" ? window.location.hostname : undefined,
-                      plan,
-                    })}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-white!"
-                  >
-                    {__("Get Free Account", "structura")}
-                    <ArrowRight size={14} className="ml-1.5" />
-                  </a>
-                </Button>
-                <Button asChild variant="secondary" size="sm">
-                  <a
-                    href={buildMarketingPricingUrl({
-                      intent: "general_upgrade",
-                      domain: typeof window !== "undefined" ? window.location.hostname : undefined,
-                      plan,
-                    })}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {__("See Plans", "structura")}
-                  </a>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+        </Section>
       )}
+
+      {/* ── What a free account and a paid plan add ──────────── */}
+      {!isPaidLicense && <PlanUpsellCard isLicensed={!!isLicensed} plan={plan} />}
+
       {/* ── Actions ────────────────────────────────────────── */}
       <div className="flex items-center justify-end gap-3">
         <Button variant="secondary" onClick={() => navigate(-1)}>
@@ -1149,23 +1146,13 @@ const SeoToggle = ({
   label,
   checked,
   onChange,
-  available,
-  tier = "Pro",
 }: {
   label: string;
   checked: boolean;
   onChange: (value: boolean) => void;
-  available: boolean;
-  tier?: string;
-}) => {
-  if (!available) {
-    return <LockedFeature label={label} tier={tier} />;
-  }
-
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{label}</span>
-      <Switch label={label} hiddenLabel checked={checked} onChange={onChange} />
-    </div>
-  );
-};
+}) => (
+  <div className="flex items-center justify-between">
+    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{label}</span>
+    <Switch label={label} hiddenLabel checked={checked} onChange={onChange} />
+  </div>
+);

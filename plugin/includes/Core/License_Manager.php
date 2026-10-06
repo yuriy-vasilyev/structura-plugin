@@ -247,43 +247,6 @@ class License_Manager
     }
 
     /**
-     * Maximum number of AI providers the user can configure
-     * simultaneously at the calling tier — Phase 1.8 §1.8.4 + Phase
-     * 1.0m feature matrix.
-     *
-     *   - none  → 1 (OpenAI only since 2026-10-02; Gemini and Anthropic visible+locked)
-     *   - free  → 2 (openai + gemini both pickable; Anthropic
-     *               visible+locked)
-     *   - byok / cloud / cloud_pro → 3 (all three pickable;
-     *               Anthropic unlocks at byok+ per the
-     *               Provider_Registry min_tier table)
-     *
-     * Surfaced into `structuraConfig.provider_count_cap` so the SPA's
-     * AI Engine page can hide the "default for text/images"
-     * toggles when the cap is 1 (single provider, no choice to
-     * make) and gate the "add another provider" CTA at the cap.
-     */
-    public static function get_provider_count_cap(): int
-    {
-        switch (self::get_plan()) {
-            case 'none':
-                return 1;
-            case 'free':
-                return 2;
-            case 'byok':
-            case 'cloud':
-            case 'cloud_pro':
-                return 3;
-            default:
-                // Forward-compat: an unknown plan slug is treated as
-                // the most-restrictive option. Better to under-show
-                // an option than to silently grant access to a
-                // higher tier's surfaces.
-                return 1;
-        }
-    }
-
-    /**
      * Per-activation campaign cap surfaced to the SPA. Source of truth
      * lives in the cloud's License doc (Stripe product
      * `max_campaigns` metadata → per-license override → tier
@@ -397,17 +360,12 @@ class License_Manager
             // logic don't need to know about the Stripe→tier
             // fallback rule. `null` = unlimited.
             'max_campaigns' => self::get_max_campaigns(),
-            // Tier-derived UI flags, duplicated from the
-            // `structuraConfig` inline bootstrap (2026-06-06). That
-            // bootstrap is a page-render snapshot the SPA can never
-            // refresh via query invalidation, which left a stale
-            // 1-provider cap on the AI Engine surfaces right after an
-            // in-SPA activation of a paid key. Carrying them on the
-            // settings payload makes them reactive like every other
-            // license field. Purely advisory for UX rendering —
-            // provider ACCESS is enforced by Provider_Registry tier
-            // gating server-side.
-            'provider_count_cap' => self::get_provider_count_cap(),
+            // Tier-derived UI flag, duplicated from the `structuraConfig`
+            // inline bootstrap (2026-06-06) so it stays reactive after an
+            // in-SPA activation. The `provider_count_cap` that sat beside
+            // it was removed 2026-10-06 (specs/open-providers.md): every
+            // plan may connect every provider. The SPA ships in the same
+            // zip as this file, so no build reads the field any more.
             'is_anonymous'       => self::is_anonymous_workspace(),
         ];
     }

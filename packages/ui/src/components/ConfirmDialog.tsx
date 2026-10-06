@@ -1,6 +1,6 @@
 import { Button } from "./Button";
 import { Dialog } from "./Dialog";
-import { AlertTriangle, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ShieldCheck, type LucideIcon } from "lucide-react";
 import { cn } from "../utils";
 
 interface ConfirmDialogProps {
@@ -9,7 +9,14 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
   title: string;
   description: string;
-  variant?: "danger" | "primary";
+  /**
+   * `neutral` is for confirming something that is not destructive, such as
+   * clearing an item that already stopped working: grey icon tile and a
+   * secondary confirm button.
+   */
+  variant?: "danger" | "primary" | "neutral";
+  /** Replaces the variant's default icon in the tile. */
+  icon?: LucideIcon;
   /** Panel width, forwarded to `Dialog.Root`. Defaults to "md". */
   size?: "md" | "lg" | "xl";
   /**
@@ -41,17 +48,19 @@ export const ConfirmDialog = ({
   title,
   description,
   variant = "primary",
+  icon,
   size = "md",
   children,
   loading = false,
   confirmButtonProps = {},
   cancelButtonProps = {},
 }: ConfirmDialogProps) => {
-  const Icon = variant === "danger" ? AlertTriangle : ShieldCheck;
+  const Icon = icon ?? (variant === "primary" ? ShieldCheck : AlertTriangle);
 
   const confirmLabel = confirmButtonProps.label || "Confirm";
   const confirmVariant =
-    confirmButtonProps.variant || (variant === "danger" ? "danger" : "primary");
+    confirmButtonProps.variant ||
+    (variant === "danger" ? "danger" : variant === "neutral" ? "secondary" : "primary");
   const cancelLabel = cancelButtonProps.label || "Cancel";
 
   return (
@@ -59,11 +68,14 @@ export const ConfirmDialog = ({
       <Dialog.Content>
         <div className="flex gap-4">
           <div
+            data-slot="confirm-icon"
             className={cn(
               "mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full sm:mx-0",
               variant === "danger"
                 ? "bg-red-50 dark:bg-red-900/20"
-                : "bg-emerald-50 dark:bg-emerald-900/20"
+                : variant === "neutral"
+                  ? "bg-neutral-100 dark:bg-neutral-700/60"
+                  : "bg-emerald-50 dark:bg-emerald-900/20"
             )}
           >
             <Icon
@@ -71,7 +83,9 @@ export const ConfirmDialog = ({
                 "h-6 w-6",
                 variant === "danger"
                   ? "text-red-600 dark:text-red-400"
-                  : "text-emerald-600 dark:text-emerald-400"
+                  : variant === "neutral"
+                    ? "text-neutral-500 dark:text-neutral-300"
+                    : "text-emerald-600 dark:text-emerald-400"
               )}
               aria-hidden="true"
             />

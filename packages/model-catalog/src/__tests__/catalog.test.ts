@@ -16,6 +16,7 @@ import {
   resolveUtilityModelId,
   resolveGroundingAuditModel,
   resolveManagedWriterLineup,
+  resolveManagedImageBinding,
   resolveTextOutputBudget,
   acceptsTemperature,
   acceptsLowEffort,
@@ -374,6 +375,45 @@ describe("use-case bindings", () => {
     }
     // A provider outage must not take out both the writer and its failover.
     expect(holders("primary")[0].provider).not.toBe(holders("failover")[0].provider);
+  });
+
+  // specs/managed-ai-lineup.md §2.4 (owner decision 2026-10-06, blind image
+  // test 2026-10-05): one image model on Cloud and Cloud Pro, and a failover
+  // on another provider at medium quality.
+  it("the managed image binding is Gemini 3.1 Flash Image with GPT Image 2.5 Sunburst (medium) as failover, on Cloud and Cloud Pro only", () => {
+    for (const plan of ["cloud", "cloud_pro"] as const) {
+      expect(resolveManagedImageBinding(plan)).toEqual({
+        primary: { provider: "gemini", model: "gemini-3.1-flash-image" },
+        failover: { provider: "openai", model: "gpt-image-2.5-sunburst", quality: "medium" },
+      });
+    }
+    for (const plan of ["byok", "free", "none", null, undefined] as const) {
+      expect(resolveManagedImageBinding(plan)).toBeUndefined();
+    }
+  });
+
+  it("exactly one catalog image model carries each managed image role, on different providers", () => {
+    const holders = (role: "primary" | "failover") => MODELS.filter((m) => m.managedImage === role);
+    for (const role of ["primary", "failover"] as const) {
+      expect(holders(role)).toHaveLength(1);
+      expect(holders(role)[0].role).toBe("image");
+    }
+    // generateAIImage ignores a fallback on the primary's provider, and a
+    // second model of one provider shares its outage and quota.
+    expect(holders("primary")[0].provider).not.toBe(holders("failover")[0].provider);
+  });
+
+  it("the managed image failover stays off every own-key picker (unlisted, untiered, unserved)", () => {
+    const { failover } = resolveManagedImageBinding("cloud")!;
+    const m = MODELS.find((x) => x.provider === failover.provider && x.id === failover.model)!;
+    expect(m.unlisted).toBe(true);
+    expect(m.tier).toBeUndefined();
+    expect(MODEL_CATALOG.openai.image.some((e) => e.id === failover.model)).toBe(false);
+    expect(failover.model in MODEL_CATALOG.openai.manifest).toBe(false);
+    expect(isKnownImageModelForProvider("openai", failover.model)).toBe(false);
+    for (const tier of ["top", "mid"] as const) {
+      expect(resolveByokTierModelId("openai", "image", tier)).not.toBe(failover.model);
+    }
   });
 
   it("prices the managed writer for the stock batch cost estimator", () => {

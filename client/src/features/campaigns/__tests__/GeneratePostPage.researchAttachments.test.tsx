@@ -3,8 +3,8 @@
  *
  * Pins the three page-level halves of the feature:
  *   1. Gating — paid licenses get the real `ResearchAttachments` dropzone;
- *      None/Free get the SectionGateTeaser with the handoff's gate copy and
- *      no upload affordance behind it.
+ *      None/Free get no section (owner review 2026-10-06), only a line in
+ *      the plan card above the actions.
  *   2. Transport — an attached file goes through the REAL
  *      `uploadResearchDoc` helper (multipart FormData to
  *      `/structura/v1/research-docs`) and lands as a ready row.
@@ -160,19 +160,18 @@ describe("GeneratePostPage — research material gating", () => {
     expect(screen.queryByText("Upgrade plan")).toBeNull();
   });
 
-  it("renders the locked teaser (no dropzone) for free licenses", () => {
+  // Owner review 2026-10-06: no locked teaser on None/Free; the plan card
+  // above the actions lists research material under the paid plans.
+  it("renders no research section for free licenses", () => {
     licenseMock.current = { isPaidLicense: false, isLicensed: true, plan: "free" };
     renderPage();
 
-    expect(screen.getByText("Research material")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Ground posts in your own PDFs, briefs and interview notes — attach up to 5 files per post.",
-      ),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Upgrade plan")).toBeInTheDocument();
-    // Gated fields are neither rendered nor fetched behind the teaser.
+    expect(screen.queryByText("Upgrade plan")).toBeNull();
+    // Gated fields are neither rendered nor fetched.
     expect(screen.queryByText("Click to upload")).toBeNull();
+    expect(screen.getByRole("region", { name: "More with a paid plan" })).toHaveTextContent(
+      "Research material",
+    );
   });
 });
 

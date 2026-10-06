@@ -1,11 +1,10 @@
 /**
- * useMagicSuggest — paid-tier gate.
+ * useMagicSuggest.
  *
- * Regression (2026-07-09): AI "suggest" calls (persona / campaign /
- * visual / topic_chips) were reachable on none/free from ungated
- * triggers (e.g. the Persona editor's "Magic Suggest"). The hook now
- * refuses to fire for a non-paid tier — the central safety net behind
- * each surface's own UI gate.
+ * 2026-07-09 to 2026-10-06 the hook refused to fire on none/free (a safety
+ * net behind each surface's paid gate). Since 2026-10-06 Magic suggest is
+ * open on every plan (specs/open-providers.md §8): the hook fires on every
+ * plan and the cloud's AI call limit is the cost control.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
@@ -20,7 +19,7 @@ vi.mock("@/hooks/humanizeSuggestionError", () => ({
   humanizeSuggestionError: (e: unknown) => String(e),
 }));
 
-const licenseMock = vi.hoisted(() => ({ current: { isPaidLicense: false } }));
+const licenseMock = vi.hoisted(() => ({ current: { isPaidLicense: false, plan: "none" } as Record<string, unknown> }));
 vi.mock("@/features/settings", () => ({ useLicense: () => licenseMock.current }));
 
 import { useMagicSuggest } from "../useMagicSuggest";
@@ -28,12 +27,13 @@ import { useMagicSuggest } from "../useMagicSuggest";
 beforeEach(() => {
   apiFetchMock.mockReset();
   errorToastMock.mockReset();
-  licenseMock.current = { isPaidLicense: false };
+  licenseMock.current = { isPaidLicense: false, plan: "none" };
 });
 
 describe("useMagicSuggest", () => {
-  it("does NOT hit the cloud on a non-paid tier and returns null", async () => {
-    licenseMock.current = { isPaidLicense: false };
+  it.each(["none", "free"])("fires the suggestion on the %s plan (open on every plan since 2026-10-06)", async (plan) => {
+    licenseMock.current = { isPaidLicense: false, plan };
+    apiFetchMock.mockResolvedValue({ result: { name: "Voice" } });
     const { result } = renderHook(() => useMagicSuggest());
 
     let out: unknown;
@@ -41,8 +41,10 @@ describe("useMagicSuggest", () => {
       out = await result.current.suggest("persona", { provider: "openai" });
     });
 
-    expect(out).toBeNull();
-    expect(apiFetchMock).not.toHaveBeenCalled();
+    expect(apiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({ path: "/structura/v1/suggest", method: "POST" }),
+    );
+    expect(out).toEqual({ name: "Voice" });
   });
 
   it("fires the suggestion for a paid tier", async () => {

@@ -33,6 +33,7 @@ import { __, sprintf } from "@wordpress/i18n";
 import {
   Badge,
   Card,
+  cn,
   Select,
   Switch,
   TextArea,
@@ -96,7 +97,9 @@ const DEFAULT_DRAFT: VisualDraft = {
 
 export const WizardStep4Visuals = () => {
   const { isPaidLicense } = useLicense();
-  const { defaultTextProvider } = useDefaultProviders();
+  const { defaultTextProvider, hasExplicitTextDefault, isAutoResolved } = useDefaultProviders();
+  // A connected text key: what a none / free auto-suggest runs on (2026-10-06).
+  const hasTextKey = Boolean(hasExplicitTextDefault || isAutoResolved);
   const { suggest, isSuggesting } = useMagicSuggest();
   const { successToast, errorToast } = useToast();
   const { data: profile } = usePublicSiteProfile();
@@ -219,21 +222,15 @@ export const WizardStep4Visuals = () => {
     [],
   );
 
-  // Generate a visual style from the given sources + medium. Shared by the
-  // SuggestStrategySection panel (manual, with the image-medium dropdown)
-  // and the auto-suggest-on-land path below. The picked medium is persisted
-  // to the draft so the drafted style and every generated image share one
-  // medium.
-  const handleGenerate = async (
-    provider: string,
-    context: ContextField[],
-    medium?: string,
-  ) => {
+  // Generate a visual style from the given sources in the medium picked on
+  // the cards (2026-10-06, matching the Visuals page; it used to be picked
+  // in the Suggest dropdown). Shared by the SuggestStrategySection panel and
+  // the auto-suggest-on-land path below. Reads the store at call time so a
+  // card picked since the last render counts.
+  const handleGenerate = async (provider: string, context: ContextField[]) => {
     if (!provider) return;
-    const picked =
-      (medium as VisualMedium | undefined) ??
-      (draft.medium as VisualMedium) ??
-      "photography";
+    const picked = ((useWizardStore.getState().drafts.step4 ?? draft).medium ||
+      "photography") as VisualMedium;
     const data = (await suggest("visual", {
       provider: provider as AIProvider,
       context,
@@ -285,23 +282,25 @@ export const WizardStep4Visuals = () => {
     const home = publicUrl || profile?.publicUrl || profile?.homeUrl || "";
     if (home) sources.push({ title: profile?.name || "Homepage", url: home });
     if (logoUrl) sources.push({ title: "Brand logo", url: logoUrl });
-    await handleGenerate(defaultTextProvider ?? "", sources, draft.medium);
+    await handleGenerate(defaultTextProvider ?? "", sources);
   };
 
-  /* ─── Auto-suggest on first land (paid + blank prompt) ─── */
+  /* ─── Auto-suggest on first land (AI available + blank prompt) ─── */
   // The seed effect above runs first (declaration order) and hydrates
   // any bound preset into the draft — but its setState only lands on
   // the NEXT render, so this effect re-checks the bound preset itself
   // rather than trusting `draft` in the same flush. Auto-fire only
   // when there's genuinely nothing to overwrite. No logo is required:
   // the cloud screenshots the homepage server-side for the brand cue,
-  // so every paid site gets an on-brand draft (the logo, when present,
+  // so every site with AI gets an on-brand draft (the logo, when present,
   // just refines the exact brand-mark hex).
   const autoFiredRef = useRef(false);
   useEffect(() => {
     if (autoFiredRef.current) return;
-    if (!isPaidLicense || !defaultTextProvider) return;
-    if (isPaidLicense && presetsData === undefined) return; // preset still loading
+    // Every plan since 2026-10-06 (specs/open-providers.md §8): none / free
+    // auto-suggest once a text key is connected, since the draft runs on it.
+    if (!defaultTextProvider || !(isPaidLicense || hasTextKey)) return;
+    if (presetsData === undefined) return; // preset still loading
     const bound = presetsData?.boundPresetId
       ? presetsData.presets.find((p) => p.presetId === presetsData.boundPresetId)
       : undefined;
@@ -316,7 +315,7 @@ export const WizardStep4Visuals = () => {
     autoFiredRef.current = true;
     void runAutoSuggest();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPaidLicense, defaultTextProvider, presetsData, step4]);
+  }, [isPaidLicense, hasTextKey, defaultTextProvider, presetsData, step4]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -342,17 +341,12 @@ export const WizardStep4Visuals = () => {
         </Card>
       ) : (
         <Card className="flex flex-col gap-6 p-8">
-          {/* AI suggest — the same panel as the Visuals page, including the
-              image-medium dropdown. Seeded with the brand logo as a source;
-              renders its own locked state on the Free tier. */}
+          {/* AI suggest — the same panel as the Visuals page. Seeded with the
+              brand logo as a source; open on every plan since 2026-10-06.
+              Drafts in the medium picked on the cards below. */}
           <SuggestStrategySection
             isStrategizing={isSuggesting}
             onGenerate={handleGenerate}
-            mediumPicker={{
-              heading: __("Image medium", "structura"),
-              current: draft.medium ?? "photography",
-              options: MEDIUM_OPTIONS,
-            }}
             toggleButtonLabel={__("Suggest Image Style", "structura")}
             contextFieldLabel={__(
               "Brand Resources (logo, guidelines, design system URL…)",
@@ -370,6 +364,52 @@ export const WizardStep4Visuals = () => {
                 : undefined
             }
           />
+
+          {/* Image medium — the same cards as the Visuals page (restored
+              there 2026-10-05, here 2026-10-06), saved on the preset at
+              Finish and the medium Suggest drafts in. */}
+          <div className="flex flex-col gap-3">
+            <span className="text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+              {__("Image medium", "structura")}
+            </span>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {MEDIUM_OPTIONS.map((opt) => {
+                const Icon = opt.icon;
+                const active = (draft.medium || "photography") === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => update({ medium: opt.value })}
+                    className={cn(
+                      "flex cursor-pointer flex-col gap-1.5 rounded-xl border p-3 text-left transition-all duration-200",
+                      active
+                        ? "border-brand-500 bg-brand-50/60 dark:border-brand-400 dark:bg-brand-950/30"
+                        : "hover:border-brand-300 dark:hover:border-brand-500/40 border-gray-200 hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-sm dark:border-neutral-800 dark:hover:bg-neutral-800/40",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "flex h-7 w-7 items-center justify-center rounded-lg",
+                        active
+                          ? "bg-brand-500 text-white"
+                          : "bg-gray-100 text-gray-500 dark:bg-neutral-800 dark:text-neutral-400",
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span className="text-[13px] font-bold text-gray-900 dark:text-white">
+                      {opt.label}
+                    </span>
+                    <span className="text-[11.5px] leading-snug text-gray-500 dark:text-neutral-400">
+                      {opt.desc}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Art direction prompt. */}
           <div className="flex flex-col gap-3">

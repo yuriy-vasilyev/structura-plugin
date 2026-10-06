@@ -3,7 +3,7 @@ import { __ } from "@wordpress/i18n";
 import { Button, cn } from "@structura/ui";
 import { Wand2 } from "lucide-react";
 
-import { useDefaultProviders, useLicense } from "@/features/settings";
+import { useDefaultProviders } from "@/features/settings";
 import { AIProvider } from "@/features/campaigns/types";
 import { ProviderPill } from "./ProviderPill";
 import { MagicSuggestProgress } from "./MagicSuggestProgress";
@@ -51,31 +51,12 @@ export const MagicSuggestButton: FC<MagicSuggestButtonProps> = ({
   className,
 }) => {
   const { defaultTextProvider } = useDefaultProviders();
-  const { isPaidLicense } = useLicense();
 
   const [providerOverride, setProviderOverride] = useState<AIProvider | null>(null);
   const activeProvider = providerOverride ?? defaultTextProvider;
 
-  if (!isPaidLicense) {
-    // Free tier doesn't get cloud-powered suggestions; render a
-    // disabled hint button so the affordance is still discoverable.
-    return (
-      <div
-        className={cn(
-          "flex items-center justify-between rounded-xl border border-dashed border-neutral-200 bg-neutral-50/50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900/40",
-          className
-        )}
-      >
-        <span className="text-xs text-neutral-500 dark:text-neutral-400">
-          {__("Magic suggestions are available on Pro and above.", "structura")}
-        </span>
-        <span className="bg-brand-100 text-brand-600 dark:bg-brand-950/30 dark:text-brand-400 rounded-md px-1.5 py-0.5 text-[8px] font-black tracking-wider uppercase">
-          {__("Pro", "structura")}
-        </span>
-      </div>
-    );
-  }
-
+  // Every plan since 2026-10-06 (specs/open-providers.md §8); until then
+  // none/free saw a disabled "available on Pro and above" hint here.
   return (
     <div
       className={cn(

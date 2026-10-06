@@ -60,12 +60,14 @@ export const SectionGateTeaser = forwardRef<HTMLDivElement, SectionGateTeaserPro
             space the CTA drops to its own line instead of crushing the copy. */}
         <div className="min-w-0 flex-1 basis-48">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">{title}</p>
+            {/* wp-admin's core `p` margin beats layered utilities, so the
+                resets are important (owner review 2026-10-06). */}
+            <p className="m-0! text-sm font-bold text-neutral-900 dark:text-neutral-100">{title}</p>
             {badge != null &&
               (typeof badge === "string" ? <Badge intent="premium">{badge}</Badge> : badge)}
           </div>
           {line != null && (
-            <p className="mt-0.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+            <p className="mx-0! mt-0.5! mb-0! text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
               {line}
             </p>
           )}

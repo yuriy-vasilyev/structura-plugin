@@ -94,10 +94,10 @@ export interface VisualDraft {
   format: string;
   optimizeOnUpload: boolean;
   /**
-   * Rendering medium (photography / illustration / 3d_render) — picked from
-   * the AI-suggest dropdown and persisted to the visual preset, so the
-   * drafted style and every generated image share one medium. Defaults to
-   * "photography" when the wizard never opens the suggest picker.
+   * Rendering medium (photography / illustration / 3d_render) — picked on
+   * the step's medium cards (2026-10-06, was the AI-suggest dropdown) and
+   * persisted to the visual preset, so the drafted style and every
+   * generated image share one medium. Defaults to "photography".
    */
   medium: string;
   /**

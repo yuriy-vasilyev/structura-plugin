@@ -155,13 +155,51 @@ describe("Combobox", () => {
       expect(within(listbox).getByRole("group", { name: "OpenAI" })).toHaveTextContent("9");
     });
 
-    it("marks the selected option, focuses it via aria-activedescendant, and scrolls it into view", () => {
+    it("marks the selected option and focuses it via aria-activedescendant", () => {
       renderCombobox();
       openPopover();
       const selected = screen.getByRole("option", { name: /Nova/ });
       expect(selected).toHaveAttribute("aria-selected", "true");
       expect(activeDescendant()).toBe(selected);
-      expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+    });
+  });
+
+  // Regression (owner review 2026-10-06): opening the Language dropdown on
+  // wp-admin's Generate a Post page jumped the page to the top. The panel
+  // mounts before floating-ui positions it (at the top of the document),
+  // and both the search input's autoFocus and the active row's
+  // scrollIntoView scrolled the window to it. Only the list may scroll.
+  describe("opening never scrolls the page", () => {
+    it("focuses the search input with preventScroll", () => {
+      const focus = vi.spyOn(HTMLElement.prototype, "focus");
+      renderCombobox();
+      openPopover();
+      const inputFocus = focus.mock.contexts
+        .map((el, i) => ({ el, args: focus.mock.calls[i] }))
+        .filter(({ el }) => el === searchInput());
+      expect(inputFocus.length).toBeGreaterThan(0);
+      for (const { args } of inputFocus) expect(args[0]).toEqual({ preventScroll: true });
+      expect(searchInput()).toHaveFocus();
+      focus.mockRestore();
+    });
+
+    it("scrolls the selected row into view inside the list, not the window", () => {
+      vi.mocked(Element.prototype.scrollIntoView).mockClear();
+      const rect = (top: number, height: number) =>
+        ({ top, bottom: top + height, height, left: 0, right: 0, width: 0, x: 0, y: top, toJSON: () => ({}) }) as DOMRect;
+      const getRect = vi
+        .spyOn(Element.prototype, "getBoundingClientRect")
+        .mockImplementation(function (this: Element) {
+          if (this.getAttribute("role") === "listbox") return rect(0, 100);
+          if (this.getAttribute("role") === "option") return rect(250, 30);
+          return rect(0, 0);
+        });
+      renderCombobox({ value: "gemini:Sulafat" });
+      const listbox = openPopover();
+      expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+      // The row sits 180px below the list's bottom edge.
+      expect(listbox.scrollTop).toBe(180);
+      getRect.mockRestore();
     });
 
     it("renders a string badge as an outline chip on its row", () => {

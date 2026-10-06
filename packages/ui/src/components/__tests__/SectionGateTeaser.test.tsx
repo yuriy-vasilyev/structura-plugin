@@ -61,6 +61,18 @@ describe("SectionGateTeaser", () => {
     expect(root.textContent).toBe("Video styling");
   });
 
+  // Owner review 2026-10-06: in wp-admin, WordPress core's `p` margin
+  // opened a gap under the title. Layered Tailwind margins lose to it, so
+  // both paragraphs carry the important reset themselves.
+  it("resets the WordPress paragraph margins on the title and the line", () => {
+    renderTeaser();
+    const title = screen.getByText("Video styling");
+    const line = screen.getByText(/brand-palette captions/);
+    expect(title.className).toContain("m-0!");
+    expect(line.className).toContain("mb-0!");
+    expect(line.className).toContain("mt-0.5!");
+  });
+
   it("wraps gracefully on narrow containers (flex-wrap row)", () => {
     const root = renderTeaser();
     expect(root.className).toContain("flex-wrap");

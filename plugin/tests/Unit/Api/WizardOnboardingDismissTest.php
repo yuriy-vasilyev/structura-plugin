@@ -66,7 +66,10 @@ class WizardOnboardingDismissTest extends TestCase
     {
         Mockery::mock('alias:Structura\Core\License_Manager')
             ->shouldReceive('get_license_data')
-            ->andReturn(['license_key' => 'live_abc']);
+            ->andReturn(['license_key' => 'live_abc'])
+            ->getMock()
+            ->shouldReceive('has_workspace')
+            ->andReturn(true);
 
         Mockery::mock('alias:Structura\Core\Cloud_Client')
             ->shouldReceive('post')
@@ -91,7 +94,10 @@ class WizardOnboardingDismissTest extends TestCase
     {
         Mockery::mock('alias:Structura\Core\License_Manager')
             ->shouldReceive('get_license_data')
-            ->andReturn(['license_key' => 'live_abc']);
+            ->andReturn(['license_key' => 'live_abc'])
+            ->getMock()
+            ->shouldReceive('has_workspace')
+            ->andReturn(true);
 
         Mockery::mock('alias:Structura\Core\Cloud_Client')
             ->shouldReceive('post')

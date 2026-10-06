@@ -223,14 +223,11 @@ class Admin_Dashboard
             //     workspace, post-bootstrap). Lets the SPA
             //     distinguish "anonymous workspace bootstrapped" from
             //     "licensed user", which matters for the AI Engine
-            //     page (provider count cap + Anthropic locked teaser)
-            //     and for the Visuals page's permanent unlicensed
+            //     page and for the Visuals page's permanent unlicensed
             //     teaser on `none` tier.
-            //   - `provider_count_cap`: 1 for none, 2 for free, 3 for
-            //     paid. The AI Engine SPA reads this to hide the
-            //     "default for text/images" toggles when cap === 1
-            //     (single provider, no choice) and to gate the "add
-            //     provider" CTA at the cap.
+            //   - `provider_count_cap` (1 / 2 / 3 per plan) was removed
+            //     2026-10-06: every plan may connect every provider
+            //     (specs/open-providers.md).
             //   - `activation_id`: passed through so anonymous SPA
             //     queries can reference the activation without
             //     waiting for `useSettingsQuery` to resolve.
@@ -243,7 +240,6 @@ class Admin_Dashboard
             // screen instead of the app while this is false (fresh install,
             // no cloud contact yet). Older SPA builds ignore the key.
             'cloud_consent'              => \Structura\Core\Anonymous_Bootstrap::has_cloud_consent(),
-            'provider_count_cap'         => \Structura\Core\License_Manager::get_provider_count_cap(),
             'activation_id'              => self::current_activation_id(),
             'plan'                       => \Structura\Core\License_Manager::get_plan(),
             // Bootstrap payload for `useSettingsQuery` — same shape the
@@ -306,7 +302,7 @@ class Admin_Dashboard
         // that's a no-op, but it silently coerces booleans
         // (`has_workspace`, `is_anonymous`, `wp_cron_disabled`,
         // `had_prior_activation`, `pregen_v1_notice_dismissed`) to
-        // `"1"` / `""` AND integers (`provider_count_cap`) to `"1"`.
+        // `"1"` / `""` AND integers (then `provider_count_cap`) to `"1"`.
         // The SPA's strict-equality / typeof checks
         // (`config.has_workspace === true`,
         // `typeof config.provider_count_cap === "number"`) then fail

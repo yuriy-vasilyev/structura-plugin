@@ -6,8 +6,8 @@
  * Why this exists: these strings used to be hand-typed into dozens of content
  * JSON files (`www/content/**`, `web/src/i18n/locales/**`) and drifted — vs
  * pages advertised "GPT-4, GPT-4o" long after the frontier default moved to
- * GPT-5.2, listed Anthropic as a BYOK-Free option (it isn't), and named a
- * retired "Pro" plan. Centralising them here means a quota or a provider
+ * GPT-5.2, listed Anthropic as a BYOK-Free option (it wasn't, until
+ * 2026-10-06), and named a retired "Pro" plan. Centralising them here means a quota or a provider
  * rule change is one edit, and every page picks it up via interpolation
  * (`{{token}}` → value): `productFactTokens()` feeds `www`'s server-side
  * dictionary interpolation and `web`'s i18next `defaultVariables`.
@@ -18,10 +18,10 @@
  * Stripe-generated `catalog.generated.ts` and are exposed via each app's
  * `catalog.ts` `priceTokens()` so there is exactly one price source.
  *
- * Provider gating (per Yurii, plugin-only case confirmed 2026-10-03):
- *   • Paid BYOK — bring any key: OpenAI, Gemini, or Anthropic.
- *   • Free — also bring-your-own-key, but OpenAI or Gemini only (no Anthropic).
- *   • The plugin with no account (anonymous mode) — bring-your-own-key, OpenAI only.
+ * Provider gating (owner, 2026-10-06; specs/open-providers.md):
+ *   • Every bring-your-own-key plan (the plugin with no account, Free, BYOK)
+ *     takes an OpenAI, Gemini or Claude key. Until 2026-10-06 the plugin with
+ *     no account took OpenAI only and Free took OpenAI or Gemini.
  *   • Managed Cloud and Cloud Pro — one AI lineup chosen by us; copy never
  *     names a provider or model for these plans (specs/managed-ai-lineup.md §3).
  *     That is why there are no model-name or failover facts here.
@@ -29,46 +29,30 @@
 
 import type { SupportedLocale } from "@structura/i18n-contracts";
 
-/** A plan that runs on the customer's own AI key. */
-export type KeyPlan = "pluginOnly" | "free" | "byok";
+/** Providers every bring-your-own-key plan accepts, in display order. */
+const KEY_PROVIDERS: readonly string[] = ["OpenAI", "Gemini", "Claude"];
 
-/** Providers each bring-your-own-key plan accepts, in display order. */
-export const PROVIDERS_BY_PLAN: Record<KeyPlan, readonly string[]> = {
-  pluginOnly: ["OpenAI"],
-  free: ["OpenAI", "Gemini"],
-  byok: ["OpenAI", "Gemini", "Anthropic"],
-};
-
-/** "or" per locale; Spanish uses "u" before a word that starts with an o sound. */
-const OR: Record<SupportedLocale, (next: string) => string> = {
-  en: () => "or",
-  de: () => "oder",
-  es: (next) => (/^h?o/i.test(next) ? "u" : "o"),
-  fr: () => "ou",
+/** "or" per locale. */
+const OR: Record<SupportedLocale, string> = {
+  en: "or",
+  de: "oder",
+  es: "o",
+  fr: "ou",
 };
 
 /**
- * Returns the plan's providers as a localized "A, B or C" list. Only English
- * takes the Oxford comma. `locale` may be composite (`de_AT`, `es-419`);
- * unknown locales fall back to English.
+ * Returns the providers as a localized "A, B or C" list. `locale` may be
+ * composite (`de_AT`, `es-419`); unknown locales fall back to English.
  */
-export function providerList(locale: string, plan: KeyPlan): string {
+export function providerList(locale: string): string {
   const lang = locale.slice(0, 2).toLowerCase();
   const loc: SupportedLocale = lang in OR ? (lang as SupportedLocale) : "en";
-  const names = PROVIDERS_BY_PLAN[plan];
-  if (names.length === 1) return names[0];
-  const last = names[names.length - 1];
-  const head = names.slice(0, -1).join(", ");
-  const comma = loc === "en" && names.length > 2 ? "," : "";
-  return `${head}${comma} ${OR[loc](last)} ${last}`;
+  const last = KEY_PROVIDERS[KEY_PROVIDERS.length - 1];
+  return `${KEY_PROVIDERS.slice(0, -1).join(", ")} ${OR[loc]} ${last}`;
 }
 
-/** Providers a paid BYOK user may bring a key for (English). */
-export const BYOK_PROVIDERS = providerList("en", "byok");
-/** Providers the Free tier may bring a key for, no Anthropic (English). */
-export const FREE_PROVIDERS = providerList("en", "free");
-/** Providers the plugin accepts with no account, anonymous mode (English). */
-export const PLUGIN_ONLY_PROVIDERS = providerList("en", "pluginOnly");
+/** Providers every bring-your-own-key plan accepts, as an English list. */
+export const OWN_KEY_PROVIDERS = providerList("en");
 
 /** Canonical plan display names. There is no plain "Pro" plan. */
 export const PLAN_NAMES = {
@@ -108,9 +92,8 @@ export const BYOK_API_COST_ESTIMATE = "$5–15/month";
  */
 export function productFactTokens(locale = "en"): Record<string, string> {
   return {
-    byokProviders: providerList(locale, "byok"),
-    freeProviders: providerList(locale, "free"),
-    pluginOnlyProviders: providerList(locale, "pluginOnly"),
+    // Named for BYOK, but every own-key plan takes this list since 2026-10-06.
+    byokProviders: providerList(locale),
     planFree: PLAN_NAMES.free,
     planByok: PLAN_NAMES.byok,
     planCloud: PLAN_NAMES.cloud,

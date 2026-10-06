@@ -14,7 +14,7 @@ import {
 import { Badge, Button, ConfirmDialog, RecommendedLabel, Tooltip, cn } from "@structura/ui";
 import { getProviderMeta } from "@/utils/providerMeta";
 import { getProviderVisual } from "@/features/campaigns/constants";
-import { isRecommendedTextProvider, recommendedForTextWord } from "@/features/campaigns/aiGuidance";
+import { providerRecommendationLabel } from "@/features/campaigns/aiGuidance";
 import { useProviderPulse } from "../api/useProviderPulse";
 import { useDisconnectProvider } from "../api/useDisconnectProvider";
 
@@ -29,15 +29,6 @@ interface InstalledProviderCardProps {
   isDefaultText: boolean;
   /** Whether this is the default image provider. */
   isDefaultImage: boolean;
-  /**
-   * Phase 1.8 §1.8.4 — single-provider tiers (anonymous `none`)
-   * suppress the "Default Text" / "Default Image" badges. With
-   * exactly one provider configurable, the badges are noise: the
-   * single provider is always the default for whatever it can do.
-   * Defaults to false so existing callers (paid tiers) keep
-   * showing the badges.
-   */
-  hideDefaultBadges?: boolean;
   /** Whether onboarding is incomplete (connected but models not selected). */
   incomplete?: boolean;
   onManage: () => void;
@@ -67,7 +58,6 @@ export const InstalledProviderCard = ({
   isCloud,
   isDefaultText,
   isDefaultImage,
-  hideDefaultBadges = false,
   incomplete = false,
   onManage,
 }: InstalledProviderCardProps) => {
@@ -111,9 +101,11 @@ export const InstalledProviderCard = ({
                 </h3>
                 {/* 2026-10-02: the label stays once the provider is connected,
                     so a site with every provider connected still shows which
-                    one we recommend (copy.csv: wp-admin provider cards). */}
-                {!isCloud && isRecommendedTextProvider(id) && (
-                  <RecommendedLabel label={recommendedForTextWord()} />
+                    one we recommend (copy.csv: wp-admin provider cards).
+                    2026-10-06: Gemini carries "Recommended for images" in
+                    the same chip. */}
+                {!isCloud && providerRecommendationLabel(id) && (
+                  <RecommendedLabel label={providerRecommendationLabel(id) as string} />
                 )}
                 {incomplete ? (
                   <Tooltip
@@ -164,13 +156,13 @@ export const InstalledProviderCard = ({
               </span>
             )}
 
-            {isDefaultText && !hideDefaultBadges && (
+            {isDefaultText && (
               <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-600 uppercase dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
                 <Star size={9} />
                 {__("Default Text", "structura")}
               </span>
             )}
-            {isDefaultImage && !hideDefaultBadges && (
+            {isDefaultImage && (
               <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-600 uppercase dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
                 <Star size={9} />
                 {__("Default Image", "structura")}

@@ -14,14 +14,18 @@ import {
   Type,
   Zap,
 } from "lucide-react";
-import { Button, cn, Dialog, InputField, Select, Switch } from "@structura/ui";
+import { Button, cn, Dialog, InputField, RecommendedLabel, Select, Switch } from "@structura/ui";
 import { getProviderVisual } from "@/features/campaigns/constants";
+import { recommendedTier, recommendedWord } from "@/features/campaigns/aiGuidance";
+import { mirrorModelForTier } from "@/features/campaigns/modelTier";
+import type { AIProvider } from "@/features/campaigns/types";
 import { looksLikeUrlNotApiKey } from "@/utils/providerMeta";
 import { useSaveKey } from "../api/useSaveKey";
 import { useProviderPulse } from "../api/useProviderPulse";
 import { useAvailableModelsQuery } from "../api/useAvailableModelsQuery";
 import { useRefreshModels } from "../api/useRefreshModels";
 import { useUpdateAiSettings } from "../api/useUpdateAiSettings";
+import { usesRecommendedModel } from "../helpers";
 
 /* ────────────────────────────────────────────────────────────────── */
 /*  Types                                                            */
@@ -45,15 +49,18 @@ interface ProviderSetupWizardProps {
   /** Whether this provider is currently the default for image. */
   isDefaultImage?: boolean;
   /**
-   * Phase 1.8 §1.8.4 — maximum number of providers the user can
-   * configure simultaneously at the calling tier. When `1` (anonymous
-   * `none` tier), the "Default Provider" toggles are hidden because
-   * the choice is degenerate: a single configured provider is always
-   * the default for whatever capabilities it offers. Defaults to a
-   * value > 1 so callers that don't pass it (older tiers, tests
-   * that don't care) keep rendering the toggles.
+   * The tier ("top" | "mid") the "Use recommended model" switch stored, or
+   * "" / undefined when the site picked a model or never used the switch.
    */
-  providerCountCap?: number;
+  currentTextTier?: string;
+  currentImageTier?: string;
+  /**
+   * False on plans without image generation (anonymous `none`): the
+   * configure step says so instead of offering an image model, and no
+   * image model or image default is saved. The overview still lists the
+   * provider's image capability (owner review 2026-10-06). Defaults to true.
+   */
+  imagesAvailable?: boolean;
 }
 
 type WizardStep = "intro" | "key" | "test" | "models";
@@ -105,21 +112,36 @@ export const ProviderSetupWizard = ({
   currentImageModel,
   isDefaultText = false,
   isDefaultImage = false,
-  providerCountCap = 3,
+  currentTextTier,
+  currentImageTier,
+  imagesAvailable = true,
 }: ProviderSetupWizardProps) => {
-  // Phase 1.8 §1.8.4 — single-provider tiers (anonymous `none`) only
-  // ever have one configurable provider, so the "Default for text /
-  // image" toggles are degenerate (their only honest answer is
-  // "yes"). Pre-2026-05-10 the section was hidden outright, but that
-  // dropped the default flags from the saved state — so when the user
-  // upgraded to Free / paid and added a second provider, neither was
-  // marked default and the campaign UI flashed the "no default
-  // selected" warning. We now keep the section visible + force-on +
-  // disabled with a one-line explanation, AND treat the force-on as
-  // a real save so the upgrade-then-add-provider path inherits a
-  // pre-set default for whatever the single-provider user already
-  // configured.
-  const forceDefaults = providerCountCap === 1;
+  // The forced "Default for text / image" toggles of the one-provider
+  // anonymous plan (Phase 1.8 §1.8.4) were deleted 2026-10-06: every plan
+  // may connect every provider (specs/open-providers.md).
+
+  /* ── Recommended model (owner review 2026-10-06) ──────────────────
+     "Use recommended model" saves the provider's recommended TIER with
+     the model it maps to today, so the site default follows the catalog
+     when that tier's model moves (`resolveDefaultModel` resolves a stored
+     tier first). A provider without a recommended model for a capability
+     (Gemini text) still uses Standard but carries no "Recommended" chip. */
+  const pid = providerId as AIProvider;
+  const recTextTier = recommendedTier(providerId, "text") ?? "mid";
+  const recImageTier = recommendedTier(providerId, "image") ?? "mid";
+  const recTextModelId = mirrorModelForTier(pid, "text", recTextTier);
+  const recImageModelId = mirrorModelForTier(pid, "image", recImageTier);
+  const textIsRecommended = recommendedTier(providerId, "text") !== undefined;
+  const imageIsRecommended = recommendedTier(providerId, "image") !== undefined;
+  // On for a new connection, a stored tier, or a stored model that IS the
+  // recommended one; off when the site picked another model (it keeps it).
+  const [useRecommendedText, setUseRecommendedText] = useState(
+    () => !isConnected || usesRecommendedModel(providerId, "text", currentTextTier, currentTextModel)
+  );
+  const [useRecommendedImage, setUseRecommendedImage] = useState(
+    () => !isConnected || usesRecommendedModel(providerId, "image", currentImageTier, currentImageModel)
+  );
+
   /* ── Wizard state ─────────────────────────────────────────────── */
   const [step, setStep] = useState<WizardStep>(isConnected ? "models" : "intro");
   const [keyInput, setKeyInput] = useState("");
@@ -138,8 +160,6 @@ export const ProviderSetupWizard = ({
   // (specs/byok-ai-guidance.md §9). Only switching it on writes one.
   const [setDefaultText, setSetDefaultText] = useState(isDefaultText);
   const [setDefaultImage, setSetDefaultImage] = useState(!isConnected || isDefaultImage);
-  const effectiveDefaultText = forceDefaults ? true : setDefaultText;
-  const effectiveDefaultImage = forceDefaults ? true : setDefaultImage;
 
   /* ── Queries & mutations ──────────────────────────────────────── */
   const { mutate: saveKey, isPending: isSavingKey } = useSaveKey();
@@ -160,18 +180,22 @@ export const ProviderSetupWizard = ({
   const imageModels = (modelsData?.image ?? []).filter((m) => m.provider === providerId && !m.fast);
   const defaultModels = modelsData?.defaults?.[providerId];
 
-  // For brand-new users (no model saved yet), pre-select the
-  // `recommended: true` entry rather than the catalog `default: true`.
-  // This matters for Anthropic where catalog default is Sonnet (mid)
-  // but we want users landing on Opus (top). For OpenAI / Gemini the
-  // two flags point at the same model so this is a no-op there.
-  // Falls through to `defaultModels.text` if no recommended is set
-  // (defensive — every provider should have one tagged).
-  const recommendedTextModelId = textModels.find((m) => m.recommended)?.id;
-  const recommendedImageModelId = imageModels.find((m) => m.recommended)?.id;
+  // The dropdown opens on the recommended tier's model when the served
+  // list carries it, else on the served `recommended` entry (frozen for
+  // images, specs/byok-ai-guidance.md §2), else the catalog default.
+  const servedTextRecommended =
+    (recTextModelId && textModels.some((m) => m.id === recTextModelId) ? recTextModelId : undefined) ??
+    textModels.find((m) => m.recommended)?.id;
+  const servedImageRecommended =
+    (recImageModelId && imageModels.some((m) => m.id === recImageModelId) ? recImageModelId : undefined) ??
+    imageModels.find((m) => m.recommended)?.id;
+  const recommendedTextModelId = servedTextRecommended;
+  const recommendedImageModelId = servedImageRecommended;
 
   const hasText = capabilities.includes("text");
   const hasImage = capabilities.includes("image");
+  // The provider makes images but the plan does not (anonymous).
+  const imageEnabled = hasImage && imagesAvailable;
 
   // Once the model catalog arrives, snap the selection to the recommended
   // entry (or catalog default) for any capability the user hasn't already
@@ -211,9 +235,17 @@ export const ProviderSetupWizard = ({
     selectedTextModel || recommendedTextModelId || defaultModels?.text || "";
   const effectiveImageModel =
     selectedImageModel || recommendedImageModelId || defaultModels?.image || "";
+  // What Finish saves: the recommended tier with its model while the
+  // switch is on, else the picked model with the tier cleared.
+  const textToSave = useRecommendedText && recTextModelId
+    ? { model: recTextModelId, tier: recTextTier }
+    : { model: effectiveTextModel, tier: "" };
+  const imageToSave = useRecommendedImage && recImageModelId
+    ? { model: recImageModelId, tier: recImageTier }
+    : { model: effectiveImageModel, tier: "" };
   const missingRequiredModels =
-    (hasText && textModels.length > 0 && !effectiveTextModel) ||
-    (hasImage && imageModels.length > 0 && !effectiveImageModel);
+    (hasText && textModels.length > 0 && !textToSave.model) ||
+    (imageEnabled && imageModels.length > 0 && !imageToSave.model);
 
   // Auto-refresh when the wizard reaches the models step and finds no models.
   // This handles the common case of stale cache after a new provider deploy.
@@ -255,12 +287,15 @@ export const ProviderSetupWizard = ({
   const handleFinish = useCallback(() => {
     const data: Record<string, any> = { ai: {} };
 
-    // Save model selections — keyed directly by provider ID (PHP expects $ai[$pid])
-    // Use effective models (explicit pick or server default) so models are always persisted
-    if (effectiveTextModel || effectiveImageModel) {
+    // Save model selections — keyed directly by provider ID (PHP expects $ai[$pid]).
+    // The tier travels beside the model ("" clears it), like a campaign's
+    // textTier + textModel. No image model on a plan without images.
+    const saveText = hasText && !!textToSave.model;
+    const saveImage = imageEnabled && !!imageToSave.model;
+    if (saveText || saveImage) {
       data.ai[providerId] = {
-        ...(effectiveTextModel && { text_model: effectiveTextModel }),
-        ...(effectiveImageModel && { image_model: effectiveImageModel }),
+        ...(saveText && { text_model: textToSave.model, text_tier: textToSave.tier }),
+        ...(saveImage && { image_model: imageToSave.model, image_tier: imageToSave.tier }),
       };
     }
 
@@ -268,18 +303,11 @@ export const ProviderSetupWizard = ({
     // Only include a capability when:
     //   - toggle ON  → set this provider as default
     //   - toggle OFF → clear only if this provider WAS the default (don't clobber other providers)
-    //
-    // `effectiveDefaultText` / `effectiveDefaultImage` collapse the
-    // user-facing toggle state with the tier-forced override (Phase
-    // 1.8 §1.8.4): on `none` tier the toggle is force-on regardless
-    // of click state, so the saved record carries the default flags
-    // and any subsequent upgrade-then-add-provider flow inherits
-    // them.
     const defaults: Record<string, string> = {};
-    if (hasText && effectiveDefaultText) defaults.text_provider = providerId;
-    if (hasText && !effectiveDefaultText && isDefaultText) defaults.text_provider = "";
-    if (hasImage && effectiveDefaultImage) defaults.image_provider = providerId;
-    if (hasImage && !effectiveDefaultImage && isDefaultImage) defaults.image_provider = "";
+    if (hasText && setDefaultText) defaults.text_provider = providerId;
+    if (hasText && !setDefaultText && isDefaultText) defaults.text_provider = "";
+    if (imageEnabled && setDefaultImage) defaults.image_provider = providerId;
+    if (imageEnabled && !setDefaultImage && isDefaultImage) defaults.image_provider = "";
     if (Object.keys(defaults).length > 0) {
       data.ai.defaults = defaults;
     }
@@ -290,12 +318,12 @@ export const ProviderSetupWizard = ({
       onClose();
     }
   }, [
-    effectiveTextModel,
-    effectiveImageModel,
-    effectiveDefaultText,
-    effectiveDefaultImage,
+    textToSave,
+    imageToSave,
+    setDefaultText,
+    setDefaultImage,
     hasText,
-    hasImage,
+    imageEnabled,
     providerId,
     isDefaultText,
     isDefaultImage,
@@ -552,64 +580,90 @@ export const ProviderSetupWizard = ({
                 </p>
               </div>
 
-              {/* Text model selector */}
+              {/* Text model — recommended switch, dropdown behind it */}
               {hasText && textModels.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2" data-testid="wizard-text-model">
                   <div className="flex items-center gap-1.5">
                     <Type size={12} className="text-blue-500" />
                     <span className="text-[10px] font-black tracking-widest text-neutral-400 uppercase">
                       {__("Text Model", "structura")}
                     </span>
                   </div>
-                  <Select
-                    value={selectedTextModel || recommendedTextModelId || defaultModels?.text || ""}
-                    onValueChange={(val) => setSelectedTextModel(val as string)}
-                    options={textModels.map((m) => ({ value: m.id, label: m.name }))}
-                  >
-                    <Select.Trigger placeholder={__("Select model...", "structura")} />
-                    <Select.Content className="w-(--button-width)">
-                      {textModels.map((m) => (
-                        <Select.Item key={m.id} value={m.id}>
-                          <span className="flex items-center justify-between gap-2">
-                            <span>{m.name}</span>
-                            {m.recommended && (
-                              <span className="bg-brand-100 text-brand-700 dark:bg-brand-950/50 dark:text-brand-300 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase">
-                                {__("Recommended", "structura")}
-                              </span>
-                            )}
-                          </span>
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select>
+                  <RecommendedModelSwitch
+                    checked={useRecommendedText}
+                    onChange={setUseRecommendedText}
+                    showChip={textIsRecommended}
+                    explain
+                  />
+                  {!useRecommendedText && (
+                    <Select
+                      value={selectedTextModel || recommendedTextModelId || defaultModels?.text || ""}
+                      onValueChange={(val) => setSelectedTextModel(val as string)}
+                      options={textModels.map((m) => ({ value: m.id, label: m.name }))}
+                    >
+                      <Select.Trigger placeholder={__("Select model...", "structura")} />
+                      <Select.Content className="w-(--button-width)">
+                        {textModels.map((m) => (
+                          <Select.Item key={m.id} value={m.id}>
+                            <span className="flex items-center justify-between gap-2">
+                              <span>{m.name}</span>
+                              {textIsRecommended && m.id === recTextModelId && (
+                                <RecommendedLabel label={recommendedWord()} />
+                              )}
+                            </span>
+                          </Select.Item>
+                        ))}
+                      </Select.Content>
+                    </Select>
+                  )}
                 </div>
               )}
 
-              {/* Image model selector */}
-              {hasImage && imageModels.length > 0 && (
-                <div className="space-y-2">
+              {/* Image model — same switch; on a plan without images, a line instead */}
+              {hasImage && (imageModels.length > 0 || !imagesAvailable) && (
+                <div className="space-y-2" data-testid="wizard-image-model">
                   <div className="flex items-center gap-1.5">
                     <Image size={12} className="text-purple-500" />
                     <span className="text-[10px] font-black tracking-widest text-neutral-400 uppercase">
                       {__("Image Model", "structura")}
                     </span>
                   </div>
-                  <Select
-                    value={
-                      selectedImageModel || recommendedImageModelId || defaultModels?.image || ""
-                    }
-                    onValueChange={(val) => setSelectedImageModel(val as string)}
-                    options={imageModels.map((m) => ({ value: m.id, label: m.name }))}
-                  >
-                    <Select.Trigger placeholder={__("Select model...", "structura")} />
-                    <Select.Content className="w-(--button-width)">
-                      {imageModels.map((m) => (
-                        <Select.Item key={m.id} value={m.id}>
-                          {m.name}
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select>
+                  {!imagesAvailable ? (
+                    <p className="m-0! text-[11px] leading-relaxed text-neutral-500 dark:text-neutral-400">
+                      {__("Image generation is not available on your current plan.", "structura")}
+                    </p>
+                  ) : (
+                    <>
+                      <RecommendedModelSwitch
+                        checked={useRecommendedImage}
+                        onChange={setUseRecommendedImage}
+                        showChip={imageIsRecommended}
+                      />
+                      {!useRecommendedImage && (
+                        <Select
+                          value={
+                            selectedImageModel || recommendedImageModelId || defaultModels?.image || ""
+                          }
+                          onValueChange={(val) => setSelectedImageModel(val as string)}
+                          options={imageModels.map((m) => ({ value: m.id, label: m.name }))}
+                        >
+                          <Select.Trigger placeholder={__("Select model...", "structura")} />
+                          <Select.Content className="w-(--button-width)">
+                            {imageModels.map((m) => (
+                              <Select.Item key={m.id} value={m.id}>
+                                <span className="flex items-center justify-between gap-2">
+                                  <span>{m.name}</span>
+                                  {imageIsRecommended && m.id === recImageModelId && (
+                                    <RecommendedLabel label={recommendedWord()} />
+                                  )}
+                                </span>
+                              </Select.Item>
+                            ))}
+                          </Select.Content>
+                        </Select>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
 
@@ -622,32 +676,25 @@ export const ProviderSetupWizard = ({
                   </span>
                 </div>
                 <p className="mt-0! text-[11px] leading-relaxed text-neutral-400">
-                  {forceDefaults
-                    ? __(
-                        "Your plan supports one provider at a time, so this provider is automatically your default. The setting is saved and will carry over if you add more providers later.",
-                        "structura"
-                      )
-                    : __(
-                        "New campaigns will use default providers automatically. You can override per campaign.",
-                        "structura"
-                      )}
+                  {__(
+                    "New campaigns will use default providers automatically. You can override per campaign.",
+                    "structura"
+                  )}
                 </p>
 
                 {hasText && (
                   <Switch
                     label={__("Default for text generation", "structura")}
-                    checked={effectiveDefaultText}
-                    onChange={forceDefaults ? () => {} : setSetDefaultText}
-                    disabled={forceDefaults}
+                    checked={setDefaultText}
+                    onChange={setSetDefaultText}
                   />
                 )}
 
-                {hasImage && (
+                {imageEnabled && (
                   <Switch
                     label={__("Default for image generation", "structura")}
-                    checked={effectiveDefaultImage}
-                    onChange={forceDefaults ? () => {} : setSetDefaultImage}
-                    disabled={forceDefaults}
+                    checked={setDefaultImage}
+                    onChange={setSetDefaultImage}
                   />
                 )}
               </div>
@@ -744,3 +791,46 @@ export const ProviderSetupWizard = ({
     </Dialog.Root>
   );
 };
+
+/**
+ * The "Use recommended model" switch of the configure step, with the
+ * "Recommended" chip beside its label when we recommend a model for this
+ * provider and capability. `explain` adds the one-line reason under it.
+ */
+const RecommendedModelSwitch = ({
+  checked,
+  onChange,
+  showChip,
+  explain = false,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  showChip: boolean;
+  explain?: boolean;
+}) => (
+  <div className="space-y-1.5 rounded-xl border border-neutral-100 bg-neutral-50/50 p-3 dark:border-neutral-800 dark:bg-neutral-800/30">
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Visible copy of the switch's own (sr-only) label. */}
+        <span aria-hidden="true" className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+          {__("Use recommended model", "structura")}
+        </span>
+        {showChip && <RecommendedLabel label={recommendedWord()} />}
+      </div>
+      <Switch
+        hiddenLabel
+        label={__("Use recommended model", "structura")}
+        checked={checked}
+        onChange={onChange}
+      />
+    </div>
+    {explain && (
+      <p className="m-0! text-[11px] leading-relaxed text-neutral-500 dark:text-neutral-400">
+        {__(
+          "We review new models regularly and move the recommendation when a better one proves itself. We suggest leaving this choice with us.",
+          "structura"
+        )}
+      </p>
+    )}
+  </div>
+);

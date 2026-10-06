@@ -52,6 +52,7 @@ import { NoPersonasBlocker } from "@/components/Shared/NoPersonasBlocker";
 import { usePersonasQuery } from "@/features/personas";
 import { PageBuilderCompatCard } from "@/features/campaigns/components/PageBuilderCompatCard";
 import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
+import { AiLabelReminder } from "@/features/campaigns/components/AiLabelReminder";
 import { CampaignProvider, useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { useCampaignDraftStore } from "@/features/campaigns/context/draftStore";
 import {
@@ -413,13 +414,12 @@ const CreateCampaignInner = () => {
 
   // Nothing drafts on mount (2026-10-02, aligned with the customer portal's
   // 2026-09-29 change, spec §4.4): the step opens empty and one Magic suggest
-  // click is one cloud call — the templated draft on Free, the AI pass on
-  // paid plans.
+  // click is one cloud call, the AI pass on every plan since 2026-10-06
+  // (specs/open-providers.md §8; the templated draft on Free until then).
   const { draft, isSuggesting, error: suggestError, suggest } = useCampaignSetupDraft({
     onDraft: applyDraft,
   });
-  const suggestStage: "deterministic" | "ai" =
-    plan === "free" || plan === "none" ? "deterministic" : "ai";
+  const suggestStage: "deterministic" | "ai" = "ai";
   const runSuggest = useCallback(
     (lang: string) => suggest(lang, suggestStage),
     [suggest, suggestStage]
@@ -1025,6 +1025,12 @@ const AdvancedSettings = () => {
                 (2026-07-09). */}
             <VisualStyleFallbackNotice
               imagesEnabled={structure.featuredImage || structure.bodyImages}
+            />
+            {/* EU AI label reminder (specs/ai-image-label.md §7); after the
+                fallback notice when both show. */}
+            <AiLabelReminder
+              imagesEnabled={structure.featuredImage || structure.bodyImages}
+              language={intelligence.language}
             />
           </SettingsGroup>
 

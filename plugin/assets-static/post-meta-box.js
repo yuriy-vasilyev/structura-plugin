@@ -79,17 +79,18 @@
         // off the current attachment and uses it as the topic, so
         // pre-filling adds no information AND introduced a confusing
         // failure mode where users assumed the prefilled string was
-        // being respected verbatim while the cloud was doing its
-        // standard prompt-wrapping (`Topic: … Visual style: …`).
+        // being respected verbatim while the cloud wrapped it in its
+        // image prompt (`wrapImagePrompt`: medium lead, `Scene: …`,
+        // `Art direction: …`; specs/image-generation-quality.md §2).
         // Placeholder is set in the PHP template; nothing to do here.
         $prompt.val('');
 
         // Populate the Top / Standard tier picker. Rows come from
         // `structuraMetaBox.imageTiers` (pre-resolved server-side —
         // top = recommended model, mid = default model, per provider).
-        // Gating: free/none hide it; pro (BYOK) shows Top/Standard;
-        // managed plans (cloud/cloud_pro) show a provider switch only
-        // when >1 provider is connected (the plan owns the model).
+        // Rows are empty on managed plans (cloud/cloud_pro), where
+        // Structura binds the image model (2026-10-06), so the picker
+        // stays hidden there.
         renderModelPicker();
 
         $backdrop.fadeIn(200);
@@ -163,7 +164,6 @@
     }
 
     function renderModelPicker() {
-        var tier  = (structuraMetaBox.tier || 'free').toLowerCase();
         var rows  = Array.isArray(structuraMetaBox.imageTiers) ? structuraMetaBox.imageTiers : [];
         var preferredProvider = structuraMetaBox.preferredProvider || structuraMetaBox.imageProvider || '';
 
@@ -178,8 +178,6 @@
             $modelSelect.empty();
             return;
         }
-
-        var isManaged = tier === 'cloud' || tier === 'cloud_pro';
 
         // Group the tier rows by provider, capturing each provider's top /
         // mid model NAME (labels only — the cloud resolves the concrete model
@@ -203,31 +201,6 @@
             if (b === preferredProvider) return 1;
             return 0;
         });
-
-        // Managed plans (cloud / cloud_pro) own the model — no tier choice.
-        // Offer a provider switch ONLY when the user has more than one
-        // image-capable provider connected; otherwise there's nothing to
-        // pick, so hide the picker. Provider options carry an EMPTY tier
-        // value (so no `image_tier` is sent) and the provider in
-        // `data-provider`.
-        if (isManaged) {
-            if (providerOrder.length <= 1) {
-                $modelSection.hide();
-                $modelSelect.empty();
-                return;
-            }
-            var provHtml = '<option value="" data-provider="">Use default provider</option>';
-            for (var mp = 0; mp < providerOrder.length; mp += 1) {
-                var mpid = providerOrder[mp];
-                provHtml += '<option value="" data-provider="' + escapeHtml(mpid) + '">' +
-                    escapeHtml(byProvider[mpid].name) + '</option>';
-            }
-            $modelSelect.html(provHtml);
-            $modelSelect.val('');
-            $modelHint.text('Your plan picks the model. Choose which provider generates this image.');
-            $modelSection.show();
-            return;
-        }
 
         // BYOK (pro): a Top / Standard quality choice per provider. Value is
         // the tier ('top'/'mid'); `data-provider` carries the provider; the

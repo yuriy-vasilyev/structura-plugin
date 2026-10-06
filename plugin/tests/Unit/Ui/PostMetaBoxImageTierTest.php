@@ -124,7 +124,9 @@ class PostMetaBoxImageTierTest extends TestCase
             ]
         );
 
-        $rows = $this->buildCatalog('cloud');
+        // Own-key plan: managed plans get no rows at all since 2026-10-06
+        // (see the managed test below).
+        $rows = $this->buildCatalog('byok');
 
         $this->assertSame('GPT Image 1 Mini', $this->rowModel($rows, 'openai', 'mid'));
         $this->assertNull($this->rowModel($rows, 'openai', 'top'));
@@ -133,6 +135,38 @@ class PostMetaBoxImageTierTest extends TestCase
             $rows,
             static fn($r) => $r['provider'] === 'anthropic'
         )));
+    }
+
+    /**
+     * Managed plans (Cloud, Cloud Pro) pick no image provider or model since
+     * 2026-10-06: Structura binds the image model there, so the regen modal
+     * gets no rows and hides its picker, even with two providers connected.
+     *
+     * @test
+     */
+    public function it_returns_no_rows_on_managed_plans(): void
+    {
+        $this->mockRegistry(
+            [
+                'openai' => ['id' => 'openai', 'name' => 'OpenAI', 'capabilities' => ['text', 'image']],
+                'gemini' => ['id' => 'gemini', 'name' => 'Google Gemini', 'capabilities' => ['text', 'image']],
+            ],
+            [
+                'openai' => [
+                    ['id' => 'gpt-image-1-mini', 'name' => 'GPT Image 1 Mini', 'default' => true],
+                    ['id' => 'gpt-image-2', 'name' => 'GPT Image 2'],
+                ],
+                'gemini' => [
+                    ['id' => 'gemini-3.1-flash-image', 'name' => 'Gemini 3.1 Flash Image', 'default' => true],
+                    ['id' => 'gemini-3-pro-image', 'name' => 'Gemini 3 Pro Image'],
+                ],
+            ]
+        );
+
+        $this->assertSame([], $this->buildCatalog('cloud'));
+        $this->assertSame([], $this->buildCatalog('cloud_pro'));
+        // Own-key plans keep the picker.
+        $this->assertNotSame([], $this->buildCatalog('byok'));
     }
 
     // ──────────────────────────────────────────────────────────────────────

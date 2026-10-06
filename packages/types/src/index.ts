@@ -153,15 +153,14 @@ export type LicenseTier = PlanId | "none";
  * Which AI providers each tier is allowed to USE (text and image
  * generation, both at campaign-create time and at run time).
  *
- * Rationale (Yurii, 2026-05-03):
- *   - `none`  — license-less / expired / disconnected. Limited to the
- *               cheapest provider so the runtime cost of an
- *               accidentally-firing campaign on a deactivated site is
- *               bounded.
- *   - `free`  — adds Gemini, which has the most generous free tier of
- *               the three providers so the demo experience doesn't
- *               feel artificially constrained.
- *   - `byok`/`cloud`/`cloud_pro` — paid; everything we ship.
+ * Every tier gets every provider (owner, 2026-10-06; spec:
+ * specs/open-providers.md). Own-key plans (`none`, `free`, `byok`) run on
+ * the customer's key, so a provider costs us nothing; managed plans own
+ * the model server-side. Until then `none` was limited to OpenAI and
+ * `free` to OpenAI + Gemini (2026-05-03). The matrix and its helpers stay
+ * so callers keep one place to ask; plan gates that are not about
+ * providers (images on `none`, body images on `free`, campaign counts)
+ * live elsewhere and are unchanged.
  *
  * The matrix is keyed only on `LicenseTier`. (It briefly carried an
  * orthogonal Individual/Agency audience axis; that was retired, so policy
@@ -174,18 +173,16 @@ export type LicenseTier = PlanId | "none";
  * the single source of truth for both.
  */
 export const PROVIDERS_FOR_TIER: Record<LicenseTier, readonly AIProvider[]> = {
-  none: ["openai"],
-  free: ["openai", "gemini"],
+  none: ["openai", "gemini", "anthropic"],
+  free: ["openai", "gemini", "anthropic"],
   byok: ["openai", "gemini", "anthropic"],
   cloud: ["openai", "gemini", "anthropic"],
   cloud_pro: ["openai", "gemini", "anthropic"],
 } as const;
 
 /**
- * Returns the providers a given tier is allowed to use. Centralises the
- * `PROVIDERS_FOR_TIER[plan] ?? PROVIDERS_FOR_TIER.none` fallback so
- * unknown / future plans default to the safest possible policy
- * (most-restrictive) rather than silently allowing everything.
+ * Returns the providers a given tier is allowed to use. Unknown plans
+ * resolve like `none`, which since 2026-10-06 is every provider too.
  */
 export const getProvidersForTier = (
   plan: LicenseTier | string | null | undefined,
@@ -1022,6 +1019,12 @@ export interface WorkspaceCredential {
  * it wants via `LicenseActivation.visualPresetBinding`.
  */
 /**
+ * Rendering medium for generated images, chosen on the Visuals page.
+ * Mirrors `VisualMedium` in `functions/src/types/shared.ts`.
+ */
+export type VisualMedium = "photography" | "illustration" | "3d_render";
+
+/**
  * Caption/motion style key for the Video channel renderer. Mirrors
  * `VIDEO_STYLE_KEYS` in `functions/src/channels/video/edl.ts` — keep the
  * two in sync (a renderer-unknown key silently falls back to `clean`).
@@ -1039,6 +1042,15 @@ export interface VisualPreset {
   aspectRatio: string;
   format: string;
   optimizeOnUpload: boolean;
+  /** Rendering medium for generated images. Absent ⇒ `photography`. */
+  medium?: VisualMedium;
+  /**
+   * Stamp the official EU "AI GENERATED" pill onto every generated post
+   * image of the sites bound to this preset (specs/ai-image-label.md).
+   * Every plan. Absent ⇒ `false`. Optional: presets saved before
+   * 2026-10-05 carry none, and a save without it keeps the stored value.
+   */
+  aiLabel?: boolean;
   /**
    * Video caption/motion style for the Video channel. Absent ⇒ `"clean"`.
    *
@@ -1500,9 +1512,11 @@ export interface LicenseActivation {
  *     Revoked at disconnect time so a `disconnected` activation has no
  *     usable token.
  *
- *   - **Workspace-wide** (`boundActivationId` undefined): created from the
- *     customer portal for programmatic access (Phase 5). Authorises
- *     workspace-scoped reads/writes regardless of activation.
+ *   - **Member-acting** (`kind` set): a personal access token a workspace
+ *     member creates in the customer portal for an AI assistant. It acts
+ *     as that member (`actingUid`) through the MCP server, carries
+ *     `MCP_SCOPES`, and the plugin middleware refuses it. Spec:
+ *     `specs/mcp-server.md` §3.1.
  *
  * The secret string itself is shown ONCE at creation time and never
  * persisted in cleartext on the cloud — only the SHA-256 hash lives on
@@ -1526,10 +1540,9 @@ export interface ApiToken {
   /**
    * Capability strings the token may exercise. Plugin-minted tokens
    * carry `["plugin:wp"]` (sentinel for "everything the WP plugin needs
-   * to do"); future portal-minted tokens carry the explicit capability
-   * strings from `CAPABILITIES`. Per-endpoint scope enforcement lands
-   * in Phase 5.3 — today the middleware records scopes but does not
-   * filter on them.
+   * to do"); personal tokens carry the `MCP_SCOPES` their access level
+   * grants (`MCP_ACCESS_LEVEL_SCOPES`). The plugin middleware records
+   * scopes but does not filter on them.
    */
   scopes: string[];
   /**
@@ -1554,7 +1567,63 @@ export interface ApiToken {
    * batch; portal revoke fires for individual tokens.
    */
   revokedAt?: Timestamp;
+  /**
+   * Which member-acting family the token belongs to. Absent means a plugin
+   * token. That covers every doc written before functions shipped slice A1
+   * of `specs/mcp-server.md` and every plugin token minted after it, so
+   * the field stays optional for good and needs no backfill. The plugin
+   * middleware refuses any token where it is set.
+   */
+  kind?: ApiTokenKind;
+  /**
+   * uid of the workspace member the token acts as. Present exactly when
+   * `kind` is set. Removing that member from the workspace revokes the
+   * token in the same write.
+   */
+  actingUid?: string;
+  /**
+   * When the token stops authenticating. Absent means it never expires,
+   * which is every plugin token and a personal token created with
+   * `"never"`. `resolveApiToken` treats a past value like `revokedAt`.
+   */
+  expiresAt?: Timestamp;
 }
+
+/**
+ * Member-acting token families (`ApiToken.kind`). Personal tokens ship in
+ * Phase A of `specs/mcp-server.md`; `oauth` access tokens arrive in Phase B
+ * and nothing mints them yet.
+ */
+export type ApiTokenKind = "personal" | "oauth";
+
+/**
+ * Scopes a member-acting token can carry. A token's effective permission
+ * is the member's role capabilities intersected with these.
+ * Spec: `specs/mcp-server.md` §1.4.
+ */
+export const MCP_SCOPES = ["mcp:read", "mcp:write", "mcp:publish"] as const;
+
+export type McpScope = typeof MCP_SCOPES[number];
+
+/** Access levels a member picks when creating a personal token, least privileged first. */
+export const MCP_ACCESS_LEVELS = ["read", "write", "publish"] as const;
+
+export type McpAccessLevel = typeof MCP_ACCESS_LEVELS[number];
+
+/** Scopes each access level grants. Every level includes the one before it. */
+export const MCP_ACCESS_LEVEL_SCOPES: Readonly<Record<McpAccessLevel, readonly McpScope[]>> = {
+  read: ["mcp:read"],
+  write: ["mcp:read", "mcp:write"],
+  publish: ["mcp:read", "mcp:write", "mcp:publish"],
+};
+
+/** Lifetimes a member can pick for a personal token. */
+export const PERSONAL_TOKEN_EXPIRIES = ["30d", "90d", "1y", "never"] as const;
+
+export type PersonalTokenExpiry = typeof PERSONAL_TOKEN_EXPIRIES[number];
+
+/** Lifetime applied when the create call names none. */
+export const DEFAULT_PERSONAL_TOKEN_EXPIRY: PersonalTokenExpiry = "90d";
 
 /**
  * Brand surface a WordPress site advertises to the cloud's stock-generation

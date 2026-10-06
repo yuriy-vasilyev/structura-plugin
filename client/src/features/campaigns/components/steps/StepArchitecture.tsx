@@ -9,6 +9,7 @@ import { Card, InputField, ReferralLinksEditor, Switch, TextArea } from "@struct
 import { useRef } from "react";
 import { SelectionCard } from "@/components/Shared/SelectionCard";
 import { CampaignLanguageField } from "@/features/campaigns/components/CampaignLanguageField";
+import { AiLabelReminder } from "@/features/campaigns/components/AiLabelReminder";
 import { SUPPORTED_BLOCK_TYPE } from "@/features/settings";
 import { buildReferralLabels } from "@/utils/referralLabels";
 
@@ -176,6 +177,11 @@ export const StepArchitecture = () => {
             </a>
           </p>
         )}
+        {/* EU AI label reminder (specs/ai-image-label.md §7). */}
+        <AiLabelReminder
+          imagesEnabled={structure.featuredImage || structure.bodyImages}
+          language={intelligence.language}
+        />
       </div>
 
       {/* SECTION 4: STRUCTURAL DNA */}

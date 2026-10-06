@@ -13,7 +13,7 @@ vi.mock("@wordpress/i18n", () => ({ __: (t: string) => t }));
 
 const planMock = vi.hoisted(() => ({ plan: "cloud" }));
 vi.mock("@/features/settings", () => ({
-  useLicense: () => ({ plan: planMock.plan, providerCountCap: 3 }),
+  useLicense: () => ({ plan: planMock.plan }),
 }));
 
 vi.mock("@/features/ai-engine", () => ({

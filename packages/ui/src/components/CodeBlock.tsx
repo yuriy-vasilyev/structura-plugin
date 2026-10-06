@@ -62,6 +62,12 @@ export interface CodeBlockProps
    * matter.
    */
   wrap?: boolean;
+  /**
+   * Called after the clipboard accepted the value. Not called when the
+   * clipboard refuses, so a parent can tell "the user has it" apart from
+   * "the user clicked".
+   */
+  onCopied?: () => void;
 }
 
 /**
@@ -100,6 +106,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
       title,
       maxHeight,
       wrap = true,
+      onCopied,
       className,
       ...props
     },
@@ -119,12 +126,17 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
 
     const handleCopy = React.useCallback(() => {
       if (!navigator.clipboard) return;
-      void navigator.clipboard.writeText(value).then(() => {
-        setCopied(true);
-        if (timerRef.current) clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(() => setCopied(false), resetMs);
-      });
-    }, [value, resetMs]);
+      void navigator.clipboard.writeText(value).then(
+        () => {
+          setCopied(true);
+          onCopied?.();
+          if (timerRef.current) clearTimeout(timerRef.current);
+          timerRef.current = setTimeout(() => setCopied(false), resetMs);
+        },
+        // A refused write leaves the idle label; the value stays selectable.
+        () => undefined,
+      );
+    }, [value, resetMs, onCopied]);
 
     if (title != null) {
       // A focusable scroller is only needed when the body can actually

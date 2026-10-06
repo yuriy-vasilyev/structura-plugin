@@ -19,21 +19,20 @@ vi.mock("@/features/campaigns/api/useCampaignMutations", () => ({
 const baseProps = {
   formData: { ...DEFAULT_CAMPAIGN_FORM_DATA, identity: { ...DEFAULT_CAMPAIGN_FORM_DATA.identity, objective: "A practical guide to headless WordPress" } },
   onChange: vi.fn(),
-  plan: "free",
 };
 
 describe("<SeoTargetingSection>", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("shows the locked Pro/Cloud teaser for None/Free — no inputs", () => {
-    render(<SeoTargetingSection {...baseProps} isPaidLicense={false} isLicensed />);
-    expect(screen.getByText("Pro / Cloud Feature")).toBeInTheDocument();
-    // No keyphrase Suggest control in the locked state.
-    expect(screen.queryByRole("button", { name: /Suggest keyphrases/i })).toBeNull();
+  // Owner review 2026-10-06: no locked teaser on None/Free; the page lists
+  // what a paid plan adds in one card instead.
+  it("renders nothing for None/Free — no teaser, no inputs", () => {
+    const { container } = render(<SeoTargetingSection {...baseProps} isPaidLicense={false} />);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("offers DFS keyphrase discovery for paid tiers", () => {
-    render(<SeoTargetingSection {...baseProps} isPaidLicense isLicensed />);
+    render(<SeoTargetingSection {...baseProps} isPaidLicense />);
     expect(
       screen.getByRole("button", { name: /Suggest keyphrases/i }),
     ).toBeInTheDocument();

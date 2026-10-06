@@ -42,13 +42,22 @@ describe("<InstalledProviderCard> recommended label", () => {
     expect(screen.getByText("Recommended for text")).toBeInTheDocument();
   });
 
-  it("shows no label on other connected providers", () => {
-    renderCard("openai");
+  // 2026-10-06 (specs/open-providers.md): Gemini is recommended for images,
+  // in the same chip.
+  it("shows Recommended for images on the connected Gemini card", () => {
+    renderCard("gemini");
+    expect(screen.getByText("Recommended for images")).toBeInTheDocument();
     expect(screen.queryByText("Recommended for text")).toBeNull();
+  });
+
+  it("shows no label on OpenAI", () => {
+    renderCard("openai");
+    expect(screen.queryByText(/Recommended for/)).toBeNull();
   });
 
   it("shows no label on managed plans", () => {
     renderCard("anthropic", true);
-    expect(screen.queryByText("Recommended for text")).toBeNull();
+    renderCard("gemini", true);
+    expect(screen.queryByText(/Recommended for/)).toBeNull();
   });
 });

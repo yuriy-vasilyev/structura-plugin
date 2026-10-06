@@ -261,9 +261,7 @@ export function VideoStylingGateTeaser({ plan }: { plan?: string }) {
 
   return (
     <SectionGateTeaser
-      // wp-admin ships WP's global <p> margins; the ui primitive is
-      // surface-neutral, so the reset rides in from here.
-      className="[&_p]:m-0!"
+      // The primitive resets WordPress's <p> margins itself since 2026-10-06.
       title={__("Video styling", "structura")}
       badge={__("Cloud Pro", "structura")}
       line={__(

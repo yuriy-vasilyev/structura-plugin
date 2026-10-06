@@ -321,8 +321,9 @@ describe("SinglePostRunDetailPage — research files echo (2026-08-01)", () => {
 
 describe("SinglePostRunDetailPage — provider and model names by plan (2026-10-01)", () => {
   // Managed plans write with one lineup chosen by Structura: the customer
-  // never sees the text provider or any model name. The image provider is
-  // their own choice and stays (specs/managed-ai-lineup.md §3.3).
+  // never sees the text provider or any model name (specs/managed-ai-lineup.md
+  // §3.3). Flipped 2026-10-06: nor the image provider, which Structura binds
+  // on managed plans whatever the snapshot stored.
   const snapshotWithProviders = {
     identity: { objective: "A topic long enough to pass" },
     structure: { postStatus: "publish" },
@@ -347,20 +348,19 @@ describe("SinglePostRunDetailPage — provider and model names by plan (2026-10-
     expect(within(dialog).getByText("Gemini · imagen-x")).toBeInTheDocument();
   });
 
-  it("managed: no text provider and no model names, image provider kept", async () => {
+  it("managed: no provider and no model names, text or image", async () => {
     licenseMock.plan = "cloud_pro";
     runQueryMock.current = makeRun({ inputSnapshot: snapshotWithProviders });
     render(<SinglePostRunDetailPage />);
 
     expect(screen.queryByText("Text provider")).toBeNull();
     expect(screen.queryByText("openai")).toBeNull();
-    expect(screen.getByText("Image provider")).toBeInTheDocument();
+    expect(screen.queryByText("Image provider")).toBeNull();
+    expect(screen.queryByText("gemini")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: /Run again/ }));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).queryByText("Text provider")).toBeNull();
-    expect(within(dialog).queryByText(/OpenAI|GPT-X|gpt-x|imagen-x/)).toBeNull();
-    // Image row: provider name only.
-    expect(within(dialog).getByText("Gemini")).toBeInTheDocument();
+    expect(within(dialog).queryByText(/OpenAI|Gemini|GPT-X|gpt-x|imagen-x/)).toBeNull();
   });
 });

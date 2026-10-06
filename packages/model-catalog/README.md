@@ -13,6 +13,16 @@ retire, or re-tier a model there and it propagates to:
 - `BATCH_INPUT_PRICE_USD_PER_M_TOKENS` + `lookupBatchInputPrice` (batch cost estimation).
 - `CATALOG_MODEL_NAMES` (marketing display names).
 
+It also owns the new-campaign defaults (`src/campaign-defaults.ts`:
+`buildCampaignDefaults`, `SEO_RULES`, `CONTENT_BLOCKS`,
+`DEFAULT_CAMPAIGN_CRON`) and the campaign cron reader and writer
+(`parseCampaignCron`, `buildCampaignCron`) and the plan clamp applied right
+before a campaign is saved (`pregenTier`, `clampCampaignForPlan`), so the
+customer portal and the cloud seed, schedule and clamp a campaign the same
+way. Callers pass in the plan's allowed providers and the resolved
+campaign language; the package takes no value import from `@structura/types`
+and no dependency on `@structura/i18n-contracts`.
+
 ## Who consumes it, and how
 
 | Consumer | Mechanism |

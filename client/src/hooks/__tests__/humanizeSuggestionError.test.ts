@@ -180,3 +180,20 @@ describe("humanizeSuggestionError — AI call limit", () => {
     }
   });
 });
+
+// 2026-10-06: Magic suggest opened on every plan (specs/open-providers.md §8),
+// so a none / free site with no key connected reaches the cloud's own-key
+// resolver, which refuses with `credentials_missing` and English copy that
+// points at the customer portal.
+describe("humanizeSuggestionError — no key connected", () => {
+  it("asks for a key in wp-admin's own words instead of the cloud's English text", () => {
+    const err = {
+      code: "cloud_suggestion_error",
+      message: "No openai key configured for this workspace. Add one in app.structurawp.com → Workspace → AI providers, then re-run.",
+      data: { code: "credentials_missing", status: 502 },
+    };
+    const out = humanizeSuggestionError(err, { isManagedAiPlan: false });
+    expect(out).toContain("AI Engine");
+    expect(out).not.toContain("app.structurawp.com");
+  });
+});

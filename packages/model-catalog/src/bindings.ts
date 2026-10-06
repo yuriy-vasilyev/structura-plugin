@@ -1,6 +1,6 @@
 import type { AIProvider, PlanId } from "@structura/types";
 import type { ModelRole, ModelTier } from "./types";
-import { getDefaultModel, getRegistryModelId } from "./catalog";
+import { getDefaultModel, getRegistryModelId, type ImageProvider } from "./catalog";
 import {
   FROZEN_FAST_TEXT_MODELS,
   FROZEN_LEGACY_DEFAULT_TEXT_MODELS,
@@ -61,6 +61,16 @@ export function resolveSupersededTextModelId(provider: AIProvider, modelId: stri
 export function resolveRecommendedTextModel(provider: AIProvider): { tier: "top" | "mid"; model: string } {
   const tier = RECOMMENDATIONS.text.model[provider] ?? "mid";
   return { tier, model: getRegistryModelId(provider, "text", tier) ?? resolveByokDefaultTextModelId(provider) };
+}
+
+/**
+ * The recommended image tier for a provider (`RECOMMENDATIONS.image.model`)
+ * and that tier's model, or `null` for a provider without image models.
+ */
+export function resolveRecommendedImageModel(provider: AIProvider): { tier: "top" | "mid"; model: string } | null {
+  const tier = RECOMMENDATIONS.image.model[provider];
+  const model = tier ? getRegistryModelId(provider, "image", tier) : undefined;
+  return tier && model ? { tier, model } : null;
 }
 
 /**
@@ -157,6 +167,49 @@ export function resolveManagedWriterLineup(
     return { provider: m.provider, model: m.id };
   };
   return { writer: pick("primary"), failover: pick("failover") };
+}
+
+/** One model of the managed image binding; `quality` is the OpenAI gpt-image quality sent with it. */
+export interface ManagedImageModel {
+  provider: ImageProvider;
+  model: string;
+  quality?: "low" | "medium" | "high";
+}
+
+/**
+ * Quality of the managed image failover. Medium measured $0.012 per image
+ * against $0.043 at high in the 2026-10-05 test, and the failover only runs
+ * when the primary fails. Owner decision 2026-10-06.
+ */
+const MANAGED_IMAGE_FAILOVER_QUALITY = "medium" as const;
+
+/**
+ * The managed image binding for a plan: `primary` makes every Cloud and
+ * Cloud Pro image (live synthesis, stock batch, regenerate, refresh) and
+ * `failover` takes over when the primary fails transiently. The campaign's
+ * stored image provider, model, tier and fallback are ignored on these
+ * plans. Returns `undefined` for every other plan, whose images stay on the
+ * campaign's own provider and model. Keyed on the plan like
+ * {@link resolveManagedWriterLineup}. The failover is on another provider on
+ * purpose: a second model of the same provider shares its outage and quota.
+ * Owner decision 2026-10-06 (blind image test 2026-10-05). Spec:
+ * `specs/managed-ai-lineup.md` §2.4.
+ */
+export function resolveManagedImageBinding(
+  plan: PlanId | "none" | null | undefined,
+): { primary: ManagedImageModel; failover: ManagedImageModel } | undefined {
+  if (!isManagedLineupPlan(plan)) return undefined;
+  const pick = (role: "primary" | "failover"): ManagedImageModel => {
+    const m = MODELS.find((x) => x.managedImage === role);
+    if (!m || (m.provider !== "openai" && m.provider !== "gemini")) {
+      throw new Error(`model-catalog: no managed ${role} image model`);
+    }
+    return { provider: m.provider, model: m.id };
+  };
+  return {
+    primary: pick("primary"),
+    failover: { ...pick("failover"), quality: MANAGED_IMAGE_FAILOVER_QUALITY },
+  };
 }
 
 /**

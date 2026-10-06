@@ -5,8 +5,8 @@
  * Rewritten 2026-10-02: the step used to run a deterministic draft the moment
  * it mounted, and only paid plans had Magic suggest. It now mirrors the
  * customer portal (2026-09-29): it opens empty, and one Magic suggest on
- * every plan is one cloud call — `deterministic` on Free, `ai` on paid
- * plans. What this pins:
+ * every plan is one cloud call — `ai` on every plan since 2026-10-06
+ * (`deterministic` on Free until then). What this pins:
  *
  *   1. Mount makes no draft call, shows empty fields, no skeletons and no
  *      rationale strip; the Magic suggest button is there on Free too.
@@ -195,14 +195,17 @@ describe("New campaign — Setup step (no draft on mount, 2026-10-02)", () => {
     expect(screen.queryByText("Drafted from your site")).toBeNull();
   });
 
-  it("Free: one click is one deterministic call; the draft lands under the neutral pill", async () => {
+  // Magic suggest on every plan (2026-10-06, specs/open-providers.md §8):
+  // Free and anonymous sites asked for the templated draft until then.
+  it.each(["free", "none"])("%s: one click is one AI call; the draft lands under the AI pill", async (plan) => {
+    h.license = { isPaidLicense: false, isLicensed: plan !== "none", plan };
     renderWizard();
 
     fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
-    expect(await screen.findByText("Drafted from your site")).toBeTruthy();
-    expect(calls().map((c) => c.data)).toEqual([{ stage: "deterministic", language: "de" }]);
-    expect(nameField().value).toBe("Balkongarten auf kleinem Raum");
-    expect(screen.queryByText("Drafted for you")).toBeNull();
+    expect(await screen.findByText("Drafted for you")).toBeTruthy();
+    expect(calls().map((c) => c.data)).toEqual([{ stage: "ai", language: "de" }]);
+    expect(nameField().value).toBe("Balkongarten-Guide");
+    expect(screen.queryByText("Drafted from your site")).toBeNull();
   });
 
   it("paid: one click is one AI call; the draft lands under the AI pill", async () => {
@@ -238,7 +241,7 @@ describe("New campaign — Setup step (no draft on mount, 2026-10-02)", () => {
   it("a failed call keeps the drafted fields and the inline error", async () => {
     renderWizard();
     fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
-    expect(await screen.findByText("Drafted from your site")).toBeTruthy();
+    expect(await screen.findByText("Drafted for you")).toBeTruthy();
 
     apiFetchMock.mockImplementation(async (opts: { path?: string }) => {
       if (opts?.path === DRAFT_PATH) throw { code: "draft_failed", message: "Could not draft the campaign." };
@@ -247,7 +250,7 @@ describe("New campaign — Setup step (no draft on mount, 2026-10-02)", () => {
     fireEvent.click(magicSuggest());
 
     expect(await screen.findByText("Couldn't refine this campaign — try again")).toBeTruthy();
-    expect(nameField().value).toBe("Balkongarten auf kleinem Raum");
+    expect(nameField().value).toBe("Balkongarten-Guide");
   });
 
   it("the AI call limit refusal shows its own message and keeps the fields", async () => {
@@ -322,7 +325,7 @@ describe("New campaign — Setup step (no draft on mount, 2026-10-02)", () => {
   it("a language pick after a draft asks to redraft, then drafts in that language", async () => {
     renderWizard();
     fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
-    expect(await screen.findByText("Drafted from your site")).toBeTruthy();
+    expect(await screen.findByText("Drafted for you")).toBeTruthy();
 
     fireEvent.click(screen.getAllByRole("combobox")[0]);
     fireEvent.click((await screen.findAllByRole("option", { name: /^English/ }))[0]);
@@ -331,7 +334,7 @@ describe("New campaign — Setup step (no draft on mount, 2026-10-02)", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Redraft" }));
     await waitFor(() => expect(calls().length).toBe(2));
-    expect(calls()[1].data).toEqual({ stage: "deterministic", language: "en" });
+    expect(calls()[1].data).toEqual({ stage: "ai", language: "en" });
   });
 
   it("names the overlapping campaign after a draft and dismisses the notice", async () => {
@@ -372,7 +375,7 @@ describe("New campaign — Setup step (no draft on mount, 2026-10-02)", () => {
 
     await waitFor(() => expect(calls().length).toBe(1));
     // The Austrian variant is its own picker option, not collapsed to `de`.
-    expect(calls()[0].data).toEqual({ stage: "deterministic", language: "de_AT" });
+    expect(calls()[0].data).toEqual({ stage: "ai", language: "de_AT" });
   });
 
   it("keeps an unsupported site language as its WordPress locale", async () => {
@@ -384,7 +387,7 @@ describe("New campaign — Setup step (no draft on mount, 2026-10-02)", () => {
     fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
 
     await waitFor(() => expect(calls().length).toBe(1));
-    expect(calls()[0].data).toEqual({ stage: "deterministic", language: "fa_IR" });
+    expect(calls()[0].data).toEqual({ stage: "ai", language: "fa_IR" });
   });
 
   it("renders the rationale codes as sentences after a draft, never as codes", async () => {

@@ -165,6 +165,15 @@ const highlight = (text: string, query: string): React.ReactNode => {
 const OVERLINE =
   "text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500";
 
+/** Scrolls `list` so `row` is fully visible, without scrolling any other ancestor. */
+const scrollWithinList = (list: HTMLElement | null, row: HTMLElement | null) => {
+  if (!list || !row) return;
+  const listRect = list.getBoundingClientRect();
+  const rowRect = row.getBoundingClientRect();
+  if (rowRect.top < listRect.top) list.scrollTop -= listRect.top - rowRect.top;
+  else if (rowRect.bottom > listRect.bottom) list.scrollTop += rowRect.bottom - listRect.bottom;
+};
+
 /** Flat navigable item — gated groups and disabled options are excluded. */
 type NavItem = { option: ComboboxOption; groupId: string };
 
@@ -208,6 +217,7 @@ const ComboboxPanel: React.FC<PanelProps> = ({
   const [query, setQuery] = useState("");
   const [activeId, setActiveId] = useState<string | null>(value ?? null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   // Space-to-action arming: true while the user is navigating (on open,
   // or after ↑↓), false while typing — so Space can still type a literal
   // space into a multi-word query. See ComboboxProps.onOptionAction.
@@ -235,12 +245,20 @@ const ComboboxPanel: React.FC<PanelProps> = ({
 
   const optionDomId = (id: string) => `${baseId}-option-${id}`;
 
+  // The panel mounts before floating-ui positions it, at the top of the
+  // document, so focusing the search box or calling scrollIntoView on a row
+  // there scrolled the whole page to the top (owner review 2026-10-06, the
+  // Language field on wp-admin's Generate a Post page). Focus without
+  // scrolling, and scroll only the list.
+  useEffect(() => {
+    inputRef.current?.focus({ preventScroll: true });
+  }, []);
+
   // On open the selected option is focused and scrolled into view; while
-  // navigating, keep the active row visible. Guarded — jsdom has no
-  // scrollIntoView.
+  // navigating, keep the active row visible.
   useEffect(() => {
     if (!active) return;
-    document.getElementById(optionDomId(active.option.id))?.scrollIntoView?.({ block: "nearest" });
+    scrollWithinList(listRef.current, document.getElementById(optionDomId(active.option.id)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active?.option.id]);
 
@@ -438,8 +456,6 @@ const ComboboxPanel: React.FC<PanelProps> = ({
         <Search className="size-3.5 shrink-0 text-neutral-400" aria-hidden="true" />
         <input
           ref={inputRef}
-          // eslint-disable-next-line jsx-a11y/no-autofocus -- the popover is a search-first surface; focusing the field on open is the design's intent
-          autoFocus
           type="text"
           value={query}
           placeholder={placeholder}
@@ -472,6 +488,7 @@ const ComboboxPanel: React.FC<PanelProps> = ({
         )}
       </div>
       <div
+        ref={listRef}
         role="listbox"
         id={listboxId}
         className="max-h-[380px] overflow-y-auto overscroll-contain"

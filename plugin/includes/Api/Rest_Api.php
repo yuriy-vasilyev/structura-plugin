@@ -1142,6 +1142,40 @@ class Rest_Api
     }
 
     /**
+     * Gate for proxies whose cloud endpoint authenticates with
+     * `requireActivationBearer`. Returns a 403 WP_Error when no bearer is
+     * bound, null otherwise.
+     *
+     * Anonymous installs (plan `none`, Phase 1.8) hold an activation bearer
+     * (`api_token`) but no license key, and Cloud_Client::post sends that
+     * bearer on every call. Until 2026-10-06 these proxies checked for a
+     * license key, so the setup wizard on an anonymous site saved nothing
+     * and the dashboard kept counting "6 steps left" after Finish.
+     */
+    private function require_cloud_connection(): ?\WP_Error
+    {
+        if (License_Manager::has_workspace()) {
+            return null;
+        }
+        return new \WP_Error('no_workspace', __('Connect to Structura Cloud first.', 'structura'), ['status' => 403]);
+    }
+
+    /**
+     * Gate for proxies whose cloud endpoint needs a licensed activation
+     * (`requireLicensedActivationBearer` or a license-tier lookup). Returns
+     * a 403 WP_Error when `$license` carries no key, null otherwise.
+     *
+     * @param array<string, mixed> $license License_Manager::get_license_data().
+     */
+    private function require_license_key(array $license): ?\WP_Error
+    {
+        if ( ! empty($license['license_key'])) {
+            return null;
+        }
+        return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+    }
+
+    /**
      * GET /structura/v1/migration/seo
      *
      * Returns one page of posts with their SEO meta — Yoast first, RankMath as
@@ -2383,8 +2417,9 @@ class Rest_Api
         $id      = (string) $request['id'];
         $license = License_Manager::get_license_data();
 
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $campaign = Campaign_Cloud_Reader::get_campaign_data($id);
@@ -2533,8 +2568,9 @@ class Rest_Api
     {
         $license = License_Manager::get_license_data();
 
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $params        = $request->get_json_params();
@@ -2708,8 +2744,9 @@ class Rest_Api
     public function draft_campaign_setup($request)
     {
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $params   = $request->get_json_params();
@@ -2760,8 +2797,9 @@ class Rest_Api
     {
         $license = License_Manager::get_license_data();
 
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $params        = $request->get_json_params();
@@ -2904,8 +2942,9 @@ class Rest_Api
     public function analyze_site($request)
     {
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $params = $request->get_json_params();
@@ -2936,8 +2975,9 @@ class Rest_Api
     public function get_site_state($request)
     {
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $params = $request->get_json_params();
@@ -2968,8 +3008,9 @@ class Rest_Api
     public function update_site_seo_settings($request)
     {
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
         $params = $request->get_json_params();
         $payload = [
@@ -3047,14 +3088,17 @@ class Rest_Api
      */
     public function get_wizard_state($request)
     {
-        $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            // No license yet — a fresh/anonymous install, or a plugin whose
-            // activation was hard-deleted. This is a background nudge query
-            // (the SPA marks it silentError), so a 403 just spams the console
-            // on every poll. Return a quiet, fresh state instead. Crucially
-            // `justCreated` is false so the dashboard auto-redirect doesn't
-            // yank the user into the wizard on every read.
+        if ($this->require_cloud_connection()) {
+            // No cloud connection yet: a fresh install polling before it
+            // connects, or one whose bearer was dropped. This is a background
+            // nudge query (the SPA marks it silentError), so a 403 just spams
+            // the console on every poll. Return a quiet, fresh state instead.
+            // Crucially `justCreated` is false so the dashboard auto-redirect
+            // doesn't yank the user into the wizard on every read.
+            //
+            // Anonymous installs have a bearer and read the real cloud state
+            // below (2026-10-06); answering them from here hid their
+            // finished wizard behind "6 steps left".
             return rest_ensure_response([
                 'state' => [
                     'currentStep'            => 1,
@@ -3070,6 +3114,7 @@ class Rest_Api
                 'activationNeedsPositioning' => false,
             ]);
         }
+        $license = License_Manager::get_license_data();
         $payload = ['licenseKey' => $license['license_key']];
         $result  = Cloud_Client::post('/getWizardState', $payload, ['timeout' => 15]);
         if (is_wp_error($result)) {
@@ -3107,10 +3152,11 @@ class Rest_Api
      */
     public function save_wizard_step($request)
     {
-        $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
         }
+        $license = License_Manager::get_license_data();
         $params = $request->get_json_params();
         $step   = isset($params['step']) ? (int) $params['step'] : 0;
         if ($step < 1 || $step > 6) {
@@ -3135,10 +3181,11 @@ class Rest_Api
      */
     public function skip_wizard_step($request)
     {
-        $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
         }
+        $license = License_Manager::get_license_data();
         $params = $request->get_json_params();
         $step   = isset($params['step']) ? (int) $params['step'] : 0;
         if ($step < 1 || $step > 6) {
@@ -3164,10 +3211,11 @@ class Rest_Api
      */
     public function reset_wizard_state($request)
     {
-        $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
         }
+        $license = License_Manager::get_license_data();
         $payload = ['licenseKey' => $license['license_key']];
         $result  = Cloud_Client::post('/resetWizardState', $payload, ['timeout' => 15]);
         if (is_wp_error($result)) {
@@ -3184,10 +3232,11 @@ class Rest_Api
      */
     public function test_wizard_ai_connection($request)
     {
-        $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
         }
+        $license = License_Manager::get_license_data();
         $params   = $request->get_json_params();
         $provider = isset($params['provider']) ? sanitize_text_field($params['provider']) : '';
         $model    = isset($params['model']) ? sanitize_text_field($params['model']) : '';
@@ -3216,10 +3265,11 @@ class Rest_Api
      */
     public function notify_wizard_support($request)
     {
-        $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
         }
+        $license = License_Manager::get_license_data();
         $params  = $request->get_json_params();
         $payload = [
             'licenseKey'   => $license['license_key'],
@@ -3241,10 +3291,11 @@ class Rest_Api
      */
     public function get_wizard_positioning($request)
     {
-        $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
         }
+        $license = License_Manager::get_license_data();
         $payload = ['licenseKey' => $license['license_key']];
         $result  = Cloud_Client::post('/getWizardPositioning', $payload, ['timeout' => 15]);
         if (is_wp_error($result)) {
@@ -3259,10 +3310,11 @@ class Rest_Api
      */
     public function save_wizard_positioning($request)
     {
-        $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
         }
+        $license = License_Manager::get_license_data();
         $params  = $request->get_json_params();
         $payload = [
             'licenseKey' => $license['license_key'],
@@ -3286,10 +3338,11 @@ class Rest_Api
      */
     public function suggest_wizard_positioning($request)
     {
-        $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
         }
+        $license = License_Manager::get_license_data();
         $payload = ['licenseKey' => $license['license_key']];
         $result  = Cloud_Client::post('/suggestWizardPositioning', $payload, ['timeout' => 30]);
         if (is_wp_error($result)) {
@@ -3306,10 +3359,11 @@ class Rest_Api
      */
     public function suggest_wizard_keywords($request)
     {
-        $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
         }
+        $license = License_Manager::get_license_data();
         $params  = $request->get_json_params();
         $payload = ['licenseKey' => $license['license_key']];
         if (isset($params['positioning']) && is_array($params['positioning'])) {
@@ -3353,10 +3407,11 @@ class Rest_Api
      */
     public function suggest_wizard_competitors($request)
     {
-        $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
         }
+        $license = License_Manager::get_license_data();
         $params  = $request->get_json_params();
         $payload = ['licenseKey' => $license['license_key']];
         if (isset($params['positioning']) && is_array($params['positioning'])) {
@@ -4180,11 +4235,13 @@ class Rest_Api
             $label = $site_name !== '' ? $site_name : (string)wp_parse_url(home_url(), PHP_URL_HOST);
         }
 
-        // Validate provider is accessible for the user's tier
+        // Every plan may connect every provider since 2026-10-06
+        // (specs/open-providers.md); this now only rejects an unknown
+        // provider id. The error code is kept for clients that match on it.
         if ( ! Provider_Registry::validate_provider_access($provider)) {
             return new \WP_Error(
                 'provider_not_available',
-                __('This provider is not available on your current plan.', 'structura'),
+                __('This AI provider is not available.', 'structura'),
                 ['status' => 403],
             );
         }
@@ -4289,6 +4346,14 @@ class Rest_Api
                 'capabilities' => $meta['capabilities'],
                 'text_model'   => get_option("structura_text_model_{$id}", $default_text),
                 'image_model'  => get_option("structura_image_model_{$id}", $default_image),
+                // The tier the provider wizard's "Use recommended model"
+                // switch stored, or '' when the site picked a model (or
+                // never used the switch). A stored tier wins over the
+                // model id in the SPA, so the site default follows the
+                // catalog when that tier's model moves. Since 2026-10-06,
+                // specs/open-providers.md.
+                'text_tier'    => self::sanitize_model_tier(get_option("structura_text_tier_{$id}", '')),
+                'image_tier'   => self::sanitize_model_tier(get_option("structura_image_tier_{$id}", '')),
             ];
         }
 
@@ -4323,6 +4388,18 @@ class Rest_Api
                 true),
             'scheduler_simple_mode' => self::get_user_meta_with_default('structura_scheduler_simple_mode', true),
         ];
+    }
+
+    /**
+     * Returns the stored model tier ("top" or "mid"), or '' for anything else.
+     *
+     * @param mixed $tier
+     */
+    private static function sanitize_model_tier($tier): string
+    {
+        $tier = is_string($tier) ? strtolower(sanitize_text_field($tier)) : '';
+
+        return in_array($tier, ['top', 'mid'], true) ? $tier : '';
     }
 
     /**
@@ -4394,6 +4471,16 @@ class Rest_Api
                     }
                     if (isset($pdata['image_model'])) {
                         update_option("structura_image_model_{$pid}", sanitize_text_field($pdata['image_model']));
+                    }
+                    // Optional since 2026-10-06 (specs/open-providers.md):
+                    // the wizard's recommended-model switch sends the tier
+                    // ("top" | "mid") with the mirrored model, or '' to
+                    // clear it when the customer picks a model.
+                    if (isset($pdata['text_tier'])) {
+                        update_option("structura_text_tier_{$pid}", self::sanitize_model_tier($pdata['text_tier']));
+                    }
+                    if (isset($pdata['image_tier'])) {
+                        update_option("structura_image_tier_{$pid}", self::sanitize_model_tier($pdata['image_tier']));
                     }
                 }
             }
@@ -6186,8 +6273,9 @@ class Rest_Api
     private function get_campaigns_from_cloud()
     {
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $secret_data = Key_Manager::get_license_payload();
@@ -6340,8 +6428,9 @@ class Rest_Api
     private function create_campaign_on_cloud($request)
     {
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $params    = $request->get_json_params();
@@ -6418,8 +6507,9 @@ class Rest_Api
         }
 
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $params    = $request->get_json_params();
@@ -6506,8 +6596,9 @@ class Rest_Api
         }
 
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $secret_data = Key_Manager::get_license_payload();
@@ -6553,8 +6644,9 @@ class Rest_Api
         }
 
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $secret_data = Key_Manager::get_license_payload();
@@ -6652,8 +6744,9 @@ class Rest_Api
     public function bulk_enable_pregeneration()
     {
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $secret_data = Key_Manager::get_license_payload();
@@ -6706,8 +6799,9 @@ class Rest_Api
         }
 
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $secret_data = Key_Manager::get_license_payload();
@@ -6771,8 +6865,9 @@ class Rest_Api
         }
 
         $license = License_Manager::get_license_data();
-        if (empty($license['license_key'])) {
-            return new \WP_Error('no_license', __('Active license required.', 'structura'), ['status' => 403]);
+        $denied = $this->require_license_key($license);
+        if ($denied) {
+            return $denied;
         }
 
         $secret_data = Key_Manager::get_license_payload();
@@ -6958,7 +7053,7 @@ class Rest_Api
             $payload['label'] = sanitize_text_field($params['label']);
         }
         if (isset($params['content'])) {
-            $payload['content'] = $this->sanitize_visual_content($params['content']);
+            $payload['content'] = $this->sanitize_visual_content($params['content'], true);
         }
         $response = Cloud_Client::post('/updateVisualPreset', $payload);
         $forwarded = $this->forward_cloud_response($response, __('Failed to update visual preset.', 'structura'));
@@ -7022,8 +7117,14 @@ class Rest_Api
      * defaults during the rollout window. Invalid values are dropped,
      * never coerced — forwarding a garbage style would still overwrite
      * the stored one after the cloud's own coercion.
+     *
+     * On update (2026-10-06) `aspectRatio`, `format`, `optimizeOnUpload` and
+     * `medium` follow the same rule: an omitted (or, for `medium`, unknown)
+     * value stays out of the patch so the cloud keeps the stored one. They
+     * used to be filled with defaults, so a partial save reset them. Create
+     * keeps the defaults.
      */
-    private function sanitize_visual_content($raw): array
+    private function sanitize_visual_content($raw, bool $is_update = false): array
     {
         if ( ! is_array($raw)) return [];
         $content = [
@@ -7046,6 +7147,27 @@ class Rest_Api
             ) ? (string)$raw['medium'] : 'photography',
         ];
 
+        if ($is_update) {
+            if ( ! isset($raw['aspect_ratio']) && ! isset($raw['aspectRatio'])) {
+                unset($content['aspectRatio']);
+            }
+            if ( ! isset($raw['format'])) {
+                unset($content['format']);
+            }
+            if ( ! isset($raw['optimize_on_upload']) && ! isset($raw['optimizeOnUpload'])) {
+                unset($content['optimizeOnUpload']);
+            }
+            if ($content['medium'] !== ($raw['medium'] ?? null)) {
+                unset($content['medium']);
+            }
+            // 2026-10-06: an update that omits the art direction used to send
+            // '' and clear the stored style text (same class as the field
+            // resets above). Omitted means untouched.
+            if ( ! isset($raw['global_art_direction']) && ! isset($raw['globalArtDirection'])) {
+                unset($content['globalArtDirection']);
+            }
+        }
+
         $video_style = $raw['video_style'] ?? $raw['videoStyle'] ?? null;
         if (is_string($video_style)
             && in_array($video_style, ['clean', 'bold', 'kinetic'], true)) {
@@ -7066,6 +7188,14 @@ class Rest_Api
 
         if (array_key_exists('palette', $raw)) {
             $content['palette'] = $this->sanitize_palette($raw['palette']);
+        }
+
+        // EU AI label switch (2026-10-05, specs/ai-image-label.md): forwarded
+        // only when sent, and only as a real boolean, on create too: a save
+        // without it must not reset the stored value.
+        $ai_label = array_key_exists('ai_label', $raw) ? $raw['ai_label'] : ($raw['aiLabel'] ?? null);
+        if (is_bool($ai_label)) {
+            $content['aiLabel'] = $ai_label;
         }
 
         return $content;

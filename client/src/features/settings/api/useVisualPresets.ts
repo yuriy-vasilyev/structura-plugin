@@ -37,6 +37,12 @@ export interface VisualPresetWire {
   /** Rendering medium; cloud defaults an absent value to photography. */
   medium: VisualMedium;
   /**
+   * Stamp the EU "AI GENERATED" pill on generated images
+   * (specs/ai-image-label.md). The cloud sends `false` when unset; optional
+   * because functions deployed before 2026-10-05 do not send it.
+   */
+  aiLabel?: boolean;
+  /**
    * Video style (video-visuals handoff, 2026-07). Optional for at least
    * one release window: presets written before the move carry no video
    * fields, and the renderer defaults an absent value to `"clean"`.
@@ -81,6 +87,12 @@ export interface VisualContent {
   optimize_on_upload: boolean;
   /** Rendering medium; absent ⇒ photography. */
   medium?: VisualMedium;
+  /**
+   * EU AI label switch. The plugin proxy (`sanitize_visual_content`)
+   * forwards it to the cloud as `aiLabel`, only when it is a real boolean.
+   * Absent: the preset keeps its stored value.
+   */
+  ai_label?: boolean;
   /**
    * Video styling (video-visuals handoff, 2026-07). All four keys are
    * optional AND omitted entirely when the caller has nothing to say —

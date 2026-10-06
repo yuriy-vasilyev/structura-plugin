@@ -1,6 +1,7 @@
 /**
- * AI guidance for Free and BYOK plans in wp-admin: the "Recommended" words,
- * the best-first text provider order and the provider names the advice
+ * AI guidance for own-key plans in wp-admin: the "Recommended" words,
+ * the best-first provider order (Claude, OpenAI, Gemini, used wherever
+ * providers are listed since 2026-10-06) and the provider names the advice
  * reads. The recommendation itself lives in `RECOMMENDATIONS`
  * (`@structura/model-catalog`); this module only reads it.
  *
@@ -18,6 +19,28 @@ export const recommendedWord = (): string => _x("Recommended", "ai advice", "str
 /** Returns the translated "Recommended for text" chip words. */
 export const recommendedForTextWord = (): string =>
   _x("Recommended for text", "ai advice", "structura");
+
+/** Returns the translated "Recommended for images" chip words. */
+export const recommendedForImagesWord = (): string =>
+  _x("Recommended for images", "ai advice", "structura");
+
+/**
+ * Returns the one recommendation chip a provider card carries: "Recommended
+ * for text" on the recommended text provider (Claude), "Recommended for
+ * images" on the recommended image provider (Gemini), else `null`. One chip
+ * style and wording on every surface (owner review 2026-10-06).
+ */
+export const providerRecommendationLabel = (provider: string): string | null => {
+  if (RECOMMENDATIONS.text.provider === provider) return recommendedForTextWord();
+  if (RECOMMENDATIONS.image.provider === provider) return recommendedForImagesWord();
+  return null;
+};
+
+/** Returns the recommended tier for `provider` and `capability`, or `undefined` when it has none. */
+export const recommendedTier = (
+  provider: string,
+  capability: "text" | "image"
+): "top" | "mid" | undefined => RECOMMENDATIONS[capability].model[provider as AIProvider];
 
 /** Returns true when `provider` is the recommended text provider. */
 export const isRecommendedTextProvider = (provider: string): boolean =>

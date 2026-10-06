@@ -95,15 +95,14 @@ describe("<ProviderToggle> model tier picker", () => {
 });
 
 describe("<ProviderToggle> text provider section by plan (2026-10-01)", () => {
-  // Managed plans never pick or see a text provider; the image provider
-  // choice stays (specs/managed-ai-lineup.md §3.3).
-  it("managed: no text provider section, image provider buttons stay", () => {
+  // Managed plans never pick or see a text provider (specs/managed-ai-lineup.md
+  // §3.3). Flipped 2026-10-06: nor an image provider; Structura binds one
+  // image model on managed plans, so the toggle renders nothing.
+  it("managed: no text and no image provider section", () => {
     renderToggle({ showTierSelectors: false }, { isCloud: true });
     expect(screen.queryByText("Text Provider")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Claude|Anthropic/i })).not.toBeInTheDocument();
-    expect(screen.getByText("Image Provider")).toBeInTheDocument();
-    // Image row: one button per image provider.
-    expect(screen.getAllByRole("button")).toHaveLength(2);
+    expect(screen.queryByText("Image Provider")).not.toBeInTheDocument();
+    expect(screen.queryAllByRole("button")).toHaveLength(0);
   });
 
   it("BYOK: text and image provider sections both render", () => {
@@ -235,3 +234,49 @@ function ProviderToggleNoKeys(props: {
     />
   );
 }
+
+describe("<ProviderToggle> hideSingleProviderRow (Generate a Post, 2026-10-06)", () => {
+  it("renders nothing for one provider per capability with no model picker", () => {
+    renderToggle({
+      availableTextProviders: ["gemini"],
+      availableImageProviders: ["gemini"],
+      hideSingleProviderRow: true,
+      showTierSelectors: false,
+    });
+    expect(screen.queryByText("Text Provider")).toBeNull();
+    expect(screen.queryByText("Image Provider")).toBeNull();
+    expect(screen.queryByText("Engine")).toBeNull();
+  });
+
+  it("keeps a lone provider's row while its model setup is incomplete", () => {
+    useLicenseMock.mockReturnValue({ isLicensed: true, plan: "byok", isPaidLicense: true });
+    useDefaultProvidersMock.mockReturnValue({ isProviderIncomplete: () => true, isCloud: false });
+    render(
+      <ProviderToggle
+        textProvider="gemini"
+        imageProvider="gemini"
+        onTextProviderChange={vi.fn()}
+        onImageProviderChange={vi.fn()}
+        availableTextProviders={["gemini"]}
+        availableImageProviders={[]}
+        hideSingleProviderRow
+      />,
+    );
+    expect(screen.getByText("Text Provider")).toBeInTheDocument();
+    expect(
+      screen.getByText("Model not selected — complete setup in AI Engine settings"),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the text and image model pickers independently", () => {
+    renderToggle({
+      availableTextProviders: ["gemini"],
+      availableImageProviders: ["gemini"],
+      hideSingleProviderRow: true,
+      showTextTierSelector: false,
+      showImageTierSelector: true,
+    });
+    expect(screen.queryByText("Text Model")).toBeNull();
+    expect(screen.getByText("Image Model")).toBeInTheDocument();
+  });
+});

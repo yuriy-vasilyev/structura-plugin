@@ -47,48 +47,15 @@ class Task_Runner
     private const MAX_JITTER_SECONDS = 5400;
 
     /**
-     * Managed-tier image-provider defaults — mirror of the cloud-side
-     * `PLAN_DEFAULTS[tier].image.provider` in
-     * `functions/src/ai/model-catalog.ts`.
+     * Plans whose image model comes from the cloud's managed image binding.
      *
-     * Used to substitute the campaign's configured imageProvider when it is
-     * not image-capable (e.g. Claude, which is text-only). On managed tiers
-     * we promise the user "we pick the right models for you", so we
-     * substitute here rather than skip — letting `imageProvider = anthropic`
-     * through would silently drop image generation in
-     * `generate_post_images()`.
-     *
-     * Keep in lockstep with the cloud catalog. If cloud switches the
-     * managed-tier image provider (say, agency moves off openai), update
-     * this map in the same PR so the plugin stops forwarding the old
-     * value — otherwise the cloud would silently re-route the request and
-     * mask the drift.
-     *
-     * BYOK tiers (free, pro) intentionally have no entry here: auto-
-     * substituting them would either call a provider the user hasn't
-     * connected (guaranteed failure) or silently switch them to a paid
-     * provider they didn't pick. Those tiers keep the graceful-skip
-     * behaviour.
+     * 2026-10-06 (specs/managed-ai-lineup.md §2.4): the plugin used to fill in
+     * its own managed image provider (`MANAGED_IMAGE_FALLBACK`, cloud → gemini,
+     * cloud_pro → openai) when a campaign's image provider was missing or
+     * text-only. The cloud now picks the image model on these plans and
+     * ignores the provider sent, so the plugin sends none in that case.
      */
-    private const MANAGED_IMAGE_FALLBACK = [
-        'cloud'  => 'gemini',
-        'cloud_pro' => 'openai',
-    ];
-
-    /**
-     * The plan's default image provider on managed tiers, or null for
-     * BYOK / unknown tiers. Exposed as a public static so tests can pin
-     * the mapping directly without spinning up the full image path.
-     *
-     * @param string $tier Plan identifier (free, pro, cloud, agency, none).
-     *
-     * @return string|null The provider id, or null if the tier has no
-     *                     managed default (BYOK tiers).
-     */
-    public static function get_managed_image_default(string $tier): ?string
-    {
-        return self::MANAGED_IMAGE_FALLBACK[$tier] ?? null;
-    }
+    private const MANAGED_IMAGE_PLANS = ['cloud', 'cloud_pro'];
 
     /**
      * Transient key + TTL for the cached visual-settings fetch. Keep
@@ -354,54 +321,33 @@ class Task_Runner
 
             $image_provider = $campaign['intelligence']['imageProvider'] ?? null;
 
-            // Managed-tier substitution: a campaign whose imageProvider is
-            // a text-only provider (Claude) would silently skip image
-            // generation in the capability check below, and the user loses
-            // images entirely despite paying for a managed tier. Swap in
-            // the plan default instead and stamp it back onto the campaign
-            // so delegate_image_to_cloud forwards the resolved value.
-            //
-            // BYOK tiers (free, pro) are intentionally excluded — see the
-            // MANAGED_IMAGE_FALLBACK docblock for the reasoning.
-            $managed_default = self::get_managed_image_default($tier);
-            if ($managed_default) {
+            // Managed image binding (2026-10-06, specs/managed-ai-lineup.md
+            // §2.4): on Cloud and Cloud Pro the cloud picks the image model
+            // and ignores the provider sent. A missing or text-only provider
+            // used to be replaced with a plugin-side default here; now it is
+            // cleared and the request goes out without one. A stored
+            // image-capable provider still travels for older clouds.
+            $is_managed_image = in_array($tier, self::MANAGED_IMAGE_PLANS, true);
+            if ($is_managed_image) {
                 $configured_meta = $image_provider ? Provider_Registry::get_provider($image_provider) : null;
-                $is_image_capable = $configured_meta && in_array('image', $configured_meta['capabilities'] ?? [], true);
-
-                if ( ! $is_image_capable) {
-                    $this->log('info', sprintf(
-                        'Image provider "%s" is not image-capable on %s tier. Substituting plan default "%s".',
-                        $image_provider ?: 'none',
-                        $tier,
-                        $managed_default
-                    ), $campaign['id'], Log_Steps::VISUALS, [
-                        'configured_provider' => $image_provider,
-                        'substituted_provider' => $managed_default,
-                        'tier' => $tier,
-                    ]);
-
-                    $image_provider                            = $managed_default;
-                    $campaign['intelligence']['imageProvider'] = $managed_default;
-                    // Clear any text-provider-specific image model — the
-                    // substituted provider has its own default model, and
-                    // forwarding a Claude/Gemini model id to OpenAI would
-                    // trip the cloud-side model validator.
-                    if (isset($campaign['intelligence']['imageModel'])) {
-                        $campaign['intelligence']['imageModel'] = null;
-                    }
+                if ( ! $configured_meta || ! in_array('image', $configured_meta['capabilities'] ?? [], true)) {
+                    $image_provider                            = null;
+                    $campaign['intelligence']['imageProvider'] = null;
+                    $campaign['intelligence']['imageModel']    = null;
                 }
             }
 
-            // Graceful skip: no image provider configured or provider lost access
-            if ( ! $image_provider || ! Provider_Registry::validate_provider_access($image_provider)) {
+            // Graceful skip: no image provider configured or an unknown one
+            // (no plan narrows the providers since 2026-10-06).
+            if ( ! $is_managed_image && ( ! $image_provider || ! Provider_Registry::validate_provider_access($image_provider))) {
                 $this->log('warning', "Skipping $image_type image: no accessible image provider.", $campaign['id'], Log_Steps::VISUALS);
                 return;
             }
 
             // Graceful skip: provider doesn't support image generation (e.g. Claude is text-only).
-            // Only reachable for BYOK tiers — managed tiers got the substitute above.
-            $provider_meta = Provider_Registry::get_provider($image_provider);
-            if ( ! $provider_meta || ! in_array('image', $provider_meta['capabilities'] ?? [], true)) {
+            // Own-key plans only; managed plans were handled above.
+            $provider_meta = $is_managed_image ? null : Provider_Registry::get_provider($image_provider);
+            if ( ! $is_managed_image && ( ! $provider_meta || ! in_array('image', $provider_meta['capabilities'] ?? [], true))) {
                 $this->log('warning', "Skipping $image_type image: provider \"$image_provider\" does not support image generation.", $campaign['id'], Log_Steps::VISUALS);
                 return;
             }
@@ -504,7 +450,9 @@ class Task_Runner
     ) {
         $image_provider = $campaign['intelligence']['imageProvider'] ?? null;
 
-        if ( ! $image_provider) {
+        // Managed plans may send no provider (2026-10-06, see
+        // MANAGED_IMAGE_PLANS); the cloud uses the managed binding.
+        if ( ! $image_provider && ! in_array($license['plan'] ?? '', self::MANAGED_IMAGE_PLANS, true)) {
             throw new \Exception('No image provider configured for this campaign.');
         }
 
@@ -554,11 +502,14 @@ class Task_Runner
         $payload = [
             'licenseKey'       => $license['license_key'],
             'domain'           => wp_parse_url(get_site_url(), PHP_URL_HOST),
-            'provider'         => $image_provider,
             'model'            => $model,
             'prompt'           => $image_data['topic'] ?? '',
             'campaign'         => $campaign,
         ];
+
+        if ($image_provider) {
+            $payload['provider'] = $image_provider;
+        }
 
         // Audit metadata — optional on the cloud side for back-compat
         // with older plugins that didn't send it. Only send keys that

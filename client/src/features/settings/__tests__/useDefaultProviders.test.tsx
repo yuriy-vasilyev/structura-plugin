@@ -1,7 +1,8 @@
 /**
  * Default text provider for new campaigns and one-off posts (2026-10-02,
  * specs/byok-ai-guidance.md §9): an explicit plugin default wins; without
- * one, the best connected provider the plan allows, not the first connected.
+ * one, the best connected provider, not the first connected. Images follow
+ * the image recommendation (Gemini, then OpenAI) since 2026-10-06.
  *
  * The real hook and the real `@structura/model-catalog` order run; only the
  * settings / connections / licence data edges are mocked.
@@ -55,7 +56,41 @@ describe("useDefaultProviders — default text provider", () => {
     expect(textDefault(["gemini"])).toBe("gemini");
   });
 
-  it("Free never defaults to Anthropic, which the plan cannot run", () => {
-    expect(textDefault(["gemini", "anthropic", "openai"], "", "free")).toBe("openai");
+  // 2026-10-06 (specs/open-providers.md): Free and anonymous may run
+  // Anthropic, so they default to it like BYOK.
+  it.each(["free", "none"])("%s defaults to Anthropic when it is connected", (plan) => {
+    expect(textDefault(["gemini", "anthropic", "openai"], "", plan)).toBe("anthropic");
+  });
+});
+
+const imageDefault = (connected: string[], plan = "byok") => {
+  h.connected = connected;
+  h.textDefault = "";
+  h.plan = plan;
+  return renderHook(() => useDefaultProviders()).result.current.defaultImageProvider;
+};
+
+// 2026-10-06: without an explicit image default, Gemini (recommended for
+// images) before OpenAI, whatever order the keys were connected in.
+describe("useDefaultProviders — default image provider", () => {
+  it("prefers Gemini over OpenAI", () => {
+    expect(imageDefault(["openai", "gemini"])).toBe("gemini");
+  });
+
+  it("falls back to OpenAI when Gemini is not connected", () => {
+    expect(imageDefault(["anthropic", "openai"])).toBe("openai");
+  });
+});
+
+// Owner review 2026-10-06: providers list Claude, OpenAI, Gemini wherever
+// they are listed, whatever order the keys were connected in.
+describe("useDefaultProviders — provider lists", () => {
+  it("orders the override lists Claude, OpenAI, Gemini", () => {
+    h.connected = ["gemini", "openai", "anthropic"];
+    h.textDefault = "";
+    h.plan = "none";
+    const { availableProviders, availableImageProviders } = renderHook(() => useDefaultProviders()).result.current;
+    expect(availableProviders).toEqual(["anthropic", "openai", "gemini"]);
+    expect(availableImageProviders).toEqual(["openai", "gemini"]);
   });
 });

@@ -256,3 +256,80 @@ describe("OptionCardGroup", () => {
     });
   });
 });
+
+describe("per-option disabled, divider and detail", () => {
+  const LEVELS: ReadonlyArray<OptionCardOption<Mode>> = [
+    { value: "traffic", label: "Read only" },
+    { value: "quick", label: "Read and write", disabled: true },
+    {
+      value: "authority",
+      label: "Full access",
+      disabled: true,
+      divider: <span>Can go live</span>,
+      detail: <label>Let this token publish</label>,
+    },
+  ];
+
+  function ControlledLevels({
+    options = LEVELS,
+    initial = "traffic",
+  }: {
+    options?: ReadonlyArray<OptionCardOption<Mode>>;
+    initial?: Mode;
+  }) {
+    const [value, setValue] = useState<Mode>(initial);
+    return (
+      <OptionCardGroup
+        options={options}
+        value={value}
+        onChange={setValue}
+        ariaLabel="What may it do?"
+        layout="row"
+      />
+    );
+  }
+
+  it("disables only the flagged options and marks them with a lock instead of a check", () => {
+    render(<ControlledLevels />);
+    expect(screen.getByRole("radio", { name: "Read only" })).toBeEnabled();
+    const locked = screen.getByRole("radio", { name: "Read and write" });
+    expect(locked).toBeDisabled();
+    expect(locked.querySelector('[data-slot="locked"]')).not.toBeNull();
+    fireEvent.click(locked);
+    expect(locked).toHaveAttribute("aria-checked", "false");
+  });
+
+  it("skips disabled options in the arrow-key cycle", () => {
+    const options: ReadonlyArray<OptionCardOption<Mode>> = [
+      { value: "traffic", label: "A" },
+      { value: "quick", label: "B", disabled: true },
+      { value: "authority", label: "C" },
+    ];
+    render(<ControlledLevels options={options} />);
+    const first = screen.getByRole("radio", { name: "A" });
+    first.focus();
+    fireEvent.keyDown(first, { key: "ArrowDown" });
+    expect(screen.getByRole("radio", { name: "C" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: "C" })).toHaveFocus();
+  });
+
+  it("renders a divider before its option, outside the radio", () => {
+    render(<ControlledLevels />);
+    const divider = screen.getByText("Can go live");
+    expect(divider.closest('[role="radio"]')).toBeNull();
+    expect(screen.getAllByRole("radio")).toHaveLength(3);
+  });
+
+  it("shows an option's detail only while it is selected, outside the radio button", () => {
+    const options: ReadonlyArray<OptionCardOption<Mode>> = [
+      { value: "traffic", label: "Read only" },
+      { value: "authority", label: "Full access", detail: <label>Let this token publish</label> },
+    ];
+    render(<ControlledLevels options={options} />);
+    expect(screen.queryByText("Let this token publish")).toBeNull();
+    fireEvent.click(screen.getByRole("radio", { name: "Full access" }));
+    const detail = screen.getByText("Let this token publish");
+    expect(detail.closest('[role="radio"]')).toBeNull();
+    expect(detail.closest('[role="radiogroup"]')).not.toBeNull();
+  });
+});

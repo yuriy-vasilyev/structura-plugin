@@ -44,7 +44,7 @@ import { WizardMagicLoader } from "./WizardMagicLoader";
 
 export const WizardStep5Persona = () => {
   const { isPaidLicense } = useLicense();
-  const { defaultTextProvider } = useDefaultProviders();
+  const { defaultTextProvider, hasExplicitTextDefault, isAutoResolved } = useDefaultProviders();
   const personasQuery = usePersonasQuery();
   const personas = personasQuery.data ?? [];
   const personasLoading = personasQuery.isLoading;
@@ -62,10 +62,12 @@ export const WizardStep5Persona = () => {
   const [autoDrafting, setAutoDrafting] = useState(false);
   const [autoBinding, setAutoBinding] = useState(false);
 
-  // AI-capable = a paid license AND a resolved text provider. Non-AI tiers
-  // (none / free / BYOK before a provider is configured) never draft a voice,
-  // so they get the plugin-seeded House voice bound instead.
-  const canAiDraft = isPaidLicense && Boolean(defaultTextProvider);
+  // AI-capable = a resolved text provider on a paid license, or (Magic
+  // suggest on every plan since 2026-10-06, specs/open-providers.md §8) a
+  // connected text key on none / free, where the draft runs on that key.
+  // Without one they get the plugin-seeded House voice bound instead.
+  const hasTextKey = Boolean(hasExplicitTextDefault || isAutoResolved);
+  const canAiDraft = Boolean(defaultTextProvider) && (Boolean(isPaidLicense) || hasTextKey);
 
   // Validity = at least one voice writing for THIS site (a member), not
   // merely something in the shared library. Updates live as the seed binds.

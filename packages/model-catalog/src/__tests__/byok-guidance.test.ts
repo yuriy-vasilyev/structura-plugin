@@ -15,6 +15,7 @@ import {
   resolveFastModelId,
   resolveLegacyDefaultTextModelId,
   resolveManagedModelId,
+  resolveRecommendedImageModel,
   resolveRecommendedTextModel,
   resolveSocialCopyModelId,
   resolveSuggestionModelId,
@@ -141,8 +142,22 @@ describe("RECOMMENDATIONS", () => {
   it("is exactly spec §3", () => {
     expect(RECOMMENDATIONS).toEqual({
       text: { order: ["anthropic", "openai", "gemini"], provider: "anthropic", model: { anthropic: "mid", openai: "mid" }, caution: ["gemini"] },
-      image: { order: null, provider: null, model: {}, caution: [] },
+      image: { order: ["gemini", "openai"], provider: "gemini", model: { gemini: "mid", openai: "mid" }, caution: [] },
     });
+  });
+
+  // 2026-10-06 (specs/open-providers.md): the image recommendation names the
+  // tiers that hold the image models own-key pickers already default to.
+  it("recommends the image tiers that hold Gemini Flash Image and the OpenAI image default", () => {
+    expect(getRegistryModelId("gemini", "image", RECOMMENDATIONS.image.model.gemini)).toBe("gemini-3.1-flash-image");
+    expect(getRegistryModelId("openai", "image", RECOMMENDATIONS.image.model.openai)).toBe(getDefaultModel("openai", "image"));
+    expect(RECOMMENDATIONS.image.model.anthropic).toBeUndefined();
+  });
+
+  it("resolveRecommendedImageModel resolves the recommended image tier; Anthropic has no image model", () => {
+    expect(resolveRecommendedImageModel("gemini")).toEqual({ tier: "mid", model: "gemini-3.1-flash-image" });
+    expect(resolveRecommendedImageModel("openai")).toEqual({ tier: "mid", model: getDefaultModel("openai", "image") });
+    expect(resolveRecommendedImageModel("anthropic")).toBeNull();
   });
 
   it("drives the served text `recommended` flag: Standard for Anthropic and OpenAI, nothing for Gemini", () => {
@@ -173,9 +188,15 @@ describe("bestConnected", () => {
     expect(bestConnected("text", ["gemini"])).toBe("gemini");
   });
 
-  it("returns null for an empty connected list, and for a capability with no order", () => {
+  it("returns null for an empty connected list", () => {
     expect(bestConnected("text", [])).toBeNull();
-    expect(bestConnected("image", ["openai", "gemini"])).toBeNull();
+    expect(bestConnected("image", [])).toBeNull();
+  });
+
+  it("images: Gemini first, then OpenAI; Anthropic makes no images", () => {
+    expect(bestConnected("image", ["openai", "gemini", "anthropic"])).toBe("gemini");
+    expect(bestConnected("image", ["anthropic", "openai"])).toBe("openai");
+    expect(bestConnected("image", ["anthropic"])).toBeNull();
   });
 });
 
@@ -196,74 +217,66 @@ describe("adviceFor", () => {
     expect(adviceFor(ctx({ plan: "cloud_pro" }))).toBeNull();
   });
 
-  it("1: Anthropic connected on BYOK → Switch to Anthropic, no secondary", () => {
-    expect(adviceFor(ctx({ connected: ["gemini", "anthropic", "openai"] }))).toEqual({
+  // 2026-10-06 (specs/open-providers.md): every own-key plan, anonymous
+  // included, can connect Anthropic, so Free and `none` get the BYOK advice.
+  // The Free-only rows (4 and 5) are gone.
+  const OWN_KEY_PLANS = ["byok", "free", "none"] as const;
+
+  it.each(OWN_KEY_PLANS)("1: Anthropic connected on %s → Switch to Anthropic, no secondary", (plan) => {
+    expect(adviceFor(ctx({ plan, connected: ["gemini", "anthropic", "openai"] }))).toEqual({
       situation: 1,
       primary: { kind: "switch", provider: "anthropic", label: "aiAdvice.switchTo" },
       secondary: null,
     });
+    // Only Anthropic besides Gemini: still a switch to Anthropic.
+    expect(adviceFor(ctx({ plan, connected: ["gemini", "anthropic"] }))?.primary).toEqual({
+      kind: "switch",
+      provider: "anthropic",
+      label: "aiAdvice.switchTo",
+    });
   });
 
-  it("2: BYOK, OpenAI connected, no Anthropic → Switch to OpenAI, Connect Anthropic", () => {
-    expect(adviceFor(ctx({ connected: ["gemini", "openai"] }))).toEqual({
+  it.each(OWN_KEY_PLANS)("2: %s, OpenAI connected, no Anthropic → Switch to OpenAI, Connect Anthropic", (plan) => {
+    expect(adviceFor(ctx({ plan, connected: ["gemini", "openai"] }))).toEqual({
       situation: 2,
       primary: { kind: "switch", provider: "openai", label: "aiAdvice.switchTo" },
       secondary: { kind: "connect", provider: "anthropic", label: "aiAdvice.connectAnthropicForBest" },
     });
     // Without key access the Connect secondary disappears; Switch stays.
-    expect(adviceFor(ctx({ connected: ["gemini", "openai"], canManageKeys: false }))).toEqual({
+    expect(adviceFor(ctx({ plan, connected: ["gemini", "openai"], canManageKeys: false }))).toEqual({
       situation: 2,
       primary: { kind: "switch", provider: "openai", label: "aiAdvice.switchTo" },
       secondary: null,
     });
   });
 
-  it("3: BYOK, only Gemini → Connect Anthropic or OpenAI, Upgrade to Cloud", () => {
-    expect(adviceFor(ctx({}))).toEqual({
+  it.each(OWN_KEY_PLANS)("3: %s, only Gemini → Connect Anthropic or OpenAI, Upgrade to Cloud", (plan) => {
+    expect(adviceFor(ctx({ plan }))).toEqual({
       situation: 3,
       primary: { kind: "connect", provider: "anthropic", label: "aiAdvice.connectAnthropicOrOpenai" },
       secondary: { kind: "upgrade", label: "aiAdvice.upgradeCloud" },
     });
-    expect(adviceFor(ctx({ canManageKeys: false, canManageBilling: false }))).toEqual({
+    expect(adviceFor(ctx({ plan, canManageKeys: false, canManageBilling: false }))).toEqual({
       situation: 3,
       note: "aiAdvice.askAdmin",
       secondary: null,
     });
   });
 
-  it("4: Free, OpenAI connected → Switch to OpenAI, Upgrade", () => {
-    expect(adviceFor(ctx({ plan: "free", connected: ["gemini", "openai"] }))).toEqual({
-      situation: 4,
-      primary: { kind: "switch", provider: "openai", label: "aiAdvice.switchTo" },
-      secondary: { kind: "upgrade", label: "aiAdvice.upgradeFree" },
-    });
-    expect(adviceFor(ctx({ plan: "free", connected: ["openai"], canManageBilling: false }))?.secondary).toBeNull();
-  });
-
-  it("5: Free, only Gemini → Connect OpenAI, Upgrade; the role variant shows askAdminFree", () => {
-    expect(adviceFor(ctx({ plan: "free" }))).toEqual({
-      situation: 5,
-      primary: { kind: "connect", provider: "openai", label: "aiAdvice.connectOpenai" },
-      secondary: { kind: "upgrade", label: "aiAdvice.upgradeFree" },
-    });
-    expect(adviceFor(ctx({ plan: "none", canManageKeys: false }))).toEqual({
-      situation: 5,
-      note: "aiAdvice.askAdminFree",
-      secondary: { kind: "upgrade", label: "aiAdvice.upgradeFree" },
-    });
-  });
-
-  it("never offers Free a switch to Anthropic, even with an Anthropic key left from a paid plan", () => {
-    const withOpenai = adviceFor(ctx({ plan: "free", connected: ["gemini", "anthropic", "openai"] }));
-    expect(withOpenai?.situation).toBe(4);
-    expect(withOpenai?.primary).toEqual({ kind: "switch", provider: "openai", label: "aiAdvice.switchTo" });
-    const onlyAnthropic = adviceFor(ctx({ plan: "free", connected: ["gemini", "anthropic"] }));
-    expect(onlyAnthropic?.situation).toBe(5);
-    expect(JSON.stringify(onlyAnthropic)).not.toContain("anthropic");
+  it("never names a Free-only action any more", () => {
+    for (const plan of OWN_KEY_PLANS) {
+      for (const connected of [[], ["gemini"], ["gemini", "openai"], ["gemini", "anthropic"]] as AIProvider[][]) {
+        for (const canManageKeys of [true, false]) {
+          const json = JSON.stringify(adviceFor(ctx({ plan, connected, canManageKeys })));
+          expect(json).not.toMatch(/upgradeFree|askAdminFree|connectOpenai"/);
+        }
+      }
+    }
   });
 
   it("an empty connected list is advised like only Gemini", () => {
     expect(adviceFor(ctx({ connected: [] }))?.situation).toBe(3);
-    expect(adviceFor(ctx({ plan: "free", connected: [] }))?.situation).toBe(5);
+    expect(adviceFor(ctx({ plan: "free", connected: [] }))?.situation).toBe(3);
+    expect(adviceFor(ctx({ plan: "none", connected: [] }))?.situation).toBe(3);
   });
 });

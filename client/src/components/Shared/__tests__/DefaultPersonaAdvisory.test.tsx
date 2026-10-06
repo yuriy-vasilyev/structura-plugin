@@ -9,7 +9,7 @@
  * no origin claim.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 vi.mock("@wordpress/i18n", () => ({
   __: (t: string) => t,
@@ -32,6 +32,8 @@ import { DefaultPersonaAdvisory } from "../DefaultPersonaAdvisory";
 
 beforeEach(() => {
   personasMock.current = { data: [], isLoading: false };
+  window.localStorage.clear();
+  window.structuraConfig = { activation_id: "act-site-a" } as typeof window.structuraConfig;
 });
 
 describe("DefaultPersonaAdvisory", () => {
@@ -70,5 +72,41 @@ describe("DefaultPersonaAdvisory", () => {
     };
     const { container: many } = render(<DefaultPersonaAdvisory />);
     expect(many).toBeEmptyDOMElement();
+  });
+
+  // Owner review 2026-10-06: one persona is fine. The notice says so,
+  // names the voice in the title, and can be closed for good on this site.
+  it("reads as a calm note that names the voice", () => {
+    personasMock.current = { data: [{ id: "p1", name: "House voice" }], isLoading: false };
+    render(<DefaultPersonaAdvisory />);
+
+    expect(screen.getByText("Writing as House voice")).toBeInTheDocument();
+    expect(
+      screen.getByText("Every post uses your only persona. Add more if you want to vary the tone.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Using your only persona")).toBeNull();
+  });
+
+  it("closes on Dismiss and stays closed on this site after a reload", () => {
+    personasMock.current = { data: [{ id: "p1", name: "House voice" }], isLoading: false };
+    const first = render(<DefaultPersonaAdvisory />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    expect(screen.queryByText("Writing as House voice")).toBeNull();
+    first.unmount();
+
+    const again = render(<DefaultPersonaAdvisory />);
+    expect(again.container).toBeEmptyDOMElement();
+  });
+
+  it("still shows on another site opened in the same browser", () => {
+    personasMock.current = { data: [{ id: "p1", name: "House voice" }], isLoading: false };
+    const first = render(<DefaultPersonaAdvisory />);
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    first.unmount();
+
+    window.structuraConfig = { activation_id: "act-site-b" } as typeof window.structuraConfig;
+    render(<DefaultPersonaAdvisory />);
+    expect(screen.getByText("Writing as House voice")).toBeInTheDocument();
   });
 });

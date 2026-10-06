@@ -11,7 +11,7 @@ import {
   Wand2,
   type LucideIcon,
 } from "lucide-react";
-import { useLicense, useDefaultProviders } from "@/features/settings";
+import { useDefaultProviders } from "@/features/settings";
 import { AIProvider } from "@/features/campaigns/types";
 import { ProviderPill } from "./ProviderPill";
 
@@ -72,7 +72,8 @@ export const SuggestStrategySection: FC<SuggestStrategySectionProps> = ({
   const activeProvider = providerOverride ?? defaultTextProvider;
   const [contextFields, setContextFields] = useState<ContextField[]>([]);
   const seededRef = useRef(false);
-  const { isPaidLicense } = useLicense();
+  // Every plan since 2026-10-06 (specs/open-providers.md §8); until then the
+  // toggle was disabled with a "Pro" chip on none/free.
 
   // Seed context fields once when initialSources become available (async-safe).
   useEffect(() => {
@@ -99,13 +100,10 @@ export const SuggestStrategySection: FC<SuggestStrategySectionProps> = ({
       {/* ── Trigger row — subtle disclosure toggle ─────────────────── */}
       <button
         type="button"
-        onClick={() => (isPaidLicense ? setIsOpen(!isOpen) : undefined)}
-        disabled={!isPaidLicense}
+        onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "group flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all",
-          isPaidLicense
-            ? "hover:bg-brand-50/60 dark:hover:bg-brand-950/20"
-            : "cursor-not-allowed opacity-50",
+          "hover:bg-brand-50/60 dark:hover:bg-brand-950/20",
           isOpen && "bg-brand-50/40 dark:bg-brand-950/15"
         )}
       >
@@ -115,11 +113,6 @@ export const SuggestStrategySection: FC<SuggestStrategySectionProps> = ({
         <span className="flex-1 text-xs font-bold text-neutral-700 dark:text-neutral-300">
           {toggleButtonLabel}
         </span>
-        {!isPaidLicense && (
-          <span className="rounded-md bg-brand-100 px-1.5 py-0.5 text-[8px] font-black tracking-wider text-brand-600 uppercase dark:bg-brand-950/30 dark:text-brand-400">
-            {__("Pro", "structura")}
-          </span>
-        )}
         <ChevronDown
           size={14}
           className={cn(

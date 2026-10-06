@@ -180,6 +180,7 @@ export const ERROR_KEYS = {
     // Plan-tier entitlement gates — the chosen provider/capability isn't
     // available on the workspace's current plan (mirrors the plugin's
     // Provider_Registry min_tier table + agency-only member invites).
+    /** Unreachable since 2026-10-06 (every plan may store every provider); kept for old clients. */
     credentialProviderNotInPlan: "workspaces.credentialProviderNotInPlan",
     inviteNotInPlan: "workspaces.inviteNotInPlan",
     // Portal visual-preset CRUD — a preset still bound to a site
@@ -217,11 +218,16 @@ export const ERROR_KEYS = {
     // future date is rejected — we don't run a scheduler, so a future date would
     // simply hide the post from the public feed with no way to surface it later.
     publishDateInFuture: "sites.publishDateInFuture",
+    // A headless post save that named the version it was edited from
+    // (`expectedUpdatedAt`) found a newer version stored, so it was refused
+    // rather than overwriting someone else's edit.
+    postChangedSinceRead: "sites.postChangedSinceRead",
   },
   campaigns: {
     // Portal campaign-create gates — parity with the plugin REST path's
     // machine-readable rejections (personas_required, etc.).
     personasRequired: "campaigns.personasRequired",
+    /** Since 2026-10-06 only an unknown provider id; no plan narrows providers. */
     providerNotAllowed: "campaigns.providerNotAllowed",
     limitReached: "campaigns.limitReached",
     cadenceLimit: "campaigns.cadenceLimit",
@@ -249,6 +255,21 @@ export const ERROR_KEYS = {
     // this key is the server-side backstop.
     planRequired: "attachments.planRequired",
   },
+  apiTokens: {
+    // Personal access tokens for the MCP server (specs/mcp-server.md §3.2).
+    nameRequired: "apiTokens.nameRequired",
+    nameTooLong: "apiTokens.nameTooLong",
+    invalidAccessLevel: "apiTokens.invalidAccessLevel",
+    invalidExpiry: "apiTokens.invalidExpiry",
+    // Workspace plan has no managed AI (Free, BYOK). Customer-caused.
+    planRequired: "apiTokens.planRequired",
+    // Write and publish levels need the member's role to hold runs.trigger.
+    accessLevelNotAllowed: "apiTokens.accessLevelNotAllowed",
+    limitReached: "apiTokens.limitReached",
+    // Unknown id, another workspace's token, or a plugin token: one answer
+    // so the callable never confirms a token exists.
+    notFound: "apiTokens.notFound",
+  },
   common: {
     internal: "common.internal",
   },
@@ -271,6 +292,7 @@ export type ErrorKey =
   | (typeof ERROR_KEYS.sites)[keyof typeof ERROR_KEYS.sites]
   | (typeof ERROR_KEYS.campaigns)[keyof typeof ERROR_KEYS.campaigns]
   | (typeof ERROR_KEYS.attachments)[keyof typeof ERROR_KEYS.attachments]
+  | (typeof ERROR_KEYS.apiTokens)[keyof typeof ERROR_KEYS.apiTokens]
   | (typeof ERROR_KEYS.common)[keyof typeof ERROR_KEYS.common];
 
 /**
@@ -299,4 +321,6 @@ export interface ErrorParams {
   "campaigns.limitReached": { limit: number };
   "campaigns.cadenceLimit": { maxPerWeek: number };
   "subscriptions.appsumoRateLimited": { retryAfterSeconds: number };
+  "apiTokens.nameTooLong": { maxLength: number };
+  "apiTokens.limitReached": { limit: number };
 }

@@ -1,9 +1,23 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { __, sprintf } from "@wordpress/i18n";
 import { Alert, Button } from "@structura/ui";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router";
 import { usePersonasQuery } from "@/features/personas";
+import { perActivationStorageKey } from "@/utils/storageKey";
+
+// Per activation, like the page-builder card: closing the note on one site
+// must not hide it on another site opened in the same browser.
+const DISMISS_KEY_BASE = "structura:single-persona-advisory-dismissed";
+
+/** Returns true when this site's admin closed the note in this browser. */
+const readDismissed = (): boolean => {
+  try {
+    return window.localStorage.getItem(perActivationStorageKey(DISMISS_KEY_BASE)) === "1";
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Inline advisory for the Generate Post / New Campaign surfaces —
@@ -32,35 +46,49 @@ import { usePersonasQuery } from "@/features/personas";
  * Self-contained — owns its own `usePersonasQuery` so callers don't
  * have to thread the count through. Idempotent re-renders pick up
  * persona-list mutations via TanStack Query invalidations.
+ *
+ * Owner review 2026-10-06: one persona is fine, so the copy is a calm note
+ * ("Writing as House voice") and the note can be closed. The dismissal is
+ * remembered per site in localStorage, the pattern the page-builder card
+ * and the dashboard's Search Console banner use.
  */
 export const DefaultPersonaAdvisory: FC = () => {
   const navigate = useNavigate();
   const { data: personas, isLoading } = usePersonasQuery();
+  const [dismissed, setDismissed] = useState(readDismissed);
 
-  if (isLoading) return null;
+  const dismiss = () => {
+    setDismissed(true);
+    try {
+      window.localStorage.setItem(perActivationStorageKey(DISMISS_KEY_BASE), "1");
+    } catch {
+      // Storage blocked: the note still closes for this visit.
+    }
+  };
+
+  if (dismissed || isLoading) return null;
   const count = personas?.length ?? 0;
   if (count !== 1) return null;
 
   const personaName = personas?.[0]?.name ?? "";
 
   return (
-    <Alert variant="info">
+    <Alert variant="info" onDismiss={dismiss} dismissLabel={__("Dismiss", "structura")}>
       <Sparkles />
-      <Alert.Title>{__("Using your only persona", "structura")}</Alert.Title>
-      <Alert.Description>
+      <Alert.Title>
         {personaName
-          ? // translators: %s is the persona name.
-            sprintf(
-              __(
-                "Every post will use “%s” — your only persona. Add a couple more to vary tone across campaigns and posts.",
-                "structura",
-              ),
+          ? sprintf(
+              /* translators: %s is the persona name. */
+              __("Writing as %s", "structura"),
               personaName,
             )
-          : __(
-              "Every post will use your only persona. Add a couple more to vary tone across campaigns and posts.",
-              "structura",
-            )}
+          : __("Writing with your only persona", "structura")}
+      </Alert.Title>
+      <Alert.Description>
+        {__(
+          "Every post uses your only persona. Add more if you want to vary the tone.",
+          "structura",
+        )}
       </Alert.Description>
       <Alert.Action>
         <Button size="sm" variant="secondary" onClick={() => navigate("/personas")}>

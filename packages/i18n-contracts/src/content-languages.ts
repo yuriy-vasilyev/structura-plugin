@@ -128,6 +128,44 @@ export function isContentLanguageOption(value: unknown): value is ContentLanguag
   );
 }
 
+/**
+ * Content languages that are official EU languages, regional variants
+ * outside the EU excluded (`de_CH`, `es_MX`, `pt_BR`). The campaign form's
+ * AI-label reminder fires only for these (specs/ai-image-label.md).
+ *
+ * English is left out on purpose, `en_GB` included: it would fire for every
+ * non-EU English site. Languages outside {@link CONTENT_LANGUAGE_OPTIONS}
+ * (campaigns on the "Other…" catalogue) are not covered.
+ */
+export const EU_CONTENT_LANGUAGES = [
+  "de",
+  "de_AT",
+  "fr",
+  "es",
+  "it",
+  "pt",
+  "nl",
+  "pl",
+  "sv",
+  "da",
+  "fi",
+  "cs",
+  "hu",
+  "ro",
+  "el",
+] as const satisfies readonly ContentLanguageOption[];
+
+/**
+ * Whether a campaign or site language is in {@link EU_CONTENT_LANGUAGES}.
+ * Any code shape resolves through {@link toContentLanguageOption} first
+ * (`de_DE` and `de-AT` count, `de-CH` does not); `"default"` is `false`, so
+ * resolve that sentinel to the site's language before calling.
+ */
+export function isEuContentLanguage(raw: string | null | undefined): boolean {
+  const option = toContentLanguageOption(raw);
+  return option !== null && (EU_CONTENT_LANGUAGES as readonly string[]).includes(option);
+}
+
 /** Regional variants the picker keeps distinct, keyed by `language-region`. */
 const REGIONAL_OPTIONS: Record<string, ContentLanguageOption> = {
   "en-gb": "en_GB",

@@ -74,6 +74,16 @@ export function humanizeSuggestionError(
     );
   }
 
+  // No key connected on an own-key plan. Common since Magic suggest opened
+  // on none / free (2026-10-06); the cloud's own text is English and points
+  // at the customer portal.
+  if (code === "credentials_missing") {
+    return __(
+      "Connect an AI provider key under AI Engine to use Magic suggest.",
+      "structura"
+    );
+  }
+
   if (options.isManagedAiPlan && code === "provider_transient") {
     return __(
       "The AI service is experiencing high demand right now. Try again in a moment.",

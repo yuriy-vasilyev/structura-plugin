@@ -4,10 +4,8 @@
  * keyphrase (not a round-robin bank), so the keyphrase picker is single-select;
  * authority sources reuse the shared `DiscoverableChipList`.
  *
- * Tier model (None = unlicensed install, Free = licensed, Pro/Cloud = paid):
- * None/Free see one locked teaser (no inputs), matching the campaign keyword
- * step. The CTA differs by tier — None gets "Create account", Free "Unlock
- * with Pro". Paid is fully interactive.
+ * Paid plans only. None/Free render nothing (owner review 2026-10-06): the
+ * page lists what a paid plan adds in one card above its actions.
  */
 import { useState } from "react";
 import { __ } from "@wordpress/i18n";
@@ -15,9 +13,7 @@ import { buildChipListLabels } from "@/utils/chipListLabels";
 import {
   Check,
   CloudOff,
-  ExternalLink,
   Globe2,
-  Key,
   Loader2,
   RefreshCw,
   SearchX,
@@ -28,8 +24,6 @@ import {
 import { Badge, Button, cn, DiscoverableChipList, InputField } from "@structura/ui";
 import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutations";
 import type { BankKeyword, CampaignFormData } from "@/features/campaigns/types";
-import { buildPortalSignupUrl } from "@/utils/portalLinks";
-import { buildWizardResumeUrl } from "@/features/campaigns/utils/wizardReturnUrl";
 
 type Phase = "idle" | "loading" | "results" | "empty" | "error";
 
@@ -48,16 +42,12 @@ interface SeoTargetingSectionProps {
   formData: CampaignFormData;
   onChange: (patch: Partial<CampaignFormData>) => void;
   isPaidLicense: boolean;
-  isLicensed: boolean;
-  plan?: string;
 }
 
 export const SeoTargetingSection = ({
   formData,
   onChange,
   isPaidLicense,
-  isLicensed,
-  plan,
 }: SeoTargetingSectionProps) => {
   const {
     discoverKeywordsDetached,
@@ -79,46 +69,9 @@ export const SeoTargetingSection = ({
   const setFocus = (kp: string) =>
     onChange({ identity: { ...formData.identity, focusKeyphrase: kp } });
 
-  // ── Locked teaser for None / Free (campaign StepKeywords parity) ──────────
-  if (!isPaidLicense) {
-    const domain = typeof window !== "undefined" ? window.location.hostname : undefined;
-    const portalUrl = buildPortalSignupUrl({
-      intent: "unlock_keyword_bank",
-      domain,
-      plan,
-      returnTo: buildWizardResumeUrl("keywords"),
-    });
-    return (
-      <div className="flex flex-col items-center justify-center py-10 text-center">
-        <div className="from-brand-50 dark:from-brand-950/30 mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br to-purple-50 dark:to-purple-950/30">
-          <Key size={28} className="text-brand-400" />
-        </div>
-        <h3 className="mb-2 text-base font-semibold text-neutral-800 dark:text-white">
-          {__("SEO Targeting", "structura")}
-        </h3>
-        <p className="mx-auto mb-4 max-w-md text-sm text-neutral-500">
-          {__(
-            "Ground this post in a real focus keyphrase with live search volume and vetted authority sources — using real Google search data.",
-            "structura",
-          )}
-        </p>
-        <span className="from-brand-500 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r to-purple-500 px-4 py-1.5 text-xs font-bold text-white">
-          <Sparkles size={12} />
-          {__("Pro / Cloud Feature", "structura")}
-        </span>
-        <div className="mt-8">
-          <Button asChild>
-            <a href={portalUrl} target="_blank" rel="noopener noreferrer">
-              {isLicensed
-                ? __("Unlock with Pro", "structura")
-                : __("Create account", "structura")}
-              <ExternalLink size={14} className="ml-1.5" />
-            </a>
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // Paid only: Generate a Post renders no locked teaser since the owner
+  // review of 2026-10-06 (one plan card above the actions instead).
+  if (!isPaidLicense) return null;
 
   // ── Keyphrase discovery ───────────────────────────────────────────────────
   const runSuggest = () => {

@@ -12,19 +12,11 @@ export interface LicenseData {
    */
   max_campaigns?: number | null;
   /**
-   * Tier-derived provider count cap (1 none / 2 free / 3 paid).
-   * Mirrors `structuraConfig.provider_count_cap`, but unlike that
-   * page-render snapshot it travels on the settings query — so it
-   * re-derives reactively after an in-SPA license activation.
-   * Optional for one release window (plugin builds predating
-   * 2026-06-06 omit it); `useLicense` falls back to the
-   * `structuraConfig` snapshot when absent.
-   */
-  provider_count_cap?: number;
-  /**
    * True when the workspace is anonymous (post-bootstrap, pre-claim).
-   * Same reactive-vs-snapshot story as `provider_count_cap` above —
-   * mirrors `structuraConfig.is_anonymous` with the same fallback.
+   * Travels on the settings query so it re-derives reactively after an
+   * in-SPA license activation; mirrors `structuraConfig.is_anonymous`,
+   * which `useLicense` falls back to. (The `provider_count_cap` that sat
+   * here was removed 2026-10-06, specs/open-providers.md.)
    */
   is_anonymous?: boolean;
 }
@@ -55,15 +47,22 @@ export interface UnifiedSettings {
         capabilities: Array<"text" | "image">;
         text_model: string;
         image_model: string;
+        /**
+         * The tier ("top" | "mid") the setup wizard's "Use recommended
+         * model" switch stored, or "" when the site picked a model. Wins
+         * over `text_model` / `image_model` (`resolveDefaultModel`).
+         * Absent on plugin builds before the release after 2026-10-06.
+         */
+        text_tier?: string;
+        image_tier?: string;
       };
     };
-    /** Provider catalog — structural metadata (capabilities, min_tier, key_url, etc.) */
+    /** Provider catalog — structural metadata (capabilities, key_url, etc.) */
     catalog: {
       [providerId: string]: {
         id: string;
         name: string;
         capabilities: Array<"text" | "image">;
-        min_tier: string;
         key_prefix?: string;
         key_url: string;
         description: string;

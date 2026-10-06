@@ -30,23 +30,14 @@ import { Plug, Unplug } from "lucide-react";
 import { useAiSettingsQuery } from "@/features/ai-engine";
 import { useLicense } from "@/features/settings";
 import { isManagedPlan, type PlanId } from "@structura/types";
-import { buildPortalSignupUrl } from "@/utils/portalLinks";
+import { orderTextProviders } from "@/features/campaigns/aiGuidance";
+import { planHasImageGeneration } from "@/features/ai-engine/helpers";
 import { InstalledProviderCard } from "@/features/ai-engine/components/InstalledProviderCard";
 import { AvailableProviderCard } from "@/features/ai-engine/components/AvailableProviderCard";
 import { ProviderSetupWizard } from "@/features/ai-engine/components/ProviderSetupWizard";
-import { ProviderUpgradeDialog } from "@/features/ai-engine/components/ProviderUpgradeDialog";
 import { WorkspaceKeysPicker } from "@/features/ai-engine/components/WorkspaceKeysPicker";
 
 import { useWizardStore } from "../state/wizardStore";
-
-/** Strip image cap on `none` tier — mirrors the AI Engine page. */
-function capsForTier(
-  capabilities: Array<"text" | "image">,
-  plan: string,
-): Array<"text" | "image"> {
-  if (plan !== "none") return capabilities;
-  return capabilities.filter((c) => c !== "image");
-}
 
 interface WizardTarget {
   id: string;
@@ -58,51 +49,34 @@ interface WizardTarget {
   isConnected: boolean;
   textModel?: string;
   imageModel?: string;
+  textTier?: string;
+  imageTier?: string;
   isDefaultText: boolean;
   isDefaultImage: boolean;
 }
 
 export const WizardStep2AiEngine = () => {
   const { data: settings, isLoading } = useAiSettingsQuery();
-  const { plan, providerCountCap } = useLicense();
-
-  // Plans page in the customer portal for the Pro-locked provider card
-  // ("Compare plans", specs/byok-ai-guidance.md §5).
-  const comparePlansHref = (providerId: string) =>
-    buildPortalSignupUrl({
-      intent: "unlock_provider",
-      domain: typeof window !== "undefined" ? window.location.hostname : undefined,
-      plan,
-      providerId,
-    });
+  const { plan } = useLicense();
   const setStepValid = useWizardStore((s) => s.setStepValid);
   const setStep2Draft = useWizardStore((s) => s.setStep2Draft);
 
   const isCloud = isManagedPlan(plan as PlanId);
-  const isSingleProviderTier = providerCountCap === 1;
+  const imagesAvailable = planHasImageGeneration(plan);
 
   const providers = settings?.providers;
   const catalog = settings?.catalog;
   const defaults = settings?.defaults;
 
   const [wizardTarget, setWizardTarget] = useState<WizardTarget | null>(null);
-  const [upgradeTarget, setUpgradeTarget] = useState<{
-    id: string;
-    name: string;
-    description: string;
-    capabilities: Array<"text" | "image">;
-    minTier: string;
-    lockReason: "tier" | "cap";
-    fromProviderId?: string;
-  } | null>(null);
-
   const { installed, available } = useMemo(() => {
     if (!catalog || !providers) {
       return { installed: [] as string[], available: [] as string[] };
     }
     const inst: string[] = [];
     const avail: string[] = [];
-    for (const id of Object.keys(catalog)) {
+    // Claude, OpenAI, Gemini, as on the AI Engine page (2026-10-06).
+    for (const id of orderTextProviders(Object.keys(catalog))) {
       if (providers[id]?.connected) inst.push(id);
       else avail.push(id);
     }
@@ -142,27 +116,9 @@ export const WizardStep2AiEngine = () => {
     );
   }
 
-  // Pre-emptive cap locking. A tier can connect at most
-  // `providerCountCap` providers. The old logic keyed the cap lock off
-  // `installed.length >= cap`, so on a `none` tier (cap 1) with nothing
-  // connected yet BOTH OpenAI and Gemini rendered as freely connectable
-  // — implying the user could connect two — and Gemini only flipped to
-  // the "Free License" cap-lock AFTER OpenAI was connected (Yurii wp.org
-  // testing 2026-07-08). Instead, lock the extras up front: the first
-  // `slotsLeft` tier-eligible, not-yet-connected providers (catalog
-  // order — OpenAI first) stay connectable; the rest read as cap-locked
-  // from the start. Free (cap 2) still shows both; paid shows all.
-  const slotsLeft = Math.max(0, providerCountCap - installed.length);
-  const capLockedIds = new Set<string>();
-  {
-    let slot = 0;
-    for (const id of available) {
-      if (!providers[id]) continue; // not offered at this tier at all
-      if (slot >= slotsLeft) capLockedIds.add(id);
-      slot++;
-    }
-  }
-
+  // Every plan may connect every provider since 2026-10-06
+  // (specs/open-providers.md); the pre-emptive cap locking of 2026-07-08
+  // and the tier locks were deleted with that decision.
   const openWizard = (id: string, reconfigure = false) => {
     const meta = catalog[id];
     const status = providers[id];
@@ -171,12 +127,14 @@ export const WizardStep2AiEngine = () => {
       id,
       name: meta.name,
       description: meta.description,
-      capabilities: capsForTier(meta.capabilities, plan),
+      capabilities: meta.capabilities,
       keyUrl: meta.key_url,
       keyPrefix: meta.key_prefix,
       isConnected: reconfigure && !!status?.connected,
       textModel: status?.text_model,
       imageModel: status?.image_model,
+      textTier: status?.text_tier,
+      imageTier: status?.image_tier,
       isDefaultText: defaults.text_provider === id,
       isDefaultImage: defaults.image_provider === id,
     });
@@ -225,14 +183,13 @@ export const WizardStep2AiEngine = () => {
                   id={id}
                   name={meta.name}
                   description={meta.description}
-                  capabilities={capsForTier(meta.capabilities, plan)}
+                  capabilities={meta.capabilities}
                   maskedKey={status.masked_key}
                   isCloud={isCloud}
                   isDefaultText={defaults.text_provider === id}
                   isDefaultImage={defaults.image_provider === id}
                   incomplete={needsText || needsImage}
                   onManage={() => openWizard(id, true)}
-                  hideDefaultBadges={isSingleProviderTier}
                 />
               );
             })}
@@ -260,36 +217,14 @@ export const WizardStep2AiEngine = () => {
             {available.map((id) => {
               const meta = catalog[id];
               if (!meta) return null;
-              const isAvailableForTier = !!providers[id];
-              const isCapLocked =
-                isAvailableForTier && capLockedIds.has(id);
-              const cardAvailable = isAvailableForTier && !isCapLocked;
               return (
                 <AvailableProviderCard
                   key={id}
                   id={id}
                   name={meta.name}
                   description={meta.description}
-                  capabilities={capsForTier(meta.capabilities, plan)}
-                  available={cardAvailable}
-                  minTier={meta.min_tier}
-                  lockReason={isCapLocked ? "cap" : "tier"}
-                  comparePlansHref={comparePlansHref(id)}
-                  onSetUp={() => {
-                    if (cardAvailable) {
-                      openWizard(id);
-                      return;
-                    }
-                    setUpgradeTarget({
-                      id,
-                      name: meta.name,
-                      description: meta.description,
-                      capabilities: meta.capabilities,
-                      minTier: meta.min_tier,
-                      lockReason: isCapLocked ? "cap" : "tier",
-                      fromProviderId: isCapLocked ? installed[0] : undefined,
-                    });
-                  }}
+                  capabilities={meta.capabilities}
+                  onSetUp={() => openWizard(id)}
                 />
               );
             })}
@@ -333,25 +268,13 @@ export const WizardStep2AiEngine = () => {
           currentTextModel={wizardTarget.textModel}
           currentImageModel={wizardTarget.imageModel}
           isDefaultText={wizardTarget.isDefaultText}
+          currentTextTier={wizardTarget.textTier}
+          currentImageTier={wizardTarget.imageTier}
           isDefaultImage={wizardTarget.isDefaultImage}
-          providerCountCap={providerCountCap}
+          imagesAvailable={imagesAvailable}
         />
       ) : null}
 
-      {upgradeTarget ? (
-        <ProviderUpgradeDialog
-          open={!!upgradeTarget}
-          onClose={() => setUpgradeTarget(null)}
-          providerId={upgradeTarget.id}
-          providerName={upgradeTarget.name}
-          description={upgradeTarget.description}
-          capabilities={upgradeTarget.capabilities}
-          minTier={upgradeTarget.minTier}
-          lockReason={upgradeTarget.lockReason}
-          fromProviderId={upgradeTarget.fromProviderId}
-          plan={plan}
-        />
-      ) : null}
     </div>
   );
 };

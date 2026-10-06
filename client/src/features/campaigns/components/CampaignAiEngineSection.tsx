@@ -509,7 +509,7 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
       {/* Text capability row — BYOK / Free only. Managed plans write with
           one lineup chosen by Structura and never pick or see a text
           provider (specs/managed-ai-lineup.md §3.3); the stored provider
-          is left as is. The image row stays on every plan. */}
+          is left as is. */}
       {!isCloud && (
         <CapabilityRow
           capability="text"
@@ -548,8 +548,10 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
       )}
 
       {/* Image capability row — only for licensed users (Free has no
-          image gen at all). */}
-      {availableImageProviders.length > 0 && isLicensed && (
+          image gen at all) on own-key plans. Managed plans pick no image
+          provider, model or fallback since 2026-10-06: Structura binds one
+          image model there; the stored values are left as they are. */}
+      {availableImageProviders.length > 0 && isLicensed && !isCloud && (
         <CapabilityRow
           capability="image"
           primary={intelligence.imageProvider}
@@ -565,9 +567,6 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
           fallbackLocked={false}
           isFallbackEligible={isFallbackEligibleFor("image")}
           primaryIncomplete={isProviderIncomplete(intelligence.imageProvider)}
-          // Managed plans show no fallback controls (2026-10-02, matching the
-          // customer portal); the image provider choice stays.
-          showFallback={!isCloud}
         />
       )}
 

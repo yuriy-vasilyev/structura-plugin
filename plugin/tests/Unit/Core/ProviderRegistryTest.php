@@ -80,7 +80,8 @@ class ProviderRegistryTest extends TestCase
         $this->assertSame('anthropic', $claude['id']);
         $this->assertSame('Anthropic Claude', $claude['name']);
         $this->assertSame(['text'], $claude['capabilities']);
-        $this->assertSame('byok', $claude['min_tier']);
+        // 2026-10-06 (specs/open-providers.md): no per-provider plan floor.
+        $this->assertArrayNotHasKey('min_tier', $claude);
         $this->assertSame('sk-ant-', $claude['key_prefix']);
         $this->assertSame('strict', $claude['schema_mode']);
     }
@@ -120,25 +121,31 @@ class ProviderRegistryTest extends TestCase
     //  TIER FILTERING
     // ──────────────────────────────────────────────────────────────────────
 
-    /** @test */
-    public function none_tier_gets_openai_only(): void
+    /**
+     * 2026-10-06 owner decision (specs/open-providers.md): every own-key
+     * plan, anonymous included, may connect all three providers.
+     *
+     * @test
+     * @dataProvider own_key_plans
+     */
+    public function own_key_plans_get_every_provider(string $plan): void
     {
-        // 2026-10-02 owner decision, matching the cloud's
-        // PROVIDERS_FOR_TIER.none: without an account only OpenAI.
-        // Gemini needs Free, Anthropic a paid tier.
-        $providers = Provider_Registry::get_providers_for_tier('none');
+        $providers = Provider_Registry::get_providers_for_tier($plan);
 
-        $this->assertSame(['openai'], array_keys($providers));
+        $this->assertSame(['openai', 'gemini', 'anthropic'], array_keys($providers));
+    }
+
+    public function own_key_plans(): array
+    {
+        return [['none'], ['free'], ['byok']];
     }
 
     /** @test */
-    public function free_tier_gets_openai_and_gemini(): void
+    public function provider_descriptions_name_no_models(): void
     {
-        $providers = Provider_Registry::get_providers_for_tier('free');
-
-        $this->assertArrayHasKey('openai', $providers);
-        $this->assertArrayHasKey('gemini', $providers);
-        $this->assertArrayNotHasKey('anthropic', $providers);
+        $this->assertSame('Text and images', Provider_Registry::get_provider('openai')['description']);
+        $this->assertSame('Text and images', Provider_Registry::get_provider('gemini')['description']);
+        $this->assertSame('Text', Provider_Registry::get_provider('anthropic')['description']);
     }
 
     /** @test */
@@ -169,13 +176,11 @@ class ProviderRegistryTest extends TestCase
     }
 
     /** @test */
-    public function unknown_tier_defaults_to_lowest_access(): void
+    public function unknown_tier_gets_every_provider_like_none(): void
     {
         $providers = Provider_Registry::get_providers_for_tier('unknown_tier');
 
-        // Unknown tier → level 0 (`none`) → OpenAI only (see
-        // `none_tier_gets_openai_only`).
-        $this->assertSame(['openai'], array_keys($providers));
+        $this->assertSame(['openai', 'gemini', 'anthropic'], array_keys($providers));
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -188,8 +193,8 @@ class ProviderRegistryTest extends TestCase
         $text_free = Provider_Registry::get_providers_by_capability('text', 'free');
         $text_pro  = Provider_Registry::get_providers_by_capability('text', 'byok');
 
-        $this->assertCount(2, $text_free);   // openai + gemini
-        $this->assertCount(3, $text_pro);    // openai + gemini + anthropic
+        $this->assertCount(3, $text_free);   // every provider since 2026-10-06
+        $this->assertCount(3, $text_pro);
     }
 
     /** @test */
@@ -199,9 +204,10 @@ class ProviderRegistryTest extends TestCase
         $image_free = Provider_Registry::get_providers_by_capability('image', 'free');
         $image_pro  = Provider_Registry::get_providers_by_capability('image', 'byok');
 
-        // `none` is OpenAI only (2026-10-02); Anthropic remains
-        // text-only at every tier.
-        $this->assertCount(1, $image_none);  // openai
+        // Capability, not plan (2026-10-06): OpenAI and Gemini make
+        // images; Anthropic is text-only at every tier. Whether `none`
+        // may GENERATE images is a plan feature enforced by the cloud.
+        $this->assertCount(2, $image_none);  // openai + gemini
         $this->assertCount(2, $image_free);  // openai + gemini
         $this->assertCount(2, $image_pro);   // openai + gemini
     }
@@ -227,22 +233,14 @@ class ProviderRegistryTest extends TestCase
         $this->assertTrue(Provider_Registry::validate_provider_access('openai', 'byok'));
     }
 
-    /** @test */
-    public function it_validates_gemini_requires_free_tier(): void
+    /**
+     * @test
+     * @dataProvider own_key_plans
+     */
+    public function it_validates_every_provider_on_every_own_key_plan(string $plan): void
     {
-        // 2026-10-02 owner decision: no Gemini without an account.
-        $this->assertFalse(Provider_Registry::validate_provider_access('gemini', 'none'));
-        $this->assertTrue(Provider_Registry::validate_provider_access('gemini', 'free'));
-        $this->assertTrue(Provider_Registry::validate_provider_access('gemini', 'byok'));
-    }
-
-    /** @test */
-    public function it_validates_anthropic_requires_pro_tier(): void
-    {
-        $this->assertFalse(Provider_Registry::validate_provider_access('anthropic', 'none'));
-        $this->assertFalse(Provider_Registry::validate_provider_access('anthropic', 'free'));
-        $this->assertTrue(Provider_Registry::validate_provider_access('anthropic', 'byok'));
-        $this->assertTrue(Provider_Registry::validate_provider_access('anthropic', 'cloud'));
+        $this->assertTrue(Provider_Registry::validate_provider_access('gemini', $plan));
+        $this->assertTrue(Provider_Registry::validate_provider_access('anthropic', $plan));
     }
 
     /** @test */
@@ -292,21 +290,31 @@ class ProviderRegistryTest extends TestCase
     }
 
     /** @test */
-    public function it_flags_text_provider_above_user_tier(): void
+    public function it_accepts_anthropic_text_on_free_and_none(): void
     {
-        // `validate_campaign_providers` always queries bindings even
-        // when the tier check above already failed (the binding lookup
-        // covers the image provider too). Stub with empty so the call
-        // resolves without attempting a real cloud query.
+        $this->stubBindings(['anthropic']);
+
+        foreach (['free', 'none'] as $plan) {
+            $result = Provider_Registry::validate_campaign_providers([
+                'textProvider' => 'anthropic',
+            ], $plan);
+
+            $this->assertTrue($result['text_ok'], $plan);
+            $this->assertEmpty($result['issues'], $plan);
+        }
+    }
+
+    /** @test */
+    public function it_flags_an_unknown_text_provider(): void
+    {
         $this->stubBindings([]);
 
         $result = Provider_Registry::validate_campaign_providers([
-            'textProvider' => 'anthropic', // requires pro
-        ], 'free'); // user is only free tier
+            'textProvider' => 'mistral',
+        ], 'byok');
 
         $this->assertFalse($result['text_ok']);
         $this->assertNotEmpty($result['issues']);
-        $this->assertStringContainsString('byok', $result['issues'][0]);
     }
 
     /** @test */
@@ -339,19 +347,14 @@ class ProviderRegistryTest extends TestCase
     }
 
     /** @test */
-    public function it_flags_image_provider_above_user_tier(): void
+    public function it_flags_an_image_provider_that_makes_no_images_as_not_connected_or_unknown(): void
     {
-        // Phase 1.8 dropped Gemini's floor to `none`, so the
-        // gemini-on-none scenario no longer flags above-tier. Use
-        // anthropic instead — it's still tier-gated above `none` and
-        // exercises the same "image provider above user tier" branch
-        // (even though anthropic doesn't actually do images — the
-        // tier check fires first, which is what this test pins).
-        $this->stubBindings(['openai', 'gemini', 'anthropic']);
+        // Unknown image provider ids still fail the access check.
+        $this->stubBindings(['openai']);
 
         $result = Provider_Registry::validate_campaign_providers([
             'textProvider'  => 'openai',
-            'imageProvider' => 'anthropic',
+            'imageProvider' => 'midjourney',
         ], 'none');
 
         $this->assertTrue($result['text_ok']);
@@ -364,7 +367,7 @@ class ProviderRegistryTest extends TestCase
     // ──────────────────────────────────────────────────────────────────────
 
     /** @test */
-    public function it_returns_connected_providers_filtered_by_tier_and_key(): void
+    public function it_returns_connected_providers_by_binding(): void
     {
         $this->stubBindings(['openai', 'gemini']);
 
@@ -372,19 +375,18 @@ class ProviderRegistryTest extends TestCase
 
         $this->assertArrayHasKey('openai', $connected);
         $this->assertArrayHasKey('gemini', $connected);
-        $this->assertArrayNotHasKey('anthropic', $connected); // above tier
+        $this->assertArrayNotHasKey('anthropic', $connected); // no binding
     }
 
     /** @test */
-    public function it_excludes_keyed_providers_above_tier(): void
+    public function it_counts_a_bound_anthropic_key_on_free_and_none(): void
     {
-        // anthropic has a key but user is free tier → should be excluded
+        // Before 2026-10-06 a Free or anonymous site's Anthropic binding
+        // was dropped here.
         $this->stubBindings(['openai', 'anthropic']);
 
-        $connected = Provider_Registry::get_connected_providers('free');
-
-        $this->assertArrayHasKey('openai', $connected);
-        $this->assertArrayNotHasKey('anthropic', $connected);
+        $this->assertArrayHasKey('anthropic', Provider_Registry::get_connected_providers('free'));
+        $this->assertArrayHasKey('anthropic', Provider_Registry::get_connected_providers('none'));
     }
 
     /** @test */

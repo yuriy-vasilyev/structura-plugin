@@ -214,6 +214,9 @@ export const MODELS: readonly CatalogModel[] = [
     provider: "openai",
     role: "image",
     unlisted: true,
+    // Managed image failover at medium quality (owner decision 2026-10-06,
+    // blind image test 2026-10-05). Stays unlisted: no own-key picker offers it.
+    managedImage: "failover",
     // Image out $30 / 1M tokens, image in $8, text in $5 (2026-10-01).
     manifest: { family: "image", endpoint: "v1/images/generations", qualities: ["low", "medium", "high", "xhigh", "max", "auto"], default_quality: "high" },
   },
@@ -320,6 +323,9 @@ export const MODELS: readonly CatalogModel[] = [
     role: "image",
     tier: "mid",
     default: true,
+    // Every Cloud and Cloud Pro image (owner decision 2026-10-06, blind
+    // image test 2026-10-05: 126 images, three judges and the owner's ranking).
+    managedImage: "primary",
     manifest: {
       family: "image",
       endpoint: "generateContent",

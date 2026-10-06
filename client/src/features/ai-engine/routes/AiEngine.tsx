@@ -11,13 +11,13 @@ import { PageContainer } from "@/components/Layout/PageContainer";
 import { useAiSettingsQuery } from "@/features/ai-engine";
 import { useLicense } from "@/features/settings";
 import { isManagedPlan, type PlanId } from "@structura/types";
-import { buildPortalSignupUrl } from "@/utils/portalLinks";
+import { orderTextProviders } from "@/features/campaigns/aiGuidance";
+import { planHasImageGeneration } from "../helpers";
 
 // Components
 import { InstalledProviderCard } from "../components/InstalledProviderCard";
 import { AvailableProviderCard } from "../components/AvailableProviderCard";
 import { ProviderSetupWizard } from "../components/ProviderSetupWizard";
-import { ProviderUpgradeDialog } from "../components/ProviderUpgradeDialog";
 import { WorkspaceKeysPicker } from "../components/WorkspaceKeysPicker";
 
 /* ────────────────────────────────────────────────────────────────── */
@@ -32,23 +32,10 @@ interface WizardTarget {
   isConnected: boolean;
   textModel?: string;
   imageModel?: string;
+  textTier?: string;
+  imageTier?: string;
   isDefaultText: boolean;
   isDefaultImage: boolean;
-}
-
-/**
- * Phase 1.8 §1.8.4 — strip the `image` capability from a provider's
- * caps array when the calling tier has no image generation. `none`
- * tier users see the AI Engine page with a single configurable
- * provider, but the image-side of the wizard (image model picker +
- * "Default for image" toggle) makes no sense — the cloud rejects
- * image-gen calls for `none` regardless. Filter at the source so
- * the wizard's existing `hasImage` checks naturally hide those
- * fields without a tier-aware branch in every UI primitive.
- */
-function capsForTier(capabilities: Array<"text" | "image">, plan: string): Array<"text" | "image"> {
-  if (plan !== "none") return capabilities;
-  return capabilities.filter((c) => c !== "image");
 }
 
 /**
@@ -56,32 +43,23 @@ function capsForTier(capabilities: Array<"text" | "image">, plan: string): Array
  *
  * Two-section layout:
  *  1. "Your Providers"  – connected providers with Default badges
- *  2. "Available"       – providers to add, or tier-locked teasers
+ *  2. "Available"       – providers to add
+ *
+ * Every plan, anonymous included, may connect every provider and the
+ * cards show what each provider can do (2026-10-06,
+ * specs/open-providers.md). The tier locks, the per-plan provider count
+ * cap and the image-capability strip on `none` were deleted then; whether
+ * the plan makes images is passed to the wizard instead.
  *
  * Clicking "Set Up" / "Manage" opens a multi-step wizard that handles
  * API key, connection test, model selection, AND default provider config.
  */
 export const AiEngine = () => {
   const { data: settings, isLoading } = useAiSettingsQuery();
-  const { plan, providerCountCap } = useLicense();
-
-  // Plans page in the customer portal for the Pro-locked provider card
-  // ("Compare plans", specs/byok-ai-guidance.md §5).
-  const comparePlansHref = (providerId: string) =>
-    buildPortalSignupUrl({
-      intent: "unlock_provider",
-      domain: typeof window !== "undefined" ? window.location.hostname : undefined,
-      plan,
-      providerId,
-    });
+  const { plan } = useLicense();
 
   const isCloud = isManagedPlan(plan as PlanId);
-  // Phase 1.8 §1.8.4 — convenience flag for "single provider" UX:
-  // hide default-for-text/image toggles in the wizard, hide
-  // duplicate "default" badges on the installed card, hide the
-  // "add another provider" affordances on the available list once
-  // installed.length === cap.
-  const isSingleProviderTier = providerCountCap === 1;
+  const imagesAvailable = planHasImageGeneration(plan);
 
   const providers = settings?.providers;
   const catalog = settings?.catalog;
@@ -90,29 +68,6 @@ export const AiEngine = () => {
   /* ── Wizard state ─────────────────────────────────────────────── */
   const [wizardTarget, setWizardTarget] = useState<WizardTarget | null>(null);
 
-  /* ── Upgrade teaser state (for tier-locked providers) ────────── */
-  const [upgradeTarget, setUpgradeTarget] = useState<{
-    id: string;
-    name: string;
-    description: string;
-    capabilities: Array<"text" | "image">;
-    minTier: string;
-    /**
-     * Phase 1.8 §1.8.4 — when the user hit the per-tier provider count
-     * cap (rather than the provider's own min_tier), the upgrade
-     * dialog reframes its copy around "connect more providers" and
-     * sends the customer to the portal with `intent=connect_more_providers`.
-     */
-    lockReason: "tier" | "cap";
-    /**
-     * Provider currently connected when a `cap` lock fires. Surfaced
-     * to the portal so the post-signup landing page can mention the
-     * swap scenario explicitly ("you came here trying to connect
-     * OpenAI alongside Gemini").
-     */
-    fromProviderId?: string;
-  } | null>(null);
-
   /* ── Derived lists ────────────────────────────────────────────── */
   const { installed, available } = useMemo(() => {
     if (!catalog || !providers) return { installed: [] as string[], available: [] as string[] };
@@ -120,7 +75,9 @@ export const AiEngine = () => {
     const inst: string[] = [];
     const avail: string[] = [];
 
-    for (const id of Object.keys(catalog)) {
+    // Claude, OpenAI, Gemini wherever providers are listed (owner review
+    // 2026-10-06).
+    for (const id of orderTextProviders(Object.keys(catalog))) {
       if (providers[id]?.connected) {
         inst.push(id);
       } else {
@@ -154,24 +111,6 @@ export const AiEngine = () => {
     return <PageLoader label={__("Syncing AI Vault…", "structura")} size="lg" padding="lg" />;
   }
 
-  // Pre-emptive cap locking — mirrors WizardStep2AiEngine (Yurii wp.org
-  // testing 2026-07-08). Keying the cap lock off `installed.length >=
-  // cap` made a `none` tier (cap 1) show BOTH OpenAI and Gemini as
-  // freely connectable until the first connect consumed the slot. Lock
-  // the extras up front instead: the first `slotsLeft` tier-eligible,
-  // not-yet-connected providers (catalog order) stay connectable; the
-  // rest read as cap-locked "Free License" from the start.
-  const slotsLeft = Math.max(0, providerCountCap - installed.length);
-  const capLockedIds = new Set<string>();
-  {
-    let slot = 0;
-    for (const id of available) {
-      if (!providers[id]) continue; // not offered at this tier at all
-      if (slot >= slotsLeft) capLockedIds.add(id);
-      slot++;
-    }
-  }
-
   /* ── Wizard helpers ───────────────────────────────────────────── */
   const openWizard = (id: string, reconfigure = false) => {
     const meta = catalog[id];
@@ -182,14 +121,14 @@ export const AiEngine = () => {
       id,
       name: meta.name,
       description: meta.description,
-      // Phase 1.8 — strip image cap on `none` tier so the wizard's
-      // image-model picker + "Default for image" toggle don't render.
-      capabilities: capsForTier(meta.capabilities, plan),
+      capabilities: meta.capabilities,
       keyUrl: meta.key_url,
       keyPrefix: meta.key_prefix,
       isConnected: reconfigure && !!status?.connected,
       textModel: status?.text_model,
       imageModel: status?.image_model,
+      textTier: status?.text_tier,
+      imageTier: status?.image_tier,
       isDefaultText: defaults.text_provider === id,
       isDefaultImage: defaults.image_provider === id,
     });
@@ -265,14 +204,13 @@ export const AiEngine = () => {
                     id={id}
                     name={meta.name}
                     description={meta.description}
-                    capabilities={capsForTier(meta.capabilities, plan)}
+                    capabilities={meta.capabilities}
                     maskedKey={status.masked_key}
                     isCloud={isCloud}
                     isDefaultText={defaults.text_provider === id}
                     isDefaultImage={defaults.image_provider === id}
                     incomplete={isIncomplete}
                     onManage={() => openWizard(id, true)}
-                    hideDefaultBadges={isSingleProviderTier}
                   />
                 );
               })}
@@ -307,59 +245,14 @@ export const AiEngine = () => {
                 const meta = catalog[id];
                 if (!meta) return null;
 
-                // If the provider is in `providers` (tier-filtered), it's available.
-                // If it's only in `catalog` (all providers), it's locked for this tier.
-                const isAvailableForTier = !!providers[id];
-
-                // Phase 1.8 §1.8.4 — available-for-tier cards beyond the
-                // tier's provider allowance flip to a cap-locked
-                // presentation rather than disappearing. Reason: a hidden
-                // card leaves the user wondering why "OpenAI" is gone
-                // after they connected Gemini; a visible-but-locked card
-                // with a "Get Free License" CTA gives them the swap-or-
-                // upgrade story explicitly. `capLockedIds` locks the
-                // extras up front (see the computation above) rather than
-                // only after the cap is physically consumed.
-                const isCapLocked = isAvailableForTier && capLockedIds.has(id);
-
-                // The user-visible "available" flag flips to false on
-                // either path so the card renders in the locked
-                // presentation; `lockReason` distinguishes "you can't
-                // pick this on your tier" (existing dialog copy) from
-                // "you've used all your provider slots, upgrade to
-                // get more" (cap-aware portal handoff).
-                const cardAvailable = isAvailableForTier && !isCapLocked;
-
                 return (
                   <AvailableProviderCard
                     key={id}
                     id={id}
                     name={meta.name}
                     description={meta.description}
-                    capabilities={capsForTier(meta.capabilities, plan)}
-                    available={cardAvailable}
-                    minTier={meta.min_tier}
-                    lockReason={isCapLocked ? "cap" : "tier"}
-                    comparePlansHref={comparePlansHref(id)}
-                    onSetUp={() => {
-                      if (cardAvailable) {
-                        openWizard(id);
-                        return;
-                      }
-                      // Surface the cap-locked story through the same
-                      // upgrade dialog that handles tier-locks; the
-                      // dialog branches on `lockReason` for the copy
-                      // and CTA target.
-                      setUpgradeTarget({
-                        id,
-                        name: meta.name,
-                        description: meta.description,
-                        capabilities: meta.capabilities,
-                        minTier: meta.min_tier,
-                        lockReason: isCapLocked ? "cap" : "tier",
-                        fromProviderId: isCapLocked ? installed[0] : undefined,
-                      });
-                    }}
+                    capabilities={meta.capabilities}
+                    onSetUp={() => openWizard(id)}
                   />
                 );
               })}
@@ -425,27 +318,14 @@ export const AiEngine = () => {
           isConnected={wizardTarget.isConnected}
           currentTextModel={wizardTarget.textModel}
           currentImageModel={wizardTarget.imageModel}
+          currentTextTier={wizardTarget.textTier}
+          currentImageTier={wizardTarget.imageTier}
           isDefaultText={wizardTarget.isDefaultText}
           isDefaultImage={wizardTarget.isDefaultImage}
-          providerCountCap={providerCountCap}
+          imagesAvailable={imagesAvailable}
         />
       )}
 
-      {/* ── Upgrade Teaser Modal (tier-locked providers) ──────────── */}
-      {upgradeTarget && (
-        <ProviderUpgradeDialog
-          open={!!upgradeTarget}
-          onClose={() => setUpgradeTarget(null)}
-          providerId={upgradeTarget.id}
-          providerName={upgradeTarget.name}
-          description={upgradeTarget.description}
-          capabilities={upgradeTarget.capabilities}
-          minTier={upgradeTarget.minTier}
-          lockReason={upgradeTarget.lockReason}
-          fromProviderId={upgradeTarget.fromProviderId}
-          plan={plan}
-        />
-      )}
     </PageContainer>
   );
 };

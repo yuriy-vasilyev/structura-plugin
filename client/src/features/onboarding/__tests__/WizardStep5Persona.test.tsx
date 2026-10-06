@@ -158,6 +158,27 @@ describe("WizardStep5Persona — auto-draft gating", () => {
   });
 });
 
+describe("WizardStep5Persona — own-key plans with a connected key", () => {
+  // Magic suggest on every plan (2026-10-06, specs/open-providers.md §8): a
+  // Free or anonymous site with a text key drafts its first voice like a paid
+  // plan; without a key it keeps the House voice below.
+  it.each(["none", "free"])("%s with a connected key AI-drafts the first persona", async (plan) => {
+    licenseMock.current = { plan, isPaidLicense: false };
+    providersMock.current = { defaultTextProvider: "openai", isAutoResolved: true };
+    personasQueryMock.current = {
+      data: [{ id: "hv1", name: "House voice" }],
+      isLoading: false,
+      isSuccess: true,
+    };
+    suggestMock.fn.mockResolvedValue({ name: "Site Voice", system_prompt: "Write plainly." });
+    savePersonaMock.fn.mockResolvedValue({ success: true, id: "ai1" });
+    render(<WizardStep5Persona />);
+
+    await waitFor(() => expect(addMembershipMock.fn).toHaveBeenCalledWith("ai1"));
+    expect(suggestMock.fn).toHaveBeenCalledWith("persona", expect.objectContaining({ provider: "openai" }));
+  });
+});
+
 describe("WizardStep5Persona — non-AI tier House-voice binding", () => {
   // Regression (2026-07-20): on none/free tiers the plugin-seeded "House
   // voice" landed in the workspace library UNBOUND, leaving an empty "no

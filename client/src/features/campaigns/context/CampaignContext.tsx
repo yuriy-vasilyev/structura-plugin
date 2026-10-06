@@ -3,7 +3,7 @@ import { CampaignFormData } from "../types";
 import { useLicense, useDefaultProviders } from "@/features/settings";
 import { useAiSettingsQuery } from "@/features/ai-engine";
 import { useAvailableModelsQuery } from "@/features/ai-engine/api/useAvailableModelsQuery";
-import { resolveDefaultModel } from "@/features/ai-engine/helpers";
+import { resolveDefaultModel, resolveDefaultTier } from "@/features/ai-engine/helpers";
 import { DEFAULT_CAMPAIGN_FORM_DATA } from "@/features/campaigns/constants";
 import { getCampaignFormDataForLicense } from "@/features/campaigns/helpers";
 import { useCampaignDraftStore } from "./draftStore";
@@ -108,6 +108,14 @@ interface ModelBackfillPatch {
   textModel?: string;
   imageModel?: string;
   /**
+   * The tier that goes with a filled model: the site default's stored tier
+   * or the tier its model belongs to (2026-10-06, specs/open-providers.md).
+   * Applied only together with its model, so the campaign stores the tier
+   * the cloud resolves at generation time.
+   */
+  textTier?: "top" | "mid";
+  imageTier?: "top" | "mid";
+  /**
    * The providers the models were resolved AGAINST. Appliers must
    * re-check these against current state before writing: the effect's
    * closure can be one render stale (e.g. the license-defaults
@@ -143,7 +151,14 @@ const useModelBackfill = (
         providerSettings: ai?.providers,
         catalogDefaults: availableModels?.defaults,
       });
-      if (resolved) patch.textModel = resolved;
+      if (resolved) {
+        patch.textModel = resolved;
+        patch.textTier = resolveDefaultTier({
+          provider: textProvider,
+          capability: "text",
+          providerSettings: ai?.providers,
+        });
+      }
     }
     if (!imageModel) {
       const resolved = resolveDefaultModel({
@@ -152,7 +167,14 @@ const useModelBackfill = (
         providerSettings: ai?.providers,
         catalogDefaults: availableModels?.defaults,
       });
-      if (resolved) patch.imageModel = resolved;
+      if (resolved) {
+        patch.imageModel = resolved;
+        patch.imageTier = resolveDefaultTier({
+          provider: imageProvider,
+          capability: "image",
+          providerSettings: ai?.providers,
+        });
+      }
     }
     if (patch.textModel || patch.imageModel) applyPatch(patch);
   }, [
@@ -175,16 +197,18 @@ const useModelBackfill = (
 const guardModelPatch = (
   patch: ModelBackfillPatch,
   current: CampaignFormData["intelligence"],
-): Partial<Pick<CampaignFormData["intelligence"], "textModel" | "imageModel">> => ({
+): Partial<
+  Pick<CampaignFormData["intelligence"], "textModel" | "imageModel" | "textTier" | "imageTier">
+> => ({
   ...(patch.textModel &&
   !current.textModel &&
   current.textProvider === patch.resolvedFor.textProvider
-    ? { textModel: patch.textModel }
+    ? { textModel: patch.textModel, ...(patch.textTier ? { textTier: patch.textTier } : {}) }
     : {}),
   ...(patch.imageModel &&
   !current.imageModel &&
   current.imageProvider === patch.resolvedFor.imageProvider
-    ? { imageModel: patch.imageModel }
+    ? { imageModel: patch.imageModel, ...(patch.imageTier ? { imageTier: patch.imageTier } : {}) }
     : {}),
 });
 

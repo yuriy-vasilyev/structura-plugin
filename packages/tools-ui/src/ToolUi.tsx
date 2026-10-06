@@ -645,6 +645,7 @@ export const LearnLink: FC<{
       rel={target.newTab ? "noopener" : undefined}
       aria-describedby={describedBy}
       data-learn={slug}
+      onClick={target.onFollow && (() => target.onFollow?.(slug))}
       className={`group/learn -my-1 inline-flex max-w-full items-start gap-1.5 rounded-md py-1 leading-4 text-brand-700 underline-offset-2 hover:underline dark:text-brand-300 ${FOCUS_GLOW} ${textClassName}`}
     >
       <BookOpen className="mt-px size-3.5 shrink-0" strokeWidth={2.25} aria-hidden="true" />

@@ -83,6 +83,32 @@ describe("CodeBlock panel layout (title)", () => {
     expect(document.getElementById(titleId as string)).toHaveTextContent("Prompt for Lovable");
   });
 
+  it("reports a successful copy through onCopied, in both layouts, and stays quiet when the clipboard refuses", async () => {
+    const onCopied = vi.fn();
+    const { unmount } = render(<CodeBlock value="ST-KEY" copyLabel="Copy key" onCopied={onCopied} />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Copy key" }));
+      await Promise.resolve();
+    });
+    expect(onCopied).toHaveBeenCalledTimes(1);
+    unmount();
+
+    render(<CodeBlock value="x" title="Prompt" copyLabel="Copy" onCopied={onCopied} />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Copy" }));
+      await Promise.resolve();
+    });
+    expect(onCopied).toHaveBeenCalledTimes(2);
+
+    writeText.mockRejectedValue(new Error("denied"));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Cop/ }));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(onCopied).toHaveBeenCalledTimes(2);
+  });
+
   it("wrap={false} keeps white-space: pre and scrolls sideways", () => {
     render(<CodeBlock value={PROMPT} title="Prompt" wrap={false} />);
     expect(document.querySelector("pre")).toHaveClass("whitespace-pre");

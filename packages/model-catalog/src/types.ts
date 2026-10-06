@@ -171,6 +171,15 @@ export interface CatalogModel {
    * Spec: specs/managed-ai-lineup.md §2.
    */
   managedWriter?: "primary" | "failover";
+  /**
+   * Managed image role this model fills, read only by
+   * `resolveManagedImageBinding` (at most one model per role, tested).
+   * `primary` makes every Cloud and Cloud Pro image; `failover` takes over
+   * when the primary fails transiently. Same pattern as `managedWriter`:
+   * may point at an `unlisted` model without making it customer-visible.
+   * Registry-only. Spec: specs/managed-ai-lineup.md §2.4.
+   */
+  managedImage?: "primary" | "failover";
   /** List prices (registry-only). See {@link ModelPricing}. */
   pricing?: ModelPricing;
   /** Provider deprecation / retirement notice (registry-only). */
