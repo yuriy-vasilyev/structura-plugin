@@ -10125,3 +10125,21 @@ msgstr "Crear cuenta gratuita"
 
 msgid "See plans"
 msgstr "Ver planes"
+
+msgid "Skip, write from the objective"
+msgstr "Omitir y escribir a partir del objetivo"
+
+msgid "Without keywords, each post picks a new topic from your objective and skips topics this site already covers."
+msgstr "Sin keywords, cada publicación elige un tema nuevo a partir de tu objetivo y omite los temas que este sitio ya cubre."
+
+msgid "From the objective"
+msgstr "A partir del objetivo"
+
+msgid "This campaign is writing from its objective"
+msgstr "Esta campaña escribe a partir de su objetivo"
+
+msgid "{{campaignName}} has no keywords, so each post picks a new topic from the campaign objective and skips topics this site already covers. Keywords are optional. Add some if you want to choose what each post targets."
+msgstr "{{campaignName}} no tiene keywords, así que cada publicación elige un tema nuevo a partir del objetivo de la campaña y omite los temas que este sitio ya cubre. Las keywords son opcionales. Añade algunas si quieres elegir a qué apunta cada publicación."
+
+msgid "Add keywords"
+msgstr "Añadir keywords"

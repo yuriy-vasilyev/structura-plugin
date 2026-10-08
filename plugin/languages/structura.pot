@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-06T10:55:28+00:00\n"
+"POT-Creation-Date: 2026-10-08T11:55:45+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: structura\n"
@@ -1603,7 +1603,7 @@ msgstr ""
 
 #: client/src/components/Layout/AppErrorBoundary.tsx:59
 #: client/src/features/campaigns/components/CampaignRunsTab.tsx:61
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1348
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1372
 #: client/src/features/channels/components/GscConnectFlow.tsx:724
 #: client/src/features/onboarding/components/AiConnectionBlocker.tsx:158
 msgid "Try again"
@@ -1681,7 +1681,7 @@ msgstr ""
 
 #: client/src/components/Layout/headerNav.ts:53
 #: client/src/features/ai-engine/routes/AiEngine.tsx:144
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:956
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:980
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:605
 msgid "AI Engine"
 msgstr ""
@@ -2002,7 +2002,7 @@ msgid "Create a persona"
 msgstr ""
 
 #: client/src/components/Shared/SelectionCard.tsx:81
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:845
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:869
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:498
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:1016
 msgid "Required"
@@ -2018,7 +2018,7 @@ msgstr ""
 #: client/src/features/campaigns/components/CampaignAiEngineSection.tsx:350
 #: client/src/features/campaigns/components/FallbackProviderRow.tsx:227
 #: client/src/features/campaigns/components/PregenerationControl.tsx:103
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:835
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:859
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:488
 #: client/src/features/channels/components/CatalogEntryCard.tsx:215
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:562
@@ -2494,7 +2494,7 @@ msgid "Starter"
 msgstr ""
 
 #: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:75
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:840
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:864
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:493
 #: client/src/features/channels/components/CatalogEntryCard.tsx:221
 #: client/src/utils/planLabel.ts:27
@@ -2544,7 +2544,7 @@ msgid "Overview"
 msgstr ""
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:72
-#: client/src/features/notices/utils.ts:222
+#: client/src/features/notices/utils.ts:223
 msgid "Connection"
 msgstr ""
 
@@ -2929,9 +2929,9 @@ msgstr ""
 
 #: client/src/features/campaigns/components/AiLabelReminder.tsx:61
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:381
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:423
-#: client/src/features/notices/utils.ts:178
-#: client/src/features/notices/utils.ts:184
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:433
+#: client/src/features/notices/utils.ts:179
+#: client/src/features/notices/utils.ts:185
 #: client/src/features/settings/routes/VisualsPage.tsx:741
 msgid "Learn more"
 msgstr ""
@@ -2971,8 +2971,7 @@ msgstr ""
 
 #: client/src/features/campaigns/components/CampaignAiEngineSection.tsx:243
 #: client/src/features/campaigns/components/FallbackProviderRow.tsx:66
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1686
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1698
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1722
 msgid "None"
 msgstr ""
 
@@ -3010,7 +3009,7 @@ msgstr ""
 #: client/src/features/campaigns/components/CampaignDraftBanner.tsx:15
 #: client/src/features/campaigns/components/ProviderPill.tsx:131
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:120
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1314
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1338
 msgid "Setup"
 msgstr ""
 
@@ -3019,7 +3018,7 @@ msgstr ""
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:135
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:619
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:121
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1681
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1705
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:123
 msgid "Keywords"
 msgstr ""
@@ -3083,7 +3082,7 @@ msgstr ""
 #: client/src/features/campaigns/components/CampaignLanguageField.tsx:63
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:102
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:697
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1667
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1691
 #: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:470
 #: client/src/features/onboarding/components/WizardStep1Identity.tsx:169
 msgid "Language"
@@ -3189,7 +3188,7 @@ msgstr ""
 
 #: client/src/features/campaigns/components/CampaignRunsTab.tsx:317
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:138
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:989
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1013
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:652
 msgid "Images"
 msgstr ""
@@ -3415,7 +3414,7 @@ msgstr ""
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:150
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:159
 #: client/src/features/campaigns/components/steps/StepSummary.tsx:95
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1101
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1125
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:757
 msgid "Taxonomy"
 msgstr ""
@@ -3802,12 +3801,12 @@ msgid "Pick one — it becomes your focus keyphrase."
 msgstr ""
 
 #: client/src/features/campaigns/components/SeoTargetingSection.tsx:202
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:465
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:475
 msgid "Live data"
 msgstr ""
 
 #: client/src/features/campaigns/components/SeoTargetingSection.tsx:204
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:467
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:477
 msgid "AI estimate"
 msgstr ""
 
@@ -4192,28 +4191,27 @@ msgid ""
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:311
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:353
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:360
 msgid "Unlock with Pro"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:312
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:354
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:361
 msgid "Create account"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:320
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:413
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1693
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1717
 msgid "Authority Sources"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:331
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:373
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:380
 msgid "Pro / Cloud Feature"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:343
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:385
 msgid "Skip & continue"
 msgstr ""
 
@@ -4222,9 +4220,9 @@ msgid "%d Authority Source(s)"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:417
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:472
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:575
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:623
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:482
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:593
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:647
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:275
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:299
 #: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:327
@@ -4232,7 +4230,7 @@ msgid "Re-discover"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:417
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:472
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:482
 #: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:328
 msgid "Discover"
 msgstr ""
@@ -4262,7 +4260,7 @@ msgid "Remove domain"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:530
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:573
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:592
 msgid "Analyzing"
 msgstr ""
 
@@ -4271,7 +4269,7 @@ msgid "Understanding your campaign objective and niche…"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:535
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:578
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:597
 msgid "Discovering"
 msgstr ""
 
@@ -4383,15 +4381,15 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:103
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:98
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1376
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1382
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1400
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1406
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:337
 msgid "Campaign Name"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/SimpleStepStrategy.tsx:104
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:99
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1385
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1409
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:340
 msgid "e.g. Winter 2026 SEO Push"
 msgstr ""
@@ -4599,19 +4597,19 @@ msgid "General Improvements"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:108
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:973
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:997
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:622
 msgid "Replace long AI-like dashes"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:109
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:974
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:998
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:623
 msgid "Normalize AI dashes (like—this) to standard format (like - this)."
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:120
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:979
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1003
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:635
 msgid "Disable emojis"
 msgstr ""
@@ -4623,7 +4621,7 @@ msgid ""
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:144
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:992
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1016
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:655
 msgid "Generate featured image"
 msgstr ""
@@ -4633,19 +4631,19 @@ msgid "Create a relevant featured image for the post."
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:155
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1000
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1024
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:667
 msgid "Body image generation"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:156
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1001
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1025
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:668
 msgid "Identify spots and generate images in the post body."
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:166
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1009
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1033
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:930
 msgid ""
 "Image generation is unavailable because WordPress can't write to your "
@@ -4653,14 +4651,14 @@ msgid ""
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:192
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1040
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1064
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:694
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:998
 msgid "Content Blocks"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:221
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1144
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1168
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:814
 msgid "AI Transparency Signal"
 msgstr ""
@@ -4672,7 +4670,7 @@ msgid "Enabled"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:235
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1167
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1191
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:845
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:975
 msgid "Disclosure Notice"
@@ -4696,34 +4694,45 @@ msgstr ""
 msgid "This roadmap will continue producing content until manually paused."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:248
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:116
+msgid ""
+"Without keywords, each post picks a new topic from your objective and skips "
+"topics this site already covers."
+msgstr ""
+
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:255
 msgid ""
 "No keywords were discovered for this topic. You can add keywords manually "
 "below."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:260
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:267
 msgid ""
 "Keyword discovery failed. You can retry, add keywords manually, or skip this "
 "step."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:362
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:456
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:369
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:466
 msgid "Keyword Bank"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:455
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:392
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:614
+msgid "Skip, write from the objective"
+msgstr ""
+
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:465
 msgid "%d Keyword(s)"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:482
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:492
 msgid ""
 "Prefilled from your site's target keywords by default. Add, remove, or re-"
 "discover to tailor them for this campaign."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:494
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:504
 msgid ""
 "These keywords were generated by AI based on your campaign objective. Real "
 "search-volume data wasn't available for this run — typically because your "
@@ -4731,39 +4740,39 @@ msgid ""
 "supported yet. Numbers are estimates."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:529
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:539
 msgid "No keywords yet. Use Discover or add keywords manually below."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:538
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:557
 msgid "Add keyword"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:539
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:558
 msgid "Add a keyword manually (e.g. best WordPress SEO plugins)"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:574
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:593
 msgid "Studying your topic landscape…"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:579
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:598
 msgid "Surfacing how readers search this niche…"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:583
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:602
 msgid "Expanding"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:584
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:603
 msgid "Mapping adjacent angles and long-tail variants…"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:588
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:607
 msgid "Curating"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepKeywords.tsx:589
+#: client/src/features/campaigns/components/steps/StepKeywords.tsx:608
 msgid "Ranking by relevance to your campaign…"
 msgstr ""
 
@@ -4772,7 +4781,7 @@ msgid "Assigned Persona"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepSeoRules.tsx:35
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1068
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1092
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:728
 msgid "SEO Directives"
 msgstr ""
@@ -5271,7 +5280,7 @@ msgid "Created"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:676
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1655
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1679
 #: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:455
 msgid "Mode"
 msgstr ""
@@ -5391,7 +5400,7 @@ msgid "%1$d / %2$d campaigns"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CampaignsPage.tsx:240
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:508
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:526
 #: client/src/features/dashboard/routes/DashboardPage.tsx:77
 msgid "New Campaign"
 msgstr ""
@@ -5488,219 +5497,223 @@ msgstr ""
 msgid "Skipped"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:509
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:527
 msgid "Configure and launch your content strategy"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:591
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:638
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:610
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:662
 msgid "Looks good — continue"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:656
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:680
 #: client/src/features/onboarding/components/WizardShell.tsx:413
 msgid "Continue"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:684
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:708
 msgid "Return to Campaigns (draft auto-saved)"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:685
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:709
 msgid "Cancel and return to Campaigns"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:694
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:718
 msgid "Discard draft and start over"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:928
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:952
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:578
 msgid "Advanced Settings"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:945
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:969
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:594
 msgid "Writing approach"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:970
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:994
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:619
 msgid "Improvements"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:980
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1004
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:636
 msgid "Remove emojis from AI-generated content for a cleaner output."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:993
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1017
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:656
 msgid "Create a relevant featured image for each post."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1110
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1134
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:766
 msgid "Categories"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1123
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1147
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:789
 #: client/src/features/channels/components/CaptionPackage.tsx:115
 #: client/src/features/channels/components/CaptionPackage.tsx:137
 msgid "Tags"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1147
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1171
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:817
 msgid "Append a disclosure notice to AI-generated content for transparency."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1156
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1180
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:829
 msgid "Disclosure"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1207
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1231
 msgid "“%1$s” is already running in %2$s."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1217
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1241
 msgid "Continue anyway"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1225
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1249
 msgid "View"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1317
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1341
 msgid "Language, objective and voice for this campaign"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1331
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1355
 msgid "Magic suggest"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1360
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1384
 msgid ""
 "Everything this campaign writes — topics, titles, posts — is in this "
 "language."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1393
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1401
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1417
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1425
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:345
 msgid "Campaign Objective"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1406
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1430
 msgid "What should this campaign achieve, and for whom?"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1410
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1434
 msgid "Two or three sentences. Structura writes every post against this."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1495
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1637
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1519
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1661
 msgid "Why these settings"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1500
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1524
 msgid ""
 "Structura decided these from your site. Change anything — nothing here is "
 "locked."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1518
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1542
 msgid "Continue to Keywords"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1535
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1559
 msgid "Redraft the campaign in %s?"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1538
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1562
 msgid ""
 "Switching the language drafts the campaign again. Your edits to the name and "
 "objective will be replaced."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1542
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1566
 msgid "Redraft"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1543
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1567
 msgid "Keep what I wrote"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1553
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1577
 msgid "Replace your edits?"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1554
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1578
 msgid ""
 "Magic suggest will rewrite the name and objective. Your edits will be "
 "replaced."
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1558
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1582
 msgid "Replace"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1559
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1583
 msgid "Keep mine"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1574
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1598
 msgid "Drafted for you"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1579
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1603
 msgid "Drafted from your site"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1614
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1638
 msgid "your choice"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1615
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1639
 msgid "inferred"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1626
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1650
 msgid "Campaign Summary"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1629
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1653
 msgid "Review your campaign details before launching"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1646
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1670
 msgid "Campaign"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1685
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1709
 msgid "%d discovered"
 msgstr ""
 
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1697
-msgid "%d domains"
-msgstr ""
-
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1707
-msgid "Objective"
-msgstr ""
-
-#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1718
-msgid "Ready to launch?"
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1710
+msgid "From the objective"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1721
-msgid "Your campaign will start generating content based on the schedule"
+msgid "%d domains"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1731
+msgid "Objective"
+msgstr ""
+
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1742
+msgid "Ready to launch?"
+msgstr ""
+
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1745
+msgid "Your campaign will start generating content based on the schedule"
+msgstr ""
+
+#: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1755
 msgid "Launch Campaign"
 msgstr ""
 
@@ -7084,7 +7097,7 @@ msgstr ""
 
 #: client/src/features/channels/components/SearchPerformanceSection.tsx:212
 #: client/src/features/dashboard/components/GscSummaryCard.tsx:252
-#: client/src/features/notices/utils.ts:97
+#: client/src/features/notices/utils.ts:98
 msgid "Reconnect"
 msgstr ""
 
@@ -7666,189 +7679,189 @@ msgstr ""
 msgid "Last seen %1$s · %2$d occurrences"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:39
+#: client/src/features/notices/utils.ts:40
 msgid "Add a {{provider}} API key"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:40
+#: client/src/features/notices/utils.ts:41
 msgid ""
 "Structura tried to generate content for you but no {{provider}} API key is "
 "connected to this workspace. Add a key in AI Settings and we'll pick up "
 "where we left off on the next run."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:44
+#: client/src/features/notices/utils.ts:45
 msgid "Open AI Settings"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:45
+#: client/src/features/notices/utils.ts:46
 msgid "Your {{provider}} key was rejected"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:46
+#: client/src/features/notices/utils.ts:47
 msgid ""
 "Your {{provider}} API key was refused by the provider. The key may have been "
 "revoked, rotated, or its billing is suspended. Update or replace it to "
 "resume generation."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:50
+#: client/src/features/notices/utils.ts:51
 msgid "Update key"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:52
+#: client/src/features/notices/utils.ts:53
 msgid ""
 "In our tests, posts written with Gemini contained more invented details. "
 "Each campaign shows how to switch in its AI engine section."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:56
+#: client/src/features/notices/utils.ts:57
 msgid "Review campaigns"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:57
+#: client/src/features/notices/utils.ts:58
 msgid "You've reached your generation quota"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:58
+#: client/src/features/notices/utils.ts:59
 msgid ""
 "This site has used all of the included posts and images for this billing "
 "cycle. The quota refills at the start of the next cycle, or you can upgrade "
 "for a larger allowance now."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:62
+#: client/src/features/notices/utils.ts:63
 msgid "Manage plan"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:63
+#: client/src/features/notices/utils.ts:64
 msgid "Weekly post limit reached"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:64
+#: client/src/features/notices/utils.ts:65
 msgid ""
 "This site has used all {{cap}} of its one-off generated posts for this week. "
 "The allowance resets on Monday (UTC) — or upgrade your plan to generate more."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:68
+#: client/src/features/notices/utils.ts:69
 msgid "See upgrade options"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:69
+#: client/src/features/notices/utils.ts:70
 msgid "Test notification delivered"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:70
+#: client/src/features/notices/utils.ts:71
 msgid ""
 "This is the test notice you asked for from Bridge Diagnostics — your site's "
 "error-notification pipeline works end to end. You can dismiss it."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:74
+#: client/src/features/notices/utils.ts:75
 msgid "Your last payment failed"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:75
+#: client/src/features/notices/utils.ts:76
 msgid ""
 "Stripe couldn't charge your card for the most recent invoice. We'll retry "
 "automatically, but you can avoid an interruption by updating your payment "
 "method now."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:79
-#: client/src/features/notices/utils.ts:85
+#: client/src/features/notices/utils.ts:80
+#: client/src/features/notices/utils.ts:86
 msgid "Update payment method"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:80
+#: client/src/features/notices/utils.ts:81
 msgid "Your subscription is past due"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:81
+#: client/src/features/notices/utils.ts:82
 msgid ""
 "After several failed payment attempts your subscription has been marked past "
 "due. Service may be downgraded soon. Update your payment method to restore "
 "your plan."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:86
+#: client/src/features/notices/utils.ts:87
 msgid "We couldn't activate your license"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:87
+#: client/src/features/notices/utils.ts:88
 msgid ""
 "Structura tried to activate this site against your license but the cloud "
 "refused. This usually means the license expired, the seat limit was reached, "
 "or the payment status changed."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:91
+#: client/src/features/notices/utils.ts:92
 msgid "Open account"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:92
+#: client/src/features/notices/utils.ts:93
 msgid "{{integrationId}} disconnected"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:93
+#: client/src/features/notices/utils.ts:94
 msgid ""
 "Structura's connection to {{integrationId}} stopped working — the access "
 "token couldn't be refreshed. Reconnect this channel to resume publishing."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:98
+#: client/src/features/notices/utils.ts:99
 msgid "{{integrationId}} webhook unreachable"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:99
+#: client/src/features/notices/utils.ts:100
 msgid ""
 "We couldn't reach the webhook URL configured for {{integrationId}}. The "
 "endpoint may be offline, the URL may have changed, or your firewall may be "
 "blocking us."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:103
+#: client/src/features/notices/utils.ts:104
 msgid "Open channel settings"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:104
+#: client/src/features/notices/utils.ts:105
 msgid "A post couldn't be generated"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:105
+#: client/src/features/notices/utils.ts:106
 msgid ""
 "Structura hit an error while generating content for this site. We'll "
 "automatically try again on the next scheduled run — open your campaigns to "
 "review the failed run or start a new one."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:109
+#: client/src/features/notices/utils.ts:110
 msgid "View campaigns"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:110
+#: client/src/features/notices/utils.ts:111
 msgid "Plugin compatibility check failed"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:111
+#: client/src/features/notices/utils.ts:112
 msgid ""
 "Diagnostics on this site detected a compatibility issue with another plugin "
 "or theme that may affect Structura. Review the diagnostics report and apply "
 "the suggested fix."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:115
-#: client/src/features/notices/utils.ts:121
-#: client/src/features/notices/utils.ts:127
+#: client/src/features/notices/utils.ts:116
+#: client/src/features/notices/utils.ts:122
+#: client/src/features/notices/utils.ts:128
 msgid "Open diagnostics"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:116
+#: client/src/features/notices/utils.ts:117
 msgid "Structura Cloud can't reach your site"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:117
+#: client/src/features/notices/utils.ts:118
 msgid ""
 "Posts are generated in the cloud and delivered back over a webhook. The last "
 "connection check couldn't reach your site, so generated posts have nowhere "
@@ -7857,96 +7870,93 @@ msgid ""
 "details and a fix."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:122
+#: client/src/features/notices/utils.ts:123
 msgid "Scheduler isn't running on time"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:123
+#: client/src/features/notices/utils.ts:124
 msgid ""
 "WordPress cron hasn't fired the scheduler heartbeat recently. Posts and "
 "images may be delayed. Diagnostics has the details and a fix."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:128
+#: client/src/features/notices/utils.ts:129
 msgid "Update Structura"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:129
+#: client/src/features/notices/utils.ts:130
 msgid ""
 "This site is running an older Structura version that's missing fixes the "
 "cloud relies on. Update the plugin to keep everything working smoothly."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:133
+#: client/src/features/notices/utils.ts:134
 msgid "Open Plugins"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:134
+#: client/src/features/notices/utils.ts:135
 msgid "Fresh keyword opportunities found"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:135
+#: client/src/features/notices/utils.ts:136
 msgid ""
 "The monthly keyword refresh for {{campaignName}} surfaced {{newCount}} new "
 "opportunities. They've been added to the campaign's keyword bank and will "
 "feed upcoming posts."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:139
+#: client/src/features/notices/utils.ts:140
 msgid "View campaign"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:140
-msgid "Campaign is running without keywords"
-msgstr ""
-
 #: client/src/features/notices/utils.ts:141
-msgid ""
-"{{campaignName}} has an empty keyword bank — new posts fall back to a "
-"generic topic instead of a targeted keyphrase. This usually happens after "
-"changing the campaign language. Re-run keyword discovery to fix it."
+msgid "This campaign is writing from its objective"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:145
-msgid "Re-discover keywords"
+#: client/src/features/notices/utils.ts:142
+msgid ""
+"{{campaignName}} has no keywords, so each post picks a new topic from the "
+"campaign objective and skips topics this site already covers. Keywords are "
+"optional. Add some if you want to choose what each post targets."
 msgstr ""
 
 #: client/src/features/notices/utils.ts:146
+#: client/src/features/notices/utils.ts:155
+#: client/src/features/notices/utils.ts:173
+msgid "Add keywords"
+msgstr ""
+
+#: client/src/features/notices/utils.ts:147
 msgid "Campaign has covered every keyword"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:150
+#: client/src/features/notices/utils.ts:151
 msgid ""
 "{{campaignName}} has already published a post for every keyword in its bank, "
 "so scheduled posts are paused rather than repeating a topic. Add or re-"
 "discover keywords to start it up again."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:154
-#: client/src/features/notices/utils.ts:172
-msgid "Add keywords"
-msgstr ""
-
-#: client/src/features/notices/utils.ts:155
+#: client/src/features/notices/utils.ts:156
 msgid "We added new keywords to your campaign"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:159
+#: client/src/features/notices/utils.ts:160
 msgid ""
 "{{campaignName}} was running low on fresh topics, so we researched its niche "
 "and added {{newCount}} new keywords to its keyword bank. Upcoming posts will "
 "use them."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:163
+#: client/src/features/notices/utils.ts:164
 msgid "Review keywords"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:164
+#: client/src/features/notices/utils.ts:165
 msgid "We skipped a duplicate post"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:168
+#: client/src/features/notices/utils.ts:169
 msgid ""
 "A scheduled post for {{campaignName}} would have used the web address "
 "“{{slug}}”, which you already publish under — so we stopped it instead of "
@@ -7954,74 +7964,74 @@ msgid ""
 "so the next post covers something new."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:173
+#: client/src/features/notices/utils.ts:174
 msgid "Search data budget almost used up"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:174
+#: client/src/features/notices/utils.ts:175
 msgid ""
 "This workspace has used 80% of its monthly search-data allowance. Keyword "
 "refreshes keep running until the cap is reached, then pause until next month."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:179
+#: client/src/features/notices/utils.ts:180
 msgid "Search data paused until next month"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:180
+#: client/src/features/notices/utils.ts:181
 msgid ""
 "This workspace has used its full monthly search-data allowance. Keyword "
 "refreshes continue with AI-only discovery, and enriched search data resumes "
 "at the start of next month."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:220
+#: client/src/features/notices/utils.ts:221
 msgid "Billing"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:221
+#: client/src/features/notices/utils.ts:222
 msgid "License"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:223
+#: client/src/features/notices/utils.ts:224
 msgid "Quota"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:224
+#: client/src/features/notices/utils.ts:225
 msgid "AI key"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:225
+#: client/src/features/notices/utils.ts:226
 msgid "Generation"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:226
+#: client/src/features/notices/utils.ts:227
 msgid "Plugin health"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:227
+#: client/src/features/notices/utils.ts:228
 #: client/src/features/onboarding/components/WizardShell.tsx:87
 #: client/src/features/onboarding/routes/OnboardingPage.tsx:300
 msgid "SEO intelligence"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:262
+#: client/src/features/notices/utils.ts:263
 msgid "just now"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:263
+#: client/src/features/notices/utils.ts:264
 msgid "%dm ago"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:265
+#: client/src/features/notices/utils.ts:266
 msgid "%dh ago"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:267
+#: client/src/features/notices/utils.ts:268
 msgid "%dd ago"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:203
+#: client/src/features/notices/utils.ts:204
 msgid "{{count}} campaign on {{site}} writes with Gemini"
 msgid_plural "{{count}} campaigns on {{site}} write with Gemini"
 msgstr[0] ""

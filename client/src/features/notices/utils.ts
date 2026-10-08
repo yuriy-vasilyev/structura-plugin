@@ -20,7 +20,8 @@ import type { Notice, NoticeCtaHref, NoticeSeverity } from "./types";
 /**
  * Map cloud `severity` to the design system Badge `intent`.
  */
-export const SEVERITY_INTENT: Record<NoticeSeverity, "warning" | "destructive"> = {
+export const SEVERITY_INTENT: Record<NoticeSeverity, "info" | "warning" | "destructive"> = {
+  info: "info",
   warning: "warning",
   error: "destructive",
 };
@@ -137,12 +138,12 @@ function copyDict(): Record<string, string> {
       "structura",
     ),
     "notices.seoIntel.refreshed.cta": __("View campaign", "structura"),
-    "notices.seoIntel.noKeywords.title": __("Campaign is running without keywords", "structura"),
+    "notices.seoIntel.noKeywords.title": __("This campaign is writing from its objective", "structura"),
     "notices.seoIntel.noKeywords.body": __(
-      "{{campaignName}} has an empty keyword bank — new posts fall back to a generic topic instead of a targeted keyphrase. This usually happens after changing the campaign language. Re-run keyword discovery to fix it.",
+      "{{campaignName}} has no keywords, so each post picks a new topic from the campaign objective and skips topics this site already covers. Keywords are optional. Add some if you want to choose what each post targets.",
       "structura",
     ),
-    "notices.seoIntel.noKeywords.cta": __("Re-discover keywords", "structura"),
+    "notices.seoIntel.noKeywords.cta": __("Add keywords", "structura"),
     "notices.seoIntel.bankExhausted.title": __(
       "Campaign has covered every keyword",
       "structura",

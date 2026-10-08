@@ -163,10 +163,10 @@ export const NOTICE_KEYS = {
       body: "notices.seoIntel.refreshed.body",
       cta: "notices.seoIntel.refreshed.cta",
     },
-    // A scheduled run fired while the campaign's keyword bank was
-    // empty (e.g. cleared by a content-language switch and never
-    // re-discovered) — the post falls back to a generic topic instead
-    // of a targeted keyphrase. Deduped per campaign until resolved.
+    // A scheduled run fired while the campaign had no keywords, so the
+    // run picked its topic from the campaign objective. Information, not a
+    // problem: raised once per campaign (`once`), never re-raised after a
+    // dismissal. Spec: specs/empty-keyword-campaigns.md §5.
     // bodyParams: { campaignName: string }
     noKeywords: {
       title: "notices.seoIntel.noKeywords.title",

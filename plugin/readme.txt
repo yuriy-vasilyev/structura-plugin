@@ -322,6 +322,20 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Changelog ==
 
+= 2.31.0 =
+* New: campaigns no longer need keywords. Skip the keyword step and every
+  post gets a fresh topic from your campaign objective, steering clear of
+  topics the site has already covered. Adding keywords still gives you
+  the most control.
+* Improved: a campaign without keywords shows a one-time hint instead of a
+  standing warning.
+* Fixed: scheduled posts from a campaign with keywords always target the
+  next keyword on its list.
+* Fixed: when your AI provider account is out of credit, the run says so
+  instead of asking you to wait and retry.
+* Fixed: posts started from the customer portal are delivered to the site
+  straight away instead of waiting for the next check-in.
+
 = 2.30.0 =
 * New: every own-key plan, including the plugin without an account, can
   connect OpenAI, Gemini and Claude. Claude is recommended for text and

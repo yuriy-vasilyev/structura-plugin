@@ -10192,3 +10192,21 @@ msgstr "Créer un compte gratuit"
 
 msgid "See plans"
 msgstr "Voir les offres"
+
+msgid "Skip, write from the objective"
+msgstr "Passer et écrire à partir de l'objectif"
+
+msgid "Without keywords, each post picks a new topic from your objective and skips topics this site already covers."
+msgstr "Sans mots-clés, chaque article choisit un nouveau sujet à partir de votre objectif et laisse de côté les sujets que ce site couvre déjà."
+
+msgid "From the objective"
+msgstr "À partir de l'objectif"
+
+msgid "This campaign is writing from its objective"
+msgstr "Cette campagne écrit à partir de son objectif"
+
+msgid "{{campaignName}} has no keywords, so each post picks a new topic from the campaign objective and skips topics this site already covers. Keywords are optional. Add some if you want to choose what each post targets."
+msgstr "{{campaignName}} n'a pas de mots-clés : chaque article choisit donc un nouveau sujet à partir de l'objectif de la campagne et laisse de côté les sujets que ce site couvre déjà. Les mots-clés sont facultatifs. Ajoutez-en si vous voulez choisir ce que cible chaque article."
+
+msgid "Add keywords"
+msgstr "Ajouter des mots-clés"

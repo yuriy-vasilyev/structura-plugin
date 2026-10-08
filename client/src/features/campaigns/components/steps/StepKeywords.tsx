@@ -111,6 +111,13 @@ interface StepKeywordsProps {
 // it into the rewrite.
 const DOCS_URL = docsUrl("using/campaigns/target-keywords");
 
+/** What a campaign without keywords does, shown wherever the step is empty. */
+const OBJECTIVE_HINT = () =>
+  __(
+    "Without keywords, each post picks a new topic from your objective and skips topics this site already covers.",
+    "structura"
+  );
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps>(
@@ -330,11 +337,11 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
     //     portal's root-index redirect drops them on /billing (logged-in
     //     Free) where the upgrade view is already inline; anonymous None
     //     tier hits /signup first.
-    //   - Secondary "Skip & continue" — advances the wizard without
-    //     opening a pricing page in a new tab. We deliberately don't
-    //     gate "continue" on viewing pricing — users can finish the
-    //     campaign on the rest of the wizard and revisit the upsell
-    //     from /billing on their own time.
+    //   - Secondary "Skip, write from the objective": advances the wizard
+    //     with no keywords. Each run then picks its topic from the
+    //     campaign objective (specs/empty-keyword-campaigns.md §3), so
+    //     skipping is a real choice rather than an empty step walked past
+    //     (2026-10-08). Continuing is never gated on viewing pricing.
     if (!isPaidLicense) {
       const domain = typeof window !== "undefined" ? window.location.hostname : undefined;
       // `returnTo` lets the portal surface a "Back to {site}" link that
@@ -382,11 +389,14 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
             </Button>
             {onSkipToNextStep && (
               <Button variant="transparent" onClick={onSkipToNextStep}>
-                {__("Skip & continue", "structura")}
+                {__("Skip, write from the objective", "structura")}
                 <ChevronsRight size={14} className="ml-1" />
               </Button>
             )}
           </div>
+          <p className="mx-auto mt-4! mb-0! max-w-md text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+            {OBJECTIVE_HINT()}
+          </p>
         </div>
       );
     }
@@ -529,6 +539,15 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
               {__("No keywords yet. Use Discover or add keywords manually below.", "structura")}
             </p>
           </div>
+        )}
+
+        {/* Zero keywords is a valid campaign (spec empty-keyword-campaigns.md
+            §6): say what it does, also when discovery came back empty and the
+            notice above replaced the dashed panel. */}
+        {keywords.length === 0 && (
+          <p className="mt-0! mb-4! text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+            {OBJECTIVE_HINT()}
+          </p>
         )}
 
         {/* Manual keyword input */}

@@ -14,7 +14,7 @@
 import { describe, expect, it } from "vitest";
 import { NOTICE_KEYS } from "@structura/i18n-contracts";
 
-import { resolveCopy } from "../utils";
+import { resolveCopy, SEVERITY_INTENT } from "../utils";
 
 /** Every dotted key the cloud can emit, flattened from the contract. */
 function allContractKeys(node: unknown): string[] {
@@ -54,5 +54,26 @@ describe("resolveCopy", () => {
     expect(resolveCopy("notices.some.future.key")).toBe(
       "notices.some.future.key",
     );
+  });
+});
+
+// 2026-10-08 (specs/empty-keyword-campaigns.md §5): a campaign with no keywords
+// writes from its objective, so the notice is information, not a warning.
+describe("no-keywords notice", () => {
+  it("renders the info severity with the info badge", () => {
+    expect(SEVERITY_INTENT.info).toBe("info");
+  });
+
+  it("says keywords are optional instead of calling the campaign broken", () => {
+    const body = resolveCopy("notices.seoIntel.noKeywords.body", {
+      campaignName: "Content Posting",
+    });
+    expect(body).toBe(
+      "Content Posting has no keywords, so each post picks a new topic from the campaign objective and skips topics this site already covers. Keywords are optional. Add some if you want to choose what each post targets.",
+    );
+    expect(resolveCopy("notices.seoIntel.noKeywords.title")).toBe(
+      "This campaign is writing from its objective",
+    );
+    expect(resolveCopy("notices.seoIntel.noKeywords.cta")).toBe("Add keywords");
   });
 });

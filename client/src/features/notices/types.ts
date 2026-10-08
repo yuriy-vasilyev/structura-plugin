@@ -19,7 +19,11 @@ export type NoticeCategory =
   | "plugin-health"
   | "seo-intel";
 
-export type NoticeSeverity = "warning" | "error";
+/**
+ * `info` (2026-10-08) is for notices the cloud raises directly, never from a
+ * log line: the one-time "writing from its objective" campaign notice.
+ */
+export type NoticeSeverity = "info" | "warning" | "error";
 
 export type NoticeStatus = "open" | "acknowledged" | "resolved";
 

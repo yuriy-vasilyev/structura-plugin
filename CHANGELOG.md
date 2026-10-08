@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.31.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.30.0...v2.31.0) (2026-10-08)
+
+
+### Features
+
+* **campaigns:** campaigns without keywords write from the objective ([eaef8bc](https://github.com/yuriy-vasilyev/structura-core/commit/eaef8bccc5c268a31de4c9bc74229337a6c4b6e7))
+
+
+### Bug Fixes
+
+* **ai:** keep an OpenAI insufficient_quota 429 terminal through the engine wrapper ([200e200](https://github.com/yuriy-vasilyev/structura-core/commit/200e20094e6cce073f765b3c9ee2085e9dddb890))
+* **campaigns:** add the scheme to WP site URLs built for portal runs ([ab2178c](https://github.com/yuriy-vasilyev/structura-core/commit/ab2178cc6d68af57936d8f0345a3f474523761f4))
+* **campaigns:** plugin cron runs of banked campaigns pick from the bank in the cloud ([bed55e2](https://github.com/yuriy-vasilyev/structura-core/commit/bed55e24be6fedc7663aefc890b78eb4fa0635a1))
+
 ## [2.30.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.29.0...v2.30.0) (2026-10-06)
 
 

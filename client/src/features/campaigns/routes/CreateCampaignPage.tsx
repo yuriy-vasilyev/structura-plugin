@@ -268,6 +268,9 @@ const CreateCampaignInner = () => {
   // on the saved step but let the user re-trigger discovery themselves.
   const [keywordsPhase, setKeywordsPhase] = useState<string>("idle");
   const [authorityPhase, setAuthorityPhase] = useState<string>("idle");
+  // Live bank size from StepKeywords: an empty bank turns the step's
+  // continue button into the explicit "write from the objective" choice.
+  const [keywordCount, setKeywordCount] = useState(0);
 
   // Setup-draft topics → explicit keyword-discovery seeds (the slot the
   // retired Interview step's chips filled). Transient, like the phase
@@ -433,6 +436,21 @@ const CreateCampaignInner = () => {
     goToStep("keywords");
   };
 
+  // Leaving the keywords step with none is the explicit "write from the
+  // objective" choice (specs/empty-keyword-campaigns.md §6): each run then
+  // picks its topic from the objective. Marked skipped, not complete, so the
+  // stepper says what happened even if the step was completed earlier.
+  const skipKeywords = () => {
+    updateForm("keywords", {
+      bank: [],
+      discoveryMeta: keywordsRef.current?.getDiscoveryMeta() ?? null,
+      discoveredAt: null,
+    });
+    clearStepFlag("keywords");
+    markSkipped("keywords");
+    nextStep("keywords");
+  };
+
   // ── Launch campaign handler ───────────────────────────────────────────
 
   const handleLaunch = async () => {
@@ -556,7 +574,7 @@ const CreateCampaignInner = () => {
               provider={formData.intelligence.textProvider}
               existingKeywords={formData.keywords?.bank?.length ? formData.keywords.bank : undefined}
               existingDiscoveryMeta={formData.keywords?.discoveryMeta}
-              onKeywordsChange={() => {}}
+              onKeywordsChange={setKeywordCount}
               onPhaseChange={setKeywordsPhase}
               onSkipToNextStep={() => {
                 markSkipped("keywords");
@@ -574,22 +592,28 @@ const CreateCampaignInner = () => {
                   <RefreshCw size={14} className="mr-1.5" />
                   {__("Re-discover", "structura")}
                 </Button>
-                <Button
-                  onClick={() => {
-                    if (keywordsRef.current) {
-                      const bank = keywordsRef.current.getKeywords();
-                      updateForm("keywords", {
-                        bank,
-                        discoveryMeta: keywordsRef.current.getDiscoveryMeta(),
-                        discoveredAt: bank.length > 0 ? new Date().toISOString() : null,
-                      });
-                    }
-                    markComplete("keywords");
-                    nextStep("keywords");
-                  }}
-                >
-                  {__("Looks good — continue", "structura")}
-                </Button>
+                {keywordCount > 0 ? (
+                  <Button
+                    onClick={() => {
+                      if (keywordsRef.current) {
+                        const bank = keywordsRef.current.getKeywords();
+                        updateForm("keywords", {
+                          bank,
+                          discoveryMeta: keywordsRef.current.getDiscoveryMeta(),
+                          discoveredAt: bank.length > 0 ? new Date().toISOString() : null,
+                        });
+                      }
+                      markComplete("keywords");
+                      nextStep("keywords");
+                    }}
+                  >
+                    {__("Looks good — continue", "structura")}
+                  </Button>
+                ) : (
+                  <Button onClick={skipKeywords}>
+                    {__("Skip, write from the objective", "structura")}
+                  </Button>
+                )}
               </div>
             )}
           </div>
@@ -1683,7 +1707,7 @@ const SummarySection = ({
           <span className="text-sm font-bold text-neutral-900 dark:text-white">
             {keywordCount > 0
               ? sprintf(__("%d discovered", "structura"), keywordCount)
-              : __("None", "structura")}
+              : __("From the objective", "structura")}
           </span>
         </div>
 
