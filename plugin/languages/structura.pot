@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-08T11:55:45+00:00\n"
+"POT-Creation-Date: 2026-10-11T07:52:29+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: structura\n"
@@ -1159,106 +1159,106 @@ msgid "%1$s, and %2$s"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:665
-#: plugin/includes/Ui/Post_Meta_Box.php:748
+#: plugin/includes/Ui/Post_Meta_Box.php:1068
 msgid "View generation run"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:682
-#: plugin/includes/Ui/Post_Meta_Box.php:765
+#: plugin/includes/Ui/Post_Meta_Box.php:1085
 msgid "Keyword"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:692
-#: plugin/includes/Ui/Post_Meta_Box.php:775
+#: plugin/includes/Ui/Post_Meta_Box.php:1095
 msgid "Keyphrase"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:732
-#: plugin/includes/Ui/Post_Meta_Box.php:815
+#: plugin/includes/Ui/Post_Meta_Box.php:1135
 msgid "tokens used"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:793
-#: plugin/includes/Ui/Post_Meta_Box.php:903
+#: plugin/includes/Ui/Post_Meta_Box.php:1225
 msgid "Regenerate Featured Image"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:831
-#: plugin/includes/Ui/Post_Meta_Box.php:941
+#: plugin/includes/Ui/Post_Meta_Box.php:1263
 msgid "Body images"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:853
-#: plugin/includes/Ui/Post_Meta_Box.php:963
+#: plugin/includes/Ui/Post_Meta_Box.php:1285
 msgid "Regenerate"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:878
-#: plugin/includes/Ui/Post_Meta_Box.php:988
+#: plugin/includes/Ui/Post_Meta_Box.php:1310
 msgid "Body image (missing)"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:881
-#: plugin/includes/Ui/Post_Meta_Box.php:991
+#: plugin/includes/Ui/Post_Meta_Box.php:1313
 msgid ""
 "A body image was scheduled here but never delivered. Generate one now to "
 "fill the placeholder."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:894
-#: plugin/includes/Ui/Post_Meta_Box.php:1004
+#: plugin/includes/Ui/Post_Meta_Box.php:1326
 msgid "Generate body image"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:907
-#: plugin/includes/Ui/Post_Meta_Box.php:1017
+#: plugin/includes/Ui/Post_Meta_Box.php:1339
 msgid "Generate Featured Image"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:909
-#: plugin/includes/Ui/Post_Meta_Box.php:1019
+#: plugin/includes/Ui/Post_Meta_Box.php:1341
 msgid "Close"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:923
-#: plugin/includes/Ui/Post_Meta_Box.php:1033
+#: plugin/includes/Ui/Post_Meta_Box.php:1355
 msgid "Describe the image"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:925
-#: plugin/includes/Ui/Post_Meta_Box.php:1035
+#: plugin/includes/Ui/Post_Meta_Box.php:1357
 msgid "(optional)"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:932
-#: plugin/includes/Ui/Post_Meta_Box.php:1042
+#: plugin/includes/Ui/Post_Meta_Box.php:1364
 msgid ""
 "Leave blank to reuse the previous topic. Omit style guidelines — your global "
 "art direction is applied automatically."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:943
-#: plugin/includes/Ui/Post_Meta_Box.php:1053
+#: plugin/includes/Ui/Post_Meta_Box.php:1375
 msgid "Image model"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:959
-#: plugin/includes/Ui/Post_Meta_Box.php:1069
+#: plugin/includes/Ui/Post_Meta_Box.php:1391
 msgid "Click \"Generate\" to create a new image"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:964
-#: plugin/includes/Ui/Post_Meta_Box.php:1074
+#: plugin/includes/Ui/Post_Meta_Box.php:1396
 msgid "Generating your image…"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:995
-#: plugin/includes/Ui/Post_Meta_Box.php:1105
+#: plugin/includes/Ui/Post_Meta_Box.php:1427
 msgid "Generate"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1005
-#: plugin/includes/Ui/Post_Meta_Box.php:1115
+#: plugin/includes/Ui/Post_Meta_Box.php:1437
 msgid "Use this image"
 msgstr ""
 
@@ -1266,84 +1266,86 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1234
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1457
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1595
-#: plugin/includes/Ui/Post_Meta_Box.php:1133
-#: plugin/includes/Ui/Post_Meta_Box.php:1353
-#: plugin/includes/Ui/Post_Meta_Box.php:1585
-#: plugin/includes/Ui/Post_Meta_Box.php:1723
+#: plugin/includes/Ui/Post_Meta_Box.php:731
+#: plugin/includes/Ui/Post_Meta_Box.php:1455
+#: plugin/includes/Ui/Post_Meta_Box.php:1675
+#: plugin/includes/Ui/Post_Meta_Box.php:1907
+#: plugin/includes/Ui/Post_Meta_Box.php:2045
 msgid "Permission denied."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1041
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1246
-#: plugin/includes/Ui/Post_Meta_Box.php:1151
-#: plugin/includes/Ui/Post_Meta_Box.php:1365
+#: plugin/includes/Ui/Post_Meta_Box.php:1473
+#: plugin/includes/Ui/Post_Meta_Box.php:1687
 msgid "Invalid post."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1049
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1261
-#: plugin/includes/Ui/Post_Meta_Box.php:1159
-#: plugin/includes/Ui/Post_Meta_Box.php:1380
+#: plugin/includes/Ui/Post_Meta_Box.php:1481
+#: plugin/includes/Ui/Post_Meta_Box.php:1702
 msgid "This post was not generated by Structura."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1099
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1322
-#: plugin/includes/Ui/Post_Meta_Box.php:1209
-#: plugin/includes/Ui/Post_Meta_Box.php:1441
+#: plugin/includes/Ui/Post_Meta_Box.php:1531
+#: plugin/includes/Ui/Post_Meta_Box.php:1763
 msgid "Cannot resolve image generation settings for this post."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1164
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1395
-#: plugin/includes/Ui/Post_Meta_Box.php:1283
-#: plugin/includes/Ui/Post_Meta_Box.php:1523
+#: plugin/includes/Ui/Post_Meta_Box.php:1605
+#: plugin/includes/Ui/Post_Meta_Box.php:1845
 msgid "Image was generated but could not be found."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1202
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1428
-#: plugin/includes/Ui/Post_Meta_Box.php:1321
-#: plugin/includes/Ui/Post_Meta_Box.php:1556
+#: plugin/includes/Ui/Post_Meta_Box.php:1643
+#: plugin/includes/Ui/Post_Meta_Box.php:1878
 msgid "Image generation failed. Check the Structura log for details."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1257
-#: plugin/includes/Ui/Post_Meta_Box.php:1376
+#: plugin/includes/Ui/Post_Meta_Box.php:1698
 msgid "Invalid attachment."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1282
-#: plugin/includes/Ui/Post_Meta_Box.php:1401
+#: plugin/includes/Ui/Post_Meta_Box.php:1723
 msgid "This image is not a body image."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1465
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1522
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1602
-#: plugin/includes/Ui/Post_Meta_Box.php:1593
-#: plugin/includes/Ui/Post_Meta_Box.php:1650
-#: plugin/includes/Ui/Post_Meta_Box.php:1730
+#: plugin/includes/Ui/Post_Meta_Box.php:737
+#: plugin/includes/Ui/Post_Meta_Box.php:1915
+#: plugin/includes/Ui/Post_Meta_Box.php:1972
+#: plugin/includes/Ui/Post_Meta_Box.php:2052
 msgid "Invalid request."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1470
-#: plugin/includes/Ui/Post_Meta_Box.php:1598
+#: plugin/includes/Ui/Post_Meta_Box.php:1920
 msgid "Post not found."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1492
-#: plugin/includes/Ui/Post_Meta_Box.php:1620
+#: plugin/includes/Ui/Post_Meta_Box.php:1942
 msgid "Could not locate the placeholder in the post content."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1558
-#: plugin/includes/Ui/Post_Meta_Box.php:1686
+#: plugin/includes/Ui/Post_Meta_Box.php:2008
 msgid "Could not locate the body image in the post content."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1621
-#: plugin/includes/Ui/Post_Meta_Box.php:1749
+#: plugin/includes/Ui/Post_Meta_Box.php:2071
 msgid "Featured image updated."
 msgstr ""
 
@@ -1500,7 +1502,39 @@ msgid ""
 "live search research."
 msgstr ""
 
-#: plugin/includes/Generator/Schema_Injector.php:226
+#: plugin/includes/Core/Source_Check.php:168
+msgid "Contradicts a source"
+msgstr ""
+
+#: plugin/includes/Core/Source_Check.php:170
+msgid "Too absolute"
+msgstr ""
+
+#: plugin/includes/Core/Source_Check.php:172
+msgid "Overpromises"
+msgstr ""
+
+#: plugin/includes/Core/Source_Check.php:174
+msgid "Against your brief"
+msgstr ""
+
+#: plugin/includes/Core/Source_Check.php:176
+msgid "Unsourced detail"
+msgstr ""
+
+#: plugin/includes/Core/Source_Check.php:185
+msgid "Excerpt"
+msgstr ""
+
+#: plugin/includes/Core/Source_Check.php:187
+msgid "Meta description"
+msgstr ""
+
+#: plugin/includes/Core/Source_Check.php:189
+msgid "Post body"
+msgstr ""
+
+#: plugin/includes/Generator/Schema_Injector.php:257
 msgid "Home"
 msgstr ""
 
@@ -1545,13 +1579,150 @@ msgstr ""
 msgid "Dismiss for now"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:857
+#. translators: %d: number of notes still to review
+#: plugin/includes/Ui/Post_Meta_Box.php:679
+#: plugin/includes/Ui/Post_Meta_Box.php:680
+#: plugin/includes/Ui/Post_Meta_Box.php:815
+msgid "%d to review"
+msgid_plural "%d to review"
+msgstr[0] ""
+msgstr[1] ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:681
+#: plugin/includes/Ui/Post_Meta_Box.php:817
+#: plugin/includes/Ui/Post_Meta_Box.php:837
+msgid "All notes resolved"
+msgstr ""
+
+#. translators: %d: number of resolved notes
+#: plugin/includes/Ui/Post_Meta_Box.php:682
+#: plugin/includes/Ui/Post_Meta_Box.php:683
+#: plugin/includes/Ui/Post_Meta_Box.php:844
+msgid "%d resolved"
+msgid_plural "%d resolved"
+msgstr[0] ""
+msgstr[1] ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:684
+#: plugin/includes/Ui/Post_Meta_Box.php:928
+msgid "Show in text"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:685
+msgid "Hide highlight"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:686
+msgid "This text is no longer in the post."
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:687
+msgid "Could not save the note. Please try again."
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:688
+msgid "Applied in the editor. Save the post to keep it."
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:689
+msgid "Could not apply the suggestion here. Edit the text by hand."
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:742
+msgid "This post has no notes."
+msgstr ""
+
+#. translators: %d: number of source pages the post was compared with
+#: plugin/includes/Ui/Post_Meta_Box.php:790
+msgid "Compared with %d source and your brief"
+msgid_plural "Compared with %d sources and your brief"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of source pages the post was compared with
+#: plugin/includes/Ui/Post_Meta_Box.php:793
+msgid "Compared with %d source"
+msgid_plural "Compared with %d sources"
+msgstr[0] ""
+msgstr[1] ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:795
+msgid "Compared with your brief"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:797
+msgid "Checked against the research"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:809
+msgid "Source check"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:819
+msgid "Nothing to review"
+msgstr ""
+
+#. translators: %d: number of sentences the check changed before delivery
+#: plugin/includes/Ui/Post_Meta_Box.php:859
+msgid "%d change made before delivery"
+msgid_plural "%d changes made before delivery"
+msgstr[0] ""
+msgstr[1] ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:871
+msgid "Sentence removed"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:897
+msgid "Outdated"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:905
+msgid "Suggested"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:909
+msgid "Suggestion: remove this sentence."
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:914
+msgid "Source:"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:917
+msgid "Source: your campaign brief"
+msgstr ""
+
+#. translators: %d: number of source pages searched
+#: plugin/includes/Ui/Post_Meta_Box.php:921
+msgid "Not found in the %d source read"
+msgid_plural "Not found in any of the %d sources read"
+msgstr[0] ""
+msgstr[1] ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:932
+msgid "Remove sentence"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:932
+msgid "Accept"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:936
+msgid "Dismiss"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:939
+msgid "Undo"
+msgstr ""
+
+#: plugin/includes/Ui/Post_Meta_Box.php:1179
 msgid ""
 "Structura varies wording and titles so your content reads human, so an "
 "occasional non-perfect readability score is by design."
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:862
+#: plugin/includes/Ui/Post_Meta_Box.php:1184
 msgid "Why?"
 msgstr ""
 
@@ -1806,14 +1977,6 @@ msgstr ""
 msgid ""
 "This site has used %1$d%% of its cycle token budget (%2$s of %3$s). "
 "Generation pauses once the included amount is used up."
-msgstr ""
-
-#: client/src/components/Shared/DefaultPersonaAdvisory.tsx:76
-#: client/src/features/campaigns/components/PageBuilderCompatCard.tsx:170
-#: client/src/features/dashboard/components/GscConnectBanner.tsx:91
-#: client/src/features/notices/components/NoticesBell.tsx:128
-#: client/src/features/notices/routes/Notices.tsx:149
-msgid "Dismiss"
 msgstr ""
 
 #: client/src/components/Shared/DefaultPersonaAdvisory.tsx:82
@@ -8252,10 +8415,6 @@ msgstr ""
 
 #: client/src/features/onboarding/components/WizardGscConnectCard.tsx:140
 msgid "Search Console skipped — connect anytime from Channels."
-msgstr ""
-
-#: client/src/features/onboarding/components/WizardGscConnectCard.tsx:151
-msgid "Undo"
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardGscConnectCard.tsx:184

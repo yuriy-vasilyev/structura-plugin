@@ -5,6 +5,7 @@ namespace Structura\Tests\Unit\Channels;
 use Brain\Monkey\Functions;
 use Mockery;
 use Structura\Channels\Channel_Event_Forwarder;
+use Structura\Core\Source_Check;
 use Structura\Tests\Unit\TestCase;
 
 /**
@@ -126,6 +127,70 @@ class ChannelEventForwarderTest extends TestCase
             'status' => 'publish', 'post_title' => 'Hello', 'locale' => 'en',
             'post_url' => 'https://example.com/hello', 'published_at' => '2026-09-29T10:00:00Z',
         ]);
+    }
+
+    /**
+     * @test
+     * @dataProvider authorProfiles
+     */
+    public function delivers_the_author_avatar_and_website_as_same_as(array $profile, string $avatar, array $expected): void
+    {
+        Functions\when('get_post_field')->alias(function ($field) {
+            return ['post_status' => 'publish', 'post_name' => 'hello', 'post_content' => '<p>Body</p>', 'post_author' => '9'][$field] ?? '';
+        });
+        Functions\when('get_the_author_meta')->alias(function ($field, $user_id) use ($profile) {
+            return $user_id === 9 ? ($profile[$field] ?? '') : 'wrong-user';
+        });
+        // Same 256px avatar the page's Person node uses.
+        Functions\when('get_avatar_url')->alias(function ($user_id, $args) use ($avatar) {
+            return $user_id === 9 && ($args['size'] ?? null) === 256 ? $avatar : 'wrong-size';
+        });
+        Functions\stubs([
+            'sanitize_title' => function ($v) { return $v; },
+            'sanitize_textarea_field' => function ($v) { return strip_tags($v); },
+            'wp_kses_post' => function ($v) { return $v; },
+            'get_post_modified_time' => '2026-10-11T10:00:00Z',
+        ]);
+        Mockery::mock('alias:Structura\Core\License_Manager')->shouldReceive('is_licensed')->andReturn(true);
+        Mockery::mock('alias:Structura\Core\Key_Manager')->shouldReceive('get_license_payload')->andReturn(['key' => 'test', 'secret' => 'test']);
+        Mockery::mock('alias:Structura\Core\Log_Service')->shouldReceive('add');
+        $sent = null;
+        Mockery::mock('alias:Structura\Core\Cloud_Client')->shouldReceive('post')->once()
+            ->with('/channelsPostPublished', Mockery::on(function ($payload) use (&$sent) {
+                $sent = $payload;
+                return true;
+            }), Mockery::any())->andReturn(['code' => 200]);
+
+        (new Channel_Event_Forwarder())->on_structura_post_inserted([
+            'post_id' => self::POST_ID, 'campaign_id' => self::CAMPAIGN_ID,
+            'status' => 'publish', 'post_title' => 'Hello', 'locale' => 'en',
+            'post_url' => 'https://example.com/hello', 'published_at' => '2026-10-11T10:00:00Z',
+        ]);
+
+        $this->assertSame($expected, $sent['article']['author']);
+    }
+
+    /** Returns WP profiles with and without the optional author fields. */
+    public static function authorProfiles(): array
+    {
+        return [
+            'full profile' => [
+                ['display_name' => 'Yurii', 'description' => 'Writes about Gutenberg.', 'user_url' => 'https://yurii.example/'],
+                'https://secure.gravatar.com/avatar/abc?s=256',
+                [
+                    'name' => 'Yurii',
+                    'bio' => 'Writes about Gutenberg.',
+                    'url' => 'https://yurii.example/',
+                    'avatarUrl' => 'https://secure.gravatar.com/avatar/abc?s=256',
+                    'sameAs' => ['https://yurii.example/'],
+                ],
+            ],
+            'no website, no avatar' => [
+                ['display_name' => 'Yurii', 'description' => '', 'user_url' => ''],
+                '',
+                ['name' => 'Yurii', 'bio' => '', 'url' => '', 'avatarUrl' => null, 'sameAs' => []],
+            ],
+        ];
     }
 
     /** Returns initial-publication and draft-approval entry points. */
@@ -408,5 +473,51 @@ class ChannelEventForwarderTest extends TestCase
         $forwarder->forward_post_published(self::POST_ID);
 
         $this->assertTrue(true);
+    }
+
+    /**
+     * @test
+     * specs/source-check.md §9.6: the open review-note count rides the event
+     * so the owner email can say so; a post without a check sends no key.
+     */
+    public function forwards_the_open_review_note_count_only_when_the_post_has_notes(): void
+    {
+        $source_check = ['checkedAt' => '2026-10-11T10:00:00.000Z', 'sourceCount' => 1, 'hasBrief' => false, 'notes' => [
+            ['id' => 'n1', 'status' => 'open'], ['id' => 'n2', 'status' => 'dismissed'], ['id' => 'n3', 'status' => 'open'],
+        ], 'changes' => []];
+        $with_notes = true;
+        Functions\when('get_post_meta')->alias(function ($id, $key) use (&$with_notes, $source_check) {
+            return $key === Source_Check::META_KEY && $with_notes ? $source_check : '';
+        });
+        Functions\when('get_post_field')->alias(function ($field) {
+            return ['post_status' => 'publish', 'post_name' => 'hello', 'post_content' => '<p>Body</p>'][$field] ?? '';
+        });
+        Functions\stubs([
+            'sanitize_title' => function ($v) { return $v; },
+            'sanitize_textarea_field' => function ($v) { return strip_tags($v); },
+            'wp_kses_post' => function ($v) { return $v; },
+            'get_post_modified_time' => '2026-10-11T10:00:00Z',
+        ]);
+        Mockery::mock('alias:Structura\Core\License_Manager')->shouldReceive('is_licensed')->andReturn(true);
+        Mockery::mock('alias:Structura\Core\Key_Manager')->shouldReceive('get_license_payload')->andReturn(['key' => 'test', 'secret' => 'test']);
+        Mockery::mock('alias:Structura\Core\Log_Service')->shouldReceive('add');
+        $sent = [];
+        Mockery::mock('alias:Structura\Core\Cloud_Client')->shouldReceive('post')->twice()
+            ->with('/channelsPostPublished', Mockery::on(function ($payload) use (&$sent) {
+                $sent[] = $payload;
+                return true;
+            }), Mockery::any())->andReturn(['code' => 200]);
+        $context = [
+            'post_id' => self::POST_ID, 'campaign_id' => self::CAMPAIGN_ID,
+            'status' => 'publish', 'post_title' => 'Hello', 'locale' => 'en',
+            'post_url' => 'https://example.com/hello', 'published_at' => '2026-10-11T10:00:00Z',
+        ];
+
+        (new Channel_Event_Forwarder())->on_structura_post_inserted($context);
+        $with_notes = false;
+        (new Channel_Event_Forwarder())->on_structura_post_inserted($context);
+
+        $this->assertSame(2, $sent[0]['open_note_count']);
+        $this->assertArrayNotHasKey('open_note_count', $sent[1]);
     }
 }

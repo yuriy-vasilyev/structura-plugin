@@ -13,6 +13,15 @@ class SchemaInjectorTest extends TestCase
 {
     private Schema_Injector $injector;
 
+    /** @var array<string, string> WP profile fields served by get_the_author_meta(), keyed by field name. */
+    private array $profile = [
+        'display_name' => 'Yurii Vasyliev',
+        'description'  => '',
+        'user_url'     => '',
+    ];
+
+    private string $avatar = '';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -33,7 +42,13 @@ class SchemaInjectorTest extends TestCase
         Functions\when('get_the_title')->justReturn('Native Gutenberg AI Content Generator');
         Functions\when('get_post_time')->justReturn('2026-06-17T10:58:50+00:00');
         Functions\when('get_post_modified_time')->justReturn('2026-06-17T10:58:53+00:00');
-        Functions\when('get_the_author_meta')->justReturn('Yurii Vasyliev');
+        Functions\when('get_the_author_meta')->alias(
+            fn (string $field): string => $this->profile[$field] ?? ''
+        );
+        // Only the 256px avatar is the Person image; any other size is a bug.
+        Functions\when('get_avatar_url')->alias(
+            fn ($id, array $args = []): string => ($args['size'] ?? null) === 256 ? $this->avatar : 'wrong-size'
+        );
         Functions\when('get_author_posts_url')->justReturn('https://example.test/author/yurii/');
         Functions\when('has_post_thumbnail')->justReturn(false);
         Functions\when('get_the_post_thumbnail_url')->justReturn('');
@@ -103,6 +118,51 @@ class SchemaInjectorTest extends TestCase
         $this->assertSame('Person', $article['author']['@type']);
         $this->assertSame('Yurii Vasyliev', $article['author']['name']);
         $this->assertSame('https://example.test/author/yurii/', $article['author']['url']);
+    }
+
+    public function test_author_carries_bio_avatar_and_website_from_the_wp_profile(): void
+    {
+        $this->profile['description'] = '<p>Writes about <strong>Gutenberg</strong>.</p>';
+        $this->profile['user_url']    = 'https://yurii.example/';
+        $this->avatar                 = 'https://secure.gravatar.com/avatar/abc?s=256';
+
+        $author = $this->nodeOfType($this->emitted(), 'BlogPosting')['author'];
+
+        $this->assertSame('Writes about Gutenberg.', $author['description']);
+        $this->assertSame('https://secure.gravatar.com/avatar/abc?s=256', $author['image']);
+        $this->assertSame(['https://yurii.example/'], $author['sameAs']);
+        $this->assertSame('Yurii Vasyliev', $author['name']);
+        $this->assertSame('https://example.test/author/yurii/', $author['url']);
+    }
+
+    public function test_author_omits_bio_avatar_and_same_as_when_the_profile_leaves_them_empty(): void
+    {
+        $author = $this->nodeOfType($this->emitted(), 'BlogPosting')['author'];
+
+        $this->assertSame(['@type', 'name', 'url'], array_keys($author));
+    }
+
+    public function test_author_same_as_skips_a_website_that_is_the_author_archive(): void
+    {
+        $this->profile['user_url'] = 'https://example.test/author/yurii/';
+
+        $author = $this->nodeOfType($this->emitted(), 'BlogPosting')['author'];
+
+        $this->assertArrayNotHasKey('sameAs', $author);
+    }
+
+    public function test_author_without_a_wp_user_gets_no_default_avatar_or_profile_fields(): void
+    {
+        // Cron inserts can leave post_author at 0; get_avatar_url(0) still
+        // returns the site's generic default avatar.
+        Functions\when('get_post')->justReturn((object) ['ID' => 42, 'post_author' => 0]);
+        $this->profile['description'] = 'Someone else';
+        $this->profile['user_url']    = 'https://someone.example/';
+        $this->avatar                 = 'https://secure.gravatar.com/avatar/?s=256&d=mm';
+
+        $author = $this->nodeOfType($this->emitted(), 'BlogPosting')['author'];
+
+        $this->assertSame(['@type', 'name'], array_keys($author));
     }
 
     public function test_publisher_is_a_reference_to_the_single_organization_node(): void

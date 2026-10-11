@@ -20,7 +20,9 @@ export const Checkbox = forwardRef<HTMLDivElement, CheckboxProps>(
   ({ label, hiddenLabel, checked, onChange, className, description, ...props }, ref) => {
     return (
       <div ref={ref}>
-        <Field className={cn("flex items-start gap-3", className)}>
+        {/* Disabling the Field (not just the checkbox) sets data-disabled on this
+            `group`, which the label and description dim from. */}
+        <Field disabled={props.disabled} className={cn("group flex items-start gap-3", className)}>
           <div className="flex h-6 cursor-pointer items-center">
             <HeadlessCheckbox
               checked={checked}

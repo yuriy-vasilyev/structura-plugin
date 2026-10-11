@@ -67,7 +67,8 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
       <Field
         as="div"
         disabled={rest.disabled}
-        className={"group/field relative disabled:opacity-40"}
+        // Field renders a div, which `:disabled` never matches; it sets data-disabled.
+        className={"group/field relative data-disabled:opacity-40"}
       >
         <Label
           className={cn(formFieldLabelVariants({ labelStyle }), {

@@ -85,6 +85,7 @@
   "devDependencies": {
     "@headlessui/tailwindcss": "^0.2.2",
     "@structura/tailwind-config": "workspace:*",
+    "@tailwindcss/node": "^4.1.18",
     "jsdom": "^25.0.1",
     "vite-plugin-dts": "^4.5.4",
     "vitest": "^2.1.9"

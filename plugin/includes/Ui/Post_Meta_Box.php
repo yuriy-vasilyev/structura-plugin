@@ -8,6 +8,7 @@ if ( ! defined('ABSPATH')) {
 
 use Structura\Core\License_Manager;
 use Structura\Core\Log_Service;
+use Structura\Core\Source_Check;
 
 /**
  * Structura post-editor meta box.
@@ -36,6 +37,11 @@ class Post_Meta_Box
         // editor's post entity so the swap appears live.
         add_action('wp_ajax_structura_regenerate_body_image', [$this, 'ajax_regenerate_body_image']);
         add_action('wp_ajax_structura_apply_body_image', [$this, 'ajax_apply_body_image']);
+        // Source check notes (specs/source-check.md §9.3, §9.4): the
+        // section lives inside this meta box; the highlight needs a style
+        // inside the editor canvas, which `enqueue_block_assets` reaches.
+        add_action('wp_ajax_structura_source_check_status', [$this, 'ajax_source_check_status']);
+        add_action('enqueue_block_assets', [$this, 'enqueue_source_check_editor_style']);
     }
 
     /**
@@ -622,6 +628,320 @@ class Post_Meta_Box
                 [],
                 STRUCTURA_VERSION,
         );
+
+        $this->enqueue_source_check_script($post);
+    }
+
+    /**
+     * The notes script, only when the post carries notes. In the block
+     * editor it highlights a note's sentence through WordPress's
+     * annotations store (the mechanism behind Yoast's eye icon) and marks
+     * notes whose text is gone as outdated; in the classic editor it only
+     * records dismissals. Spec: specs/source-check.md §9.4.
+     */
+    private function enqueue_source_check_script(\WP_Post $post): void
+    {
+        $source_check = get_post_meta($post->ID, Source_Check::META_KEY, true);
+        if ( ! is_array($source_check) || empty($source_check['notes'])) {
+            return;
+        }
+        $block_editor = function_exists('use_block_editor_for_post') && use_block_editor_for_post($post);
+
+        wp_enqueue_script(
+                'structura-source-check',
+                STRUCTURA_URL . 'assets-static/source-check.js',
+                $block_editor ? ['wp-data', 'wp-rich-text', 'wp-annotations', 'wp-dom-ready'] : [],
+                STRUCTURA_VERSION,
+                true,
+        );
+
+        $notes = [];
+        foreach ($source_check['notes'] as $note) {
+            $notes[] = [
+                    'id'         => (string) ($note['id'] ?? ''),
+                    'where'      => (string) ($note['where'] ?? 'body'),
+                    'quote'      => (string) ($note['quote'] ?? ''),
+                    'status'     => (string) ($note['status'] ?? 'open'),
+                    // null = no suggestion; "" = remove the sentence.
+                    'suggestion' => isset($note['suggestion']) && is_string($note['suggestion']) ? $note['suggestion'] : null,
+            ];
+        }
+
+        wp_localize_script('structura-source-check', 'structuraSourceCheck', [
+                'ajaxUrl'     => admin_url('admin-ajax.php'),
+                'nonce'       => wp_create_nonce('structura_source_check'),
+                'postId'      => $post->ID,
+                'blockEditor' => $block_editor,
+                'notes'       => $notes,
+                'i18n'        => [
+                        // Singular and plural forms resolved here so the script
+                        // needs no translation bundle; the script picks by count.
+                        'toReviewOne'   => _n('%d to review', '%d to review', 1, 'structura'),
+                        'toReviewOther' => _n('%d to review', '%d to review', 2, 'structura'),
+                        'allResolved'   => __('All notes resolved', 'structura'),
+                        'resolvedOne'   => _n('%d resolved', '%d resolved', 1, 'structura'),
+                        'resolvedOther' => _n('%d resolved', '%d resolved', 2, 'structura'),
+                        'showInText'    => __('Show in text', 'structura'),
+                        'hideInText'    => __('Hide highlight', 'structura'),
+                        'notFound'      => __('This text is no longer in the post.', 'structura'),
+                        'saveFailed'    => __('Could not save the note. Please try again.', 'structura'),
+                        'accepted'      => __('Applied in the editor. Save the post to keep it.', 'structura'),
+                        'acceptFailed'  => __('Could not apply the suggestion here. Edit the text by hand.', 'structura'),
+                ],
+        ]);
+    }
+
+    /**
+     * The highlight colour for a note's sentence, loaded where the block
+     * editor renders the post (the canvas is an iframe on recent
+     * WordPress, which admin styles do not reach).
+     */
+    public function enqueue_source_check_editor_style(): void
+    {
+        if ( ! is_admin() || ! License_Manager::is_licensed()) {
+            return;
+        }
+        global $post;
+        if ( ! $post || ! self::post_is_structura_generated($post->ID)) {
+            return;
+        }
+        $source_check = get_post_meta($post->ID, Source_Check::META_KEY, true);
+        if ( ! is_array($source_check) || empty($source_check['notes'])) {
+            return;
+        }
+        wp_enqueue_style(
+                'structura-source-check-editor',
+                STRUCTURA_URL . 'assets-static/source-check-editor.css',
+                [],
+                STRUCTURA_VERSION,
+        );
+    }
+
+    /**
+     * Records note statuses from the editor: `{ post_id, notes: JSON of
+     * [{ id, status }] }`. Known ids and enum statuses only; the server
+     * stamps who and when. Capability: editing the post.
+     */
+    public function ajax_source_check_status(): void
+    {
+        check_ajax_referer('structura_source_check', 'nonce');
+
+        $post_id = isset($_POST['post_id']) ? absint(wp_unslash($_POST['post_id'])) : 0;
+        if ( ! $post_id || ! current_user_can('edit_post', $post_id)) {
+            wp_send_json_error(['message' => __('Permission denied.', 'structura')]);
+        }
+
+        $raw   = isset($_POST['notes']) ? wp_unslash($_POST['notes']) : '';
+        $notes = is_string($raw) ? json_decode($raw, true) : null;
+        if ( ! is_array($notes)) {
+            wp_send_json_error(['message' => __('Invalid request.', 'structura')]);
+        }
+
+        $source_check = get_post_meta($post_id, Source_Check::META_KEY, true);
+        if ( ! is_array($source_check)) {
+            wp_send_json_error(['message' => __('This post has no notes.', 'structura')]);
+        }
+
+        $updated = Source_Check::apply_status_patch(
+            $source_check,
+            ['notes' => $notes],
+            (int) get_current_user_id(),
+            gmdate('c')
+        );
+        update_post_meta($post_id, Source_Check::META_KEY, $updated);
+
+        wp_send_json_success(['openNoteCount' => Source_Check::open_count($updated)]);
+    }
+
+    /**
+     * The Source check section of the meta box: open notes first, then
+     * the resolved ones and the changes the check applied, each behind a
+     * disclosure. Nothing is printed when no check ran.
+     */
+    private function render_source_check(int $post_id): void
+    {
+        $source_check = get_post_meta($post_id, Source_Check::META_KEY, true);
+        if ( ! is_array($source_check) || ! isset($source_check['notes']) || ! is_array($source_check['notes'])) {
+            return;
+        }
+
+        $notes = $source_check['notes'];
+        usort($notes, static function ($a, $b) {
+            return (int) ($a['n'] ?? 0) <=> (int) ($b['n'] ?? 0);
+        });
+        $open = [];
+        $resolved = [];
+        foreach ($notes as $note) {
+            $status = $note['status'] ?? 'open';
+            if ($status === 'open' || $status === 'outdated') {
+                $open[] = $note;
+            } elseif ($status !== '') {
+                $resolved[] = $note;
+            }
+        }
+        $open_count   = Source_Check::open_count($source_check);
+        $changes      = (isset($source_check['changes']) && is_array($source_check['changes'])) ? $source_check['changes'] : [];
+        $source_count = (int) ($source_check['sourceCount'] ?? 0);
+        $has_brief    = ! empty($source_check['hasBrief']);
+        $checked_ts   = ! empty($source_check['checkedAt']) ? strtotime((string) $source_check['checkedAt']) : false;
+
+        if ($source_count > 0 && $has_brief) {
+            /* translators: %d: number of source pages the post was compared with */
+            $compared = sprintf(_n('Compared with %d source and your brief', 'Compared with %d sources and your brief', $source_count, 'structura'), $source_count);
+        } elseif ($source_count > 0) {
+            /* translators: %d: number of source pages the post was compared with */
+            $compared = sprintf(_n('Compared with %d source', 'Compared with %d sources', $source_count, 'structura'), $source_count);
+        } elseif ($has_brief) {
+            $compared = __('Compared with your brief', 'structura');
+        } else {
+            $compared = __('Checked against the research', 'structura');
+        }
+        ?>
+        <div class="structura-mb__divider"></div>
+        <div class="structura-sc" id="structura-source-check" data-open-count="<?php echo esc_attr((string) $open_count); ?>">
+            <div class="structura-sc__head">
+                <span class="structura-sc__title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                    <?php esc_html_e('Source check', 'structura'); ?>
+                </span>
+                <span class="structura-sc__count<?php echo $open_count > 0 ? ' structura-sc__count--open' : ''; ?>" data-sc-count>
+                    <?php
+                    if ($open_count > 0) {
+                        /* translators: %d: number of notes still to review */
+                        echo esc_html(sprintf(_n('%d to review', '%d to review', $open_count, 'structura'), $open_count));
+                    } elseif (count($notes) > 0) {
+                        esc_html_e('All notes resolved', 'structura');
+                    } else {
+                        esc_html_e('Nothing to review', 'structura');
+                    }
+                    ?>
+                </span>
+            </div>
+            <p class="structura-sc__meta">
+                <?php echo esc_html($compared); ?><?php
+                if ($checked_ts) {
+                    echo ' · ' . esc_html(wp_date('M j, Y', $checked_ts));
+                } ?>
+            </p>
+
+            <ul class="structura-sc__list" data-sc-open<?php echo empty($open) ? ' hidden' : ''; ?>>
+                <?php foreach ($open as $note) {
+                    $this->render_source_check_note($note);
+                } ?>
+            </ul>
+            <p class="structura-sc__empty" data-sc-empty<?php echo (empty($open) && count($notes) > 0) ? '' : ' hidden'; ?>>
+                <?php esc_html_e('All notes resolved', 'structura'); ?>
+            </p>
+
+            <details class="structura-sc__disclosure" data-sc-resolved<?php echo empty($resolved) ? ' hidden' : ''; ?>>
+                <summary data-sc-resolved-summary>
+                    <?php
+                    /* translators: %d: number of resolved notes */
+                    echo esc_html(sprintf(_n('%d resolved', '%d resolved', count($resolved), 'structura'), count($resolved)));
+                    ?>
+                </summary>
+                <ul class="structura-sc__list structura-sc__list--resolved" data-sc-resolved-list>
+                    <?php foreach ($resolved as $note) {
+                        $this->render_source_check_note($note);
+                    } ?>
+                </ul>
+            </details>
+
+            <?php if ( ! empty($changes)) : ?>
+                <details class="structura-sc__disclosure">
+                    <summary>
+                        <?php
+                        /* translators: %d: number of sentences the check changed before delivery */
+                        echo esc_html(sprintf(_n('%d change made before delivery', '%d changes made before delivery', count($changes), 'structura'), count($changes)));
+                        ?>
+                    </summary>
+                    <ul class="structura-sc__changes">
+                        <?php foreach ($changes as $change) : ?>
+                            <li class="structura-sc__change">
+                                <span class="structura-sc__type"><?php echo esc_html(Source_Check::type_label((string) ($change['category'] ?? ''))); ?></span>
+                                <p class="structura-sc__reason"><?php echo esc_html((string) ($change['reason'] ?? '')); ?></p>
+                                <p class="structura-sc__before"><?php echo esc_html(wp_strip_all_tags((string) ($change['before'] ?? ''))); ?></p>
+                                <?php if (($change['after'] ?? '') !== '') : ?>
+                                    <p class="structura-sc__after"><?php echo esc_html(wp_strip_all_tags((string) $change['after'])); ?></p>
+                                <?php else : ?>
+                                    <p class="structura-sc__after structura-sc__after--removed"><?php esc_html_e('Sentence removed', 'structura'); ?></p>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </details>
+            <?php endif; ?>
+        </div>
+        <?php
+    }
+
+    /** One note card: collapsed row, details on expand, actions at the foot. */
+    private function render_source_check_note(array $note): void
+    {
+        $id         = (string) ($note['id'] ?? '');
+        $status     = (string) ($note['status'] ?? 'open');
+        $quote      = wp_strip_all_tags((string) ($note['quote'] ?? ''));
+        $suggestion = $note['suggestion'] ?? null;
+        $source     = isset($note['source']) && is_array($note['source']) ? $note['source'] : null;
+        $resolvable = $status === 'open' || $status === 'outdated';
+        ?>
+        <li class="structura-sc__note" data-note-id="<?php echo esc_attr($id); ?>"
+            data-status="<?php echo esc_attr($status); ?>" data-where="<?php echo esc_attr((string) ($note['where'] ?? 'body')); ?>">
+            <button type="button" class="structura-sc__row" aria-expanded="false" data-sc-action="toggle">
+                <span class="structura-sc__n"><?php echo esc_html((string) (int) ($note['n'] ?? 0)); ?></span>
+                <span class="structura-sc__type"><?php echo esc_html(Source_Check::type_label((string) ($note['category'] ?? ''))); ?></span>
+                <span class="structura-sc__status" data-sc-status-label<?php echo $status === 'outdated' ? '' : ' hidden'; ?>><?php esc_html_e('Outdated', 'structura'); ?></span>
+                <span class="structura-sc__quote">&ldquo;<?php echo esc_html($quote); ?>&rdquo;</span>
+            </button>
+            <div class="structura-sc__body" hidden>
+                <p class="structura-sc__where"><?php echo esc_html(Source_Check::where_label((string) ($note['where'] ?? 'body'))); ?></p>
+                <p class="structura-sc__reason"><?php echo esc_html((string) ($note['reason'] ?? '')); ?></p>
+                <?php if (is_string($suggestion) && $suggestion !== '') : ?>
+                    <div class="structura-sc__diff">
+                        <span class="structura-sc__label"><?php esc_html_e('Suggested', 'structura'); ?></span>
+                        <p class="structura-sc__suggestion"><?php echo esc_html(wp_strip_all_tags($suggestion)); ?></p>
+                    </div>
+                <?php elseif ($suggestion === '') : ?>
+                    <p class="structura-sc__suggestion structura-sc__suggestion--remove"><?php esc_html_e('Suggestion: remove this sentence.', 'structura'); ?></p>
+                <?php endif; ?>
+                <?php if ($source !== null) : ?>
+                    <p class="structura-sc__source">
+                        <?php if ( ! empty($source['url'])) : ?>
+                            <?php esc_html_e('Source:', 'structura'); ?>
+                            <a href="<?php echo esc_url((string) $source['url']); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html((string) ($source['site'] ?: $source['title'] ?: $source['url'])); ?></a>
+                        <?php elseif ( ! empty($source['brief'])) : ?>
+                            <?php esc_html_e('Source: your campaign brief', 'structura'); ?>
+                        <?php elseif (isset($source['notFoundIn'])) : ?>
+                            <?php
+                            /* translators: %d: number of source pages searched */
+                            echo esc_html(sprintf(_n('Not found in the %d source read', 'Not found in any of the %d sources read', (int) $source['notFoundIn'], 'structura'), (int) $source['notFoundIn']));
+                            ?>
+                        <?php endif; ?>
+                    </p>
+                <?php endif; ?>
+                <div class="structura-sc__actions">
+                    <button type="button" class="structura-mb__btn structura-mb__btn--ghost" data-sc-action="show" aria-pressed="false" hidden>
+                        <?php esc_html_e('Show in text', 'structura'); ?>
+                    </button>
+                    <?php if (is_string($suggestion)) : ?>
+                        <button type="button" class="structura-mb__btn structura-mb__btn--ghost structura-mb__btn--accent" data-sc-action="accept" hidden>
+                            <?php echo $suggestion === '' ? esc_html__('Remove sentence', 'structura') : esc_html__('Accept', 'structura'); ?>
+                        </button>
+                    <?php endif; ?>
+                    <button type="button" class="structura-mb__btn structura-mb__btn--ghost" data-sc-action="dismiss"<?php echo $resolvable ? '' : ' hidden'; ?>>
+                        <?php esc_html_e('Dismiss', 'structura'); ?>
+                    </button>
+                    <button type="button" class="structura-mb__btn structura-mb__btn--ghost" data-sc-action="undo"<?php echo $resolvable ? ' hidden' : ''; ?>>
+                        <?php esc_html_e('Undo', 'structura'); ?>
+                    </button>
+                </div>
+            </div>
+        </li>
+        <?php
     }
 
     /**
@@ -836,6 +1156,8 @@ class Post_Meta_Box
                 </div>
             <?php
             endif; ?>
+
+            <?php $this->render_source_check($post->ID); ?>
 
             <!-- Naturalness note -->
             <?php

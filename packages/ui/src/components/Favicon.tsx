@@ -13,6 +13,18 @@ export interface FaviconProps {
 }
 
 /**
+ * Sizes S2 serves as requested (probed 2026-10-09). Any other `sz` comes back
+ * as its 16px default even for domains with real icons, which `onLoad` below
+ * reads as "no favicon".
+ */
+const S2_SIZES = [32, 40, 48, 64, 96, 128];
+
+/** The smallest S2-served size covering 2x the box, capped at 128px. */
+function s2Size(size: number): number {
+  return S2_SIZES.find((s) => s >= size * 2) ?? 128;
+}
+
+/**
  * Favicon — a website's favicon by domain, via Google's public S2 service.
  *
  * Free, no API key, and returns a generic glyph for unknown domains. On a hard
@@ -38,7 +50,7 @@ export function Favicon({
     <img
       src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(
         domain,
-      )}&sz=${Math.max(size * 2, 32)}`}
+      )}&sz=${s2Size(size)}`}
       alt=""
       width={size}
       height={size}

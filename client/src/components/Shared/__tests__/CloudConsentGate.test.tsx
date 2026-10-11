@@ -82,6 +82,37 @@ describe("CloudConsentGate", () => {
     vi.unstubAllGlobals();
   });
 
+  it("stays busy and says what it is doing until the reload replaces the page", async () => {
+    let resolveFetch: (value: unknown) => void = () => {};
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockReturnValue(
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }),
+      ),
+    );
+    const onGranted = vi.fn();
+    renderGate(onGranted);
+
+    const button = screen.getByRole("button", { name: "Connect to Structura Cloud" });
+    fireEvent.click(button);
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Creating your workspace on Structura Cloud…",
+    );
+    expect(button).toBeDisabled();
+
+    resolveFetch({ ok: true, json: async () => ({ cloudConsent: true, hasWorkspace: true }) });
+
+    await waitFor(() => expect(onGranted).toHaveBeenCalledTimes(1));
+    // The reload is still in flight here; the gate must not look idle again.
+    expect(screen.getByRole("status")).toHaveTextContent("Connected. Opening Structura…");
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("aria-busy", "true");
+    vi.unstubAllGlobals();
+  });
+
   it("shows an error and does not hand off when the POST fails", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 500 }));
     const onGranted = vi.fn();

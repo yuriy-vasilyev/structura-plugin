@@ -386,6 +386,33 @@
 }
 
 /*
+ * Motion duration utilities. Tailwind 4 has no theme namespace for transition
+ * durations, so the --duration-* tokens above never produced `duration-fast`
+ * & co. and every caller fell back to the 150ms default (found 2026-10-09).
+ * --tw-duration is set too, because the `transition*` utilities read it
+ * whatever their order in the stylesheet.
+ */
+@utility duration-fast {
+    --tw-duration: var(--duration-fast);
+    transition-duration: var(--duration-fast);
+}
+
+@utility duration-normal {
+    --tw-duration: var(--duration-normal);
+    transition-duration: var(--duration-normal);
+}
+
+@utility duration-slow {
+    --tw-duration: var(--duration-slow);
+    transition-duration: var(--duration-slow);
+}
+
+@utility duration-slower {
+    --tw-duration: var(--duration-slower);
+    transition-duration: var(--duration-slower);
+}
+
+/*
  * Dark values for the AI guidance aliases above. Every app's `dark:`
  * variant is `.dark` on an ancestor (`@custom-variant dark`), so the
  * aliases switch on the same class.

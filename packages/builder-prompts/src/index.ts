@@ -55,7 +55,7 @@ const COPY: Record<SupportedLocale, PromptCopy> = {
     verification:
       'Verify X-Structura-Signature against the exact raw UTF-8 request body and X-Structura-Timestamp using HMAC-SHA256(secret, timestamp + "." + rawBody). Reject timestamps outside 5 minutes, invalid signatures and unsupported events or schema versions before changing data.',
     storage:
-      "Use a database transaction with a unique event_id to deduplicate deliveries and upsert articles by site.id + post.id + post.locale. Reject older revisions. Store article content and available SEO fields. Sanitize HTML and serialize JSON-LD safely when rendering. Respond with 2xx only after durable storage; duplicate valid events should also return 2xx.",
+      "Use a database transaction with a unique event_id to deduplicate deliveries and upsert articles by site.id + post.id + post.locale. Reject older revisions. Store article content and available SEO fields. Sanitize HTML and serialize JSON-LD safely when rendering. Emit every post.jsonLd entry in the article page head and render post.author (name, avatarUrl, bio, link to url) as the byline when it is not null. Respond with 2xx only after durable storage; duplicate valid events should also return 2xx.",
     ending:
       "Test a valid delivery, a bad signature and a replay before you say it’s done. When done, reply with the public URL of the receiver so I can paste it into Structura.",
   },
@@ -71,7 +71,7 @@ const COPY: Record<SupportedLocale, PromptCopy> = {
     verification:
       'Prüfe X-Structura-Signature anhand des unveränderten UTF-8-Anfragetextes und X-Structura-Timestamp: HMAC-SHA256(secret, timestamp + "." + rawBody). Weise Zeitstempel außerhalb von fünf Minuten, ungültige Signaturen und unbekannte Ereignisse oder Schemaversionen vor jeder Datenänderung ab.',
     storage:
-      "Nutze eine Datenbanktransaktion mit eindeutigem event_id zur Deduplizierung. Aktualisiere Artikel über site.id + post.id + post.locale. Weise ältere Revisionen ab. Speichere Inhalt und verfügbare SEO-Felder. Bereinige HTML und serialisiere JSON-LD beim Rendern sicher. Antworte erst nach dauerhafter Speicherung mit 2xx; gültige Duplikate erhalten ebenfalls 2xx.",
+      "Nutze eine Datenbanktransaktion mit eindeutigem event_id zur Deduplizierung. Aktualisiere Artikel über site.id + post.id + post.locale. Weise ältere Revisionen ab. Speichere Inhalt und verfügbare SEO-Felder. Bereinige HTML und serialisiere JSON-LD beim Rendern sicher. Gib jeden post.jsonLd-Eintrag im Head der Artikelseite aus und zeige post.author (name, avatarUrl, bio, Link auf url) als Autorenzeile, wenn es nicht null ist. Antworte erst nach dauerhafter Speicherung mit 2xx; gültige Duplikate erhalten ebenfalls 2xx.",
     ending:
       "Teste eine gültige Übertragung, eine falsche Signatur und ein Replay, bevor du fertig meldest. Antworte danach mit der öffentlichen URL des Empfängers, damit ich sie in Structura einfügen kann.",
   },
@@ -87,7 +87,7 @@ const COPY: Record<SupportedLocale, PromptCopy> = {
     verification:
       'Verifica X-Structura-Signature con el cuerpo UTF-8 original y X-Structura-Timestamp mediante HMAC-SHA256(secret, timestamp + "." + rawBody). Rechaza marcas de tiempo con más de cinco minutos de diferencia, firmas inválidas y eventos o versiones de esquema desconocidos antes de modificar datos.',
     storage:
-      "Usa una transacción con event_id único para deduplicar y actualiza los artículos por site.id + post.id + post.locale. Rechaza revisiones antiguas. Guarda contenido y campos SEO disponibles. Sanea el HTML y serializa JSON-LD de forma segura al renderizar. Responde 2xx solo tras guardar de forma duradera; los duplicados válidos también reciben 2xx.",
+      "Usa una transacción con event_id único para deduplicar y actualiza los artículos por site.id + post.id + post.locale. Rechaza revisiones antiguas. Guarda contenido y campos SEO disponibles. Sanea el HTML y serializa JSON-LD de forma segura al renderizar. Emite cada entrada de post.jsonLd en el head de la página del artículo y muestra post.author (name, avatarUrl, bio, enlace a url) como firma de autor cuando no sea null. Responde 2xx solo tras guardar de forma duradera; los duplicados válidos también reciben 2xx.",
     ending:
       "Prueba una entrega válida, una firma incorrecta y un replay antes de darlo por terminado. Al terminar, responde con la URL pública del receptor para que pueda pegarla en Structura.",
   },
@@ -103,7 +103,7 @@ const COPY: Record<SupportedLocale, PromptCopy> = {
     verification:
       'Vérifie X-Structura-Signature avec le corps UTF-8 brut et X-Structura-Timestamp via HMAC-SHA256(secret, timestamp + "." + rawBody). Rejette les horodatages décalés de plus de cinq minutes, les signatures invalides et les événements ou versions inconnus avant de modifier les données.',
     storage:
-      "Utilise une transaction avec event_id unique pour dédupliquer et mets les articles à jour par site.id + post.id + post.locale. Refuse les révisions anciennes. Stocke le contenu et les champs SEO disponibles. Assainis le HTML et sérialise JSON-LD de façon sûre au rendu. Réponds 2xx après stockage durable uniquement ; les doublons valides reçoivent aussi 2xx.",
+      "Utilise une transaction avec event_id unique pour dédupliquer et mets les articles à jour par site.id + post.id + post.locale. Refuse les révisions anciennes. Stocke le contenu et les champs SEO disponibles. Assainis le HTML et sérialise JSON-LD de façon sûre au rendu. Émets chaque entrée de post.jsonLd dans le head de la page d’article et affiche post.author (name, avatarUrl, bio, lien vers url) comme signature d’auteur quand il n’est pas null. Réponds 2xx après stockage durable uniquement ; les doublons valides reçoivent aussi 2xx.",
     ending:
       "Teste un envoi valide, une signature invalide et un rejeu avant de dire que c’est terminé. Ensuite, réponds avec l’URL publique du récepteur pour que je puisse la coller dans Structura.",
   },

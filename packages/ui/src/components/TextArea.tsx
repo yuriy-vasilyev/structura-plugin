@@ -48,7 +48,8 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       <Field
         as="div"
         disabled={rest.disabled || loading}
-        className={cn("w-full disabled:opacity-50", className)}
+        // Field renders a div, which `:disabled` never matches; it sets data-disabled.
+        className={cn("w-full data-disabled:opacity-50", className)}
       >
         <Label
           className={cn(formFieldLabelVariants({ labelStyle }), {

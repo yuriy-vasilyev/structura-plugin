@@ -2,11 +2,13 @@
 
 namespace Structura\Channels;
 
+use Structura\Core\Source_Check;
 use Structura\Core\Cloud_Client;
 use Structura\Core\Key_Manager;
 use Structura\Core\License_Manager;
 use Structura\Core\Log_Service;
 use Structura\Core\Public_Site_Profile;
+use Structura\Generator\Schema_Injector;
 
 if ( ! defined('ABSPATH')) {
     exit;
@@ -381,6 +383,10 @@ class Channel_Event_Forwarder implements Channel_Event_Forwarder_Interface
         // Persona name is denormalized on the post via the campaign
         // identity. Older posts may not have it; the prompt copes by
         // omitting the persona instruction when the field is empty.
+        $source_check    = $post_id > 0 ? get_post_meta($post_id, Source_Check::META_KEY, true) : '';
+        $open_note_count = is_array($source_check) && isset($source_check['notes'])
+            ? Source_Check::open_count($source_check)
+            : null;
         $persona_name = $post_id > 0
             ? (string)get_post_meta($post_id, '_structura_persona_name', true)
             : '';
@@ -418,6 +424,11 @@ class Channel_Event_Forwarder implements Channel_Event_Forwarder_Interface
             'primary_keyword'     => $primary_keyword,
             'persona_name'        => $persona_name,
         ];
+        // Open review notes, so the owner email can say so
+        // (specs/source-check.md §9.6). Omitted when no check ran.
+        if ($open_note_count !== null) {
+            $payload['open_note_count'] = $open_note_count;
+        }
         if (isset($context['allowed_integration_ids'])) {
             // Older cloud builds reject this event instead of ignoring the new allowlist.
             $payload['event'] = 'article_delivery_requested';
@@ -456,6 +467,7 @@ class Channel_Event_Forwarder implements Channel_Event_Forwarder_Interface
         if ($language === '' || $language === 'default') {
             $language = $payload['locale'];
         }
+        $website = $author_id > 0 ? esc_url_raw((string)get_the_author_meta('user_url', $author_id)) : '';
         return [
             'id' => $post_id,
             'slug' => sanitize_title((string)get_post_field('post_name', $post_id)),
@@ -476,7 +488,11 @@ class Channel_Event_Forwarder implements Channel_Event_Forwarder_Interface
             'author' => $author_id > 0 ? [
                 'name' => sanitize_text_field((string)get_the_author_meta('display_name', $author_id)),
                 'bio' => sanitize_textarea_field((string)get_the_author_meta('description', $author_id)),
-                'url' => esc_url_raw((string)get_the_author_meta('user_url', $author_id)),
+                'url' => $website,
+                // New in plugin 2.32.0. Older clouds ignore both; the cloud normalizer
+                // defaults them for older plugins. Spec: specs/author-identity-eeat.md §6.2
+                'avatarUrl' => esc_url_raw((string)get_avatar_url($author_id, ['size' => Schema_Injector::AUTHOR_AVATAR_SIZE])) ?: null,
+                'sameAs' => $website !== '' ? [$website] : [],
             ] : null,
             'jsonLd' => is_array($schema) ? $schema : [],
         ];

@@ -10143,3 +10143,42 @@ msgstr "{{campaignName}} no tiene keywords, así que cada publicación elige un 
 
 msgid "Add keywords"
 msgstr "Añadir keywords"
+
+msgid "A random install ID, generated on this site by WordPress"
+msgstr "Un ID de instalación aleatorio, generado por WordPress en este sitio"
+
+msgid "Your site's address (host name) and site title"
+msgstr "La dirección de tu sitio (nombre de host) y el título del sitio"
+
+msgid "Your WordPress version and the plugin version"
+msgstr "Tu versión de WordPress y la versión del plugin"
+
+msgid "Your site's branding details: title, tagline, language, logo URL, and active theme name"
+msgstr "Los datos de marca de tu sitio: título, eslogan, idioma, URL del logotipo y nombre del tema activo"
+
+msgid "Connect this site to Structura Cloud"
+msgstr "Conectar este sitio con Structura Cloud"
+
+msgid "Structura writes and formats your posts on Structura Cloud, a service run by the plugin author. Nothing has been sent yet. When you continue, the plugin creates an anonymous workspace for this site and shares:"
+msgstr "Structura escribe y da formato a tus entradas en Structura Cloud, un servicio gestionado por el autor del plugin. Todavía no se ha enviado nada. Cuando continúes, el plugin creará un espacio de trabajo anónimo para este sitio y compartirá:"
+
+msgid "No post content, prompts, or visitor data are included. You can disconnect at any time from Account & License. If you would rather not connect, simply deactivate the plugin — nothing has been sent."
+msgstr "No se incluye el contenido de las entradas, los prompts ni los datos de los visitantes. Puedes desconectarte en cualquier momento desde Cuenta & Licencia. Si prefieres no conectarte, simplemente desactiva el plugin: no se ha enviado nada."
+
+msgid "Privacy policy"
+msgstr "Política de privacidad"
+
+msgid "Terms of service"
+msgstr "Términos del servicio"
+
+msgid "Connected. Opening Structura…"
+msgstr "Conectado. Abriendo Structura…"
+
+msgid "Creating your workspace on Structura Cloud…"
+msgstr "Creando tu espacio de trabajo en Structura Cloud…"
+
+msgid "We couldn't save your choice. Please try again in a moment."
+msgstr "No se pudo guardar tu elección. Inténtalo de nuevo en un momento."
+
+msgid "Connect to Structura Cloud"
+msgstr "Conectar con Structura Cloud"

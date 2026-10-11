@@ -3,6 +3,7 @@
 namespace Structura\Scheduler;
 
 use Structura\Compat\Builder_Compat;
+use Structura\Core\Source_Check;
 use Structura\Core\Cloud_Client;
 use Structura\Core\Image_Processor;
 use Structura\Core\Key_Manager;
@@ -2346,6 +2347,15 @@ class Task_Runner
             $gen_meta['campaign_id']   = $campaign_id;
             $gen_meta['campaign_name'] = $campaign['identity']['name'] ?? '';
             update_post_meta($post_id, '_structura_generation_meta', $gen_meta);
+        }
+
+        // Review notes for the post editor (specs/source-check.md §9.3).
+        // Optional on the wire: a cloud that ran no check sends no key.
+        if (isset($payload['source_check']) && is_array($payload['source_check'])) {
+            $source_check = Source_Check::sanitize($payload['source_check']);
+            if ($source_check !== null) {
+                update_post_meta($post_id, Source_Check::META_KEY, $source_check);
+            }
         }
 
         // Phase 1.0h — cloud ships images inline for every tier; sideload the

@@ -33,6 +33,9 @@ if ( ! defined('ABSPATH')) {
  */
 class Schema_Injector
 {
+    /** Avatar size in pixels for the author Person `image`; article delivery sends the same one. */
+    public const AUTHOR_AVATAR_SIZE = 256;
+
     public function init(): void
     {
         add_action('wp_head', [$this, 'inject_schema_markup']);
@@ -164,6 +167,15 @@ class Schema_Injector
      * Author as a Person node, including the `url` (author archive) that
      * Google flags as a recommended-but-missing field when absent.
      *
+     * 2026-10-11: description, image and sameAs come from the WP profile
+     * (biographical info, avatar, website). The profile stays the only
+     * source on WordPress so the node cannot drift from the byline and
+     * archive the theme renders. A website equal to the archive is skipped
+     * because it would only repeat `url`. Author id 0 (a cron insert with
+     * no user) gets none of them: get_avatar_url(0) still returns the
+     * generic default avatar.
+     * Spec: specs/author-identity-eeat.md §3, §6.3
+     *
      * @return array<string, mixed>
      */
     private function build_author(int $author_id): array
@@ -176,6 +188,25 @@ class Schema_Injector
         $url = $author_id > 0 ? get_author_posts_url($author_id) : '';
         if ($url) {
             $author['url'] = (string) $url;
+        }
+
+        if ($author_id <= 0) {
+            return $author;
+        }
+
+        $bio = wp_strip_all_tags((string) get_the_author_meta('description', $author_id));
+        if ($bio !== '') {
+            $author['description'] = $bio;
+        }
+
+        $avatar = (string) get_avatar_url($author_id, ['size' => self::AUTHOR_AVATAR_SIZE]);
+        if ($avatar !== '') {
+            $author['image'] = $avatar;
+        }
+
+        $website = (string) get_the_author_meta('user_url', $author_id);
+        if ($website !== '' && $website !== ($author['url'] ?? '')) {
+            $author['sameAs'] = [$website];
         }
 
         return $author;

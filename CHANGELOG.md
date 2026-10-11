@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.32.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.31.0...v2.32.0) (2026-10-11)
+
+
+### Features
+
+* accept review notes in the WordPress editor and flag open notes in the owner email ([c5c99eb](https://github.com/yuriy-vasilyev/structura-core/commit/c5c99ebc2ec5678b62d7fb74399de5d66568fe2c))
+* credit a real author per persona per site with Person JSON-LD on every surface ([41e5072](https://github.com/yuriy-vasilyev/structura-core/commit/41e5072a4f83d714761d41b9199da53680134ca3))
+* **functions:** add editor review notes to the WordPress delivery payload ([4ce51a9](https://github.com/yuriy-vasilyev/structura-core/commit/4ce51a9cd6c50b7c534fda5e85f2057a6278b034))
+* keep authors in a workspace library and credit them per persona per site ([c49ba76](https://github.com/yuriy-vasilyev/structura-core/commit/c49ba766d294780f2c026b1a1947b760a3c64c11))
+* **plugin:** show editor review notes in the Structura post meta box ([3e0e7ae](https://github.com/yuriy-vasilyev/structura-core/commit/3e0e7ae6db7394a2a5f16f028ef56d5db873cc52))
+* **www:** add LetsLaunch listing badge to the footer rotator ([c40c2e2](https://github.com/yuriy-vasilyev/structura-core/commit/c40c2e298d0312ff46730d059467b9d1acec6321))
+
+
+### Bug Fixes
+
+* **client:** keep the cloud consent gate busy until the page reloads ([9e94af3](https://github.com/yuriy-vasilyev/structura-core/commit/9e94af302d11d67a87794f761cf340ba0932f38d))
+* **theme:** make the duration-fast/normal/slow/slower utilities exist ([0bba5d3](https://github.com/yuriy-vasilyev/structura-core/commit/0bba5d3ae50ee93c9b7b231c014a12049c2183c8))
+* **ui:** dim disabled InputField, TextArea and Checkbox ([ab0dfd1](https://github.com/yuriy-vasilyev/structura-core/commit/ab0dfd12e05b52657cf007023713e475e6e98f89))
+* **ui:** request a favicon size Google's S2 actually serves ([2986f93](https://github.com/yuriy-vasilyev/structura-core/commit/2986f93d57be1eb9e01a539c5a770ed7001e8880))
+* **web:** hold the shell behind the loader until workspace and role resolve ([2d2066e](https://github.com/yuriy-vasilyev/structura-core/commit/2d2066e832228dfdeae3104ddc9968ec0733e26c))
+* **web:** show bullets and numbers in post editor list blocks ([33dead0](https://github.com/yuriy-vasilyev/structura-core/commit/33dead020a1a788b841d67d5973ef4a19b07ed15))
+
 ## [2.31.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.30.0...v2.31.0) (2026-10-08)
 
 

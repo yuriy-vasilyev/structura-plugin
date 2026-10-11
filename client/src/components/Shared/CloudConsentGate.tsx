@@ -50,11 +50,16 @@ interface CloudConsentGateProps {
 export const CloudConsentGate = ({ onGranted }: CloudConsentGateProps) => {
   const grant = useGrantCloudConsent();
   const [failed, setFailed] = useState(false);
+  // The POST resolves well before the reload paints the app, so the gate
+  // holds its busy state until the page is replaced instead of reverting
+  // to idle while the browser is still loading.
+  const [opening, setOpening] = useState(false);
 
   const handleConnect = async () => {
     setFailed(false);
     try {
       await grant.mutateAsync();
+      setOpening(true);
       if (onGranted) {
         onGranted();
       } else {
@@ -86,20 +91,22 @@ export const CloudConsentGate = ({ onGranted }: CloudConsentGateProps) => {
             </h1>
           </div>
 
-          <p className="m-0! mb-4 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+          <p className="mt-0! mb-4! text-sm! leading-relaxed text-gray-700 dark:text-gray-300">
             {__(
               "Structura writes and formats your posts on Structura Cloud, a service run by the plugin author. Nothing has been sent yet. When you continue, the plugin creates an anonymous workspace for this site and shares:",
               "structura",
             )}
           </p>
 
-          <ul className="m-0! mb-4 list-disc space-y-1 pl-5 text-sm text-gray-700 dark:text-gray-300">
+          <ul className="mt-0! mb-4! list-disc! pl-5! text-sm text-gray-700 dark:text-gray-300">
             {shared.map((item) => (
-              <li key={item}>{item}</li>
+              <li key={item} className="mt-0! mb-1! leading-relaxed">
+                {item}
+              </li>
             ))}
           </ul>
 
-          <p className="m-0! mb-6 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+          <p className="mt-0! mb-6! text-sm! leading-relaxed text-gray-600 dark:text-gray-400">
             {__(
               "No post content, prompts, or visitor data are included. You can disconnect at any time from Account & License. If you would rather not connect, simply deactivate the plugin — nothing has been sent.",
               "structura",
@@ -127,10 +134,20 @@ export const CloudConsentGate = ({ onGranted }: CloudConsentGateProps) => {
             </a>
           </div>
 
+          <div role="status">
+            {(grant.isPending || opening) && (
+              <p className="mt-0! mb-4! text-sm! font-medium text-gray-700 dark:text-gray-300">
+                {opening
+                  ? __("Connected. Opening Structura…", "structura")
+                  : __("Creating your workspace on Structura Cloud…", "structura")}
+              </p>
+            )}
+          </div>
+
           {failed && (
             <p
               role="alert"
-              className="m-0! mb-4 text-sm font-medium text-red-600 dark:text-red-400"
+              className="mt-0! mb-4! text-sm! font-medium text-red-600 dark:text-red-400"
             >
               {__(
                 "We couldn't save your choice. Please try again in a moment.",
@@ -139,7 +156,7 @@ export const CloudConsentGate = ({ onGranted }: CloudConsentGateProps) => {
             </p>
           )}
 
-          <Button onClick={handleConnect} loading={grant.isPending} size="lg">
+          <Button onClick={handleConnect} loading={grant.isPending || opening} size="lg">
             {__("Connect to Structura Cloud", "structura")}
           </Button>
         </Card>

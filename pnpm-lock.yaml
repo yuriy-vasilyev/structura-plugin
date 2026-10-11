@@ -445,6 +445,9 @@ importers:
       '@structura/tailwind-config':
         specifier: workspace:*
         version: link:../tailwind-config
+      '@tailwindcss/node':
+        specifier: ^4.1.18
+        version: 4.2.2
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
