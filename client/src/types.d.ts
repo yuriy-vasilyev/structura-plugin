@@ -129,8 +129,8 @@ declare global {
        *   - `activation_id`: the activation UUID — passed through so
        *     anonymous SPA queries can reference the activation
        *     without waiting for `useSettingsQuery` to resolve.
-       *   - `plan`: one of "none" / "free" / "byok" / "cloud" /
-       *     "cloud_pro" — read on first paint to drive the
+       *   - `plan`: one of "none" / "free" / "byok" / "cloud" — read
+       *     on first paint to drive the
        *     `is_anonymous` derivation.
        *
        * All five are optional for back-compat with plugin builds

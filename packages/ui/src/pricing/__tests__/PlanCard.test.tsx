@@ -85,3 +85,93 @@ describe("PlanCard — founding treatment is opt-in (web unaffected)", () => {
     expect(screen.getByText("Top Tier")).toBeInTheDocument();
   });
 });
+
+/**
+ * Cloud volume design (2026-10-12, specs/cloud-volume-pricing-design.md): the
+ * card reads eyebrow → name → description → before-price control → price →
+ * billing detail → CTA → allowances → features. The managed card no longer
+ * uses the gold premium treatment.
+ */
+describe("PlanCard — design stack and optional slots", () => {
+  const follows = (a: HTMLElement, b: HTMLElement) =>
+    // eslint-disable-next-line no-bitwise
+    Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+  it("renders the slots in reading order", () => {
+    render(
+      <PlanCard
+        {...BASE}
+        currency="usd"
+        price={119}
+        strikePrice={149}
+        eyebrow="Managed plan"
+        tag="AI included"
+        beforePrice={<label htmlFor="v">Posts per site per month</label>}
+        priceNote="$1,428 per site, billed yearly"
+        allowancesLabel="Included per site, every month"
+        allowances={[
+          { value: "100", label: "posts" },
+          { value: "150", label: "images" },
+          { value: "40", label: "AI videos" },
+        ]}
+        featuresLabel="Everything you need"
+        ctaPlacement="top"
+      />,
+    );
+    const order = [
+      screen.getByText("Managed plan"),
+      screen.getByRole("heading", { name: "Cloud" }),
+      screen.getByText("Managed AI, fully hosted."),
+      screen.getByText("Posts per site per month"),
+      screen.getByText("$119"),
+      screen.getByText("$1,428 per site, billed yearly"),
+      screen.getByRole("link", { name: "Generate posts in the cloud" }),
+      screen.getByText("Included per site, every month"),
+      screen.getByText("Everything you need"),
+      screen.getByText("30 posts per site / month"),
+    ];
+    for (let i = 1; i < order.length; i++) {
+      expect(follows(order[i - 1], order[i]), `slot ${i} out of order`).toBe(true);
+    }
+    expect(screen.getByText("AI included")).toBeInTheDocument();
+  });
+
+  it("pairs each allowance value with its label in a definition list", () => {
+    render(
+      <PlanCard
+        {...BASE}
+        allowances={[
+          { value: "30", label: "posts" },
+          { value: "90", label: "images" },
+        ]}
+      />,
+    );
+    const terms = screen.getAllByRole("term").map((t) => t.textContent);
+    const values = screen.getAllByRole("definition").map((d) => d.textContent);
+    expect(terms).toEqual(["posts", "images"]);
+    expect(values).toEqual(["30", "90"]);
+  });
+
+  it("names the struck price for screen readers when a label is given", () => {
+    render(
+      <PlanCard
+        {...BASE}
+        currency="usd"
+        price={39}
+        strikePrice={49}
+        labels={{ unit: "/ site / month", strikePrice: "Monthly billing rate" }}
+      />,
+    );
+    const struck = screen.getByText("$49");
+    expect(struck.tagName).toBe("S");
+    expect(struck.parentElement).toHaveTextContent("Monthly billing rate $49");
+  });
+
+  it("keeps the CTA free of the gold premium gradient unless `premium` is set", () => {
+    const { rerender } = render(<PlanCard {...BASE} recommended ctaPlacement="top" />);
+    const cta = () => screen.getByRole("link", { name: "Generate posts in the cloud" });
+    expect(cta().className).not.toMatch(/gold/);
+    rerender(<PlanCard {...BASE} premium ctaPlacement="top" />);
+    expect(cta().className).toMatch(/from-gold-400/);
+  });
+});

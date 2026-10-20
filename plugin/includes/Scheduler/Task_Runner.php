@@ -55,6 +55,8 @@ class Task_Runner
      * cloud_pro → openai) when a campaign's image provider was missing or
      * text-only. The cloud now picks the image model on these plans and
      * ignores the provider sent, so the plugin sends none in that case.
+     *
+     * 'cloud_pro': retired 2026-10-12, accepted for one release window (see License_Manager::get_plan()).
      */
     private const MANAGED_IMAGE_PLANS = ['cloud', 'cloud_pro'];
 
@@ -363,7 +365,7 @@ class Task_Runner
             // (`Provider_Registry::resolve_image_adapter` → adapter
             // class) is gone; the cloud's resolver applies the per-
             // cycle rate cap for free / none tiers, returns the
-            // managed master key for cloud / cloud_pro, or decrypts
+            // managed master key for cloud, or decrypts
             // the activation-bound BYOK credential. Forward
             // `$image_type` as the slot id so the cloud's generations
             // record carries the same slot/topic/alt/fileName fields

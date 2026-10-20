@@ -265,7 +265,7 @@ describe("ChannelsConnectionsPage — video channel", () => {
     capabilities: ["adapt"],
     authType: "none",
     iconUrl: "",
-    gating: { requiredPlan: "cloud_pro", requiredAddon: null },
+    gating: { requiredPlan: "cloud", requiredAddon: null },
     entitlement: { canInstall: true, blocker: null as string | null },
   };
 
@@ -279,7 +279,7 @@ describe("ChannelsConnectionsPage — video channel", () => {
       if (path.startsWith("/structura/v1/channels/catalog")) {
         return Promise.resolve({
           success: true,
-          plan: "cloud_pro",
+          plan: "cloud",
           activeAddons: [],
           entries: [
             {
@@ -333,17 +333,18 @@ describe("ChannelsConnectionsPage — video channel", () => {
     expect(screen.getByText("12 of 20 videos this month")).toBeInTheDocument();
   });
 
-  it("gates a deep-linked video connection behind the Cloud Pro upsell when the plan lost access", async () => {
-    // Installed on Cloud Pro, then downgraded: a `?configure=` deep link to
+  it("gates a deep-linked video connection behind the Cloud upsell when the plan lost access", async () => {
+    // Installed with video, then downgraded: a `?configure=` deep link to
     // the video connection must show the upgrade gate (handoff §4) instead
-    // of the settings modal.
+    // of the settings modal. Video comes with every Cloud option since
+    // 2026-10-12, so the gate names Cloud.
     mockApi({ entitlementBlocker: "upgrade_plan" });
 
     renderAt("/channels/connections?configure=conn-video");
 
     await waitFor(() => {
       expect(
-        screen.getByText("Video is a Cloud Pro feature"),
+        screen.getByText("Video is included with Cloud"),
       ).toBeInTheDocument();
     });
     // The settings modal must NOT have opened.
@@ -362,6 +363,6 @@ describe("ChannelsConnectionsPage — video channel", () => {
     await waitFor(() => {
       expect(screen.getByText("Configure Vertical video")).toBeInTheDocument();
     });
-    expect(screen.queryByText("Video is a Cloud Pro feature")).toBeNull();
+    expect(screen.queryByText("Video is included with Cloud")).toBeNull();
   });
 });

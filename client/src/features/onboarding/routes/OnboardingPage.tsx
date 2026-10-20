@@ -58,7 +58,6 @@ const TIER_ORDER: ReadonlyArray<string> = [
   "free",
   "byok",
   "cloud",
-  "cloud_pro",
 ];
 
 function tierLevel(planId: string | null | undefined): number {

@@ -109,6 +109,7 @@ class Post_Meta_Box
         // regen is refused.
         if ($image_provider === '') {
             $license_data = \Structura\Core\License_Manager::get_license_data();
+            // 'cloud_pro': retired 2026-10-12, accepted for one release window (see License_Manager::get_plan()).
             if ( ! in_array($license_data['plan'] ?? 'free', ['cloud', 'cloud_pro'], true)) {
                 return null;
             }
@@ -439,7 +440,7 @@ class Post_Meta_Box
      * Extracted from the enqueue path so the derivation is unit-testable
      * without standing up admin enqueue.
      *
-     * Managed plans (Cloud, Cloud Pro) get no rows, so the modal hides its
+     * Managed plans (Cloud) get no rows, so the modal hides its
      * picker: since 2026-10-06 Structura binds the image model there and the
      * cloud ignores a provider or tier sent with a managed regen
      * (specs/managed-ai-lineup.md).
@@ -449,6 +450,7 @@ class Post_Meta_Box
      */
     private static function build_image_tier_catalog(string $tier): array
     {
+        // 'cloud_pro': retired 2026-10-12, accepted for one release window (see License_Manager::get_plan()).
         if (in_array($tier, ['cloud', 'cloud_pro'], true)) {
             return [];
         }
@@ -518,6 +520,7 @@ class Post_Meta_Box
      */
     public static function generation_stats_lines($gen_meta, string $plan): array
     {
+        // 'cloud_pro': retired 2026-10-12, accepted for one release window (see License_Manager::get_plan()).
         if ( ! is_array($gen_meta) || in_array($plan, ['cloud', 'cloud_pro'], true)) {
             return ['model' => '', 'tokens' => 0];
         }

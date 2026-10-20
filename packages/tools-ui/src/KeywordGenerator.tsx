@@ -40,6 +40,7 @@ import {
   EmptyPane,
   ErrorPane,
   LearnLink,
+  LearnRow,
   ReportFooter,
   ReportFrame,
   ReportSkeleton,
@@ -410,6 +411,9 @@ const KeywordLegend: FC<{ dict: Dict; shared: Shared; locale: string; learn: Lea
 /** The table only ever shows this many rows, whatever the API sends. */
 const MAX_ROWS = 50;
 
+/** The Learn row under the table: where to look for more ideas once these are used up. */
+const MORE_LEARN: readonly LearnSlug[] = ["how-to-find-competitor-keywords", "long-tail-keywords"];
+
 function plural(forms: { none: string; one: string; other: string }, count: number): string {
   if (count === 0) return forms.none;
   return count === 1 ? forms.one : fill(forms.other, { count });
@@ -550,6 +554,7 @@ const KeywordReport: FC<{
     { term: r.columns.cpc, body: r.read.cpc },
     { term: r.columns.intent, body: r.read.intent },
   ];
+  const moreLearn = MORE_LEARN.filter((slug) => learn.published.has(slug));
 
   return (
     <ReportFrame testId="keywords-result">
@@ -751,6 +756,16 @@ const KeywordReport: FC<{
                 ))}
               </dl>
             </Disclosure>
+            {moreLearn.length > 0 && (
+              <LearnRow
+                label={shared.learn.rowLabel}
+                testId="keyword-learn"
+                className="mt-4"
+                links={moreLearn.map((slug) => (
+                  <LearnLink key={slug} target={learn} copy={shared.learn} slug={slug} />
+                ))}
+              />
+            )}
           </>
         )}
       </div>

@@ -306,7 +306,9 @@ const SelectItem: React.FC<SelectItemProps> = ({
           )}
         </span>
         {description && (
-          <span className="block text-xs font-normal text-gray-500 group-data-focus:text-gray-600 dark:text-gray-500 dark:group-data-focus:text-gray-400">
+          // Dark gray-400 / focus gray-300: gray-500 on the gray-900 panel
+          // was under 4.5:1 for 12px text (Cloud volume menu, 2026-10-12).
+          <span className="block text-xs font-normal text-gray-500 group-data-focus:text-gray-600 dark:text-gray-400 dark:group-data-focus:text-gray-300">
             {description}
           </span>
         )}

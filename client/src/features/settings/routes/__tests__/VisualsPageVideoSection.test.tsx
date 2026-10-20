@@ -47,7 +47,7 @@ const presetsMock = vi.hoisted(() => ({
 vi.mock("@/features/settings", () => ({
   useDefaultProviders: () => ({ defaultImageProvider: "gemini" }),
   useLicense: () => ({
-    plan: "cloud_pro",
+    plan: "cloud",
     isPaidLicense: true,
     hasUsableLicense: true,
   }),
@@ -144,9 +144,11 @@ describe("VisualsPage — Video section (eligible plan)", () => {
   it("renders the Video section seeded from the bound preset's video fields", () => {
     renderPage();
 
-    // Section head: title + premium plan badge.
+    // Section head: title + plan badge. Video comes with every Cloud
+    // option since 2026-10-12, so the badge names Cloud.
     expect(screen.getByText("Video")).toBeInTheDocument();
-    expect(screen.getByText("Cloud Pro")).toBeInTheDocument();
+    expect(screen.getByText("Cloud")).toBeInTheDocument();
+    expect(screen.queryByText("Cloud Pro")).toBeNull();
 
     // Style preset radiogroup with the three cards; preset's kinetic wins.
     const styleGroup = screen.getByRole("radiogroup", {
@@ -290,6 +292,7 @@ describe("VisualsPage — Video section gating", () => {
     renderPage();
 
     expect(screen.getByText("Video styling")).toBeInTheDocument();
+    expect(screen.queryByText("Cloud Pro")).toBeNull();
     const upgrade = screen.getByRole("link", { name: /upgrade plan/i });
     expect(upgrade).toHaveAttribute(
       "href",

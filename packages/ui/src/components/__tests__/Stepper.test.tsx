@@ -115,4 +115,15 @@ describe("Stepper", () => {
       expect(screen.getByText("Discovery")).toHaveClass("text-neutral-900");
     });
   });
+
+  it("draws a disabled step as done but never makes it clickable", () => {
+    const steps = STEPS.map((s) => (s.id === "interview" ? { ...s, disabled: true } : s));
+    render(<Stepper steps={steps} activeIndex={2} onStepClick={vi.fn()} />);
+
+    const interview = screen.getByRole("button", { name: /Interview/ });
+    expect(interview).toBeDisabled();
+    // Still the done check, not the lock glyph or the number.
+    expect(interview).not.toHaveTextContent("1");
+    expect(screen.getByRole("button", { name: /Strategy/ })).toBeEnabled();
+  });
 });

@@ -17,6 +17,12 @@ export interface StepperStep {
   dot?: boolean;
   /** Render a lock glyph and never make the step clickable (gated steps). */
   locked?: boolean;
+  /**
+   * Never clickable, but drawn like any other step (no lock glyph): a step
+   * the user cannot go back to, such as the setup wizard's Address step
+   * once the site exists.
+   */
+  disabled?: boolean;
 }
 
 export interface StepperProps {
@@ -75,7 +81,8 @@ export const Stepper: FC<StepperProps> = ({
       {steps.map((step, i) => {
         const state =
           i === activeIndex ? "active" : i <= furthest ? "done" : "upcoming";
-        const clickable = state === "done" && !!onStepClick && !step.locked;
+        const clickable =
+          state === "done" && !!onStepClick && !step.locked && !step.disabled;
         const showLabel = labelMode === "all" || state === "active";
         return (
           <div key={step.id} className="flex items-center gap-2">

@@ -242,7 +242,7 @@ describe("ChannelConnectionRow — video channel", () => {
     capabilities: ["adapt"],
     authType: "none",
     iconUrl: "",
-    gating: { requiredPlan: "cloud_pro", requiredAddon: null },
+    gating: { requiredPlan: "cloud", requiredAddon: null },
     entitlement: { canInstall: true, blocker: null },
   };
 

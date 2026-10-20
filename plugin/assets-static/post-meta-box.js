@@ -88,7 +88,7 @@
         // Populate the Top / Standard tier picker. Rows come from
         // `structuraMetaBox.imageTiers` (pre-resolved server-side —
         // top = recommended model, mid = default model, per provider).
-        // Rows are empty on managed plans (cloud/cloud_pro), where
+        // Rows are empty on managed plans (cloud), where
         // Structura binds the image model (2026-10-06), so the picker
         // stays hidden there.
         renderModelPicker();

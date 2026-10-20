@@ -13,7 +13,7 @@ import { render, screen } from "@testing-library/react";
 
 vi.mock("@wordpress/i18n", () => ({ __: (t: string) => t, _x: (t: string) => t }));
 vi.mock("@structura/types", () => ({
-  isManagedPlan: (p: string) => p === "cloud" || p === "cloud_pro",
+  isManagedPlan: (p: string) => p === "cloud",
 }));
 vi.mock("@structura/ui", () => ({
   Badge: ({ children }: { children?: unknown }) => <span>{children as never}</span>,

@@ -64,7 +64,7 @@ export interface JustThePluginSectionProps {
  * standalone plugin** (no account, paragraph-only, BYOK).
  *
  * Wave-2 restructure (2026-05-04): Free was hoisted out of the paid
- * grid into this band so the paid cards (BYOK / Cloud / Cloud Pro) get
+ * grid into this band so the paid cards (BYOK / Cloud) get
  * their own visual rhythm without a "$0" outlier in the row. The plugin
  * column on the right is the same content this component used to be
  * before the restructure, just shifted to make room for Free.

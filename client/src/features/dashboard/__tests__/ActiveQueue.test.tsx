@@ -2,7 +2,7 @@
  * ActiveQueue — the "Intelligence" column by plan (2026-10-02).
  *
  * `model_slug` on a queued job is the campaign's text provider id (the
- * plugin's `GET /structura/v1/jobs`). Managed plans (Cloud, Cloud Pro) never
+ * plugin's `GET /structura/v1/jobs`). Managed plans (Cloud) never
  * see a provider or model name (specs/managed-ai-lineup.md §3.3), so the
  * column and its header go, as in RecentBlueprints. Found in the local
  * wp-admin walkthrough on a Cloud Pro site: the row read "openai".
@@ -51,8 +51,8 @@ describe("ActiveQueue — Intelligence column", () => {
     expect(screen.getByText("openai")).toBeInTheDocument();
   });
 
-  it.each(["cloud", "cloud_pro"])("managed plan %s: no column, no provider id", (plan) => {
-    planMock.plan = plan;
+  it("managed plan cloud: no column, no provider id", () => {
+    planMock.plan = "cloud";
     render(<ActiveQueue jobs={[job()]} />);
     expect(screen.queryByText("Intelligence")).toBeNull();
     expect(screen.queryByText("openai")).toBeNull();
@@ -68,7 +68,7 @@ describe("ActiveQueue — Intelligence column", () => {
   });
 
   it("managed empty queue spans the remaining three columns", () => {
-    planMock.plan = "cloud_pro";
+    planMock.plan = "cloud";
     render(<ActiveQueue jobs={[]} />);
     expect(screen.getByText("Queue is currently empty.").getAttribute("colspan")).toBe("3");
   });

@@ -156,7 +156,7 @@ export interface CatalogModel {
   /**
    * Grounding-audit role this model fills, read only by
    * `resolveGroundingAuditModel` (at most one model per role, tested).
-   * `premium` audits Cloud Pro, `standard` every other audited tier. An
+   * `premium` audits Cloud, `standard` every other audited tier. An
    * internal binding: it may point at an `unlisted` model without making it
    * customer-visible. Registry-only.
    */
@@ -164,7 +164,7 @@ export interface CatalogModel {
   /**
    * Managed-lineup writer role this model fills, read only by
    * `resolveManagedWriterLineup` (at most one model per role, tested).
-   * `primary` writes every Cloud and Cloud Pro post; `failover` takes over
+   * `primary` writes every Cloud post; `failover` takes over
    * live synthesis when the primary fails transiently or times out. Same
    * pattern as `auditor`: an internal binding that may point at an
    * `unlisted` model without making it customer-visible. Registry-only.
@@ -174,7 +174,7 @@ export interface CatalogModel {
   /**
    * Managed image role this model fills, read only by
    * `resolveManagedImageBinding` (at most one model per role, tested).
-   * `primary` makes every Cloud and Cloud Pro image; `failover` takes over
+   * `primary` makes every Cloud image; `failover` takes over
    * when the primary fails transiently. Same pattern as `managedWriter`:
    * may point at an `unlisted` model without making it customer-visible.
    * Registry-only. Spec: specs/managed-ai-lineup.md §2.4.

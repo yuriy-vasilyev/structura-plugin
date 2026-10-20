@@ -1,5 +1,5 @@
 /**
- * OnboardingPage — managed-plan (cloud / cloud_pro) AI-engine skip.
+ * OnboardingPage — managed-plan (cloud) AI-engine skip.
  *
  * Pins the 2026-06-06 fix: cloud plans run on Structura's master keys,
  * so the wizard must NOT ask them to connect an AI provider. The

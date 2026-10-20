@@ -13,5 +13,6 @@ export * from "./founding-offer";
 export * from "./CurrencyToggle";
 export * from "./AgencyVolumeStrip";
 export * from "./ComparisonMatrix";
+export * from "./VolumeSelect";
 export * from "./JustThePluginSection";
 export * from "./ContactBand";

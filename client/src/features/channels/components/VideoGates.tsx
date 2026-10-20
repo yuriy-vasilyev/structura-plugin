@@ -4,11 +4,13 @@
  *   - `VideoFirstRunEmptyState` — Activity page, when a video connection
  *     exists but nothing has rendered yet. Reassures ("on its way") and
  *     routes to the connection's settings.
- *   - `VideoUpgradeGate` — a non-Cloud-Pro user deep-links into a video
- *     connection URL (e.g. after a plan downgrade). Explains the lock and
- *     routes to pricing with the dedicated `unlock_video` intent so the
- *     marketing page can highlight the Cloud Pro tier and analytics can
- *     attribute the conversion to this surface.
+ *   - `VideoUpgradeGate` — a user without video on their license
+ *     deep-links into a video connection URL (e.g. after a plan downgrade).
+ *     Explains the lock and routes to pricing with the dedicated
+ *     `unlock_video` intent so the marketing page can highlight the Cloud
+ *     plan and analytics can attribute the conversion to this surface.
+ *     Video comes with every Cloud option since 2026-10-12
+ *     (specs/cloud-volume-pricing.md); it used to be Cloud Pro only.
  */
 
 import { __ } from "@wordpress/i18n";
@@ -45,7 +47,7 @@ export const VideoUpgradeGate = () => {
   return (
     <EmptyState
       icon={<Lock size={22} />}
-      title={__("Video is a Cloud Pro feature", "structura")}
+      title={__("Video is included with Cloud", "structura")}
       description={__(
         "This link points to the Video channel, which isn’t included in your plan. Upgrade to turn every post into a vertical video for Shorts and TikTok.",
         "structura",

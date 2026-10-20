@@ -349,7 +349,7 @@ describe("SinglePostRunDetailPage — provider and model names by plan (2026-10-
   });
 
   it("managed: no provider and no model names, text or image", async () => {
-    licenseMock.plan = "cloud_pro";
+    licenseMock.plan = "cloud";
     runQueryMock.current = makeRun({ inputSnapshot: snapshotWithProviders });
     render(<SinglePostRunDetailPage />);
 

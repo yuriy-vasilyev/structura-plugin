@@ -30,15 +30,13 @@ import type { PlanId } from "@structura/types";
  *   --------------|------------------------|--------
  *   byok          |   true                 | true    (add-on purchased OR agency-bundled)
  *   cloud         |   true                 | true    (add-on purchased OR agency-bundled)
- *   cloud_pro     |   true                 | true    (add-on purchased OR agency-bundled)
- *   byok/cloud/   |                        |
- *   cloud_pro     |   false                | false   (no entitlement on file)
+ *   byok/cloud    |   false                | false   (no entitlement on file)
  *   free          |   any                  | false   (plan ceiling — defense in depth)
  *   none/other    |   any                  | false
  *
  * Previously this helper hard-coded `plan === "cloud_pro" → true`
  * unconditionally on the assumption that `cloud_pro` was a synonym for
- * "agency". That was wrong — `cloud_pro` is the plan tier and exists
+ * "agency". That was wrong — `cloud_pro` was the plan tier and existed
  * in BOTH individual and agency audience grids. The old behaviour made
  * the Channels nav visible to individual cloud_pro users who hadn't
  * bought the Channels add-on, and every install attempt then bounced
@@ -59,7 +57,7 @@ export const hasChannelsAccess = (
   // Plan ceiling — Free / None / unknown plans never see Channels even
   // if a stale entitlement key leaked through (e.g. during a
   // downgrade-grace window before the cron tears it down).
-  if (plan !== "byok" && plan !== "cloud" && plan !== "cloud_pro") {
+  if (plan !== "byok" && plan !== "cloud") {
     return false;
   }
 

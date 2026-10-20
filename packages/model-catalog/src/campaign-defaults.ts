@@ -243,8 +243,8 @@ export interface CampaignDefaults {
 /**
  * Plan family for the pre-generation control — mirrors the plugin's
  * `PregenerationControl` split: BYOK toggle / Free lock / Managed
- * banner. Cloud + Cloud Pro are managed (master keys, pre-gen always
- * on); every other paid family is BYOK-style.
+ * banner. Cloud is managed (master keys, pre-gen always on); every
+ * other paid family is BYOK-style.
  */
 export function pregenTier(planId: string | undefined | null): "free" | "managed" | "byok" {
   if (!planId || planId === "free") return "free";

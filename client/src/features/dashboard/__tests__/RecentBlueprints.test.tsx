@@ -2,7 +2,7 @@
  * RecentBlueprints — the "Intelligence" column by plan (2026-10-01).
  *
  * The column shows `post.model`, which the plugin fills with the
- * campaign's text provider id. Managed plans (Cloud, Cloud Pro) never see
+ * campaign's text provider id. Managed plans (Cloud) never see
  * a provider or model name, so the column goes there; on BYOK a blank
  * value renders no empty badge (specs/managed-ai-lineup.md §3.3).
  */
@@ -70,7 +70,7 @@ describe("RecentBlueprints — Intelligence column", () => {
   });
 
   it("managed empty state spans the remaining three columns", () => {
-    planMock.plan = "cloud_pro";
+    planMock.plan = "cloud";
     postsMock.current = [];
     render(<RecentBlueprints />);
 

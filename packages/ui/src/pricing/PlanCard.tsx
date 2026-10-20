@@ -28,6 +28,12 @@ export interface PlanCardLabels {
    * "PREMIUM", "TOP TIER", or any per-plan variant.
    */
   premiumBadge?: string;
+  /**
+   * Screen-reader prefix for the struck-through price (e.g. "Monthly billing
+   * rate"), because assistive tech does not announce a strike. Absent → the
+   * struck figure is read bare.
+   */
+  strikePrice?: string;
 }
 
 export interface PlanCardProps {
@@ -131,12 +137,48 @@ export interface PlanCardProps {
    * verbatim — pass them already in `data-foo` form.
    */
   ctaDataAttributes?: Record<string, string>;
+  /**
+   * Small uppercase category above the name (e.g. "Managed AI"). Absent →
+   * nothing renders.
+   */
+  eyebrow?: string;
+  /** Pill on the eyebrow row, right-aligned (e.g. "AI included"). */
+  tag?: string;
+  /**
+   * Rendered between the description and the price. The Cloud card passes its
+   * posts-per-site volume selector here so the input sits directly above
+   * the number it changes (specs/cloud-volume-pricing-design.md, 2026-10-12).
+   * The caller owns the slot's height, so a grid can reserve the same region
+   * in every card and keep the price and CTA rows aligned. Absent → nothing
+   * renders.
+   */
+  beforePrice?: ReactNode;
+  /**
+   * Rendered directly under the price line. Used for billing detail such as
+   * the annual total and the yearly saving.
+   */
+  priceNote?: ReactNode;
+  /** Heading above `allowances` (e.g. "Included per site, every month"). */
+  allowancesLabel?: string;
+  /**
+   * Structured per-period allowances (posts, images, videos) rendered as a
+   * row of large numbers above the feature list. Absent → nothing renders.
+   */
+  allowances?: ReadonlyArray<{ value: string; label: string }>;
+  /** Heading above the feature list (e.g. "The full publishing engine"). */
+  featuresLabel?: string;
 }
 
 /**
  * Pricing tier card. Pure presentational — no hooks, no fetches, no i18n
  * dependency. Used by both the marketing site (`www/`) and the authenticated
  * app portal (`web/`); each app composes the card with its own data + i18n.
+ *
+ * Reading order since the Cloud volume design (2026-10-12,
+ * specs/cloud-volume-pricing-design.md): eyebrow → name → description →
+ * `beforePrice` → price → `priceNote` → CTA (`top` placement) → allowances →
+ * features → footnote. Cards never lift or scale on hover: they are static
+ * surfaces, and a scaled card broke the equal-column grid.
  *
  * Spec: pricing-v2-implementation.md §8.1.
  */
@@ -166,6 +208,13 @@ export const PlanCard: FC<PlanCardProps> = ({
   ctaPlacement = "bottom",
   ctaVariant,
   ctaDataAttributes,
+  eyebrow,
+  tag,
+  beforePrice,
+  priceNote,
+  allowancesLabel,
+  allowances,
+  featuresLabel,
 }) => {
   const currencySymbol = currency === "eur" ? "€" : "$";
   const showCurrentBadge = Boolean(isCurrent && labels.currentPlan);
@@ -176,13 +225,24 @@ export const PlanCard: FC<PlanCardProps> = ({
   const showFoundingStrike = Boolean(founding && showStrikePrice);
   const showFoundingBadge = Boolean(founding?.badge && !isCurrent);
   const priceText = priceDisplay ?? String(price);
+  // `top` placement (marketing grid) keeps its badges in the eyebrow row;
+  // `bottom` (app portal) pops them over the top border as before.
+  const inFlowBadges = ctaPlacement === "top" && !showCurrentBadge;
+  const showTopRow = Boolean(
+    eyebrow ||
+      tag ||
+      (inFlowBadges && (showPopularBadge || showFoundingBadge || showPremiumBadge)) ||
+      // The marketing grid reserves the row so names line up across cards.
+      ctaPlacement === "top"
+  );
 
-  // The premium (Cloud Pro) tier CTA uses the brand's muted premium-gold
-  // gradient (the `gold-*` token, NOT stock amber) so the most expensive tier
-  // reads as "premium" instead of "muted / secondary". `!` overrides keep the
-  // gradient from being stripped by Button's own variant classes.
+  // The premium tier CTA uses the brand's muted premium-gold gradient (the
+  // `gold-*` token, NOT stock amber). Opt-in through `premium`; the Cloud card
+  // stopped using it when Cloud Pro was retired (2026-10-12). `!` overrides
+  // keep the gradient from being stripped by Button's own variant classes.
   const premiumCtaCls =
     "!bg-gradient-to-r !from-gold-400 !to-gold-500 !text-gold-950 hover:!text-gold-950 shadow-lg shadow-gold-500/20 hover:!from-gold-300 hover:!to-gold-400 hover:shadow-gold-500/30 focus-visible:!ring-gold-400 dark:shadow-gold-500/30";
+  const ctaCls = cn("min-h-12 w-full", premium && !isCurrent && premiumCtaCls);
 
   const ctaButton = ctaHref ? (
     <Button
@@ -191,7 +251,7 @@ export const PlanCard: FC<PlanCardProps> = ({
       rel={ctaRel}
       onClick={ctaOnClickCapture}
       variant={isCurrent ? "secondary" : (ctaVariant ?? "primary")}
-      className={cn("w-full", premium && !isCurrent && premiumCtaCls)}
+      className={ctaCls}
       aria-disabled={ctaDisabled || isCurrent}
       {...ctaDataAttributes}
     >
@@ -203,24 +263,28 @@ export const PlanCard: FC<PlanCardProps> = ({
       loading={ctaLoading}
       disabled={ctaDisabled || isCurrent || (!onCtaClick && !ctaHref)}
       variant={isCurrent ? "secondary" : (ctaVariant ?? "primary")}
-      className={cn("w-full", premium && !isCurrent && premiumCtaCls)}
+      className={ctaCls}
       {...ctaDataAttributes}
     >
       {ctaLabel}
     </Button>
   );
 
+  const muted = premium ? "text-neutral-300" : "text-neutral-600 dark:text-neutral-300";
+  const subtle = premium ? "text-neutral-400" : "text-neutral-600 dark:text-neutral-400";
+  const strong = premium ? "text-white" : "text-neutral-900 dark:text-white";
+
   return (
     <div
       className={cn(
-        "duration-normal relative flex flex-col rounded-3xl border p-8 transition-all",
+        "relative flex min-w-0 flex-col rounded-2xl border p-5 transition-colors duration-fast ease-out motion-reduce:transition-none sm:p-6",
         premium
           ? // Dark premium treatment — inverted in light mode, accent glow
             // in dark mode. Matches specs/design-guide.md "dark card" pattern.
             "dark:border-brand-500/40 dark:ring-brand-500/10 dark:shadow-brand-500/40 border-neutral-900 bg-neutral-950 text-neutral-100 shadow-xl ring-1 ring-neutral-900/20 dark:bg-neutral-950 dark:shadow-[0_0_60px_-20px] dark:ring-2"
           : recommended
-            ? "border-brand-500 ring-brand-500/5 dark:border-brand-500/30 z-10 scale-105 bg-white shadow-xl ring-4 dark:bg-neutral-900 dark:ring-1 dark:ring-white/[0.04]"
-            : "border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900/50 dark:ring-1 dark:ring-white/[0.04]"
+            ? "border-brand-300 shadow-floating dark:border-brand-500/50 bg-white dark:bg-neutral-900 dark:ring-1 dark:ring-white/[0.04]"
+            : "shadow-raised border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900 dark:ring-1 dark:ring-white/[0.04]"
       )}
     >
       {showCurrentBadge && (
@@ -229,156 +293,168 @@ export const PlanCard: FC<PlanCardProps> = ({
         </div>
       )}
 
-      {/* `top` placement (marketing grid): badges sit IN FLOW at the top of the
-          card (mono, gap-2) so "Most Popular" + the gold "for life"/premium
-          badge coexist cleanly without cramping or colliding with the top
-          border. The row is always reserved (min-h) so every card's name/price
-          line up even when a card carries no badge (e.g. Free).
-          `bottom` placement (app portal): the original "popped" absolute badges
-          render — same positions as before, now in the mono badge font. */}
-      {ctaPlacement === "top" ? (
-        !showCurrentBadge && (
-          <div className="mb-5 flex min-h-[22px] flex-wrap items-center gap-2">
-            {showPopularBadge && (
+      {!inFlowBadges && showPopularBadge && (
+        <div className="bg-brand-600 absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-3 py-1 font-mono text-[10px] font-bold tracking-wider text-white uppercase">
+          {labels.mostPopular}
+        </div>
+      )}
+      {!inFlowBadges && showPremiumBadge && (
+        <div className="from-gold-400 to-gold-500 text-gold-950 absolute top-0 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full bg-gradient-to-r px-3 py-1 font-mono text-[10px] font-bold tracking-wider uppercase">
+          <Sparkles className="size-3" strokeWidth={3} />
+          {labels.premiumBadge}
+        </div>
+      )}
+
+      {showTopRow && (
+        <div className="mb-4 flex min-h-6 flex-wrap items-center justify-between gap-2">
+          {eyebrow ? (
+            <span className={cn("text-xs font-bold tracking-widest uppercase", subtle)}>
+              {eyebrow}
+            </span>
+          ) : (
+            <span aria-hidden="true" />
+          )}
+          <span className="flex flex-wrap items-center gap-2">
+            {tag && (
+              <span className="bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300 rounded-full px-2 py-1 text-xs font-semibold">
+                {tag}
+              </span>
+            )}
+            {inFlowBadges && showPopularBadge && (
               <span className="bg-brand-600 inline-flex items-center rounded-full px-2.5 py-1 font-mono text-[10px] font-bold tracking-wider text-white uppercase">
                 {labels.mostPopular}
               </span>
             )}
-            {showFoundingBadge && (
+            {inFlowBadges && showFoundingBadge && (
               <span className="bg-gold-300 text-gold-950 inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-mono text-[10px] font-bold tracking-wider uppercase">
                 <Sparkles className="size-3" strokeWidth={3} />
                 {founding!.badge}
               </span>
             )}
-            {showPremiumBadge && (
+            {inFlowBadges && showPremiumBadge && (
               <span className="from-gold-400 to-gold-500 text-gold-950 inline-flex items-center gap-1 rounded-full bg-gradient-to-r px-2.5 py-1 font-mono text-[10px] font-bold tracking-wider uppercase">
                 <Sparkles className="size-3" strokeWidth={3} />
                 {labels.premiumBadge}
               </span>
             )}
-          </div>
-        )
-      ) : (
-        <>
-          {showPopularBadge && (
-            <div className="bg-brand-600 absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full px-3 py-1 font-mono text-[10px] font-bold tracking-wider text-white uppercase">
-              {labels.mostPopular}
-            </div>
-          )}
-
-          {showPremiumBadge && (
-            <div className="from-gold-400 to-gold-500 text-gold-950 absolute top-0 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full bg-gradient-to-r px-3 py-1 font-mono text-[10px] font-bold tracking-wider uppercase">
-              <Sparkles className="size-3" strokeWidth={3} />
-              {labels.premiumBadge}
-            </div>
-          )}
-        </>
+          </span>
+        </div>
       )}
 
-      <div className="mb-6">
-        <h3
-          className={cn(
-            "text-lg font-bold",
-            premium ? "text-white" : "text-neutral-900 dark:text-white"
-          )}
-        >
-          {name}
-        </h3>
-        {showFoundingStrike ? (
-          // Founding treatment: struck original small ABOVE with a thick angled
-          // red slash + a discount pill, big discounted price BELOW in gold.
-          <>
-            <div className="mb-1 flex items-center gap-2">
-              <span className="relative inline-block text-lg font-semibold text-neutral-400 dark:text-neutral-500">
-                {currencySymbol}
-                {strikePrice}
-                {/* Thick (-9°) coloured slash — deliberately louder than a
-                    default line-through. */}
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-x-[-3px] top-1/2 h-[3px] -translate-y-1/2 -rotate-[9deg] rounded-full bg-red-500 dark:bg-red-400"
-                />
-              </span>
-              <span className="rounded-full bg-red-500/15 px-2 py-0.5 font-mono text-[10px] font-bold tracking-wider text-red-500 uppercase dark:text-red-400">
-                {founding!.strikeLabel}
-              </span>
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-gold-600 dark:text-gold-300 text-4xl font-extrabold tracking-tight tabular-nums">
-                {currencySymbol}
-                {priceText}
-              </span>
-              <span className="text-sm text-neutral-500">{labels.unit}</span>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-baseline gap-1">
-            {showStrikePrice && (
+      <h3 className={cn("text-2xl font-bold tracking-tight", strong)}>{name}</h3>
+      {/* Two lines reserved so a one-line description does not pull its
+          card's price above its neighbours'. */}
+      <p className={cn("mt-3 min-h-[2lh] text-sm leading-relaxed", muted)}>{description}</p>
+
+      {beforePrice && <div className="mt-6">{beforePrice}</div>}
+
+      {showFoundingStrike ? (
+        // Founding treatment: struck original small ABOVE with a thick angled
+        // red slash + a discount pill, big discounted price BELOW in gold.
+        <div className="mt-4">
+          <div className="mb-1 flex items-center gap-2">
+            <span className="relative inline-block text-lg font-semibold text-neutral-400 dark:text-neutral-500">
+              {currencySymbol}
+              {strikePrice}
+              {/* Thick (-9°) coloured slash — deliberately louder than a
+                  default line-through. */}
               <span
-                className={cn(
-                  "text-2xl font-bold line-through",
-                  premium ? "text-neutral-500" : "text-neutral-400 dark:text-neutral-500"
-                )}
-              >
-                {currencySymbol}
-                {strikePrice}
-              </span>
-            )}
-            <span
-              className={cn(
-                "text-4xl font-bold",
-                premium ? "text-white" : "text-neutral-900 dark:text-white"
-              )}
-            >
+                aria-hidden="true"
+                className="absolute inset-x-[-3px] top-1/2 h-[3px] -translate-y-1/2 -rotate-[9deg] rounded-full bg-red-500 dark:bg-red-400"
+              />
+            </span>
+            <span className="rounded-full bg-red-500/15 px-2 py-0.5 font-mono text-[10px] font-bold tracking-wider text-red-500 uppercase dark:text-red-400">
+              {founding!.strikeLabel}
+            </span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-gold-600 dark:text-gold-300 text-4xl font-extrabold tracking-tight tabular-nums">
               {currencySymbol}
               {priceText}
             </span>
-            <span className={cn("text-sm", premium ? "text-neutral-400" : "text-neutral-500")}>
-              {labels.unit}
-            </span>
+            <span className="text-xs text-neutral-600 dark:text-neutral-300">{labels.unit}</span>
           </div>
-        )}
-        <p
-          className={cn(
-            "mt-3 text-xs leading-relaxed",
-            premium ? "text-neutral-300" : "text-neutral-500"
+        </div>
+      ) : (
+        <div className="mt-4 flex min-h-11 flex-wrap items-baseline gap-x-2 gap-y-1">
+          {showStrikePrice && (
+            <span
+              className={cn(
+                "text-xl font-medium tabular-nums",
+                premium ? "text-neutral-500" : "text-neutral-500 dark:text-neutral-400"
+              )}
+            >
+              {labels.strikePrice && <span className="sr-only">{labels.strikePrice} </span>}
+              <s>
+                {currencySymbol}
+                {strikePrice}
+              </s>
+            </span>
           )}
-        >
-          {description}
-        </p>
-      </div>
+          <span className={cn("text-4xl font-bold tracking-tight tabular-nums", strong)}>
+            {currencySymbol}
+            {priceText}
+          </span>
+          <span className={cn("text-xs", muted)}>{labels.unit}</span>
+        </div>
+      )}
+      {priceNote && (
+        // Two lines reserved so toggling monthly / yearly never moves the CTA.
+        <div className={cn("mt-2 min-h-10 text-xs leading-relaxed", subtle)}>{priceNote}</div>
+      )}
 
       {/* Order is placement-aware (§3): `top` renders CTA → note → features so
-          the founding grid leads with the action; `bottom` (default, app
+          the marketing grid leads with the action; `bottom` (default, app
           portal) keeps features first with the CTA pinned to the card foot.
           Check icons stay emerald on founding cards, gold on premium, brand
           otherwise — never following the founding gold accent. */}
       {ctaPlacement === "top" && (
-        <div className="mb-6 flex flex-col">
+        <div className="mt-5 flex flex-col">
           {ctaButton}
           {ctaNote}
         </div>
       )}
 
+      {allowances && allowances.length > 0 && (
+        <div className="mt-6 border-y border-neutral-200 py-4 dark:border-neutral-700">
+          {allowancesLabel && <p className={cn("mb-3 text-xs", subtle)}>{allowancesLabel}</p>}
+          <dl
+            className="grid gap-2"
+            style={{ gridTemplateColumns: `repeat(${allowances.length}, minmax(0, 1fr))` }}
+          >
+            {allowances.map((a) => (
+              // Number above its label visually; the label stays first in
+              // the DOM so it reads as "posts: 100".
+              <div key={a.label} className="flex flex-col-reverse gap-1">
+                <dt className={cn("text-xs", muted)}>{a.label}</dt>
+                <dd className={cn("text-xl font-bold tabular-nums", strong)}>{a.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
+
+      {featuresLabel && (
+        <p className={cn("mt-6 text-sm font-semibold leading-relaxed", strong)}>{featuresLabel}</p>
+      )}
+
       <ul
         className={cn(
-          "flex-1 space-y-3",
-          ctaPlacement === "top" ? "mb-2" : "mb-8"
+          "flex flex-1 flex-col gap-3",
+          featuresLabel ? "mt-4" : "mt-5"
         )}
       >
         {features.map((feature, i) => (
-          <li
-            key={i}
-            className={cn(
-              "flex items-start gap-3 text-sm",
-              premium ? "text-neutral-200" : "text-neutral-600 dark:text-neutral-300"
-            )}
-          >
+          <li key={i} className={cn("flex items-start gap-3 text-sm leading-relaxed", muted)}>
             <Check
-              size={16}
+              aria-hidden="true"
               className={cn(
-                "mt-0.5 shrink-0",
-                founding ? "text-emerald-500" : premium ? "text-gold-400" : "text-brand-600"
+                "mt-1 size-4 shrink-0",
+                founding
+                  ? "text-emerald-500"
+                  : premium
+                    ? "text-gold-400"
+                    : "text-brand-600 dark:text-brand-400"
               )}
               strokeWidth={3}
             />
@@ -387,19 +463,10 @@ export const PlanCard: FC<PlanCardProps> = ({
         ))}
       </ul>
 
-      {footnote && (
-        <p
-          className={cn(
-            "mb-6 text-xs leading-relaxed italic",
-            premium ? "text-neutral-400" : "text-neutral-500 dark:text-neutral-400"
-          )}
-        >
-          {footnote}
-        </p>
-      )}
+      {footnote && <p className={cn("mt-6 text-xs leading-relaxed", subtle)}>{footnote}</p>}
 
       {ctaPlacement === "bottom" && (
-        <div className="mt-auto flex flex-col">
+        <div className="mt-6 flex flex-col">
           {ctaButton}
           {ctaNote}
         </div>

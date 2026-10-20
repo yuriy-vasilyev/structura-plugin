@@ -173,7 +173,7 @@ describe("IntelligenceUsage — managed cycle (approaching limit)", () => {
 
 describe("IntelligenceUsage — managed cycle (at limit)", () => {
   it("flips to red when utilization hits 100%", () => {
-    useLicenseMock.mockReturnValue({ plan: "cloud_pro" });
+    useLicenseMock.mockReturnValue({ plan: "cloud" });
     setHook(managedFixture(100, { daysLeftInCycle: 2 }));
 
     const { container } = render(

@@ -16,6 +16,8 @@ export const LEARN_SLUGS = [
   "search-intent",
   "title-tag-and-meta-description",
   "on-page-seo",
+  "how-to-find-competitor-keywords",
+  "long-tail-keywords",
 ] as const;
 
 /** One of {@link LEARN_SLUGS}. */
@@ -36,6 +38,8 @@ export const PUBLISHED_LEARN_SLUGS: ReadonlySet<LearnSlug> = new Set<LearnSlug>(
   "domain-authority",
   "referring-domains",
   "search-intent",
+  "how-to-find-competitor-keywords",
+  "long-tail-keywords",
 ]);
 
 /** Where a surface's Learn links go. */

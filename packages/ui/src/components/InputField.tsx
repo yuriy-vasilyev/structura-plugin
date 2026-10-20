@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes, ReactNode, useState, } from "react";
+import { forwardRef, type InputHTMLAttributes, ReactNode, useState } from "react";
 import { Description, Field, Input, Label } from "@headlessui/react";
 import { Spinner } from "./Spinner";
 import { cn } from "../utils";
@@ -10,6 +10,22 @@ import {
   leftAdornmentVariants,
   rightAdornmentVariants,
 } from "../variants/form-field";
+
+/**
+ * The `<input>` Headless UI's `Input` renders, joining the ids it computes
+ * from the field's own descriptions (the error message) with the ones the
+ * caller passed as `aria-describedby` (a hint rendered outside the field).
+ * Headless UI's own value would otherwise replace the caller's: it is set
+ * even when the field has no description, as `undefined`.
+ */
+const DescribedInput = forwardRef<
+  HTMLInputElement,
+  InputHTMLAttributes<HTMLInputElement> & { extraDescribedBy?: string }
+>(({ extraDescribedBy, "aria-describedby": fieldDescribedBy, ...props }, ref) => {
+  const describedBy = [fieldDescribedBy, extraDescribedBy].filter(Boolean).join(" ");
+  return <input ref={ref} aria-describedby={describedBy || undefined} {...props} />;
+});
+DescribedInput.displayName = "DescribedInput";
 
 /**
  * Props for the InputField component.
@@ -53,6 +69,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
       className,
       inputClassName,
       labelStyle = "default",
+      "aria-describedby": callerDescribedBy,
       ...rest
     },
     ref
@@ -89,6 +106,8 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
           {leftAdornment && <div className={leftAdornmentVariants({ size })}>{leftAdornment}</div>}
 
           <Input
+            as={DescribedInput}
+            extraDescribedBy={callerDescribedBy}
             id={id}
             ref={ref}
             type={type}

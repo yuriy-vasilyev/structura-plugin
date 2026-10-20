@@ -36,7 +36,7 @@ const Header = () => {
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     `nav-item ${isActive ? "nav-item-active" : ""}`;
 
-  // The badge shows the plan TIER only (byok / cloud / cloud pro). The old
+  // The badge shows the plan TIER only (byok / cloud). The old
   // Individual/Agency audience suffix is gone — "CLOUD PRO AGENCY" wrongly
   // read as a distinct tier, and the audience split has been retired.
   const getPlanBadgeConfig = (): { label: string; intent: BadgeProps["intent"] } => {
@@ -53,7 +53,7 @@ const Header = () => {
     const intent: BadgeProps["intent"] =
       plan === "byok"
         ? "success"
-        : plan === "cloud" || plan === "cloud_pro"
+        : plan === "cloud"
           ? "premium"
           : plan === "free"
             ? "info"

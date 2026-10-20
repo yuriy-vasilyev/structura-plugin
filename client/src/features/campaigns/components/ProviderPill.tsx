@@ -24,7 +24,7 @@ interface ProviderPillProps {
  * Compact provider dropdown selector.
  *
  * Visibility rules:
- * - Managed tier (Cloud / Cloud Pro) → NEVER shown. Since 2026-10-01
+ * - Managed tier (Cloud) → NEVER shown. Since 2026-10-01
  *   managed customers neither pick nor see a text provider
  *   (specs/managed-ai-lineup.md §1 decision 2, §3.3). This reverses the
  *   2026-04-28 "always shown on managed" rule, which existed for the

@@ -177,8 +177,8 @@ describe("ProviderAdvice — the situations", () => {
 });
 
 describe("ProviderAdvice — when it shows nothing", () => {
-  it.each(["cloud", "cloud_pro"])("managed plan %s: no advice for Gemini", (plan) => {
-    env.plan = plan;
+  it("managed plan cloud: no advice for Gemini", () => {
+    env.plan = "cloud";
     env.connected = ["gemini", "openai"];
     const { container } = render(<Harness />);
     expect(screen.queryByText(LEAD)).toBeNull();

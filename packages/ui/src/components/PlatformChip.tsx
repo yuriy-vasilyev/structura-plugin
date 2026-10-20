@@ -4,12 +4,12 @@ import { PLATFORMS, PlatformMark, type Platform } from "./PlatformMark";
 
 /** Props for {@link PlatformChip}. Extra span attributes (e.g. `id`) pass through. */
 export interface PlatformChipProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> {
-  /** Which builder to show. */
+  /** Which platform to show. */
   platform: Platform;
 }
 
 /**
- * `<PlatformChip>` — a builder's 16px mark plus its name in a pill. The
+ * `<PlatformChip>` — a platform's 16px mark plus its name in a pill. The
  * name is real text, so a field can point at the chip with
  * `aria-describedby` (spec: specs/article-delivery-connect-flow.md §5, §7).
  */

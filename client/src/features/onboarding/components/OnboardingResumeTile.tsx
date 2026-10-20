@@ -54,7 +54,6 @@ const TIER_ORDER: ReadonlyArray<string> = [
   "free",
   "byok",
   "cloud",
-  "cloud_pro",
 ];
 
 function tierLevel(planId: string | null | undefined): number {
@@ -92,7 +91,10 @@ export const OnboardingResumeTile = () => {
    * without re-flowing the JSX.
    */
   const mode: TileMode | null = useMemo(() => {
-    if (!data) return null;
+    // The proxy answers a quiet state when the cloud cannot, but an older
+    // plugin passed the cloud's error body through and this read of
+    // `state` took the whole dashboard down (2026-10-19).
+    if (!data?.state) return null;
     if (!data.state.completedAt) return "incomplete";
 
     // Upgrade detection — wizard completed under a strictly lower

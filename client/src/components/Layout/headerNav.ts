@@ -85,7 +85,7 @@ export interface AccountMenuModel {
  *   - Anonymous (no license) → **Upgrade** → marketing pricing, plus a
  *     quieter **Create a free account** → portal sign-up.
  *   - Free → **Upgrade** → portal billing, plus **Manage account**.
- *   - Paid (BYOK, Cloud, Cloud Pro) → **Manage account** only. They're
+ *   - Paid (BYOK, Cloud) → **Manage account** only. They're
  *     already paying; plan changes happen in the portal, so there's no
  *     "Upgrade" CTA to push here.
  *
@@ -117,7 +117,7 @@ export function getAccountMenuModel(opts: {
   }
   return {
     // Upgrade is an entry-tier CTA: only Free has an obvious next step we
-    // surface here. Paid tiers (BYOK/Cloud/Cloud Pro) manage plan changes
+    // surface here. Paid tiers (BYOK/Cloud) manage plan changes
     // in the portal, so no Upgrade row for them.
     showUpgrade: (plan as PlanId) === "free",
     upgradeTarget: "portal",

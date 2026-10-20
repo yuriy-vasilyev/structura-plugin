@@ -12,6 +12,7 @@ import { Timestamp } from "firebase-admin/firestore";
 
 export * from "./videoVoices";
 
+import type { BuilderPlatform, SitePlatform } from "./channelIntegrations";
 export * from "./channelIntegrations";
 
 /**
@@ -55,6 +56,24 @@ export interface User {
    */
   portalPrefs?: {
     xerxBanner?: Record<string, "dismissed" | "sent">;
+  };
+  /**
+   * Account-level preferences. Only the product-updates fields are typed
+   * here; `locale` also lives in this map server-side (read by
+   * `functions/src/i18n/resolve-locale.ts`).
+   *
+   * `productUpdatesOptIn` — the user agreed to occasional "what's new"
+   * emails (specs/product-updates-opt-in.md). Opt-in: absent means false.
+   * Written client-side by the customer portal's account page switch
+   * (`useProductUpdatesOptIn`, merge `setDoc`).
+   *
+   * `productUpdatesOptInAt` — server timestamp of the latest change, on or
+   * off, so it records the consent or the withdrawal time. Written with the
+   * flag.
+   */
+  preferences?: {
+    productUpdatesOptIn?: boolean;
+    productUpdatesOptInAt?: Timestamp;
   };
   /**
    * First-occurrence stamps for the deep funnel milestones (`growth/events.ts`).
@@ -101,31 +120,31 @@ export interface UserAttribution {
  * Naming history (Yurii, 2026-05-04 audit + Wave-2 rename):
  *   - v1: `free | pro | cloud | agency`
  *   - v2: `free | byok | cloud | cloud_pro`
+ *   - v3 (2026-10-12): `free | byok | cloud`. `cloud_pro` retired; volume
+ *     is a Stripe price option of `cloud` (specs/cloud-volume-pricing.md).
  *
  * `byok` (Bring Your Own Key) replaces `pro` — clearer label for the
- * "user supplies the AI key" tier. `cloud_pro` is a new top-tier above
- * `cloud`. The old `agency` tier and the Individual/Agency audience axis
- * that briefly succeeded it are both retired — the ladder is now exactly
- * the four plans above, with no separate audience dimension.
+ * "user supplies the AI key" tier. The old `agency` tier and the
+ * Individual/Agency audience axis that briefly succeeded it are both
+ * retired — the ladder is now exactly the three plans above, with no
+ * separate audience dimension.
  */
-export type PlanId = "free" | "byok" | "cloud" | "cloud_pro";
+export type PlanId = "free" | "byok" | "cloud";
 
 /**
  * Plans where Structura runs the AI infrastructure (no API keys required
- * from the user). Cloud Pro is a superset of Cloud — anything that asks
- * "is this a managed-AI plan?" should use this helper rather than an
- * inline `=== "cloud"` check, otherwise Cloud Pro will silently fall
- * into the BYOK code path.
+ * from the user). Ask "is this a managed-AI plan?" through this helper
+ * rather than an inline `=== "cloud"` check, so the managed set stays
+ * defined in one place.
  */
-export const isManagedPlan = (p: PlanId): p is "cloud" | "cloud_pro" =>
-  p === "cloud" || p === "cloud_pro";
+export const isManagedPlan = (p: PlanId): p is "cloud" => p === "cloud";
 
 /**
  * Anything that's not the free tier. Use for "requires a paid license"
  * gates (entitlement checks, billing-portal CTAs). Free still gets a
  * license key — the difference is Free can't activate paid features.
  */
-export const isPaidPlan = (p: PlanId): p is "byok" | "cloud" | "cloud_pro" =>
+export const isPaidPlan = (p: PlanId): p is "byok" | "cloud" =>
   p !== "free";
 
 /**
@@ -177,7 +196,6 @@ export const PROVIDERS_FOR_TIER: Record<LicenseTier, readonly AIProvider[]> = {
   free: ["openai", "gemini", "anthropic"],
   byok: ["openai", "gemini", "anthropic"],
   cloud: ["openai", "gemini", "anthropic"],
-  cloud_pro: ["openai", "gemini", "anthropic"],
 } as const;
 
 /**
@@ -233,7 +251,6 @@ export const MAX_CAMPAIGNS_FOR_TIER: Record<LicenseTier, number | null> = {
   free: 1,
   byok: 10,
   cloud: null,
-  cloud_pro: null,
 } as const;
 
 /**
@@ -274,8 +291,8 @@ export const isCampaignCountAllowedForTier = (
  *   path, or by the admin createManualLicense call).
  * - `maxCampaigns: null` → unlimited. This is the deliberate default
  *   for paid Stripe plans whose product does NOT declare
- *   `max_campaigns` metadata — managed-AI tiers (Cloud, Cloud Pro)
- *   leave it unset on the product so they remain uncapped, and the
+ *   `max_campaigns` metadata — the managed-AI tier (Cloud)
+ *   leaves it unset on the product so it remains uncapped, and the
  *   webhook writes `null` here so the cloud short-circuits the count
  *   query.
  * - `maxCampaigns: undefined` → legacy license written before the
@@ -305,7 +322,7 @@ export const resolveCampaignLimit = (
  * under the 100/site/month abuse cap) with no incentive to upgrade.
  * Capping Free to one post per week keeps the demo genuinely useful (a
  * weekly autopilot post) while turning "publish more often" into a paid
- * upgrade reason. Paid tiers (BYOK, Cloud, Cloud Pro) are uncapped here;
+ * upgrade reason. Paid tiers (BYOK, Cloud) are uncapped here;
  * their cost is bounded by token quotas / BYOK keys, not cadence.
  *
  * `none` is 0 only for symmetry with the other tier matrices — a
@@ -331,7 +348,6 @@ export const MAX_POSTS_PER_WEEK_FOR_TIER: Record<LicenseTier, number | null> = {
   free: 1,
   byok: null,
   cloud: null,
-  cloud_pro: null,
 } as const;
 
 /**
@@ -597,15 +613,14 @@ export interface License {
    */
   maxImagesPerActivation: number | null;
   /**
-   * Per-activation monthly post quota on managed plans, copied from
-   * `product.metadata.max_posts` by the Stripe webhook (Cloud 30, Cloud Pro
-   * 100; spec `specs/managed-ai-lineup.md` §4). `null` / absent on BYOK and
-   * Free, and on managed licenses written before the field: readers resolve
-   * it through `managedPostQuota()` (`functions/src/billing/quotas.ts`),
-   * which falls back to the catalog value for the plan. Optional until the
-   * backfill script has run against production and functions deployed
-   * after 2026-10-01 have written it on every managed license; then the
-   * webhook and admin paths keep it populated.
+   * Per-activation monthly post quota on managed plans, copied from the
+   * subscribed Stripe PRICE's `max_posts` metadata by the webhook
+   * (specs/cloud-volume-pricing.md §2.1, §2.3). `null` / absent on BYOK
+   * and Free, and when the price carries no `max_posts` (the webhook logs
+   * that as an error): readers resolve it through `managedPostQuota()`
+   * (`functions/src/billing/quotas.ts`), which falls back to a per-plan
+   * constant. Every managed license carries it since the cloud-volume
+   * migration of 2026-10-12.
    */
   maxPostsPerActivation?: number | null;
   /**
@@ -700,12 +715,11 @@ export interface License {
    * fallback — see `functions/src/billing/videoEntitlement.ts`), and
    * deleted when the new price carries no video metadata.
    *
-   * Optional for back-compat (2026-07 rollout window): licenses whose
-   * last webhook predates the field won't have it — `cloud_pro`
-   * remains video-eligible without a stamp (and even with an explicit
-   * `enabled: false` stamp; video is the tier's headline feature).
-   * Resolution lives in `resolveVideoGate()`
-   * (`functions/src/channels/video/quota.ts`).
+   * Optional: licenses whose last webhook predates the field, and
+   * licenses whose price carries no grant, don't have it. Since
+   * 2026-10-12 this stamp is the only source of video eligibility
+   * (specs/cloud-volume-pricing.md §4 slice 2). Resolution lives in
+   * `resolveVideoGate()` (`functions/src/channels/video/quota.ts`).
    */
   videoEntitlement?: VideoEntitlement;
 
@@ -1193,6 +1207,12 @@ export interface WpSurfaceMetadata {
   wpVersion?: string;
   /** Structura plugin version, for update-adoption tracking. */
   pluginVersion?: string;
+  /**
+   * `"wordpress"` on sites that went through the portal wizard (set when a
+   * pending space is adopted, spec specs/portal-site-onboarding.md §4.3).
+   * Absent on sites the plugin created directly.
+   */
+  platform?: SitePlatform;
 }
 
 export interface ShopifySurfaceMetadata {
@@ -1237,6 +1257,28 @@ export interface HeadlessSurfaceMetadata {
    * rollout — readers default to `"/%postname%"` when absent.
    */
   permalinkSchema?: string;
+  /**
+   * Which AI builder (or "custom" code) hosts the consumer's site, recorded
+   * when the site is created from the `/connect` guess or picker. Drives the
+   * platform mark in the Sites list and sidebar, the wizard's Connect step
+   * and the receiver prompt. Absent on sites created before 2026-10-17 and
+   * on Content API spaces. Additive; old clients omit it.
+   */
+  builderPlatform?: BuilderPlatform;
+  /**
+   * Where the site runs, chosen on the wizard's Site info step
+   * (`SITE_PLATFORMS`). Replaces `builderPlatform` for sites created from
+   * 2026-10-19; readers fall back to `builderPlatform`. Spec:
+   * specs/portal-site-onboarding.md §6.
+   */
+  platform?: SitePlatform;
+  /**
+   * A WordPress site set up in the portal before its plugin activated. The
+   * activation converts to the `wp` surface in place when the plugin
+   * activates with this workspace's key on the same host. Spec:
+   * specs/portal-site-onboarding.md §4.3.
+   */
+  pendingSurface?: "wp";
 }
 
 /**
@@ -1453,7 +1495,7 @@ export interface LicenseActivation {
    * *usable*, `aiDefaults` records which usable provider/model is the
    * *default* for text vs images.
    *
-   * BYOK/free concept only — managed tiers (`cloud`/`cloud_pro`) skip the
+   * BYOK/free concept only — the managed tier (`cloud`) skips the
    * AI-engine step and keep the campaign-level default. Optional during
    * rollout (back-compat window, CLAUDE.md §10); readers fall back to the
    * existing hardcoded campaign default when absent.

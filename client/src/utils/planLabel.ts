@@ -1,4 +1,4 @@
-import { __ } from "@wordpress/i18n";
+import { __, _n, sprintf } from "@wordpress/i18n";
 
 /**
  * Human-readable plan-badge labels for the wp-admin SPA.
@@ -16,6 +16,10 @@ import { __ } from "@wordpress/i18n";
  * solo Cloud Pro customer got the "Agency" badge. This helper
  * realigns the labels with the modern PlanId names and appends the
  * audience suffix when present.
+ *
+ * 2026-10-12 (specs/cloud-volume-pricing.md): Cloud Pro became the 100-post
+ * option of Cloud and the `cloud_pro` id was retired; the cloud no longer
+ * sends it.
  */
 
 // `__` calls must take literal arguments so the makepot toolchain can
@@ -29,8 +33,6 @@ function planName(planId: string): string {
       return __("BYOK", "structura");
     case "cloud":
       return __("Cloud", "structura");
-    case "cloud_pro":
-      return __("Cloud Pro", "structura");
     default:
       // Unknown id (e.g. cloud added a new tier the SPA hasn't shipped
       // a case for yet) — surface the raw value rather than masking it
@@ -43,7 +45,15 @@ function planName(planId: string): string {
 /**
  * Human-readable plan-badge label (tier only). The old Individual/Agency
  * audience suffix has been retired — the badge shows the plan tier alone.
+ * A Cloud plan with a known posts allowance reads "Cloud, 100 posts".
  */
-export function formatPlanName(planId: string): string {
+export function formatPlanName(planId: string, postsPerSite?: number | null): string {
+  if (planId === "cloud" && typeof postsPerSite === "number") {
+    return sprintf(
+      /* translators: %d: posts per site per month included in the site's Cloud plan. */
+      _n("Cloud, %d post", "Cloud, %d posts", postsPerSite, "structura"),
+      postsPerSite
+    );
+  }
   return planName(planId);
 }

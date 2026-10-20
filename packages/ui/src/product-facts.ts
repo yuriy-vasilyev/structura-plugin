@@ -22,9 +22,15 @@
  *   • Every bring-your-own-key plan (the plugin with no account, Free, BYOK)
  *     takes an OpenAI, Gemini or Claude key. Until 2026-10-06 the plugin with
  *     no account took OpenAI only and Free took OpenAI or Gemini.
- *   • Managed Cloud and Cloud Pro — one AI lineup chosen by us; copy never
- *     names a provider or model for these plans (specs/managed-ai-lineup.md §3).
- *     That is why there are no model-name or failover facts here.
+ *   • Managed Cloud — one AI lineup chosen by us; copy never names a provider
+ *     or model for it (specs/managed-ai-lineup.md §3). That is why there are
+ *     no model-name or failover facts here.
+ *
+ * Cloud is one plan with volume options since 2026-10-12
+ * (specs/cloud-volume-pricing.md): the posts, images and video caps of each
+ * option live on its Stripe price, so they are not facts here. Each app reads
+ * them from its generated catalog and turns them into tokens with
+ * {@link cloudOptionTokens}, so a new listed price needs no code change.
  */
 
 import type { SupportedLocale } from "@structura/i18n-contracts";
@@ -41,42 +47,84 @@ const OR: Record<SupportedLocale, string> = {
 };
 
 /**
+ * Returns `values` as a localized "A, B or C" list. `locale` may be
+ * composite (`de_AT`, `es-419`); unknown locales fall back to English.
+ */
+function orList(values: readonly string[], locale: string): string {
+  if (values.length < 2) return values.join("");
+  const lang = locale.slice(0, 2).toLowerCase();
+  const loc: SupportedLocale = lang in OR ? (lang as SupportedLocale) : "en";
+  const last = values[values.length - 1];
+  return `${values.slice(0, -1).join(", ")} ${OR[loc]} ${last}`;
+}
+
+/**
  * Returns the providers as a localized "A, B or C" list. `locale` may be
  * composite (`de_AT`, `es-419`); unknown locales fall back to English.
  */
 export function providerList(locale: string): string {
-  const lang = locale.slice(0, 2).toLowerCase();
-  const loc: SupportedLocale = lang in OR ? (lang as SupportedLocale) : "en";
-  const last = KEY_PROVIDERS[KEY_PROVIDERS.length - 1];
-  return `${KEY_PROVIDERS.slice(0, -1).join(", ")} ${OR[loc]} ${last}`;
+  return orList(KEY_PROVIDERS, locale);
 }
 
 /** Providers every bring-your-own-key plan accepts, as an English list. */
 export const OWN_KEY_PROVIDERS = providerList("en");
 
-/** Canonical plan display names. There is no plain "Pro" plan. */
+/**
+ * Canonical plan display names. There is no "Pro" plan: Cloud Pro was folded
+ * into Cloud as its 100-post option on 2026-10-12.
+ */
 export const PLAN_NAMES = {
   free: "Free",
   byok: "BYOK",
   cloud: "Cloud",
-  cloudPro: "Cloud Pro",
-} as const;
-
-/** Monthly image quota per site, by managed plan. */
-export const IMAGE_QUOTA = {
-  cloud: 90,
-  cloudPro: 150,
 } as const;
 
 /**
- * Monthly posts quota per site, by managed plan (owner, 2026-10-01). A post
- * counts when it is delivered to the customer and includes its research,
- * writing and images. Spec: specs/managed-ai-lineup.md §4, §6.1.
+ * One listed Cloud option, as its Stripe price metadata describes it. A post
+ * counts when it is delivered and includes its research, writing and images
+ * (specs/managed-ai-lineup.md §4).
  */
-export const POST_QUOTA = {
-  cloud: 30,
-  cloudPro: 100,
-} as const;
+export interface CloudOptionFacts {
+  /** Posts per site per UTC month; also the option's identity. */
+  maxPosts: number;
+  /** Images per site per month. */
+  maxImages: number;
+  /** AI videos per site per month. */
+  videoMonthlyCap: number;
+}
+
+/**
+ * Returns the content tokens for the listed Cloud options: localized lists
+ * across options (`cloudPostOptions` → "30 or 100") and per-option values
+ * (`cloudOption30Images` → "90"). A content token for an option that is no
+ * longer listed stays unresolved, which the content tests catch.
+ */
+export function cloudOptionTokens(
+  options: readonly CloudOptionFacts[],
+  locale = "en"
+): Record<string, string> {
+  const sorted = [...options].sort((a, b) => a.maxPosts - b.maxPosts);
+  const tokens: Record<string, string> = {
+    cloudPostOptions: orList(
+      sorted.map((o) => String(o.maxPosts)),
+      locale
+    ),
+    cloudImageOptions: orList(
+      sorted.map((o) => String(o.maxImages)),
+      locale
+    ),
+    cloudVideoOptions: orList(
+      sorted.map((o) => String(o.videoMonthlyCap)),
+      locale
+    ),
+  };
+  for (const o of sorted) {
+    tokens[`cloudOption${o.maxPosts}Posts`] = String(o.maxPosts);
+    tokens[`cloudOption${o.maxPosts}Images`] = String(o.maxImages);
+    tokens[`cloudOption${o.maxPosts}Videos`] = String(o.videoMonthlyCap);
+  }
+  return tokens;
+}
 
 /** Rough BYOK provider API-cost estimate for daily publishing (not a Stripe
  *  price — it's the customer's own provider bill, so it lives with the facts,
@@ -86,9 +134,8 @@ export const BYOK_API_COST_ESTIMATE = "$5–15/month";
 /**
  * Flat `{ token: value }` map consumed by the content-interpolation layers.
  * Keys are `[A-Za-z0-9]+` so they satisfy both `www`'s `{{\w+}}` matcher and
- * i18next's default `{{key}}` syntax. Numeric quotas are stringified because
- * interpolation substitutes text. Provider lists are joined in `locale`
- * (default English).
+ * i18next's default `{{key}}` syntax. Provider lists are joined in `locale`
+ * (default English). Cloud option facts come from {@link cloudOptionTokens}.
  */
 export function productFactTokens(locale = "en"): Record<string, string> {
   return {
@@ -97,11 +144,6 @@ export function productFactTokens(locale = "en"): Record<string, string> {
     planFree: PLAN_NAMES.free,
     planByok: PLAN_NAMES.byok,
     planCloud: PLAN_NAMES.cloud,
-    planCloudPro: PLAN_NAMES.cloudPro,
-    imageQuotaCloud: String(IMAGE_QUOTA.cloud),
-    imageQuotaCloudPro: String(IMAGE_QUOTA.cloudPro),
-    postQuotaCloud: String(POST_QUOTA.cloud),
-    postQuotaCloudPro: String(POST_QUOTA.cloudPro),
     byokApiCost: BYOK_API_COST_ESTIMATE,
   };
 }

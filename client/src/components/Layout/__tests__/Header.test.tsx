@@ -8,8 +8,8 @@
  *      longer locales (German). `buildPrimaryNavLinks` must never emit
  *      `/account` or `/settings`.
  *   2. The account menu's CTAs follow license state: anonymous → Connect,
- *      licensed → Manage, and Upgrade everywhere except the Cloud Pro
- *      ceiling. `getAccountMenuModel` owns that branching.
+ *      licensed → Manage, and Upgrade on Free only. `getAccountMenuModel`
+ *      owns that branching.
  *   3. The Header *renders* without throwing. This is the regression
  *      guard for React error #185: the account menu was briefly built on
  *      DropdownMenu, whose anchored `MenuItems` mount eagerly, so
@@ -83,7 +83,7 @@ describe("buildPrimaryNavLinks", () => {
     // route lock per-tier, but the entry point must always be
     // visible — otherwise the user can't reach the always-available
     // identity controls.
-    for (const plan of ["none", "free", "byok", "cloud", "cloud_pro"]) {
+    for (const plan of ["none", "free", "byok", "cloud"]) {
       const paths = buildPrimaryNavLinks({
         channelsVisible: false,
         plan,
@@ -144,8 +144,8 @@ describe("getAccountMenuModel", () => {
     });
   });
 
-  it("paid tiers (byok, cloud, cloud_pro): Manage account only — no Upgrade", () => {
-    for (const plan of ["byok", "cloud", "cloud_pro"]) {
+  it("paid tiers (byok, cloud): Manage account only — no Upgrade", () => {
+    for (const plan of ["byok", "cloud"]) {
       expect(
         getAccountMenuModel({ loading: false, isLicensed: true, plan })
       ).toEqual({

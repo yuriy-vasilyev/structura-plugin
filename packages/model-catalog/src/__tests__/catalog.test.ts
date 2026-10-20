@@ -5,7 +5,6 @@ import {
   getDefaultModel,
   getRecommendedModel,
   isKnownImageModelForProvider,
-  resolveManagedTier,
   resolveManagedModelId,
   BATCH_INPUT_PRICE_USD_PER_M_TOKENS,
   lookupBatchInputPrice,
@@ -197,39 +196,17 @@ describe("selectors", () => {
 });
 
 describe("managed-tier resolution (replaces PLAN_DEFAULTS)", () => {
-  it("cloud → mid, cloud_pro → top", () => {
-    expect(resolveManagedTier("cloud", "text", "gemini")).toBe("mid");
-    expect(resolveManagedTier("cloud", "text", "openai")).toBe("mid");
-    expect(resolveManagedTier("cloud_pro", "text", "openai")).toBe("top");
-    expect(resolveManagedTier("cloud_pro", "text", "anthropic")).toBe("top");
-  });
-
-  it("Cloud Pro Gemini IMAGE stays on mid (Flash Image) — the one exception", () => {
-    expect(resolveManagedTier("cloud_pro", "image", "openai")).toBe("top");
-    expect(resolveManagedTier("cloud_pro", "image", "gemini")).toBe("mid");
-    expect(resolveManagedTier("cloud", "image", "gemini")).toBe("mid");
-  });
-
   // FROZEN text mapping (specs/byok-ai-guidance.md §2): the 2026-10-01 tier
   // refresh must not move it. It feeds managed suggestions and social copy.
   it("reproduces the EXACT former PLAN_DEFAULTS pins (behavior-preserving)", () => {
-    // Former cloud pins.
     expect(resolveManagedModelId("cloud", "text", "gemini")).toBe("gemini-3.5-flash");
     expect(resolveManagedModelId("cloud", "text", "openai")).toBe("gpt-5.4-mini");
     expect(resolveManagedModelId("cloud", "text", "anthropic")).toBe("claude-sonnet-5");
-    // Former cloud_pro pins.
-    expect(resolveManagedModelId("cloud_pro", "text", "openai")).toBe("gpt-5.2-2025-12-11");
-    expect(resolveManagedModelId("cloud_pro", "text", "gemini")).toBe("gemini-3.1-pro-preview");
-    expect(resolveManagedModelId("cloud_pro", "text", "anthropic")).toBe("claude-opus-4-8");
-    // Image pins — note cloud_pro gemini stays Flash Image, matching the old pin.
+    // Images resolve the registry mid tier.
     expect(resolveManagedModelId("cloud", "image", "gemini")).toBe(
       "gemini-3.1-flash-image",
     );
     expect(resolveManagedModelId("cloud", "image", "openai")).toBe("gpt-image-1-mini");
-    expect(resolveManagedModelId("cloud_pro", "image", "openai")).toBe("gpt-image-2");
-    expect(resolveManagedModelId("cloud_pro", "image", "gemini")).toBe(
-      "gemini-3.1-flash-image",
-    );
   });
 });
 
@@ -342,10 +319,8 @@ describe("use-case bindings", () => {
   // same day Cloud moved to the premium auditor too (specs/managed-ai-lineup.md
   // §2: Opus 5.5 found 7 real problems in 12 drafts where 3.8 Flash found
   // none). This test pinned Cloud on the standard auditor until then.
-  it("the grounding audit binds per plan: Cloud and Cloud Pro to the premium auditor, everything else to the standard one", () => {
-    for (const plan of ["cloud", "cloud_pro"] as const) {
-      expect(resolveGroundingAuditModel(plan)).toEqual({ provider: "anthropic", model: "claude-opus-5-5" });
-    }
+  it("the grounding audit binds per plan: Cloud to the premium auditor, everything else to the standard one", () => {
+    expect(resolveGroundingAuditModel("cloud")).toEqual({ provider: "anthropic", model: "claude-opus-5-5" });
     for (const plan of ["byok", "free", "none", null, undefined] as const) {
       expect(resolveGroundingAuditModel(plan)).toEqual({ provider: "gemini", model: "gemini-3.8-flash" });
     }
@@ -353,13 +328,11 @@ describe("use-case bindings", () => {
   });
 
   // specs/managed-ai-lineup.md §2 (owner decision 2026-10-01).
-  it("the managed writer lineup is Sonnet 5.5 with GPT-5.6 Sol as failover, on Cloud and Cloud Pro only", () => {
-    for (const plan of ["cloud", "cloud_pro"] as const) {
-      expect(resolveManagedWriterLineup(plan)).toEqual({
-        writer: { provider: "anthropic", model: "claude-sonnet-5-5" },
-        failover: { provider: "openai", model: "gpt-5.6-sol" },
-      });
-    }
+  it("the managed writer lineup is Sonnet 5.5 with GPT-5.6 Sol as failover, on Cloud only", () => {
+    expect(resolveManagedWriterLineup("cloud")).toEqual({
+      writer: { provider: "anthropic", model: "claude-sonnet-5-5" },
+      failover: { provider: "openai", model: "gpt-5.6-sol" },
+    });
     for (const plan of ["byok", "free", "none", null, undefined] as const) {
       expect(resolveManagedWriterLineup(plan)).toBeUndefined();
     }
@@ -378,15 +351,13 @@ describe("use-case bindings", () => {
   });
 
   // specs/managed-ai-lineup.md §2.4 (owner decision 2026-10-06, blind image
-  // test 2026-10-05): one image model on Cloud and Cloud Pro, and a failover
-  // on another provider at medium quality.
-  it("the managed image binding is Gemini 3.1 Flash Image with GPT Image 2.5 Sunburst (medium) as failover, on Cloud and Cloud Pro only", () => {
-    for (const plan of ["cloud", "cloud_pro"] as const) {
-      expect(resolveManagedImageBinding(plan)).toEqual({
-        primary: { provider: "gemini", model: "gemini-3.1-flash-image" },
-        failover: { provider: "openai", model: "gpt-image-2.5-sunburst", quality: "medium" },
-      });
-    }
+  // test 2026-10-05): one image model on Cloud, and a failover on another
+  // provider at medium quality.
+  it("the managed image binding is Gemini 3.1 Flash Image with GPT Image 2.5 Sunburst (medium) as failover, on Cloud only", () => {
+    expect(resolveManagedImageBinding("cloud")).toEqual({
+      primary: { provider: "gemini", model: "gemini-3.1-flash-image" },
+      failover: { provider: "openai", model: "gpt-image-2.5-sunburst", quality: "medium" },
+    });
     for (const plan of ["byok", "free", "none", null, undefined] as const) {
       expect(resolveManagedImageBinding(plan)).toBeUndefined();
     }

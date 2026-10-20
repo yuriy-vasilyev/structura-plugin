@@ -202,8 +202,8 @@ const TIER_LOCK_LABELS: Partial<Record<Milestone, string>> = {
   images: "Free License",
   image_featured: "Free License",
   image_body: "Pro",
-  // The `link_validation` server-side rule lives in the BYOK / Cloud /
-  // Cloud Pro `ALWAYS_ON_RULES_BY_TIER` lists — Free + None never
+  // The `link_validation` server-side rule lives in the BYOK / Cloud
+  // `ALWAYS_ON_RULES_BY_TIER` lists — Free + None never
   // run it. Pro is the floor.
   link_validation: "Pro",
   // Channels (the Integrations Store) is a paid-tier feature — the
@@ -228,7 +228,7 @@ const TIER_LOCK_LABELS: Partial<Record<Milestone, string>> = {
  * The caller decides what to do with the returned set: on Free / None
  * tiers, render the rows as `tier_locked` with a "Pro" / "Free
  * License" badge so the upgrade path is visible; on paid tiers
- * (Pro / Cloud / Cloud Pro / Cloud Agency) filter the rows out of the
+ * (Pro / Cloud) filter the rows out of the
  * visible order entirely so the user doesn't see a "PRO" badge on a
  * feature they already pay for (Yurii feedback 2026-05-19).
  */
@@ -329,8 +329,8 @@ function resolveInapplicableMilestones(
   // when the SPA's run-detail surface pulls them by id.
   alwaysFiltered.add("images");
 
-  // Link validation is in the always-on rule set for BYOK / Cloud /
-  // Cloud Pro / Cloud Agency tiers — on paid tiers, the step WILL
+  // Link validation is in the always-on rule set for the BYOK and Cloud
+  // tiers — on paid tiers, the step WILL
   // run regardless of the user's seoRules toggles, so it isn't
   // structurally inapplicable. On Free / None, the cloud doesn't
   // stamp `tracker.milestone("link_validation")` unless a

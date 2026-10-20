@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-11T07:52:29+00:00\n"
+"POT-Creation-Date: 2026-10-12T17:23:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: structura\n"
@@ -50,10 +50,10 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5058
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5123
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5231
-#: plugin/includes/Api/Rest_Api.php:1883 plugin/includes/Api/Rest_Api.php:6506
-#: plugin/includes/Api/Rest_Api.php:6595 plugin/includes/Api/Rest_Api.php:6643
-#: plugin/includes/Api/Rest_Api.php:6798 plugin/includes/Api/Rest_Api.php:6864
-#: plugin/includes/Api/Rest_Api.php:6970
+#: plugin/includes/Api/Rest_Api.php:1883 plugin/includes/Api/Rest_Api.php:6507
+#: plugin/includes/Api/Rest_Api.php:6596 plugin/includes/Api/Rest_Api.php:6644
+#: plugin/includes/Api/Rest_Api.php:6799 plugin/includes/Api/Rest_Api.php:6865
+#: plugin/includes/Api/Rest_Api.php:6971
 msgid "Campaign ID is required."
 msgstr ""
 
@@ -286,32 +286,32 @@ msgid "Invalid suggestion mode."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2351
-#: plugin/includes/Api/Rest_Api.php:3618
+#: plugin/includes/Api/Rest_Api.php:3619
 msgid "Intelligence source not specified."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2458
-#: plugin/includes/Api/Rest_Api.php:3725
+#: plugin/includes/Api/Rest_Api.php:3726
 msgid "AI provider is required for cloud suggestions."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2495
-#: plugin/includes/Api/Rest_Api.php:3775
+#: plugin/includes/Api/Rest_Api.php:3776
 msgid "The AI service returned an unexpected error. Please try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2567
-#: plugin/includes/Api/Rest_Api.php:3849
+#: plugin/includes/Api/Rest_Api.php:3850
 msgid "Failed to disconnect provider in the cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2680
-#: plugin/includes/Api/Rest_Api.php:3962
+#: plugin/includes/Api/Rest_Api.php:3963
 msgid "Cannot delete the default persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2688
-#: plugin/includes/Api/Rest_Api.php:3970
+#: plugin/includes/Api/Rest_Api.php:3971
 msgid "Failed to delete persona."
 msgstr ""
 
@@ -320,135 +320,135 @@ msgid "This provider is not available on your current plan."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2987
-#: plugin/includes/Api/Rest_Api.php:4271
+#: plugin/includes/Api/Rest_Api.php:4272
 msgid "Failed to save the provider key in the cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3237
-#: plugin/includes/Api/Rest_Api.php:4573
+#: plugin/includes/Api/Rest_Api.php:4574
 msgid "Request body must be a JSON object."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3262
-#: plugin/includes/Api/Rest_Api.php:4598
+#: plugin/includes/Api/Rest_Api.php:4599
 msgid "Public website URL must start with https://"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3344
-#: plugin/includes/Api/Rest_Api.php:4680
+#: plugin/includes/Api/Rest_Api.php:4681
 msgid "Provide a valid https:// URL before running Quick setup."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3356
-#: plugin/includes/Api/Rest_Api.php:4692
+#: plugin/includes/Api/Rest_Api.php:4693
 msgid "Connect your license before running Quick setup."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3372
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3478
-#: plugin/includes/Api/Rest_Api.php:4708 plugin/includes/Api/Rest_Api.php:4814
+#: plugin/includes/Api/Rest_Api.php:4709 plugin/includes/Api/Rest_Api.php:4815
 msgid "Could not reach the Structura cloud. Try again in a moment."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3388
-#: plugin/includes/Api/Rest_Api.php:4724
+#: plugin/includes/Api/Rest_Api.php:4725
 msgid "Quick setup failed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3446
-#: plugin/includes/Api/Rest_Api.php:4782
+#: plugin/includes/Api/Rest_Api.php:4783
 msgid "Missing connection id."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3455
-#: plugin/includes/Api/Rest_Api.php:4791
+#: plugin/includes/Api/Rest_Api.php:4792
 msgid "Connect your license before verifying IndexNow."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3491
-#: plugin/includes/Api/Rest_Api.php:4827
+#: plugin/includes/Api/Rest_Api.php:4828
 msgid "Verification failed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3556
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3600
-#: plugin/includes/Api/Rest_Api.php:4907 plugin/includes/Api/Rest_Api.php:4951
+#: plugin/includes/Api/Rest_Api.php:4908 plugin/includes/Api/Rest_Api.php:4952
 msgid "noticeId is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3620
-#: plugin/includes/Api/Rest_Api.php:4971
+#: plugin/includes/Api/Rest_Api.php:4972
 msgid "Please enter a license key."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3629
-#: plugin/includes/Api/Rest_Api.php:4980
+#: plugin/includes/Api/Rest_Api.php:4981
 msgid "License activated successfully!"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3635
-#: plugin/includes/Api/Rest_Api.php:4986
+#: plugin/includes/Api/Rest_Api.php:4987
 msgid "Activation failed. Please check your key and try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3650
-#: plugin/includes/Api/Rest_Api.php:5008
+#: plugin/includes/Api/Rest_Api.php:5009
 msgid "License deactivated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3655
-#: plugin/includes/Api/Rest_Api.php:5013
+#: plugin/includes/Api/Rest_Api.php:5014
 msgid "Could not deactivate license."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3678
-#: plugin/includes/Api/Rest_Api.php:5036
+#: plugin/includes/Api/Rest_Api.php:5037
 msgid "Please enter your license key to confirm."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3688
 #: .tmp-wporg/structura/includes/Core/License_Manager.php:567
-#: plugin/includes/Api/Rest_Api.php:5046
-#: plugin/includes/Core/License_Manager.php:647
+#: plugin/includes/Api/Rest_Api.php:5047
+#: plugin/includes/Core/License_Manager.php:652
 msgid "Site removed from your activations."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3692
-#: plugin/includes/Api/Rest_Api.php:5050
+#: plugin/includes/Api/Rest_Api.php:5051
 msgid "Could not remove this site. Please try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3711
-#: plugin/includes/Api/Rest_Api.php:5069
+#: plugin/includes/Api/Rest_Api.php:5070
 msgid "License plan synchronized with cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3738
-#: plugin/includes/Api/Rest_Api.php:5096
+#: plugin/includes/Api/Rest_Api.php:5097
 msgid "No license bound to this site."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3769
 #: .tmp-wporg/structura/includes/Core/License_Manager.php:80
-#: plugin/includes/Api/Rest_Api.php:5127
+#: plugin/includes/Api/Rest_Api.php:5128
 #: plugin/includes/Core/License_Manager.php:98
 msgid "Invalid server response format."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3784
-#: plugin/includes/Api/Rest_Api.php:5155
+#: plugin/includes/Api/Rest_Api.php:5156
 msgid "Cloud heartbeat rejected."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3868
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3887
-#: plugin/includes/Api/Rest_Api.php:5249 plugin/includes/Api/Rest_Api.php:5268
+#: plugin/includes/Api/Rest_Api.php:5250 plugin/includes/Api/Rest_Api.php:5269
 msgid "Unknown"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3991
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:97
-#: plugin/includes/Api/Rest_Api.php:5427
+#: plugin/includes/Api/Rest_Api.php:5428
 #: plugin/includes/Channels/Channels_Connections_Service.php:100
 msgid "Integration id and webhook URL are required."
 msgstr ""
@@ -457,7 +457,7 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4154
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:155
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:233
-#: plugin/includes/Api/Rest_Api.php:5464 plugin/includes/Api/Rest_Api.php:5683
+#: plugin/includes/Api/Rest_Api.php:5465 plugin/includes/Api/Rest_Api.php:5684
 #: plugin/includes/Channels/Channels_Connections_Service.php:164
 #: plugin/includes/Channels/Channels_Connections_Service.php:339
 msgid "Connection id is required."
@@ -465,7 +465,7 @@ msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4118
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:198
-#: plugin/includes/Api/Rest_Api.php:5647
+#: plugin/includes/Api/Rest_Api.php:5648
 #: plugin/includes/Channels/Channels_Connections_Service.php:304
 msgid "Integration id is required."
 msgstr ""
@@ -477,8 +477,8 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:104
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:224
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:254
-#: plugin/includes/Api/Rest_Api.php:5764 plugin/includes/Api/Rest_Api.php:6048
-#: plugin/includes/Api/Rest_Api.php:6095
+#: plugin/includes/Api/Rest_Api.php:5765 plugin/includes/Api/Rest_Api.php:6049
+#: plugin/includes/Api/Rest_Api.php:6096
 #: plugin/includes/Progress/Runs_Service.php:57
 #: plugin/includes/Progress/Runs_Service.php:116
 #: plugin/includes/Progress/Runs_Service.php:236
@@ -489,36 +489,36 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4389
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:144
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:151
-#: plugin/includes/Api/Rest_Api.php:5924
+#: plugin/includes/Api/Rest_Api.php:5925
 #: plugin/includes/Progress/Runs_Service.php:156
 #: plugin/includes/Progress/Runs_Service.php:163
 msgid "campaign_id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4512
-#: plugin/includes/Api/Rest_Api.php:6062
+#: plugin/includes/Api/Rest_Api.php:6063
 msgid "Active admin session required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4580
-#: plugin/includes/Api/Rest_Api.php:6130
+#: plugin/includes/Api/Rest_Api.php:6131
 msgid "run_id and cancelled_by are required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4588
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:262
-#: plugin/includes/Api/Rest_Api.php:6138
+#: plugin/includes/Api/Rest_Api.php:6139
 #: plugin/includes/Progress/Runs_Service.php:274
 msgid "cancelled_by must be \"user\" or \"system\"."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4639
-#: plugin/includes/Api/Rest_Api.php:6189
+#: plugin/includes/Api/Rest_Api.php:6190
 msgid "integration_id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4840
-#: plugin/includes/Api/Rest_Api.php:6387
+#: plugin/includes/Api/Rest_Api.php:6388
 msgid "Campaign limit reached for your current plan."
 msgstr ""
 
@@ -529,128 +529,128 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4861
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4927
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5189
-#: plugin/includes/Api/Rest_Api.php:6473 plugin/includes/Api/Rest_Api.php:6556
-#: plugin/includes/Api/Rest_Api.php:6928
+#: plugin/includes/Api/Rest_Api.php:6474 plugin/includes/Api/Rest_Api.php:6557
+#: plugin/includes/Api/Rest_Api.php:6929
 msgid "Cloud did not return campaign document."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4875
-#: plugin/includes/Api/Rest_Api.php:6487
+#: plugin/includes/Api/Rest_Api.php:6488
 msgid "New campaign deployed successfully."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4938
-#: plugin/includes/Api/Rest_Api.php:6567
+#: plugin/includes/Api/Rest_Api.php:6568
 msgid "Campaign architecture updated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4991
-#: plugin/includes/Api/Rest_Api.php:6621
+#: plugin/includes/Api/Rest_Api.php:6622
 msgid "Failed to fetch stock summary."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5028
-#: plugin/includes/Api/Rest_Api.php:6768
+#: plugin/includes/Api/Rest_Api.php:6769
 msgid "Failed to enable pre-generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5048
-#: plugin/includes/Api/Rest_Api.php:6788
+#: plugin/includes/Api/Rest_Api.php:6789
 msgid "Not authenticated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5087
-#: plugin/includes/Api/Rest_Api.php:6828
+#: plugin/includes/Api/Rest_Api.php:6829
 msgid "Campaign cleared."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5153
-#: plugin/includes/Api/Rest_Api.php:6895
+#: plugin/includes/Api/Rest_Api.php:6896
 msgid "Source campaign payload was empty."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5172
-#: plugin/includes/Api/Rest_Api.php:6911
+#: plugin/includes/Api/Rest_Api.php:6912
 msgid "(Copy)"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5201
-#: plugin/includes/Api/Rest_Api.php:6940
+#: plugin/includes/Api/Rest_Api.php:6941
 msgid "Campaign cloned successfully."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5239
-#: plugin/includes/Api/Rest_Api.php:6978
+#: plugin/includes/Api/Rest_Api.php:6979
 msgid "Campaign not found in cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5248
-#: plugin/includes/Api/Rest_Api.php:6987
+#: plugin/includes/Api/Rest_Api.php:6988
 msgid "Failed to update campaign status."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5259
-#: plugin/includes/Api/Rest_Api.php:6998
+#: plugin/includes/Api/Rest_Api.php:6999
 msgid "Campaign resumed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5260
-#: plugin/includes/Api/Rest_Api.php:6999
+#: plugin/includes/Api/Rest_Api.php:7000
 msgid "Campaign paused."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5292
-#: plugin/includes/Api/Rest_Api.php:7031
+#: plugin/includes/Api/Rest_Api.php:7032
 msgid "Failed to list visual presets."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5304
-#: plugin/includes/Api/Rest_Api.php:7043
+#: plugin/includes/Api/Rest_Api.php:7044
 msgid "Failed to create visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5320
-#: plugin/includes/Api/Rest_Api.php:7059
+#: plugin/includes/Api/Rest_Api.php:7060
 msgid "Failed to update visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5338
-#: plugin/includes/Api/Rest_Api.php:7077
+#: plugin/includes/Api/Rest_Api.php:7078
 msgid "Failed to fork visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5351
-#: plugin/includes/Api/Rest_Api.php:7090
+#: plugin/includes/Api/Rest_Api.php:7091
 msgid "Failed to delete visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5362
-#: plugin/includes/Api/Rest_Api.php:7101
+#: plugin/includes/Api/Rest_Api.php:7102
 msgid "Failed to bind visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5407
-#: plugin/includes/Api/Rest_Api.php:7242
+#: plugin/includes/Api/Rest_Api.php:7243
 msgid "Failed to fork persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5418
-#: plugin/includes/Api/Rest_Api.php:7253
+#: plugin/includes/Api/Rest_Api.php:7254
 msgid "Failed to set default persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5428
-#: plugin/includes/Api/Rest_Api.php:7284
+#: plugin/includes/Api/Rest_Api.php:7285
 msgid "Failed to list workspace keys."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5439
-#: plugin/includes/Api/Rest_Api.php:7295
+#: plugin/includes/Api/Rest_Api.php:7296
 msgid "Credential id and provider are required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5442
-#: plugin/includes/Api/Rest_Api.php:7298
+#: plugin/includes/Api/Rest_Api.php:7299
 msgid "Failed to bind workspace key."
 msgstr ""
 
@@ -703,17 +703,17 @@ msgid "Persona"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Core/License_Manager.php:550
-#: plugin/includes/Core/License_Manager.php:629
+#: plugin/includes/Core/License_Manager.php:634
 msgid "Unknown error from server."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Core/License_Manager.php:675
-#: plugin/includes/Core/License_Manager.php:770
+#: plugin/includes/Core/License_Manager.php:775
 msgid "House voice"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Core/License_Manager.php:676
-#: plugin/includes/Core/License_Manager.php:771
+#: plugin/includes/Core/License_Manager.php:776
 msgid ""
 "Write clearly and naturally for this site's audience. Adapt tone to the "
 "topic and keep guidance practical."
@@ -1159,106 +1159,106 @@ msgid "%1$s, and %2$s"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:665
-#: plugin/includes/Ui/Post_Meta_Box.php:1068
+#: plugin/includes/Ui/Post_Meta_Box.php:1071
 msgid "View generation run"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:682
-#: plugin/includes/Ui/Post_Meta_Box.php:1085
+#: plugin/includes/Ui/Post_Meta_Box.php:1088
 msgid "Keyword"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:692
-#: plugin/includes/Ui/Post_Meta_Box.php:1095
+#: plugin/includes/Ui/Post_Meta_Box.php:1098
 msgid "Keyphrase"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:732
-#: plugin/includes/Ui/Post_Meta_Box.php:1135
+#: plugin/includes/Ui/Post_Meta_Box.php:1138
 msgid "tokens used"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:793
-#: plugin/includes/Ui/Post_Meta_Box.php:1225
+#: plugin/includes/Ui/Post_Meta_Box.php:1228
 msgid "Regenerate Featured Image"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:831
-#: plugin/includes/Ui/Post_Meta_Box.php:1263
+#: plugin/includes/Ui/Post_Meta_Box.php:1266
 msgid "Body images"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:853
-#: plugin/includes/Ui/Post_Meta_Box.php:1285
+#: plugin/includes/Ui/Post_Meta_Box.php:1288
 msgid "Regenerate"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:878
-#: plugin/includes/Ui/Post_Meta_Box.php:1310
+#: plugin/includes/Ui/Post_Meta_Box.php:1313
 msgid "Body image (missing)"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:881
-#: plugin/includes/Ui/Post_Meta_Box.php:1313
+#: plugin/includes/Ui/Post_Meta_Box.php:1316
 msgid ""
 "A body image was scheduled here but never delivered. Generate one now to "
 "fill the placeholder."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:894
-#: plugin/includes/Ui/Post_Meta_Box.php:1326
+#: plugin/includes/Ui/Post_Meta_Box.php:1329
 msgid "Generate body image"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:907
-#: plugin/includes/Ui/Post_Meta_Box.php:1339
+#: plugin/includes/Ui/Post_Meta_Box.php:1342
 msgid "Generate Featured Image"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:909
-#: plugin/includes/Ui/Post_Meta_Box.php:1341
+#: plugin/includes/Ui/Post_Meta_Box.php:1344
 msgid "Close"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:923
-#: plugin/includes/Ui/Post_Meta_Box.php:1355
+#: plugin/includes/Ui/Post_Meta_Box.php:1358
 msgid "Describe the image"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:925
-#: plugin/includes/Ui/Post_Meta_Box.php:1357
+#: plugin/includes/Ui/Post_Meta_Box.php:1360
 msgid "(optional)"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:932
-#: plugin/includes/Ui/Post_Meta_Box.php:1364
+#: plugin/includes/Ui/Post_Meta_Box.php:1367
 msgid ""
 "Leave blank to reuse the previous topic. Omit style guidelines — your global "
 "art direction is applied automatically."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:943
-#: plugin/includes/Ui/Post_Meta_Box.php:1375
+#: plugin/includes/Ui/Post_Meta_Box.php:1378
 msgid "Image model"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:959
-#: plugin/includes/Ui/Post_Meta_Box.php:1391
+#: plugin/includes/Ui/Post_Meta_Box.php:1394
 msgid "Click \"Generate\" to create a new image"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:964
-#: plugin/includes/Ui/Post_Meta_Box.php:1396
+#: plugin/includes/Ui/Post_Meta_Box.php:1399
 msgid "Generating your image…"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:995
-#: plugin/includes/Ui/Post_Meta_Box.php:1427
+#: plugin/includes/Ui/Post_Meta_Box.php:1430
 msgid "Generate"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1005
-#: plugin/includes/Ui/Post_Meta_Box.php:1437
+#: plugin/includes/Ui/Post_Meta_Box.php:1440
 msgid "Use this image"
 msgstr ""
 
@@ -1266,86 +1266,86 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1234
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1457
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1595
-#: plugin/includes/Ui/Post_Meta_Box.php:731
-#: plugin/includes/Ui/Post_Meta_Box.php:1455
-#: plugin/includes/Ui/Post_Meta_Box.php:1675
-#: plugin/includes/Ui/Post_Meta_Box.php:1907
-#: plugin/includes/Ui/Post_Meta_Box.php:2045
+#: plugin/includes/Ui/Post_Meta_Box.php:734
+#: plugin/includes/Ui/Post_Meta_Box.php:1458
+#: plugin/includes/Ui/Post_Meta_Box.php:1678
+#: plugin/includes/Ui/Post_Meta_Box.php:1910
+#: plugin/includes/Ui/Post_Meta_Box.php:2048
 msgid "Permission denied."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1041
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1246
-#: plugin/includes/Ui/Post_Meta_Box.php:1473
-#: plugin/includes/Ui/Post_Meta_Box.php:1687
+#: plugin/includes/Ui/Post_Meta_Box.php:1476
+#: plugin/includes/Ui/Post_Meta_Box.php:1690
 msgid "Invalid post."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1049
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1261
-#: plugin/includes/Ui/Post_Meta_Box.php:1481
-#: plugin/includes/Ui/Post_Meta_Box.php:1702
+#: plugin/includes/Ui/Post_Meta_Box.php:1484
+#: plugin/includes/Ui/Post_Meta_Box.php:1705
 msgid "This post was not generated by Structura."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1099
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1322
-#: plugin/includes/Ui/Post_Meta_Box.php:1531
-#: plugin/includes/Ui/Post_Meta_Box.php:1763
+#: plugin/includes/Ui/Post_Meta_Box.php:1534
+#: plugin/includes/Ui/Post_Meta_Box.php:1766
 msgid "Cannot resolve image generation settings for this post."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1164
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1395
-#: plugin/includes/Ui/Post_Meta_Box.php:1605
-#: plugin/includes/Ui/Post_Meta_Box.php:1845
+#: plugin/includes/Ui/Post_Meta_Box.php:1608
+#: plugin/includes/Ui/Post_Meta_Box.php:1848
 msgid "Image was generated but could not be found."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1202
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1428
-#: plugin/includes/Ui/Post_Meta_Box.php:1643
-#: plugin/includes/Ui/Post_Meta_Box.php:1878
+#: plugin/includes/Ui/Post_Meta_Box.php:1646
+#: plugin/includes/Ui/Post_Meta_Box.php:1881
 msgid "Image generation failed. Check the Structura log for details."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1257
-#: plugin/includes/Ui/Post_Meta_Box.php:1698
+#: plugin/includes/Ui/Post_Meta_Box.php:1701
 msgid "Invalid attachment."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1282
-#: plugin/includes/Ui/Post_Meta_Box.php:1723
+#: plugin/includes/Ui/Post_Meta_Box.php:1726
 msgid "This image is not a body image."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1465
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1522
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1602
-#: plugin/includes/Ui/Post_Meta_Box.php:737
-#: plugin/includes/Ui/Post_Meta_Box.php:1915
-#: plugin/includes/Ui/Post_Meta_Box.php:1972
-#: plugin/includes/Ui/Post_Meta_Box.php:2052
+#: plugin/includes/Ui/Post_Meta_Box.php:740
+#: plugin/includes/Ui/Post_Meta_Box.php:1918
+#: plugin/includes/Ui/Post_Meta_Box.php:1975
+#: plugin/includes/Ui/Post_Meta_Box.php:2055
 msgid "Invalid request."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1470
-#: plugin/includes/Ui/Post_Meta_Box.php:1920
+#: plugin/includes/Ui/Post_Meta_Box.php:1923
 msgid "Post not found."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1492
-#: plugin/includes/Ui/Post_Meta_Box.php:1942
+#: plugin/includes/Ui/Post_Meta_Box.php:1945
 msgid "Could not locate the placeholder in the post content."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1558
-#: plugin/includes/Ui/Post_Meta_Box.php:2008
+#: plugin/includes/Ui/Post_Meta_Box.php:2011
 msgid "Could not locate the body image in the post content."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1621
-#: plugin/includes/Ui/Post_Meta_Box.php:2071
+#: plugin/includes/Ui/Post_Meta_Box.php:2074
 msgid "Featured image updated."
 msgstr ""
 
@@ -1425,49 +1425,49 @@ msgstr ""
 msgid "provider + model required."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:4244
+#: plugin/includes/Api/Rest_Api.php:4245
 msgid "This AI provider is not available."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:5007
+#: plugin/includes/Api/Rest_Api.php:5008
 msgid "Site removed."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:5591
+#: plugin/includes/Api/Rest_Api.php:5592
 #: plugin/includes/Channels/Channels_Events_Service.php:68
 msgid "Video job id is required."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6400
+#: plugin/includes/Api/Rest_Api.php:6401
 msgid ""
 "This publishing schedule is more frequent than your current plan allows."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6412
+#: plugin/includes/Api/Rest_Api.php:6413
 msgid "Cloud rejected the campaign request."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6688
+#: plugin/includes/Api/Rest_Api.php:6689
 msgid "Failed to fetch stock."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6704
+#: plugin/includes/Api/Rest_Api.php:6705
 msgid "Failed to delete the stock entry."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6719
+#: plugin/includes/Api/Rest_Api.php:6720
 msgid "Failed to empty the stock."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6734
+#: plugin/includes/Api/Rest_Api.php:6735
 msgid "Failed to regenerate the stock."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7265
+#: plugin/includes/Api/Rest_Api.php:7266
 msgid "Failed to add persona to this site."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7274
+#: plugin/includes/Api/Rest_Api.php:7275
 msgid "Failed to remove persona from this site."
 msgstr ""
 
@@ -1580,149 +1580,149 @@ msgid "Dismiss for now"
 msgstr ""
 
 #. translators: %d: number of notes still to review
-#: plugin/includes/Ui/Post_Meta_Box.php:679
-#: plugin/includes/Ui/Post_Meta_Box.php:680
-#: plugin/includes/Ui/Post_Meta_Box.php:815
+#: plugin/includes/Ui/Post_Meta_Box.php:682
+#: plugin/includes/Ui/Post_Meta_Box.php:683
+#: plugin/includes/Ui/Post_Meta_Box.php:818
 msgid "%d to review"
 msgid_plural "%d to review"
 msgstr[0] ""
 msgstr[1] ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:681
-#: plugin/includes/Ui/Post_Meta_Box.php:817
-#: plugin/includes/Ui/Post_Meta_Box.php:837
+#: plugin/includes/Ui/Post_Meta_Box.php:684
+#: plugin/includes/Ui/Post_Meta_Box.php:820
+#: plugin/includes/Ui/Post_Meta_Box.php:840
 msgid "All notes resolved"
 msgstr ""
 
 #. translators: %d: number of resolved notes
-#: plugin/includes/Ui/Post_Meta_Box.php:682
-#: plugin/includes/Ui/Post_Meta_Box.php:683
-#: plugin/includes/Ui/Post_Meta_Box.php:844
+#: plugin/includes/Ui/Post_Meta_Box.php:685
+#: plugin/includes/Ui/Post_Meta_Box.php:686
+#: plugin/includes/Ui/Post_Meta_Box.php:847
 msgid "%d resolved"
 msgid_plural "%d resolved"
 msgstr[0] ""
 msgstr[1] ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:684
-#: plugin/includes/Ui/Post_Meta_Box.php:928
+#: plugin/includes/Ui/Post_Meta_Box.php:687
+#: plugin/includes/Ui/Post_Meta_Box.php:931
 msgid "Show in text"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:685
+#: plugin/includes/Ui/Post_Meta_Box.php:688
 msgid "Hide highlight"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:686
+#: plugin/includes/Ui/Post_Meta_Box.php:689
 msgid "This text is no longer in the post."
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:687
+#: plugin/includes/Ui/Post_Meta_Box.php:690
 msgid "Could not save the note. Please try again."
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:688
+#: plugin/includes/Ui/Post_Meta_Box.php:691
 msgid "Applied in the editor. Save the post to keep it."
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:689
+#: plugin/includes/Ui/Post_Meta_Box.php:692
 msgid "Could not apply the suggestion here. Edit the text by hand."
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:742
+#: plugin/includes/Ui/Post_Meta_Box.php:745
 msgid "This post has no notes."
 msgstr ""
 
 #. translators: %d: number of source pages the post was compared with
-#: plugin/includes/Ui/Post_Meta_Box.php:790
+#: plugin/includes/Ui/Post_Meta_Box.php:793
 msgid "Compared with %d source and your brief"
 msgid_plural "Compared with %d sources and your brief"
 msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of source pages the post was compared with
-#: plugin/includes/Ui/Post_Meta_Box.php:793
+#: plugin/includes/Ui/Post_Meta_Box.php:796
 msgid "Compared with %d source"
 msgid_plural "Compared with %d sources"
 msgstr[0] ""
 msgstr[1] ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:795
+#: plugin/includes/Ui/Post_Meta_Box.php:798
 msgid "Compared with your brief"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:797
+#: plugin/includes/Ui/Post_Meta_Box.php:800
 msgid "Checked against the research"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:809
+#: plugin/includes/Ui/Post_Meta_Box.php:812
 msgid "Source check"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:819
+#: plugin/includes/Ui/Post_Meta_Box.php:822
 msgid "Nothing to review"
 msgstr ""
 
 #. translators: %d: number of sentences the check changed before delivery
-#: plugin/includes/Ui/Post_Meta_Box.php:859
+#: plugin/includes/Ui/Post_Meta_Box.php:862
 msgid "%d change made before delivery"
 msgid_plural "%d changes made before delivery"
 msgstr[0] ""
 msgstr[1] ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:871
+#: plugin/includes/Ui/Post_Meta_Box.php:874
 msgid "Sentence removed"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:897
+#: plugin/includes/Ui/Post_Meta_Box.php:900
 msgid "Outdated"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:905
+#: plugin/includes/Ui/Post_Meta_Box.php:908
 msgid "Suggested"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:909
+#: plugin/includes/Ui/Post_Meta_Box.php:912
 msgid "Suggestion: remove this sentence."
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:914
+#: plugin/includes/Ui/Post_Meta_Box.php:917
 msgid "Source:"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:917
+#: plugin/includes/Ui/Post_Meta_Box.php:920
 msgid "Source: your campaign brief"
 msgstr ""
 
 #. translators: %d: number of source pages searched
-#: plugin/includes/Ui/Post_Meta_Box.php:921
+#: plugin/includes/Ui/Post_Meta_Box.php:924
 msgid "Not found in the %d source read"
 msgid_plural "Not found in any of the %d sources read"
 msgstr[0] ""
 msgstr[1] ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:932
+#: plugin/includes/Ui/Post_Meta_Box.php:935
 msgid "Remove sentence"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:932
+#: plugin/includes/Ui/Post_Meta_Box.php:935
 msgid "Accept"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:936
+#: plugin/includes/Ui/Post_Meta_Box.php:939
 msgid "Dismiss"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:939
+#: plugin/includes/Ui/Post_Meta_Box.php:942
 msgid "Undo"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:1179
+#: plugin/includes/Ui/Post_Meta_Box.php:1182
 msgid ""
 "Structura varies wording and titles so your content reads human, so an "
 "occasional non-perfect readability score is by design."
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:1184
+#: plugin/includes/Ui/Post_Meta_Box.php:1187
 msgid "Why?"
 msgstr ""
 
@@ -1794,20 +1794,20 @@ msgstr ""
 
 #: client/src/components/Layout/Header.tsx:183
 #: client/src/components/Layout/Header.tsx:298
-#: client/src/features/account/routes/AccountPage.tsx:133
+#: client/src/features/account/routes/AccountPage.tsx:139
 msgid "Account & License"
 msgstr ""
 
 #: client/src/components/Layout/Header.tsx:220
 #: client/src/components/Layout/Header.tsx:316
 #: client/src/features/account/components/AddonCard.tsx:177
-#: client/src/features/account/routes/AccountPage.tsx:268
+#: client/src/features/account/routes/AccountPage.tsx:271
 msgid "Upgrade"
 msgstr ""
 
 #: client/src/components/Layout/Header.tsx:235
 #: client/src/components/Layout/Header.tsx:327
-#: client/src/features/account/routes/AccountPage.tsx:353
+#: client/src/features/account/routes/AccountPage.tsx:356
 msgid "Manage account"
 msgstr ""
 
@@ -2136,7 +2136,7 @@ msgid ""
 msgstr ""
 
 #: client/src/components/Shared/LicenseStatusBanner.tsx:45
-#: client/src/features/account/routes/AccountPage.tsx:187
+#: client/src/features/account/routes/AccountPage.tsx:193
 msgid "View Plans"
 msgstr ""
 
@@ -2355,140 +2355,130 @@ msgid_plural "This site is part of the workspace alongside %d other sites."
 msgstr[0] ""
 msgstr[1] ""
 
-#: client/src/features/account/routes/AccountPage.tsx:47
+#: client/src/features/account/routes/AccountPage.tsx:75
 msgid "Anonymous Mode"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:48
+#: client/src/features/account/routes/AccountPage.tsx:76
 msgid ""
 "Connect a free account to unlock Headings, Featured Images, and Scheduled "
 "tasks."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:56
+#: client/src/features/account/routes/AccountPage.tsx:84
 msgid "Registered Architect"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:57
+#: client/src/features/account/routes/AccountPage.tsx:85
 msgid ""
 "Your account is connected. Upgrade to Pro for high-authority SEO rules and "
 "bulk synthesis."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:66
+#: client/src/features/account/routes/AccountPage.tsx:94
 msgid "Pro Architect"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:67
+#: client/src/features/account/routes/AccountPage.tsx:95
 msgid ""
 "All systems operational. You have full access to the Structura ecosystem."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:76
+#: client/src/features/account/routes/AccountPage.tsx:104
 msgid "Cloud Architect"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:77
+#: client/src/features/account/routes/AccountPage.tsx:105
 msgid ""
 "Fully managed AI — no API keys required. Maximum output, zero maintenance."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:92
-msgid "Cloud Pro Architect"
-msgstr ""
-
-#: client/src/features/account/routes/AccountPage.tsx:93
-msgid ""
-"More posts and images per site, AI video, bundled Channels distribution and "
-"a dedicated support channel."
-msgstr ""
-
-#: client/src/features/account/routes/AccountPage.tsx:136
+#: client/src/features/account/routes/AccountPage.tsx:142
 msgid "Manage your Structura identity and subscription tier"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:174
-#: client/src/features/account/routes/AccountPage.tsx:287
+#: client/src/features/account/routes/AccountPage.tsx:180
+#: client/src/features/account/routes/AccountPage.tsx:290
 msgid "Create Free Account"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:232
+#: client/src/features/account/routes/AccountPage.tsx:235
 msgid "License Activation"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:240
+#: client/src/features/account/routes/AccountPage.tsx:243
 #: client/src/features/onboarding/components/WizardLicenseGate.tsx:122
 msgid "License Key"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:260
+#: client/src/features/account/routes/AccountPage.tsx:263
 msgid "Paste your license key first."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:267
+#: client/src/features/account/routes/AccountPage.tsx:270
 msgid "Connect Account"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:273
+#: client/src/features/account/routes/AccountPage.tsx:276
 msgid "No license key yet? It comes with your account."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:304
+#: client/src/features/account/routes/AccountPage.tsx:307
 #: client/src/features/settings/routes/VisualsPage.tsx:910
 msgid "View Pricing"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:316
+#: client/src/features/account/routes/AccountPage.tsx:319
 msgid "Cloud Connection Verified"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:326
+#: client/src/features/account/routes/AccountPage.tsx:329
 msgid ""
 "Your license is currently inactive. Please contact support if you believe "
 "this is an error."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:361
+#: client/src/features/account/routes/AccountPage.tsx:364
 #: client/src/features/ai-engine/components/InstalledProviderCard.tsx:215
 #: client/src/features/ai-engine/components/InstalledProviderCard.tsx:240
 #: client/src/features/ai-engine/components/ProviderCard.tsx:143
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:186
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:284
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:184
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:282
 #: client/src/features/channels/components/ChannelConnectionRow.tsx:288
 #: client/src/features/channels/components/ChannelConnectionRow.tsx:291
 #: client/src/features/channels/components/ChannelConnectionRow.tsx:374
 msgid "Disconnect"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:398
+#: client/src/features/account/routes/AccountPage.tsx:401
 msgid "Documentation"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:401
+#: client/src/features/account/routes/AccountPage.tsx:404
 msgid "Learn how to master the Architect and configure custom personas."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:425
+#: client/src/features/account/routes/AccountPage.tsx:428
 msgid "Support Portal"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:428
+#: client/src/features/account/routes/AccountPage.tsx:431
 msgid "Get help from our architects if you run into any issues."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:451
+#: client/src/features/account/routes/AccountPage.tsx:454
 msgid "Community Forum"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:454
+#: client/src/features/account/routes/AccountPage.tsx:457
 msgid "Ask the community and browse existing support topics."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:480
+#: client/src/features/account/routes/AccountPage.tsx:483
 msgid "Disconnect Account"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:481
+#: client/src/features/account/routes/AccountPage.tsx:484
 msgid ""
 "Are you sure? This site will revert to Anonymous Mode and all scheduled "
 "campaign work will stop. If you later activate a different license, you'll "
@@ -2496,19 +2486,19 @@ msgid ""
 "and channel connections won't transfer over."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:489
+#: client/src/features/account/routes/AccountPage.tsx:492
 msgid "Delete permanently"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:490
+#: client/src/features/account/routes/AccountPage.tsx:493
 msgid "Disconnect Site"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:495
+#: client/src/features/account/routes/AccountPage.tsx:498
 msgid "Permanently delete all data for this site"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:496
+#: client/src/features/account/routes/AccountPage.tsx:499
 msgid ""
 "Erases everything we store for this site — it can't be restored. Shared "
 "personas, AI keys and presets are kept."
@@ -2550,7 +2540,7 @@ msgstr ""
 
 #: client/src/features/ai-engine/components/AvailableProviderCard.tsx:119
 #: client/src/features/ai-engine/components/ProviderCard.tsx:119
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:241
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:239
 #: client/src/features/dashboard/components/GscConnectBanner.tsx:86
 #: client/src/features/dashboard/components/GscSummaryCard.tsx:69
 #: client/src/features/onboarding/components/WizardGscConnectCard.tsx:238
@@ -2600,12 +2590,12 @@ msgid "Default Image"
 msgstr ""
 
 #: client/src/features/ai-engine/components/InstalledProviderCard.tsx:178
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:263
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:261
 msgid "Managed by Structura Cloud"
 msgstr ""
 
 #: client/src/features/ai-engine/components/InstalledProviderCard.tsx:199
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:178
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:176
 msgid "Check connection"
 msgstr ""
 
@@ -2615,12 +2605,12 @@ msgstr ""
 
 #: client/src/features/ai-engine/components/InstalledProviderCard.tsx:235
 #: client/src/features/ai-engine/components/ProviderCard.tsx:90
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:279
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:277
 msgid "Disconnect Provider"
 msgstr ""
 
 #: client/src/features/ai-engine/components/InstalledProviderCard.tsx:236
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:280
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:278
 msgid ""
 "This will remove your API key. Campaigns using this provider will not be "
 "able to generate content until a new key is connected."
@@ -2660,43 +2650,41 @@ msgstr ""
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:864
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:493
 #: client/src/features/channels/components/CatalogEntryCard.tsx:221
-#: client/src/utils/planLabel.ts:27
+#: client/src/utils/planLabel.ts:31
 msgid "Free"
 msgstr ""
 
 #: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:79
-#: client/src/utils/planLabel.ts:31
+#: client/src/features/settings/components/VideoPresetSection.tsx:163
+#: client/src/features/settings/components/VideoPresetSection.tsx:267
+#: client/src/utils/planLabel.ts:35
 msgid "Cloud"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:81
-msgid "Agency"
-msgstr ""
-
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:129
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:127
 msgid "Requires"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:129
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:127
 msgid "Plan"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:221
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:219
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:475
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:71
 msgid "API Key"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:226
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:224
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:479
 msgid "Enter API key..."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:241
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:239
 msgid "Update"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:252
+#: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:250
 msgid "Get API Key"
 msgstr ""
 
@@ -6588,58 +6576,58 @@ msgid "Add Channels"
 msgstr ""
 
 #: client/src/features/channels/components/CatalogEntryCard.tsx:288
-#: client/src/features/channels/components/VideoGates.tsx:63
-#: client/src/features/settings/components/VideoPresetSection.tsx:279
+#: client/src/features/channels/components/VideoGates.tsx:65
+#: client/src/features/settings/components/VideoPresetSection.tsx:280
 msgid "Upgrade plan"
 msgstr ""
 
 #: client/src/features/channels/components/CatalogEntryCard.tsx:304
-msgid "Includes 40 videos/mo"
+msgid "Includes a monthly video allowance"
 msgstr ""
 
-#: client/src/features/channels/components/CatalogEntryCard.tsx:317
-msgid "Requires Cloud Pro"
-msgstr ""
-
-#: client/src/features/channels/components/CatalogEntryCard.tsx:321
-msgid "Requires Pro plan"
+#: client/src/features/channels/components/CatalogEntryCard.tsx:318
+msgid "Requires Cloud"
 msgstr ""
 
 #: client/src/features/channels/components/CatalogEntryCard.tsx:322
+msgid "Requires Pro plan"
+msgstr ""
+
+#: client/src/features/channels/components/CatalogEntryCard.tsx:323
 msgid "Requires higher plan"
 msgstr ""
 
-#: client/src/features/channels/components/CatalogEntryCard.tsx:325
+#: client/src/features/channels/components/CatalogEntryCard.tsx:326
 msgid "Requires Channels add-on"
 msgstr ""
 
-#: client/src/features/channels/components/CatalogEntryCard.tsx:333
+#: client/src/features/channels/components/CatalogEntryCard.tsx:334
 #: client/src/features/notices/components/NoticesBell.tsx:171
 #: client/src/features/notices/components/NoticesBell.tsx:48
 msgid "Notifications"
 msgstr ""
 
-#: client/src/features/channels/components/CatalogEntryCard.tsx:335
+#: client/src/features/channels/components/CatalogEntryCard.tsx:336
 msgid "Email"
 msgstr ""
 
-#: client/src/features/channels/components/CatalogEntryCard.tsx:337
+#: client/src/features/channels/components/CatalogEntryCard.tsx:338
 msgid "Social"
 msgstr ""
 
-#: client/src/features/channels/components/CatalogEntryCard.tsx:339
+#: client/src/features/channels/components/CatalogEntryCard.tsx:340
 msgid "SEO"
 msgstr ""
 
-#: client/src/features/channels/components/CatalogEntryCard.tsx:341
+#: client/src/features/channels/components/CatalogEntryCard.tsx:342
 msgid "Ads"
 msgstr ""
 
-#: client/src/features/channels/components/CatalogEntryCard.tsx:343
+#: client/src/features/channels/components/CatalogEntryCard.tsx:344
 msgid "CRM"
 msgstr ""
 
-#: client/src/features/channels/components/CatalogEntryCard.tsx:345
+#: client/src/features/channels/components/CatalogEntryCard.tsx:346
 #: client/src/features/settings/components/VideoPresetSection.tsx:161
 msgid "Video"
 msgstr ""
@@ -7430,31 +7418,31 @@ msgid ""
 "your quota resets."
 msgstr ""
 
-#: client/src/features/channels/components/VideoGates.tsx:23
+#: client/src/features/channels/components/VideoGates.tsx:25
 msgid "Your first video is on its way"
 msgstr ""
 
-#: client/src/features/channels/components/VideoGates.tsx:24
+#: client/src/features/channels/components/VideoGates.tsx:26
 msgid ""
 "It will appear here after your next post publishes. Rendering takes a few "
 "minutes — you’ll see live progress."
 msgstr ""
 
-#: client/src/features/channels/components/VideoGates.tsx:34
+#: client/src/features/channels/components/VideoGates.tsx:36
 msgid "Configure Video"
 msgstr ""
 
-#: client/src/features/channels/components/VideoGates.tsx:48
-msgid "Video is a Cloud Pro feature"
+#: client/src/features/channels/components/VideoGates.tsx:50
+msgid "Video is included with Cloud"
 msgstr ""
 
-#: client/src/features/channels/components/VideoGates.tsx:49
+#: client/src/features/channels/components/VideoGates.tsx:51
 msgid ""
 "This link points to the Video channel, which isn’t included in your plan. "
 "Upgrade to turn every post into a vertical video for Shorts and TikTok."
 msgstr ""
 
-#: client/src/features/channels/components/VideoGates.tsx:66
+#: client/src/features/channels/components/VideoGates.tsx:68
 msgid "Back to Store"
 msgstr ""
 
@@ -7586,7 +7574,7 @@ msgid ""
 msgstr ""
 
 #: client/src/features/dashboard/components/GscSummaryCard.tsx:80
-#: client/src/features/onboarding/routes/OnboardingPage.tsx:379
+#: client/src/features/onboarding/routes/OnboardingPage.tsx:378
 msgid "Finish setup"
 msgstr ""
 
@@ -7647,7 +7635,7 @@ msgid "posts this cycle"
 msgstr ""
 
 #: client/src/features/dashboard/components/IntelligenceUsage.tsx:219
-#: client/src/utils/planLabel.ts:29
+#: client/src/utils/planLabel.ts:33
 msgid "BYOK"
 msgstr ""
 
@@ -8174,7 +8162,7 @@ msgstr ""
 
 #: client/src/features/notices/utils.ts:228
 #: client/src/features/onboarding/components/WizardShell.tsx:87
-#: client/src/features/onboarding/routes/OnboardingPage.tsx:300
+#: client/src/features/onboarding/routes/OnboardingPage.tsx:299
 msgid "SEO intelligence"
 msgstr ""
 
@@ -8274,41 +8262,41 @@ msgstr ""
 msgid "Continue past this step for now — you can come back any time."
 msgstr ""
 
-#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:140
+#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:139
 msgid "Finish your Structura setup"
 msgstr ""
 
-#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:141
+#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:140
 msgid "Pick up where you left off"
 msgstr ""
 
-#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:144
+#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:143
 msgid "One step left — a few minutes."
 msgstr ""
 
-#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:147
+#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:146
 msgid "%d steps left — a few minutes."
 msgstr ""
 
-#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:150
+#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:149
 msgid "Resume setup"
 msgstr ""
 
-#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:154
+#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:153
 msgid "New options unlocked"
 msgstr ""
 
-#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:155
+#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:154
 msgid ""
 "Your plan upgrade enables paid-tier setup steps — refresh your wizard to "
 "take advantage."
 msgstr ""
 
-#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:159
+#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:158
 msgid "Refresh setup"
 msgstr ""
 
-#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:190
+#: client/src/features/onboarding/components/OnboardingResumeTile.tsx:189
 msgid "Dismiss setup reminder"
 msgstr ""
 
@@ -8840,7 +8828,7 @@ msgid ""
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:461
-#: client/src/features/settings/components/VideoPresetSection.tsx:265
+#: client/src/features/settings/components/VideoPresetSection.tsx:266
 msgid "Video styling"
 msgstr ""
 
@@ -9002,25 +8990,25 @@ msgstr ""
 msgid "Restart setup from step 1"
 msgstr ""
 
-#: client/src/features/onboarding/routes/OnboardingPage.tsx:206
+#: client/src/features/onboarding/routes/OnboardingPage.tsx:205
 msgid "Loading setup…"
 msgstr ""
 
-#: client/src/features/onboarding/routes/OnboardingPage.tsx:301
+#: client/src/features/onboarding/routes/OnboardingPage.tsx:300
 msgid "Real keyword data, not guesses."
 msgstr ""
 
-#: client/src/features/onboarding/routes/OnboardingPage.tsx:302
+#: client/src/features/onboarding/routes/OnboardingPage.tsx:301
 msgid ""
 "Paid plans pull live ranking + competitor data and suggest target keywords "
 "from what you do."
 msgstr ""
 
-#: client/src/features/onboarding/routes/OnboardingPage.tsx:386
+#: client/src/features/onboarding/routes/OnboardingPage.tsx:385
 msgid "Complete every step to finish"
 msgstr ""
 
-#: client/src/features/onboarding/routes/OnboardingPage.tsx:387
+#: client/src/features/onboarding/routes/OnboardingPage.tsx:386
 msgid "Complete this step to continue"
 msgstr ""
 
@@ -9967,12 +9955,6 @@ msgstr ""
 msgid "Bottom"
 msgstr ""
 
-#: client/src/features/settings/components/VideoPresetSection.tsx:163
-#: client/src/features/settings/components/VideoPresetSection.tsx:266
-#: client/src/utils/planLabel.ts:33
-msgid "Cloud Pro"
-msgstr ""
-
 #: client/src/features/settings/components/VideoPresetSection.tsx:166
 msgid ""
 "How videos rendered from posts look, on every site using this preset — "
@@ -10015,7 +9997,7 @@ msgstr ""
 msgid "Preset palette"
 msgstr ""
 
-#: client/src/features/settings/components/VideoPresetSection.tsx:267
+#: client/src/features/settings/components/VideoPresetSection.tsx:268
 msgid ""
 "Style presets, caption placement and brand-palette captions for every "
 "rendered video."
@@ -10723,6 +10705,12 @@ msgstr ""
 #: client/src/utils/cronUtils.ts:28
 msgid "Custom schedule"
 msgstr ""
+
+#: client/src/utils/planLabel.ts:54
+msgid "Cloud, %d post"
+msgid_plural "Cloud, %d posts"
+msgstr[0] ""
+msgstr[1] ""
 
 #: client/src/utils/providerMeta.ts:31
 msgid "AI"

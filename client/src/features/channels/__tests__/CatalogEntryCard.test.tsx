@@ -202,7 +202,7 @@ describe("CatalogEntryCard — upgrade_plan branch (Free-tier teaser)", () => {
     // still behave if we ever add one — this is the "any plan above pro"
     // fallback label.
     const entry = makeEntry({
-      gating: { requiredPlan: "cloud_pro", requiredAddon: null },
+      gating: { requiredPlan: "cloud", requiredAddon: null },
       entitlement: { canInstall: false, blocker: "upgrade_plan" },
     });
     renderWithClient(<CatalogEntryCard entry={entry} />);
@@ -340,8 +340,9 @@ describe("CatalogEntryCard — category pill labels", () => {
 describe("CatalogEntryCard — video channel premium card", () => {
   // The Video card keeps the shared grid geometry + CTA logic but adds the
   // premium hairline ring, a fuchsia "Video" category pill, capability
-  // chips, and per-state hints ("Includes 40 videos/mo" when installable,
-  // "Requires Cloud Pro" when plan-blocked). The catalog currently ships
+  // chips, and per-state hints (a monthly-allowance line when installable,
+  // "Requires Cloud" when plan-blocked; 2026-10-12, video comes with every
+  // Cloud option and the allowance depends on it). The catalog currently ships
   // the entry with comingSoon: true — but the card must render every
   // entitlement state correctly so flipping the server flag needs no UI
   // release.
@@ -356,7 +357,7 @@ describe("CatalogEntryCard — video channel premium card", () => {
       category: "video",
       capabilities: ["adapt"],
       authType: "none",
-      gating: { requiredPlan: "cloud_pro", requiredAddon: null },
+      gating: { requiredPlan: "cloud", requiredAddon: null },
       entitlement: { canInstall: true, blocker: null },
       ...overrides,
     });
@@ -391,10 +392,10 @@ describe("CatalogEntryCard — video channel premium card", () => {
     expect(
       screen.getByRole("button", { name: /^install$/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Includes 40 videos/mo")).toBeInTheDocument();
+    expect(screen.getByText("Includes a monthly video allowance")).toBeInTheDocument();
   });
 
-  it("upgrade_plan: shows the Requires Cloud Pro hint and an upgrade link", () => {
+  it("upgrade_plan: shows the Requires Cloud hint and an upgrade link", () => {
     renderWithClient(
       <CatalogEntryCard
         entry={videoEntry({
@@ -402,7 +403,8 @@ describe("CatalogEntryCard — video channel premium card", () => {
         })}
       />,
     );
-    expect(screen.getByText("Requires Cloud Pro")).toBeInTheDocument();
+    expect(screen.getByText("Requires Cloud")).toBeInTheDocument();
+    expect(screen.queryByText(/Cloud Pro/)).toBeNull();
     expect(
       screen.getByRole("link", { name: /upgrade plan/i }),
     ).toBeInTheDocument();
@@ -427,7 +429,7 @@ describe("CatalogEntryCard — video channel premium card", () => {
       screen.getByRole("button", { name: /coming soon/i }),
     ).toBeDisabled();
     // No quota hint while nothing is installable.
-    expect(screen.queryByText("Includes 40 videos/mo")).toBeNull();
+    expect(screen.queryByText("Includes a monthly video allowance")).toBeNull();
   });
 });
 

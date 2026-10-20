@@ -93,7 +93,7 @@ export interface Advice {
 
 /**
  * The provider advice for a campaign, or `null` when its text provider is
- * not a caution provider or the plan is managed (Cloud, Cloud Pro). Pure;
+ * not a caution provider or the plan is managed (Cloud). Pure;
  * shared by the portal and wp-admin. Switch is always offered, Connect
  * needs key access (else a note), Upgrade needs billing access (else
  * hidden). Spec: specs/byok-ai-guidance.md §3.
@@ -106,7 +106,7 @@ export interface Advice {
 export function adviceFor(ctx: AdviceContext): Advice | null {
   if (!RECOMMENDATIONS.text.caution.includes(ctx.provider)) return null;
   // Managed plans write with the managed lineup, whatever provider is stored.
-  if (ctx.plan === "cloud" || ctx.plan === "cloud_pro") return null;
+  if (ctx.plan === "cloud") return null;
   const has = (p: AIProvider) => ctx.connected.includes(p);
   const upgrade: AdviceAction | null = ctx.canManageBilling ? { kind: "upgrade", label: "aiAdvice.upgradeCloud" } : null;
 

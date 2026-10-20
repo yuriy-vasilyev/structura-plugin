@@ -13,7 +13,7 @@ import {
  * Site-wide cycle-usage warning banner — Phase 4.4 of
  * `specs/v2/multi-tenant-and-public-api.md`.
  *
- * Two severity levels for managed-tier (Cloud / Cloud Pro)
+ * Two severity levels for managed-tier (Cloud)
  * customers, scoped to THIS SITE's per-activation quota (the
  * generation gate hard-blocks each activation independently —
  * there is no shared workspace pool, and no overage billing):

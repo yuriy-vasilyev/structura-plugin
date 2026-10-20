@@ -10,7 +10,7 @@
  * they already pay for.
  *
  * Post-fix:
- *   - Paid tiers (Pro / Cloud / Cloud Pro / Cloud Agency) never see
+ *   - Paid tiers (Pro / Cloud) never see
  *     a tier-lock chip. Steps that won't run (stock_check on a
  *     single-post run, images when none requested) are filtered out
  *     of the visible order entirely.

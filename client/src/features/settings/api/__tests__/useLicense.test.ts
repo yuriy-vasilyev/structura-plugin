@@ -147,7 +147,7 @@ describe("deriveHasAnonymousActivation", () => {
       deriveHasAnonymousActivation({ has_workspace: true, plan: "byok" }),
     ).toBe(false);
     expect(
-      deriveHasAnonymousActivation({ has_workspace: true, plan: "cloud_pro" }),
+      deriveHasAnonymousActivation({ has_workspace: true, plan: "cloud" }),
     ).toBe(false);
   });
 

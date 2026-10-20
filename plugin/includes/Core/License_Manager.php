@@ -197,8 +197,12 @@ class License_Manager
      *   - 'free'   — registered with a free license key
      *   - 'byok'    — BYOK paid tier
      *   - 'cloud'  — managed-AI paid tier
-     *   - 'cloud_pro' — managed-AI paid tier with graduated volume + bundled
-     *                Channels add-on
+     *   - 'cloud_pro' — retired 2026-10-12. The cloud stopped sending it that
+     *                day (every license moved to 'cloud'), but a cached
+     *                payload can still carry it until the next heartbeat. The
+     *                managed and paid checks keep accepting it until the next
+     *                plugin release after 2.32.0 has shipped; drop the string
+     *                in the release after that.
      */
     public static function get_plan(): string
     {
@@ -242,7 +246,7 @@ class License_Manager
     {
         $plan = self::get_plan();
 
-        // Match against all paid plan slugs
+        // Match against all paid plan slugs. 'cloud_pro': retired 2026-10-12, accepted for one release window (see License_Manager::get_plan()).
         return in_array($plan, ['byok', 'cloud', 'cloud_pro'], true);
     }
 
@@ -293,6 +297,7 @@ class License_Manager
             case 'byok':
                 return 10;
             case 'cloud':
+            // 'cloud_pro': retired 2026-10-12, accepted for one release window (see License_Manager::get_plan()).
             case 'cloud_pro':
                 return null;
             case 'none':

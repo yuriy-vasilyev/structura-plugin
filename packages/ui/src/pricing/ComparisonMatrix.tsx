@@ -1,16 +1,17 @@
 import { FC, Fragment } from "react";
 import { Check, Minus } from "lucide-react";
 import { cn } from "../utils";
+import { VolumeSelect, type VolumeSelectProps } from "./VolumeSelect";
 
 /**
  * One cell in the comparison table. The shape is intentionally narrow so the
  * caller can decide what each value means semantically:
  *
- *   - `true`  → green check, "Included"
+ *   - `true`  → check, "Included"
  *   - `false` → muted dash, "Not included"
  *   - `string` → render as text. Used for everything that isn't a binary
- *                yes/no — token quotas ("2M"), price-formatted add-ons
- *                ("$7 add-on"), tier text ("White-glove"), placeholders ("—").
+ *                yes/no — allowances ("30"), tier text ("White-glove"),
+ *                placeholders ("—").
  *
  * `null`/`undefined` is treated as "not included" so callers can omit a key
  * for any column the row doesn't apply to.
@@ -18,13 +19,17 @@ import { cn } from "../utils";
 export type ComparisonCell = boolean | string | null;
 
 export interface ComparisonRow {
-  /** Row label rendered in the sticky first column. */
+  /** Row label rendered in the first column. */
   label: string;
   wpOrg: ComparisonCell;
   free: ComparisonCell;
   byok: ComparisonCell;
+  /**
+   * The Cloud cell for the selected volume option. Volume-dependent rows
+   * (posts, images, videos, rates) are resolved by the caller from the
+   * selection; the matrix only renders them.
+   */
   cloud: ComparisonCell;
-  cloud_pro: ComparisonCell;
 }
 
 export interface ComparisonGroup {
@@ -49,7 +54,6 @@ export interface ComparisonMatrixLabels {
     free: string;
     byok: string;
     cloud: string;
-    cloud_pro: string;
   };
   /** Visually-hidden labels used by the cell icons for screen readers. */
   cellAria: {
@@ -69,73 +73,35 @@ export interface ComparisonMatrixProps {
    * `true` on launch day surfaces the column with no data migration.
    */
   includeWpOrg?: boolean;
+  /**
+   * The Cloud column follows one volume option. `selector` renders a compact
+   * labelled select beside the title, bound to the same selection as the
+   * Cloud plan card; `columnNote` sits under the Cloud header (e.g. "100
+   * posts selected"). Absent → a static Cloud column.
+   */
+  cloudVolume?: {
+    selector: VolumeSelectProps;
+    columnNote: string;
+  };
 }
 
-type PlanKey = "wpOrg" | "free" | "byok" | "cloud" | "cloud_pro";
+type PlanKey = "wpOrg" | "free" | "byok" | "cloud";
 
-const ALL_PLAN_KEYS: ReadonlyArray<PlanKey> = [
-  "wpOrg",
-  "free",
-  "byok",
-  "cloud",
-  "cloud_pro",
-];
-
-/**
- * Per-column theming. The Agency column is emphasized with an amber accent
- * that matches the TOP TIER badge; the Pro column gets a quiet brand tint
- * that mirrors the MOST POPULAR badge. Both tints are *background only* —
- * text color lives in `COLUMN_HEADER_TINT` so `twMerge` can't collapse the
- * amber accent into a neutral header color.
- *
- * Agency was previously `bg-neutral-950` in both modes to match the dark
- * premium card upstream. That worked in dark mode but in light mode it
- * printed a single pitch-black column in the middle of an otherwise white
- * table, which read as "something rendered wrong" — not "this tier is
- * special". The amber tint keeps the "this is the premium column" signal
- * while staying visually coherent with the surrounding light surface.
- */
-const COLUMN_TINT: Record<PlanKey, string> = {
-  wpOrg: "",
-  free: "",
-  byok: "bg-brand-50/60 dark:bg-brand-500/[0.04]",
-  cloud: "",
-  cloud_pro: "bg-gold-50/70 dark:bg-gold-500/[0.06]",
-};
-
-const COLUMN_HEADER_TINT: Record<PlanKey, string> = {
-  wpOrg: "text-neutral-600 dark:text-neutral-300",
-  free: "text-neutral-600 dark:text-neutral-300",
-  byok: "text-brand-700 dark:text-brand-300",
-  cloud: "text-neutral-600 dark:text-neutral-300",
-  cloud_pro: "text-gold-700 dark:text-gold-300",
-};
+const ALL_PLAN_KEYS: ReadonlyArray<PlanKey> = ["wpOrg", "free", "byok", "cloud"];
 
 /**
  * Renders one cell value. Booleans become icons; strings are rendered as-is
- * with a slightly bolder weight so plan-specific detail ("$7 add-on", "2M",
- * "White-glove") jumps out from the surrounding checks.
- *
- * The `premium` tone pairs with `COLUMN_TINT.agency` (a gold-tinted
- * surface in both modes). Check + text colors lean amber so the column
- * reads as the gold-accented premium track top-to-bottom.
+ * with a slightly bolder weight so plan-specific detail ("30", "White-glove")
+ * stands out from the surrounding checks.
  */
 const Cell: FC<{
   value: ComparisonCell;
   ariaIncluded: string;
   ariaNotIncluded: string;
-  tone: "default" | "premium";
-}> = ({ value, ariaIncluded, ariaNotIncluded, tone }) => {
+}> = ({ value, ariaIncluded, ariaNotIncluded }) => {
   if (value === true) {
     return (
-      <span
-        className={cn(
-          "inline-flex size-6 items-center justify-center rounded-full",
-          tone === "premium"
-            ? "bg-gold-100 text-gold-700 dark:bg-gold-500/15 dark:text-gold-300"
-            : "bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400"
-        )}
-      >
+      <span className="inline-flex size-6 items-center justify-center rounded-full bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
         <Check size={14} strokeWidth={3} aria-hidden="true" />
         <span className="sr-only">{ariaIncluded}</span>
       </span>
@@ -144,14 +110,7 @@ const Cell: FC<{
 
   if (value === false || value == null) {
     return (
-      <span
-        className={cn(
-          "inline-flex size-6 items-center justify-center",
-          tone === "premium"
-            ? "text-gold-300 dark:text-gold-700/60"
-            : "text-neutral-300 dark:text-neutral-600"
-        )}
-      >
+      <span className="inline-flex size-6 items-center justify-center text-neutral-500 dark:text-neutral-400">
         <Minus size={14} aria-hidden="true" />
         <span className="sr-only">{ariaNotIncluded}</span>
       </span>
@@ -164,13 +123,7 @@ const Cell: FC<{
     <span
       className={cn(
         "text-sm font-semibold",
-        isPlaceholder
-          ? tone === "premium"
-            ? "text-gold-300 dark:text-gold-700/60"
-            : "text-neutral-400 dark:text-neutral-600"
-          : tone === "premium"
-            ? "text-gold-800 dark:text-gold-200"
-            : "text-neutral-900 dark:text-white"
+        isPlaceholder ? "text-neutral-500 dark:text-neutral-400" : "text-neutral-900 dark:text-white"
       )}
     >
       {value}
@@ -179,23 +132,21 @@ const Cell: FC<{
 };
 
 /**
- * Side-by-side feature matrix for the WP.org plugin and the four paid tiers.
- * Lives below the per-tier cards and the volume strip — the cards are for
- * scanning, this is for visitors who need every row before they pick.
+ * Side-by-side feature matrix for the WP.org plugin and the Free, BYOK and
+ * Cloud plans. Lives below the plan cards and the volume strip — the cards
+ * are for scanning, this is for visitors who need every row before they pick.
  *
- * Pure presentational composite. No hooks, no fetches, no i18n runtime —
- * the host app passes pre-resolved strings via `labels` and `groups`.
+ * Since 2026-10-12 (specs/cloud-volume-pricing-design.md "Comparison
+ * matrix") there is one Cloud column that follows the selected volume, and
+ * the Cloud Pro column is gone.
  *
- * Responsive layout:
- *   - `md:` and up render the 6-column table (all plans side-by-side). The
- *     table has an intrinsic 760px width and can scroll horizontally
- *     inside its rounded surface if the viewport is between md and lg.
- *   - Below `md:` the table view is hidden and replaced by a stacked
- *     per-plan accordion. Each plan becomes a native `<details>` element —
- *     no JS, works server-rendered, and Pro opens by default so the
- *     recommended tier is scannable without a tap. The accordion trades
- *     density for mobile-friendliness: no horizontal scrolling, no
- *     squinting at a 430px viewport trying to read across 6 columns.
+ * Pure presentational composite. No fetches, no i18n runtime — the host app
+ * passes pre-resolved strings via `labels` and `groups`.
+ *
+ * Responsive layout, no horizontal scrolling at any width:
+ *   - `md:` and up render the table, every plan side by side.
+ *   - Below `md:` each feature becomes a labelled block with one value per
+ *     plan, so a value is never separated from its plan name.
  *
  * Spec: marketing/PRICING-PAGE-COPY-V2.md §"Feature comparison table".
  */
@@ -203,111 +154,84 @@ export const ComparisonMatrix: FC<ComparisonMatrixProps> = ({
   groups,
   labels,
   includeWpOrg = true,
+  cloudVolume,
 }) => {
   const planKeys = includeWpOrg
     ? ALL_PLAN_KEYS
     : ALL_PLAN_KEYS.filter((key) => key !== "wpOrg");
-  // colSpan for the section heading row covers the row-label column
-  // plus every rendered plan column. Was hardcoded to 6 before wpOrg
-  // became optional; derive so it stays correct in both states.
+  // colSpan for the section heading row covers the row-label column plus
+  // every rendered plan column.
   const groupHeadingColSpan = planKeys.length + 1;
   return (
-  <section
-    aria-labelledby="comparison-matrix-title"
-    // `min-w-0` is the critical bit here: inside a flex column ancestor the
-    // default `min-width: auto` lets the table's intrinsic 760px width
-    // leak out through `overflow-x-auto` and push the page into horizontal
-    // scroll at ~430px viewports. Forcing min-width to 0 lets the table
-    // container shrink below intrinsic content width so the inner
-    // `overflow-x-auto` can actually do its job.
-    //
-    // No horizontal padding here — the host page (`app/[locale]/pricing/
-    // page.tsx`) already supplies `px-6` on its section wrapper, and our
-    // sibling pricing components (`AgencyVolumeStrip`, `JustThePluginSection`)
-    // don't double-pad either. Match that convention.
-    className="mx-auto mt-20 w-full max-w-7xl min-w-0"
-  >
-    <div className="mb-10 text-center">
-      {/* The eyebrow carries the query and is the heading; the display line
-          is copy. Same rule as www's SectionHeading (site-wide since
-          2026-09-26) — kept inline here because this package cannot import
-          from www. */}
-      <h2
-        id="comparison-matrix-title"
-        className="mb-3 text-xs font-bold tracking-widest text-brand-600 uppercase dark:text-brand-400"
-      >
-        {labels.eyebrow}
-      </h2>
-      <p className="font-display text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl dark:text-white">
-        {labels.title}
-      </p>
-      {labels.description && (
-        <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-          {labels.description}
-        </p>
-      )}
-    </div>
-
-    {/* Mobile (< md): stacked per-plan accordions. The table view is too
-        wide to read on a 430px viewport even with horizontal scrolling —
-        users don't know there's more content to the right, and even if
-        they scroll they lose the row label context. One plan at a time,
-        expandable, keeps the density reasonable without sacrificing any
-        row from the comparison. */}
-    <div className="space-y-3 md:hidden">
-      {planKeys.map((planKey) => (
-        <details
-          key={planKey}
-          // Pro is the recommended tier — opening it by default means the
-          // "most likely answer" is already visible without a tap. Agency
-          // and Cloud stay collapsed to keep the page length sane.
-          open={planKey === "byok"}
-          className={cn(
-            "group overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-neutral-900 dark:ring-1 dark:ring-white/[0.04]",
-            planKey === "cloud_pro"
-              ? "border-gold-200 dark:border-gold-500/20"
-              : planKey === "byok"
-                ? "border-brand-300 dark:border-brand-500/30"
-                : "border-neutral-200 dark:border-neutral-800"
-          )}
-        >
-          <summary
-            className={cn(
-              // `list-none` removes the default disclosure marker so we
-              // can render our own chevron that flips on open/close.
-              "flex cursor-pointer list-none items-center justify-between px-5 py-4 text-sm font-bold uppercase tracking-wider",
-              COLUMN_HEADER_TINT[planKey]
-            )}
+    <section
+      aria-labelledby="comparison-matrix-title"
+      // No horizontal padding here — the host page supplies it, like the
+      // sibling pricing components (`AgencyVolumeStrip`,
+      // `JustThePluginSection`).
+      className="mx-auto mt-20 w-full max-w-6xl min-w-0"
+    >
+      <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div className="min-w-0">
+          {/* The eyebrow carries the query and is the heading; the display line
+              is copy. Same rule as www's SectionHeading (site-wide since
+              2026-09-26) — kept inline here because this package cannot import
+              from www. */}
+          <h2
+            id="comparison-matrix-title"
+            className="mb-3 text-xs font-bold tracking-widest text-brand-700 uppercase dark:text-brand-300"
           >
-            <span>{labels.columns[planKey]}</span>
-            <span
-              aria-hidden="true"
-              className="text-xs transition-transform duration-fast group-open:rotate-180"
+            {labels.eyebrow}
+          </h2>
+          <p className="font-display text-3xl font-black tracking-tight text-neutral-900 sm:text-4xl dark:text-white">
+            {labels.title}
+          </p>
+          {labels.description && (
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+              {labels.description}
+            </p>
+          )}
+        </div>
+        {cloudVolume && (
+          <VolumeSelect {...cloudVolume.selector} className="w-full shrink-0 md:w-60" />
+        )}
+      </div>
+
+      {/* Phones (< md): one labelled block per feature with a value per plan.
+          A table squeezed to 390px loses the row label or forces horizontal
+          scrolling; neither is acceptable (design handoff 2026-10-12). */}
+      <div className="md:hidden">
+        {groups.map((group) => (
+          <section key={group.id} aria-labelledby={`comparison-${group.id}-mobile`}>
+            <h3
+              id={`comparison-${group.id}-mobile`}
+              className="border-t border-neutral-200 pt-6 pb-2 text-[11px] font-bold tracking-widest text-neutral-600 uppercase dark:border-neutral-800 dark:text-neutral-400"
             >
-              ▾
-            </span>
-          </summary>
-          <div className="border-t border-neutral-200 dark:border-neutral-800">
-            {groups.map((group) => (
-              <div key={group.id}>
-                <div className="bg-neutral-50/60 px-5 py-2 text-[11px] font-bold tracking-widest text-neutral-500 uppercase dark:bg-neutral-900/60 dark:text-neutral-400">
-                  {group.title}
-                </div>
-                <dl className="divide-y divide-neutral-100 dark:divide-neutral-800/60">
-                  {group.rows.map((row, rowIdx) => (
-                    <div
-                      key={`${group.id}-${rowIdx}`}
-                      className="flex items-center justify-between gap-4 px-5 py-3"
-                    >
-                      <dt className="text-sm text-neutral-700 dark:text-neutral-200">
-                        {row.label}
+              {group.title}
+            </h3>
+            {group.rows.map((row, rowIdx) => (
+              <div
+                key={`${group.id}-${rowIdx}`}
+                className="border-t border-neutral-100 py-4 first-of-type:border-t-0 dark:border-neutral-800/60"
+              >
+                <p className="mb-3 text-sm font-semibold text-neutral-900 dark:text-white">
+                  {row.label}
+                </p>
+                <dl
+                  className={cn(
+                    "grid gap-x-3 gap-y-3",
+                    planKeys.length === 4 ? "grid-cols-2 xs:grid-cols-4" : "grid-cols-3"
+                  )}
+                >
+                  {planKeys.map((key) => (
+                    <div key={key} className="min-w-0">
+                      <dt className="mb-1 text-xs text-neutral-600 dark:text-neutral-400">
+                        {labels.columns[key]}
                       </dt>
-                      <dd className="shrink-0">
+                      <dd className="break-words">
                         <Cell
-                          value={row[planKey]}
+                          value={row[key]}
                           ariaIncluded={labels.cellAria.included}
                           ariaNotIncluded={labels.cellAria.notIncluded}
-                          tone={planKey === "cloud_pro" ? "premium" : "default"}
                         />
                       </dd>
                     </div>
@@ -315,24 +239,19 @@ export const ComparisonMatrix: FC<ComparisonMatrixProps> = ({
                 </dl>
               </div>
             ))}
-          </div>
-        </details>
-      ))}
-    </div>
+          </section>
+        ))}
+      </div>
 
-    {/* Desktop (md+): the original 6-column table. */}
-    <div className="hidden w-full overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:ring-1 dark:ring-white/[0.04] md:block">
-      {/* `w-full` + `max-w-full` pin the scroll container to the card's
-          content box; without max-w-full Safari has been seen to let the
-          intrinsic 760px table width establish the scroller's outer size
-          and bubble horizontal overflow up to the page. */}
-      <div className="w-full max-w-full overflow-x-auto">
-        <table className="w-full min-w-[760px] border-collapse text-left">
+      {/* md+: the table. Fixed layout so the columns share the width instead
+          of growing past the container. */}
+      <div className="hidden w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-raised md:block dark:border-neutral-800 dark:bg-neutral-900 dark:ring-1 dark:ring-white/[0.04]">
+        <table className="w-full table-fixed border-collapse text-left">
           <thead>
             <tr className="border-b border-neutral-200 bg-neutral-50/60 dark:border-neutral-800 dark:bg-neutral-900/60">
               <th
                 scope="col"
-                className="sticky left-0 z-10 w-[34%] bg-neutral-50/60 px-6 py-5 text-xs font-bold tracking-widest text-neutral-500 uppercase dark:bg-neutral-900/60"
+                className="w-[34%] px-6 py-5 text-xs font-bold tracking-widest text-neutral-600 uppercase dark:text-neutral-400"
               >
                 {labels.columns.feature}
               </th>
@@ -341,12 +260,16 @@ export const ComparisonMatrix: FC<ComparisonMatrixProps> = ({
                   key={key}
                   scope="col"
                   className={cn(
-                    "px-4 py-5 text-center text-sm font-bold uppercase tracking-wider",
-                    COLUMN_HEADER_TINT[key],
-                    COLUMN_TINT[key]
+                    "px-4 py-5 text-center align-bottom text-sm font-bold text-neutral-900 dark:text-white",
+                    key === "cloud" && "bg-brand-50/70 dark:bg-brand-500/5"
                   )}
                 >
                   {labels.columns[key]}
+                  {key === "cloud" && cloudVolume && (
+                    <span className="mt-1 block text-xs font-normal text-neutral-600 dark:text-neutral-400">
+                      {cloudVolume.columnNote}
+                    </span>
+                  )}
                 </th>
               ))}
             </tr>
@@ -358,7 +281,7 @@ export const ComparisonMatrix: FC<ComparisonMatrixProps> = ({
                   <th
                     scope="rowgroup"
                     colSpan={groupHeadingColSpan}
-                    className="px-6 py-3 text-left text-[11px] font-bold tracking-widest text-neutral-500 uppercase dark:text-neutral-400"
+                    className="px-6 py-3 text-left text-[11px] font-bold tracking-widest text-neutral-600 uppercase dark:text-neutral-400"
                   >
                     {group.title}
                   </th>
@@ -370,7 +293,7 @@ export const ComparisonMatrix: FC<ComparisonMatrixProps> = ({
                   >
                     <th
                       scope="row"
-                      className="sticky left-0 z-10 bg-white px-6 py-4 text-left text-sm font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+                      className="px-6 py-4 text-left text-sm font-medium text-neutral-700 dark:text-neutral-200"
                     >
                       {row.label}
                     </th>
@@ -378,15 +301,14 @@ export const ComparisonMatrix: FC<ComparisonMatrixProps> = ({
                       <td
                         key={key}
                         className={cn(
-                          "px-4 py-4 text-center align-middle",
-                          COLUMN_TINT[key]
+                          "px-4 py-4 text-center align-middle break-words",
+                          key === "cloud" && "bg-brand-50/70 dark:bg-brand-500/5"
                         )}
                       >
                         <Cell
                           value={row[key]}
                           ariaIncluded={labels.cellAria.included}
                           ariaNotIncluded={labels.cellAria.notIncluded}
-                          tone={key === "cloud_pro" ? "premium" : "default"}
                         />
                       </td>
                     ))}
@@ -397,7 +319,6 @@ export const ComparisonMatrix: FC<ComparisonMatrixProps> = ({
           </tbody>
         </table>
       </div>
-    </div>
-  </section>
+    </section>
   );
 };

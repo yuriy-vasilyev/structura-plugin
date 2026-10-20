@@ -1,7 +1,7 @@
 /**
  * AI Engine page — managed plans are sent to the dashboard (2026-10-01).
  *
- * The nav already hides "AI Engine" on Cloud / Cloud Pro. A direct visit
+ * The nav already hides "AI Engine" on Cloud. A direct visit
  * must not list providers either: managed customers never see provider
  * names (specs/managed-ai-lineup.md §3.3). BYOK still gets the page.
  */
@@ -69,12 +69,6 @@ describe("AiEngine route by plan", () => {
     renderAt();
     expect(screen.getByText("dashboard")).toBeInTheDocument();
     expect(screen.queryByText("OpenAI")).not.toBeInTheDocument();
-  });
-
-  it("Cloud Pro: redirects too", () => {
-    planMock.plan = "cloud_pro";
-    renderAt();
-    expect(screen.getByText("dashboard")).toBeInTheDocument();
   });
 
   it("BYOK: renders the page with the connected provider", () => {

@@ -301,7 +301,7 @@ function GatingHint({ entry }: { entry: IntegrationCatalogEntry }) {
     if (isVideo) {
       return (
         <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
-          {__("Includes 40 videos/mo", "structura")}
+          {__("Includes a monthly video allowance", "structura")}
         </span>
       );
     }
@@ -312,9 +312,10 @@ function GatingHint({ entry }: { entry: IntegrationCatalogEntry }) {
   let label: string;
   if (entitlement.blocker === "upgrade_plan") {
     if (isVideo) {
-      // Name the exact tier rather than the generic "higher plan" — the
-      // handoff pairs the Pro badge with a concrete "Requires Cloud Pro".
-      label = __("Requires Cloud Pro", "structura");
+      // Name the exact plan rather than the generic "higher plan". Video
+      // comes with every Cloud option since 2026-10-12 (it was Cloud Pro
+      // only), and the allowance depends on the option, so no number here.
+      label = __("Requires Cloud", "structura");
     } else {
       label =
         gating.requiredPlan === "byok"

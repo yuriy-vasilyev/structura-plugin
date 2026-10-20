@@ -113,17 +113,17 @@ export function resolveUtilityModelId(provider: AIProvider): string {
 }
 
 /**
- * True for the plans whose AI lineup Structura owns (Cloud, Cloud Pro).
+ * True for the plans whose AI lineup Structura owns (Cloud).
  * Mirrors `isManagedPlan` in `@structura/types`, which this package may only
  * import as a type (see `types.ts`).
  */
 function isManagedLineupPlan(plan: PlanId | "none" | null | undefined): boolean {
-  return plan === "cloud" || plan === "cloud_pro";
+  return plan === "cloud";
 }
 
 /**
  * The post-generation grounding audit (`functions/src/ai/grounding-audit.ts`)
- * model for a plan: Cloud and Cloud Pro get the `premium` auditor, every
+ * model for a plan: Cloud gets the `premium` auditor, every
  * other tier that is audited (BYOK, free single posts with research
  * documents) the `standard` one. Platform-paid in every case. Owner
  * decisions 2026-10-01: Gemini 3.5 Flash (the previous auditor) failed 15 of
@@ -149,13 +149,12 @@ export interface ManagedLineupModel {
 }
 
 /**
- * The managed writer lineup for a plan: `writer` writes every Cloud and
- * Cloud Pro post (live synthesis, stock batch, Run now, single post) and
- * `failover` takes over live synthesis when the writer fails transiently or
- * times out. Returns `undefined` for every other plan, whose writer stays
- * the campaign's own provider and model. Both plans share one lineup: the
- * model tier is no longer what separates Cloud from Cloud Pro (owner
- * decision 2026-10-01). Spec: `specs/managed-ai-lineup.md` §2.
+ * The managed writer lineup for a plan: `writer` writes every Cloud post
+ * (live synthesis, stock batch, Run now, single post) and `failover` takes
+ * over live synthesis when the writer fails transiently or times out.
+ * Returns `undefined` for every other plan, whose writer stays the
+ * campaign's own provider and model. Owner decision 2026-10-01. Spec:
+ * `specs/managed-ai-lineup.md` §2.
  */
 export function resolveManagedWriterLineup(
   plan: PlanId | "none" | null | undefined,
@@ -184,8 +183,8 @@ export interface ManagedImageModel {
 const MANAGED_IMAGE_FAILOVER_QUALITY = "medium" as const;
 
 /**
- * The managed image binding for a plan: `primary` makes every Cloud and
- * Cloud Pro image (live synthesis, stock batch, regenerate, refresh) and
+ * The managed image binding for a plan: `primary` makes every Cloud
+ * image (live synthesis, stock batch, regenerate, refresh) and
  * `failover` takes over when the primary fails transiently. The campaign's
  * stored image provider, model, tier and fallback are ignored on these
  * plans. Returns `undefined` for every other plan, whose images stay on the
@@ -234,35 +233,14 @@ export function resolveByokTierModelId(
 }
 
 /**
- * Managed-tier → quality tier. The plan owns the tier (the user only picks the
- * provider on Cloud/Cloud Pro): `cloud` → `mid`, `cloud_pro` → `top`.
- *
- * One deliberate exception (spec §4): Cloud Pro **Gemini image** stays on Flash
- * Image (`mid`) rather than Pro Image — flash-image is the recommended default
- * everywhere at ~half the batch cost. This preserves the prior `PLAN_DEFAULTS`
- * pin exactly.
- */
-export function resolveManagedTier(
-  plan: PlanId,
-  capability: ModelRole,
-  provider: AIProvider,
-): ModelTier {
-  const base: ModelTier = plan === "cloud_pro" ? "top" : "mid";
-  if (base === "top" && capability === "image" && provider === "gemini") {
-    return "mid";
-  }
-  return base;
-}
-
-/**
  * The concrete model a managed campaign runs for `(plan, capability, provider)`
- * — replaces the `PLAN_DEFAULTS` pin table. Images derive from the registry
- * tier. Text is the legacy managed mapping, FROZEN pending its own test at
- * the pre-2026-10-01 ids (frozen.ts): it feeds suggestions and social copy
- * on managed plans, and posts there use the managed lineup instead. Returns
- * `undefined` only if the provider carries no model at the resolved tier or
- * its `mid` fallback; managed callers then fall back to the provider's
- * catalog default.
+ * — replaces the `PLAN_DEFAULTS` pin table. Images resolve the registry `mid`
+ * tier (the `top` tier was Cloud Pro's, retired 2026-10-12). Text is the
+ * legacy managed mapping, FROZEN pending its own test at the pre-2026-10-01
+ * ids (frozen.ts): it feeds suggestions and social copy on managed plans,
+ * and posts there use the managed lineup instead. Returns `undefined` only
+ * if the provider carries no `mid` model; managed callers then fall back to
+ * the provider's catalog default.
  */
 export function resolveManagedModelId(
   plan: PlanId,
@@ -270,15 +248,11 @@ export function resolveManagedModelId(
   provider: AIProvider,
 ): string | undefined {
   // BYOK plans (free, byok) carry no managed pin — the user's own model choice
-  // wins. Only Cloud / Cloud Pro resolve a server-owned model here. Returning
-  // undefined lets callers fall through to their provider-default path.
-  if (plan !== "cloud" && plan !== "cloud_pro") return undefined;
-  if (capability === "text") return FROZEN_MANAGED_TEXT_MODELS[plan][provider];
-  const tier = resolveManagedTier(plan, capability, provider);
-  return (
-    getRegistryModelId(provider, capability, tier) ??
-    getRegistryModelId(provider, capability, "mid")
-  );
+  // wins. Only Cloud resolves a server-owned model here. Returning undefined
+  // lets callers fall through to their provider-default path.
+  if (plan !== "cloud") return undefined;
+  if (capability === "text") return FROZEN_MANAGED_TEXT_MODELS.cloud[provider];
+  return getRegistryModelId(provider, capability, "mid");
 }
 
 /**

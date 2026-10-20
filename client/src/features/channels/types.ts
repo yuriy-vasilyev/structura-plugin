@@ -58,7 +58,7 @@ export type ConnectionAddon = "channels";
  * Structura plan identifiers — subset of cloud's `PlanId`, defined here so
  * the client doesn't need to import from `functions/`.
  */
-export type PlanId = "free" | "byok" | "cloud" | "cloud_pro";
+export type PlanId = "free" | "byok" | "cloud";
 
 export type ConnectionStatus = "connected" | "expired" | "revoked" | "error";
 
@@ -565,7 +565,7 @@ export interface VideoQuota {
  * top-level on `channelsListConnections`. Mirrors `VideoTtsAvailability`
  * in `functions/src/channels/endpoints/connections.ts`.
  *
- *   - `managed: true` (cloud / cloud_pro) — renders narrate on platform
+ *   - `managed: true` (cloud) — renders narrate on platform
  *     master keys, so both provider groups are selectable and the picker
  *     shows no gate UI.
  *   - `managed: false` (BYOK) — a provider group is selectable iff the

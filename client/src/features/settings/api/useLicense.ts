@@ -368,8 +368,8 @@ export const useLicense = () => {
   // Once cloud responds, it becomes authoritative.
   const isPaidLicense = cloudStatus
     ? cloudStatus.status === "active" &&
-      ["byok", "cloud", "cloud_pro"].includes(cloudStatus.plan ?? "")
-    : Boolean(license?.is_pro) && ["byok", "cloud", "cloud_pro"].includes(license?.plan ?? "");
+      ["byok", "cloud"].includes(cloudStatus.plan ?? "")
+    : Boolean(license?.is_pro) && ["byok", "cloud"].includes(license?.plan ?? "");
   const isLicensed = plan !== "none";
 
   // See `deriveIsActivationValid` for the decision table. Pulled out as

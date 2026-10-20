@@ -1,7 +1,7 @@
 /**
  * Campaign view Overview — the "AI Providers" row by plan (2026-10-01).
  *
- * Managed plans (Cloud, Cloud Pro) never see a text provider or a model
+ * Managed plans (Cloud) never see a text provider or a model
  * name (specs/managed-ai-lineup.md §3.3), so the row goes there. BYOK
  * keeps the provider icons and the resolved model names.
  */
@@ -81,7 +81,7 @@ describe("OverviewTab — AI Providers row", () => {
   });
 
   it("managed: drops the row, keeps the rest of the configuration", () => {
-    planMock.plan = "cloud_pro";
+    planMock.plan = "cloud";
     renderTab();
     expect(screen.queryByText("AI Providers")).not.toBeInTheDocument();
     expect(screen.queryByText("GPT-X")).not.toBeInTheDocument();

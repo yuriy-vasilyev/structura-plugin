@@ -52,9 +52,10 @@
  *   - `unlock_channels`       — Channels store entry on Free / unentitled
  *     plans. Lets the portal scroll to the Channels-bundled tier card.
  *   - `unlock_video`          — Video channel (Shorts/TikTok renders) is
- *     Cloud Pro-only. Fired from the deep-link gate, the quota-exhausted
- *     "Upgrade for more videos" prompts, and the skipped-quota activity
- *     row so pricing can highlight the Cloud Pro tier.
+ *     included with every Cloud option (Cloud Pro only until 2026-10-12).
+ *     Fired from the deep-link gate, the quota-exhausted "Upgrade for more
+ *     videos" prompts, and the skipped-quota activity row so pricing can
+ *     highlight the Cloud plan.
  *   - `unlock_addon`          — Add-on card (Account page) when the user
  *     isn't entitled. The AddonCard previously hardcoded a `pricingAnchor`
  *     fragment, now passed through alongside the intent.
@@ -194,7 +195,7 @@ export interface MarketingPricingLinkArgs {
    * card it just sold the customer on. Marketing site treats it as
    * a hint, not a constraint.
    */
-  suggest?: "byok" | "cloud" | "cloud_pro";
+  suggest?: "byok" | "cloud";
   /**
    * Optional locale override. When omitted, derived from
    * `document.documentElement.lang` so a German wp-admin lands the

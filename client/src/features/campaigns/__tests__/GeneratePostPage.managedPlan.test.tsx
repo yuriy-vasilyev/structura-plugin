@@ -2,7 +2,7 @@
  * GeneratePostPage — managed plans pick no text provider and send no model
  * (2026-10-01, specs/managed-ai-lineup.md §3.3).
  *
- * Cloud and Cloud Pro write with one AI lineup chosen by Structura. The page
+ * Cloud writes with one AI lineup chosen by Structura. The page
  * hides the text provider picker but keeps the text provider on the form:
  * the plugin's `/post/generate` refuses a request without one and the cloud
  * keeps it for utility calls. The concrete model is never seeded or sent on a
@@ -44,7 +44,7 @@ vi.mock("@/features/settings", () => ({
   useLicense: () => ({
     isPaidLicense: true,
     isLicensed: true,
-    plan: planMock.managed ? "cloud_pro" : "byok",
+    plan: planMock.managed ? "cloud" : "byok",
   }),
   usePublicSiteProfile: () => ({ data: { language: "en-US" }, isLoading: false }),
   useAiConnections: () => {

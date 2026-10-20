@@ -3099,20 +3099,7 @@ class Rest_Api
             // Anonymous installs have a bearer and read the real cloud state
             // below (2026-10-06); answering them from here hid their
             // finished wizard behind "6 steps left".
-            return rest_ensure_response([
-                'state' => [
-                    'currentStep'            => 1,
-                    'completedSteps'         => [],
-                    'skippedSteps'           => [],
-                    'startedAt'              => gmdate('c'),
-                    'completedAt'            => null,
-                    'completedAtPlanId'      => null,
-                    'initiatedFromSurface'   => 'wp-admin',
-                    'lastUpdatedFromSurface' => 'wp-admin',
-                ],
-                'justCreated'                => false,
-                'activationNeedsPositioning' => false,
-            ]);
+            return rest_ensure_response($this->quiet_wizard_state());
         }
         $license = License_Manager::get_license_data();
         $payload = ['licenseKey' => $license['license_key']];
@@ -3121,6 +3108,13 @@ class Rest_Api
             return $result;
         }
         $body = is_array($result['body'] ?? null) ? $result['body'] : [];
+        // A cloud answer without a state (`{"success":false,"error":
+        // "Unauthorized."}` from an install whose activation no longer
+        // exists, 2026-10-19) must not reach the SPA as a 200: the dashboard
+        // read `state.completedAt` and died. Same quiet state as above.
+        if ( ! is_array($body['state'] ?? null)) {
+            return rest_ensure_response($this->quiet_wizard_state());
+        }
         // Self-heal: a workspace that finished the wizard (server-stamped
         // `completedAt`) durably suppresses the auto-redirect even on installs
         // that completed before the local flag shipped, or that completed on
@@ -3129,6 +3123,31 @@ class Rest_Api
             update_option('structura_onboarding_dismissed', '1');
         }
         return rest_ensure_response($body);
+    }
+
+    /**
+     * The wizard state the SPA gets when the cloud cannot answer: step 1,
+     * nothing completed, `justCreated` false so the dashboard never
+     * auto-redirects into the wizard on a read.
+     *
+     * @return array<string,mixed>
+     */
+    private function quiet_wizard_state(): array
+    {
+        return [
+            'state' => [
+                'currentStep'            => 1,
+                'completedSteps'         => [],
+                'skippedSteps'           => [],
+                'startedAt'              => gmdate('c'),
+                'completedAt'            => null,
+                'completedAtPlanId'      => null,
+                'initiatedFromSurface'   => 'wp-admin',
+                'lastUpdatedFromSurface' => 'wp-admin',
+            ],
+            'justCreated'                => false,
+            'activationNeedsPositioning' => false,
+        ];
     }
 
     /**
@@ -3607,6 +3626,7 @@ class Rest_Api
         // Cloud-tier users: utility suggestions (topic chips, campaign strategy,
         // persona, visual style) use our preferred provider silently — the user's
         // chosen default only matters for actual post/image generation.
+        // 'cloud_pro': retired 2026-10-12, accepted for one release window (see License_Manager::get_plan()).
         $is_managed = in_array($plan, ['cloud', 'cloud_pro'], true);
         if ($is_managed) {
             $provider = 'gemini';

@@ -17,7 +17,7 @@ dayjs.extend(relativeTime);
  * Reads `cycleUsage` from `getUsageAnalytics` and renders one of three
  * branches off the discriminator:
  *
- *   - `managed` — Cloud / Cloud Pro: THIS SITE's posts (tokens on a
+ *   - `managed` — Cloud: THIS SITE's posts (tokens on a
  *     cloud deployed before 2026-10-01, which sends no posts fields)
  *     and images against its per-activation cap. Quotas are per activation (the
  *     generation gate hard-blocks each site independently — there is
@@ -62,7 +62,7 @@ export const IntelligenceUsage = () => {
 };
 
 /* ------------------------------------------------------------------ */
-/*  Branch: managed (Cloud / Cloud Pro)                                */
+/*  Branch: managed (Cloud)                                            */
 /* ------------------------------------------------------------------ */
 
 const ManagedCycleCard = ({

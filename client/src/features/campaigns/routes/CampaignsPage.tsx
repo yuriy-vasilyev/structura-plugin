@@ -114,7 +114,7 @@ export const CampaignsPage = () => {
   // longer a hard block here. The "Random persona" option in the
   // generator falls back to a generic voice when zero personas exist.
   //
-  // Engine-ready gate: managed-AI plans (Cloud / Cloud Pro) never need
+  // Engine-ready gate: managed-AI plans (Cloud) never need
   // a user-supplied key — the cloud handles credentials. Every other
   // tier (None / Free / BYOK) needs at least one connected provider.
   // The previous `!isPaidLicense` short-circuit was lying — it claimed
@@ -128,7 +128,7 @@ export const CampaignsPage = () => {
 
   // Per-activation campaign cap. Sourced from `useLicense` which
   // already resolved cloud heartbeat → PHP cache → tier fallback;
-  // `null` = unlimited (Cloud, Cloud Pro, or any paid plan whose
+  // `null` = unlimited (Cloud, or any paid plan whose
   // Stripe product omits the `max_campaigns` metadata). A finite cap
   // drives the "X of Y" chip and disables the "New Campaign" CTA
   // at-cap. We count against the full campaigns list (including

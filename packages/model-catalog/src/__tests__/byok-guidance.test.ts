@@ -40,9 +40,6 @@ describe("frozen bindings (pinned at their pre-refresh ids)", () => {
     expect(resolveManagedModelId("cloud", "text", "openai")).toBe("gpt-5.4-mini");
     expect(resolveManagedModelId("cloud", "text", "gemini")).toBe("gemini-3.5-flash");
     expect(resolveManagedModelId("cloud", "text", "anthropic")).toBe("claude-sonnet-5");
-    expect(resolveManagedModelId("cloud_pro", "text", "openai")).toBe("gpt-5.2-2025-12-11");
-    expect(resolveManagedModelId("cloud_pro", "text", "gemini")).toBe("gemini-3.1-pro-preview");
-    expect(resolveManagedModelId("cloud_pro", "text", "anthropic")).toBe("claude-opus-4-8");
     for (const plan of ["free", "byok"] as const) {
       for (const p of PROVIDERS) expect(resolveManagedModelId(plan, "text", p)).toBeUndefined();
     }
@@ -65,8 +62,8 @@ describe("frozen bindings (pinned at their pre-refresh ids)", () => {
     expect(resolveUtilityModelId("openai")).toBe("gpt-5-nano-2025-08-07");
     expect(resolveUtilityModelId("gemini")).toBe("gemini-3.1-flash-lite");
     expect(resolveUtilityModelId("anthropic")).toBe("claude-haiku-4-5-20251001");
-    expect(resolveManagedModelId("cloud_pro", "image", "gemini")).toBe("gemini-3.1-flash-image");
-    expect(resolveManagedModelId("cloud_pro", "image", "openai")).toBe("gpt-image-2");
+    expect(resolveManagedModelId("cloud", "image", "gemini")).toBe("gemini-3.1-flash-image");
+    expect(resolveManagedModelId("cloud", "image", "openai")).toBe("gpt-image-1-mini");
     expect(getDefaultModel("openai", "image")).toBe("gpt-image-1-mini");
   });
 });
@@ -214,7 +211,6 @@ describe("adviceFor", () => {
     expect(adviceFor(ctx({ provider: "openai", connected: ["openai"] }))).toBeNull();
     expect(adviceFor(ctx({ provider: "anthropic", connected: ["anthropic"] }))).toBeNull();
     expect(adviceFor(ctx({ plan: "cloud" }))).toBeNull();
-    expect(adviceFor(ctx({ plan: "cloud_pro" }))).toBeNull();
   });
 
   // 2026-10-06 (specs/open-providers.md): every own-key plan, anonymous

@@ -193,7 +193,7 @@ export const milestoneOrderForFlow = (flow: CampaignRunFlow | undefined): Milest
  *     validator runs over nothing and ticks off in <100ms — same
  *     misleading-vs-reality problem as research.
  *
- * Pro / BYOK / Cloud / Cloud Pro keep both milestones; the actual work
+ * Pro / BYOK / Cloud keep both milestones; the actual work
  * runs there.
  */
 const FREE_TIER_HIDDEN_MILESTONES: Set<Milestone> = new Set([

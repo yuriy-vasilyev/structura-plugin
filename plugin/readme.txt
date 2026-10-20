@@ -62,10 +62,10 @@ get a free license:
   generation, the full 20+ point SEO protocol, scheduled campaigns,
   channel fan-out, and
   authority-link verification.
-* **Cloud / Cloud Pro** (paid) — Structura provisions the AI provider
-  for you, with one bill from Structura instead of separate provider
-  charges. Cloud Pro adds more posts and images per site and AI video
-  generation (Shorts/TikTok/Reels). See
+* **Cloud** (paid) — Structura provisions the AI provider for you,
+  with one bill from Structura instead of separate provider charges.
+  You pick the posts per site per month (30 or 100); images and AI
+  video generation (Shorts/TikTok/Reels) scale with it. See
   [structurawp.com/pricing](https://www.structurawp.com/pricing) for
   details.
 

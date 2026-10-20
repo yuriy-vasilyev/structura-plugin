@@ -85,13 +85,13 @@ describe("useLicense plan auto-sync (2026-10-06 /license/sync storm)", () => {
     renderHook(() => useLicense(), { wrapper });
     await waitFor(() => expect(syncCalls()).toHaveLength(1));
 
-    state.cloudPlan = "cloud_pro";
+    state.cloudPlan = "byok";
     await client.invalidateQueries({ queryKey: ["license-cloud-verify"] });
-    await waitFor(() => expect(result.current.cloudStatus?.plan).toBe("cloud_pro"));
+    await waitFor(() => expect(result.current.cloudStatus?.plan).toBe("byok"));
     await new Promise((r) => setTimeout(r, 30));
 
     expect(syncCalls()).toHaveLength(2);
-    expect(syncCalls()[1][0].data).toEqual({ plan: "cloud_pro" });
+    expect(syncCalls()[1][0].data).toEqual({ plan: "byok" });
   });
 
   it("does not sync when the stored plan already matches the cloud", async () => {

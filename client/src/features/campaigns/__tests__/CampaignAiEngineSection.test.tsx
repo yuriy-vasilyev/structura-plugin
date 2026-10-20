@@ -371,7 +371,7 @@ describe("<CampaignAiEngineSection> fallback controls on managed plans (2026-10-
   it("managed: no image provider or fallback, no footnote, stored image fields not cleared", () => {
     const updateForm = vi.fn();
     connectedMock.text = [];
-    useLicenseMock.mockReturnValue({ isLicensed: true, plan: "cloud_pro", isPaidLicense: true });
+    useLicenseMock.mockReturnValue({ isLicensed: true, plan: "cloud", isPaidLicense: true });
     useDefaultProvidersMock.mockReturnValue({ isCloud: true, isProviderIncomplete: () => false });
     useAiSettingsQueryMock.mockReturnValue({ data: { providers: {} } });
     useCampaignFormMock.mockReturnValue({

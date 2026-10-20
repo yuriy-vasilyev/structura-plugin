@@ -77,8 +77,6 @@ const tierLabel = (tier: string): string => {
       return __("Pro", "structura");
     case "cloud":
       return __("Cloud", "structura");
-    case "cloud_pro":
-      return __("Agency", "structura");
     default:
       return tier;
   }

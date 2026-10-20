@@ -22,15 +22,14 @@ export const FROZEN_SUGGESTION_TEXT_MODELS: Readonly<Record<AIProvider, string>>
 
 /**
  * The legacy managed text mapping (plan × stored provider) used by
- * suggestions and social copy on Cloud and Cloud Pro. Cloud was the `mid`
- * tier, Cloud Pro the `top` tier. FROZEN pending its own test: social copy
- * runs under a 30 s deadline with `max_tokens: 1024`, which Sonnet 5.5's
- * adaptive thinking would not fit.
+ * suggestions and social copy on Cloud, the `mid` tier. The Cloud Pro
+ * (`top`) row went with the plan id on 2026-10-12. FROZEN pending its own
+ * test: social copy runs under a 30 s deadline with `max_tokens: 1024`,
+ * which Sonnet 5.5's adaptive thinking would not fit.
  */
-export const FROZEN_MANAGED_TEXT_MODELS: Readonly<Record<"cloud" | "cloud_pro", Readonly<Record<AIProvider, string>>>> =
+export const FROZEN_MANAGED_TEXT_MODELS: Readonly<Record<"cloud", Readonly<Record<AIProvider, string>>>> =
   Object.freeze({
     cloud: Object.freeze({ openai: "gpt-5.4-mini", gemini: "gemini-3.5-flash", anthropic: "claude-sonnet-5" }),
-    cloud_pro: Object.freeze({ openai: "gpt-5.2-2025-12-11", gemini: "gemini-3.1-pro-preview", anthropic: "claude-opus-4-8" }),
   });
 
 /**

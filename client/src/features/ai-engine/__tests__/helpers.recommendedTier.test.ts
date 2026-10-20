@@ -59,7 +59,7 @@ describe("resolveDefaultTier", () => {
 describe("planHasImageGeneration", () => {
   it("is false on anonymous (`none`) and true on every other plan", () => {
     expect(planHasImageGeneration("none")).toBe(false);
-    for (const plan of ["free", "byok", "cloud", "cloud_pro"]) expect(planHasImageGeneration(plan)).toBe(true);
+    for (const plan of ["free", "byok", "cloud"]) expect(planHasImageGeneration(plan)).toBe(true);
   });
 });
 

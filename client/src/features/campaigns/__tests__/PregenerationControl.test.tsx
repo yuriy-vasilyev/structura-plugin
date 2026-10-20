@@ -32,10 +32,10 @@ vi.mock("@/features/settings", () => ({
 import { PregenerationControl } from "../components/PregenerationControl";
 
 function setPlan(plan: string) {
-  // `isPaidLicense` mirrors the real hook: paid for byok / cloud /
-  // cloud_pro, false for free / none. The component reads both fields,
+  // `isPaidLicense` mirrors the real hook: paid for byok / cloud,
+  // false for free / none. The component reads both fields,
   // so they must move together.
-  const paid = ["byok", "cloud", "cloud_pro"].includes(plan);
+  const paid = ["byok", "cloud"].includes(plan);
   useLicenseMock.mockReturnValue({ plan, isPaidLicense: paid });
 }
 
@@ -96,13 +96,6 @@ describe("<PregenerationControl> — managed-tier banner branch", () => {
     expect(screen.getByText(/Run Now still generates fresh on demand/i)).toBeInTheDocument();
     // Critically — no role=switch in this branch. Managed-tier users
     // can't opt out; the banner just explains the behavior.
-    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
-  });
-
-  it("renders the banner for agency tier (no toggle)", () => {
-    setPlan("cloud_pro");
-    render(<PregenerationControl enabled onChange={() => undefined} />);
-    expect(screen.getByText(/Instant publishes are on/i)).toBeInTheDocument();
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();
   });
 

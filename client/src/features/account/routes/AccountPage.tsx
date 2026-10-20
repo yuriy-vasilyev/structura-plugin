@@ -17,11 +17,33 @@ import { Badge, Button, Card, Checkbox, cn, ConfirmDialog, InputField, Tooltip }
 import { useLicense } from "@/features/settings";
 import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
 import { formatPlanName } from "@/utils/planLabel";
+import {
+  selectOwnActivationUsage,
+  useUsageAnalytics,
+  type CycleUsageView,
+} from "@/features/dashboard/api/useUsageAnalytics";
 import { PageContainer } from "@/components/Layout/PageContainer";
 import { AddonsSection } from "../components/AddonsSection";
 import { WorkspaceMembershipCard } from "../components/WorkspaceMembershipCard";
 import { docsUrl } from "@/utils/docsUrl";
 import { type PlanId } from "@structura/types";
+
+/**
+ * Returns this site's Cloud posts per month, as the license sets it, from the
+ * cycle-usage view the dashboard already reads. Null until it loads, off a
+ * managed plan, or on a cloud older than the posts quota (2026-10-01).
+ */
+export function cloudPostsPerSite(cycle: CycleUsageView | null | undefined): number | null {
+  if (!cycle || cycle.kind !== "managed") return null;
+  // Every site on a license shares its cap, so any row answers when this
+  // site's row cannot be matched (plugin builds without `activation_id`).
+  const row =
+    selectOwnActivationUsage(
+      cycle,
+      typeof window !== "undefined" ? window.structuraConfig?.activation_id : undefined
+    ) ?? cycle.activations[0];
+  return typeof row?.postsIncluded === "number" ? row.postsIncluded : null;
+}
 
 export const Account = () => {
   const {
@@ -35,6 +57,12 @@ export const Account = () => {
     deactivate,
     processing,
   } = useLicense();
+
+  // One Cloud card for every volume option since 2026-10-12; the posts
+  // number comes from the license, not the plan id.
+  const isCloud = (plan as PlanId) === "cloud";
+  const { data: usageData } = useUsageAnalytics();
+  const cloudPosts = isCloud ? cloudPostsPerSite(usageData?.cycleUsage) : null;
 
   const [licenseKeyInput, setLicenseKeyInput] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -82,47 +110,25 @@ export const Account = () => {
       theme:
         "text-violet-600 bg-violet-50 ring-violet-100 dark:text-violet-400 dark:bg-violet-950/30 dark:ring-violet-900/50",
     },
-    // Cloud Pro: the larger managed plan (more posts and images per site,
-    // AI video, bundled Channels, dedicated support). Since 2026-10-01 both
-    // managed plans share one AI lineup, so the model is no longer the
-    // difference (specs/managed-ai-lineup.md §5). Uses amber to distinguish
-    // from Cloud's violet in the dashboard — see specs/design-guide.md on
-    // premium-tier accents.
-    cloud_pro: {
-      title: __("Cloud Pro Architect", "structura"),
-      desc: __(
-        "More posts and images per site, AI video, bundled Channels distribution and a dedicated support channel.",
-        "structura"
-      ),
-      icon: <Award className="h-7 w-7" />,
-      theme:
-        "text-amber-600 bg-amber-50 ring-amber-100 dark:text-amber-400 dark:bg-amber-950/30 dark:ring-amber-900/50",
-    },
   };
 
   // We branch on `plan` directly (same source the License Activation badge
   // and the nav use) rather than on `isPaidLicense`. `isPaidLicense` also
-  // requires a successful cloud heartbeat, so for Cloud Pro / Cloud sites
+  // requires a successful cloud heartbeat, so for Cloud sites
   // where the heartbeat hasn't resolved yet — or where the locally stored
   // `license.is_pro` flag is stale after a recent upgrade — the hero would
   // otherwise flash the free-tier "Registered Architect" copy while the
   // badge already says the paid tier. Using `plan` keeps every surface on
   // the account page telling the same story.
-  const paidPlan =
-    (plan as PlanId) === "cloud_pro" ||
-    (plan as PlanId) === "cloud" ||
-    (plan as PlanId) === "byok";
+  const paidPlan = (plan as PlanId) === "cloud" || (plan as PlanId) === "byok";
 
-  const currentStatus =
-    (plan as PlanId) === "cloud_pro"
-      ? statusConfig.cloud_pro
-      : (plan as PlanId) === "cloud"
-        ? statusConfig.cloud
-        : (plan as PlanId) === "byok"
-          ? statusConfig.pro
-          : isLicensed
-            ? statusConfig.free
-            : statusConfig.none;
+  const currentStatus = isCloud
+    ? statusConfig.cloud
+    : (plan as PlanId) === "byok"
+      ? statusConfig.pro
+      : isLicensed
+        ? statusConfig.free
+        : statusConfig.none;
 
   return (
     <>
@@ -191,9 +197,8 @@ export const Account = () => {
 
             {/* Visual Progress Bar (Micro-interaction)
                 Two-segment journey: connect → upgrade. The second segment
-                is tinted to match the current paid tier so Agency users see
-                amber (not brand-blue) and Cloud users see violet, mirroring
-                the hero card's tier accent. Keyed off `plan` — same source
+                is tinted to match the current paid tier (violet for Cloud,
+                brand-blue for BYOK), mirroring the hero card's tier accent. Keyed off `plan` — same source
                 as the hero copy — so the two never disagree while the cloud
                 heartbeat is in flight. */}
             <div className="flex items-center gap-3 px-1">
@@ -207,13 +212,11 @@ export const Account = () => {
               <div
                 className={cn(
                   "h-2 flex-[1.5] rounded-full transition-colors duration-500",
-                  (plan as PlanId) === "cloud_pro"
-                    ? "bg-amber-500"
-                    : (plan as PlanId) === "cloud"
-                      ? "bg-violet-500"
-                      : (plan as PlanId) === "byok"
-                        ? "bg-brand-500"
-                        : "bg-gray-200 dark:bg-neutral-800"
+                  isCloud
+                    ? "bg-violet-500"
+                    : (plan as PlanId) === "byok"
+                      ? "bg-brand-500"
+                      : "bg-gray-200 dark:bg-neutral-800"
                 )}
               />
             </div>
@@ -310,7 +313,7 @@ export const Account = () => {
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-3">
                     <Badge variant="solid" intent="success">
-                      {formatPlanName(plan)}
+                      {formatPlanName(plan, cloudPosts)}
                     </Badge>
                     {cloudStatus?.valid && (
                       <Tooltip title={__("Cloud Connection Verified", "structura")}>

@@ -21,7 +21,7 @@ import { __, sprintf } from "@wordpress/i18n";
  * The friendly copy below names the provider, hints at the cause, and
  * points at the "switch providers" escape hatch.
  *
- * Managed plans (Cloud / Cloud Pro) get the same branches without the
+ * Managed plans (Cloud) get the same branches without the
  * provider name or the "switch provider / check your key" advice: their
  * customers never see a provider and have no key or provider to change
  * (specs/managed-ai-lineup.md §3.3, 2026-10-01).

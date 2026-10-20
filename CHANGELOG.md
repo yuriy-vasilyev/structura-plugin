@@ -1,5 +1,57 @@
 # Changelog
 
+## [2.33.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.32.0...v2.33.0) (2026-10-20)
+
+
+### Features
+
+* **billing:** count delivered images on the cycle usage map ([4251355](https://github.com/yuriy-vasilyev/structura-core/commit/4251355c2bd357848ce85809a0954c693fdd3b2e))
+* **billing:** sell Cloud volumes as prices of one plan and stamp caps from the price ([57498cc](https://github.com/yuriy-vasilyev/structura-core/commit/57498cccf3b5bad1b74292e4e05293aeaea575a2))
+* **functions:** adopt a pending WordPress space and merge a blocked claim ([b6f4f4d](https://github.com/yuriy-vasilyev/structura-core/commit/b6f4f4dd50914b5118a7bcafcd2a66d7e4612303))
+* **functions:** guess a site's platform and record its builder ([d429e0a](https://github.com/yuriy-vasilyev/structura-core/commit/d429e0a43932e754a537b5c3cce4f3bae9336d8b))
+* **functions:** site platform, pending WordPress spaces and the portal finish ([a891864](https://github.com/yuriy-vasilyev/structura-core/commit/a891864e31712d13f7231a215707f93ebcc34ba1))
+* **tools:** link the free tools' results to the new Learn pages ([3bd0a20](https://github.com/yuriy-vasilyev/structura-core/commit/3bd0a20828cc072712d72c769b6e86c1490fe794))
+* **ui:** draw real platform and surface marks ([5f4895a](https://github.com/yuriy-vasilyev/structura-core/commit/5f4895a8bdfcf0dfd50c7cfcefef08ac0200b590))
+* **ui:** marks for every site platform, a disabled stepper step, described-by on inputs ([00b071c](https://github.com/yuriy-vasilyev/structura-core/commit/00b071c88cf588752cec4a33ed89c748042b1c46))
+* upload author photos instead of pasting a photo URL ([650669f](https://github.com/yuriy-vasilyev/structura-core/commit/650669f0f34e316ca845bea40446e6524a6e75cb))
+* **web:** connect a site from its address ([f5f3fd7](https://github.com/yuriy-vasilyev/structura-core/commit/f5f3fd711b34bb16c66a6242f93fdccc7dc18fc7))
+* **web:** connect the site as the last setup wizard step ([b133ad6](https://github.com/yuriy-vasilyev/structura-core/commit/b133ad6b2e5b92e8d3796994599e066556df2f5c))
+* **web:** explain the photo and profile page fields in the author form ([0030ccb](https://github.com/yuriy-vasilyev/structura-core/commit/0030ccb32d34159f91d2f03816ebdcaf567343fc))
+* **web:** give workspace authors their own page and show personas and authors as cards ([336d802](https://github.com/yuriy-vasilyev/structura-core/commit/336d8029d03ca805ba4ff151acbb1d2d8c83c372))
+* **web:** license key on the workspace home and platform status in site lists ([82b952f](https://github.com/yuriy-vasilyev/structura-core/commit/82b952f0942390d5b6b62477127b717e9a0994ed))
+* **web:** one setup wizard for every platform ([bb725fd](https://github.com/yuriy-vasilyev/structura-core/commit/bb725fd798e6a98042f33ee88c71289ee67e2ee2))
+* **web:** pick the Cloud posts-per-site volume on the pricing page ([ef90e61](https://github.com/yuriy-vasilyev/structura-core/commit/ef90e61e9debe28397fbb3f56ef1f7d14cb5e708))
+* **web:** product updates email opt-in ([154b157](https://github.com/yuriy-vasilyev/structura-core/commit/154b1576ab93a7f9e42a6027f58b6e90aeeb053a))
+* **web:** show the detected platform as one card, with the picker behind Change platform ([14819e8](https://github.com/yuriy-vasilyev/structura-core/commit/14819e8895dc78d8baa644ab0bc6327534b74354))
+* **www:** add a format to Learn pages, a by-format strip on the hub and a fuller Learn footer column ([255001b](https://github.com/yuriy-vasilyev/structura-core/commit/255001bc825bb485c37798d3d196678970d75968))
+* **www:** add an IndexNow key file and a submit script ([f6dba41](https://github.com/yuriy-vasilyev/structura-core/commit/f6dba41a803f18a1685763842f101a65640495df))
+* **www:** credit the post's author on blog posts and drop the API's duplicate BlogPosting ([89f945a](https://github.com/yuriy-vasilyev/structura-core/commit/89f945a9f206bb2f218b2f369b8e77eb00f38518))
+* **www:** move the backlinks-needed post into the Learn hub ([6e4a4a8](https://github.com/yuriy-vasilyev/structura-core/commit/6e4a4a86689d7c872a07ee42d8f1aa4be8c8fc7c))
+* **www:** one Cloud plan with a volume selector across the site, docs and plugin copy ([f8ebb97](https://github.com/yuriy-vasilyev/structura-core/commit/f8ebb973ac95ed4150f263fa3facf46b9e5b5991))
+* **www:** publish 12 more Learn pages (wave 3) ([86d56da](https://github.com/yuriy-vasilyev/structura-core/commit/86d56da3856a9003de85089fc4b9a4d532d20c05))
+* **www:** publish 16 Learn pages and extend 12 existing ones ([f9e84ee](https://github.com/yuriy-vasilyev/structura-core/commit/f9e84eef17ecc5278e3412dd4e25ee79889bcb4d))
+* **www:** publish 18 more Learn pages (wave 2) ([d4ace5e](https://github.com/yuriy-vasilyev/structura-core/commit/d4ace5e751877e8222d7d84d687554b59105f975))
+* **www:** tint the plan-choice band on the pricing page ([a2ee3b9](https://github.com/yuriy-vasilyev/structura-core/commit/a2ee3b973123c80d438d9b915bbc115c74a5bbe1))
+
+
+### Bug Fixes
+
+* **billing:** acknowledge subscription webhooks for a deleted user instead of retrying ([16db624](https://github.com/yuriy-vasilyev/structura-core/commit/16db62461ce12c77ae430d7fa4d5ce36f2afaab4))
+* **docs:** serve sitemap.xml and robots.txt past the locale middleware ([84fe4c9](https://github.com/yuriy-vasilyev/structura-core/commit/84fe4c9acb335328488c92448671745331b788ea))
+* **functions:** adopt a pending WordPress space ahead of reviving a disconnected activation ([071c23b](https://github.com/yuriy-vasilyev/structura-core/commit/071c23b34d60ac518f5fc5fdd9ccfe30763197cb))
+* **headless:** run headlessReadPosts at 512 MiB ([614b77d](https://github.com/yuriy-vasilyev/structura-core/commit/614b77d2cc12fd3ff327b246827bc1999414046b))
+* **plugin:** never hand the wp-admin dashboard a wizard state without a state ([7072234](https://github.com/yuriy-vasilyev/structura-core/commit/707223451e31db2c8003f3b71b211280c0aa2b08))
+* **web:** align onboarding copy across locales ([64b6a42](https://github.com/yuriy-vasilyev/structura-core/commit/64b6a42386e9a5f304e86e8979bef724936b75d4))
+* **web:** let the site check outlast a cold start ([f8689d0](https://github.com/yuriy-vasilyev/structura-core/commit/f8689d0ce908955f1936b4ad2b98e96e85331135))
+* **web:** noindex every portal route except /login and /signup for crawlers that skip JS ([7d0ce16](https://github.com/yuriy-vasilyev/structura-core/commit/7d0ce16757ccac2d0aaf3c49e67aba5fcd2cb9ed))
+* **web:** run Update on a live post without the publish confirmation ([aa91549](https://github.com/yuriy-vasilyev/structura-core/commit/aa9154945aecf4fbbc67dadb09f9960d3c6e3e96))
+* **web:** show the author's photo in the persona author picker and on the site persona card ([961d195](https://github.com/yuriy-vasilyev/structura-core/commit/961d195dcf0c170ba23f82d7831bb95ef04e814d))
+* **web:** the Persona step says Continue while Connect is still ahead ([1e1c96e](https://github.com/yuriy-vasilyev/structura-core/commit/1e1c96e74fed859df800665d03150768f4de9219))
+* **www:** leave retired blog posts out of the sitemap ([9928e82](https://github.com/yuriy-vasilyev/structura-core/commit/9928e828eee0af2bd8e4e3002c6cabd4f89fe259))
+* **www:** move the footer's Learn links into a full-width band ([3e6d5f5](https://github.com/yuriy-vasilyev/structura-core/commit/3e6d5f549c5df07095ab8198a3e98bdf0f266eb6))
+* **www:** run the free AI detector on its heuristics only ([7ade9ee](https://github.com/yuriy-vasilyev/structura-core/commit/7ade9ee3d500e0afe5393a268b42d251db30b4c0))
+* **www:** stop caching a blog backend failure as a post 404 ([918efe2](https://github.com/yuriy-vasilyev/structura-core/commit/918efe2621557038a44c0fe2b389af3baa24b78f))
+
 ## [2.32.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.31.0...v2.32.0) (2026-10-11)
 
 

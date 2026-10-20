@@ -3,10 +3,13 @@
  *
  *   - First-run empty state on Activity (video connected, nothing rendered
  *     yet): tinted video tile, "on its way" copy, Configure CTA.
- *   - Deep-link upgrade gate for non-Cloud-Pro users landing on a video
+ *   - Deep-link upgrade gate for users without video landing on a video
  *     connection URL: lock tile, explainer, "Upgrade plan" primary routed
  *     to the marketing pricing page with the NEW `unlock_video` intent,
  *     transparent "Back to Store".
+ *
+ * 2026-10-12 (specs/cloud-volume-pricing.md): video comes with every Cloud
+ * option, so the gate names Cloud, never the retired Cloud Pro.
  */
 
 import { describe, expect, it, vi } from "vitest";
@@ -55,8 +58,9 @@ describe("VideoUpgradeGate", () => {
     renderWithRouter(<VideoUpgradeGate />);
 
     expect(
-      screen.getByText("Video is a Cloud Pro feature"),
+      screen.getByText("Video is included with Cloud"),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/Cloud Pro/)).toBeNull();
 
     const upgrade = screen.getByRole("link", { name: /upgrade plan/i });
     const href = new URL(upgrade.getAttribute("href") ?? "");

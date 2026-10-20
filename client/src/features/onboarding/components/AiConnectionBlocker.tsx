@@ -8,7 +8,7 @@
  *   - BYOK: surface the provider's error verbatim with a "Try
  *     again" button. The user fixes their key in the existing
  *     ProviderSetupWizard dialog (opened separately) and retests.
- *   - Managed (cloud / cloud_pro): managed tier means OUR master
+ *   - Managed (cloud): managed tier means OUR master
  *     key broke or the provider is degraded — both are ops issues
  *     the user can't fix. One-button "Notify support" posts a
  *     structured email with auto-attached context (workspace,

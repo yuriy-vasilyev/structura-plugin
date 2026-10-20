@@ -478,7 +478,7 @@ describe("VisualsPage OpenAI aspect-ratio hint by plan (2026-10-06)", () => {
 
   it("managed: no OpenAI hint at 16:9 whatever the stored image provider", () => {
     cloudMock.isCloud = true;
-    licenseMock.mockReturnValue({ plan: "cloud_pro", isPaidLicense: true });
+    licenseMock.mockReturnValue({ plan: "cloud", isPaidLicense: true });
     renderPage();
     expect(screen.queryByText(HINT)).toBeNull();
   });

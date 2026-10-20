@@ -160,7 +160,7 @@ export function VideoPresetSection({
             <h4 className="m-0! text-sm font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
               {__("Video", "structura")}
             </h4>
-            <Badge intent="premium">{__("Cloud Pro", "structura")}</Badge>
+            <Badge intent="premium">{__("Cloud", "structura")}</Badge>
           </div>
           <p className="m-0! mt-0.5! text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
             {__(
@@ -252,7 +252,8 @@ export function VideoPresetSection({
 /**
  * Locked teaser for plans without the Video channel — same gate
  * vocabulary as the channel's deep-link gate (`unlock_video` intent so
- * pricing highlights Cloud Pro and analytics attribute the surface).
+ * pricing highlights the Cloud plan, which includes video on every option
+ * since 2026-10-12, and analytics attribute the surface).
  * Gated fields are neither rendered nor fetched behind this row.
  */
 export function VideoStylingGateTeaser({ plan }: { plan?: string }) {
@@ -263,7 +264,7 @@ export function VideoStylingGateTeaser({ plan }: { plan?: string }) {
     <SectionGateTeaser
       // The primitive resets WordPress's <p> margins itself since 2026-10-06.
       title={__("Video styling", "structura")}
-      badge={__("Cloud Pro", "structura")}
+      badge={__("Cloud", "structura")}
       line={__(
         "Style presets, caption placement and brand-palette captions for every rendered video.",
         "structura",

@@ -175,8 +175,8 @@ export const MODELS: readonly CatalogModel[] = [
     pricing: { pricedAt: "2026-10-01", inputUsdPerMTok: 0.2, outputUsdPerMTok: 1.2, batchInputUsdPerMTok: 0.1, batchOutputUsdPerMTok: 0.6, longContext: { inputUsdPerMTok: 0.4, outputUsdPerMTok: 1.8, batchInputUsdPerMTok: 0.2, batchOutputUsdPerMTok: 0.9 } },
     manifest: { family: "chat", endpoint: "v1/chat/completions" },
   },
-  // Image — strict mid + top (see header). gpt-image-1-mini is the Cloud-tier
-  // mid; gpt-image-2 is the Agency / Cloud Pro top.
+  // Image — strict mid + top (see header). gpt-image-1-mini is the mid,
+  // gpt-image-2 the top.
   {
     id: "gpt-image-1-mini",
     name: "GPT Image 1 Mini",
@@ -323,7 +323,7 @@ export const MODELS: readonly CatalogModel[] = [
     role: "image",
     tier: "mid",
     default: true,
-    // Every Cloud and Cloud Pro image (owner decision 2026-10-06, blind
+    // Every Cloud image (owner decision 2026-10-06, blind
     // image test 2026-10-05: 126 images, three judges and the owner's ranking).
     managedImage: "primary",
     manifest: {
@@ -376,7 +376,7 @@ export const MODELS: readonly CatalogModel[] = [
     // provider's default for a BYOK post that stores no model.
     tier: "mid",
     default: true,
-    // Managed writer (Cloud and Cloud Pro, live and stock), owner decision 2026-10-01.
+    // Managed writer (Cloud, live and stock), owner decision 2026-10-01.
     managedWriter: "primary",
     // The managed writer runs through the stock batch path, so the batch
     // cost estimator needs its price.
@@ -397,7 +397,7 @@ export const MODELS: readonly CatalogModel[] = [
     batchInputUsdPerMTok: 2,
     // Low reasoning setting accepted (probed 2026-10-01).
     lowEffort: true,
-    // Grounding auditor (Cloud and Cloud Pro), owner decisions 2026-10-01.
+    // Grounding auditor (Cloud), owner decisions 2026-10-01.
     auditor: "premium",
     // 64,000: within every current Claude model's output maximum (Anthropic answers 400 above a model's maximum).
     maxOutputTokens: 64000,

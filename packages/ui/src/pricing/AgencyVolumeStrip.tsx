@@ -1,14 +1,15 @@
-import { FC } from "react";
+import { FC, useId } from "react";
+import { ArrowUpRight } from "lucide-react";
 import type { Currency } from "./CurrencyToggle";
 
 /**
- * One bracket of Agency volume pricing. `null` prices on a tier render the
- * "contact" CTA in place of a number (used for the custom-bracket).
+ * One bracket of graduated per-site pricing. `null` prices on a tier render
+ * the "contact" CTA in place of a number (used for the custom bracket).
  */
 export interface AgencyVolumeTier {
   /** Stable id for React keys and label lookups (e.g. "tier1", "tier4"). */
   id: string;
-  /** Pre-resolved label for the "Sites" column (e.g. "1–4 sites"). */
+  /** Pre-resolved bracket label (e.g. "Sites 1–4", "25+ sites"). */
   rangeLabel: string;
   /** Per-site/month prices, billed annually / monthly respectively. */
   usdYearly: number | null;
@@ -20,31 +21,36 @@ export interface AgencyVolumeTier {
 export interface AgencyVolumeStripLabels {
   /** Eyebrow above the title, e.g. "Volume pricing". */
   eyebrow: string;
-  /** Section title, e.g. "Per-site rate drops as your portfolio grows". */
+  /** Title, e.g. "Cloud". */
   title: string;
-  /** Column headers. */
-  colSites: string;
-  colYearly: string;
-  colMonthly: string;
-  /** Suffix after each price, e.g. "per site/mo". */
-  perSiteSlashMonth: string;
+  /** Muted detail after the title, e.g. "30 posts". Absent → title only. */
+  titleDetail?: string;
+  /**
+   * Unit line for the interval being shown, e.g. "Per site / month" or
+   * "Per site / month · billed yearly". The caller resolves it per interval.
+   */
+  unit: string;
   /** CTA in the custom bracket, e.g. "Contact sales". */
   contactCta: string;
-  /** Caption beneath the table. */
+  /** Caption beneath the brackets. */
   caption: string;
 }
 
 export interface AgencyVolumeStripProps {
   currency: Currency;
+  /**
+   * Billing interval the strip shows. Yearly brackets are monthly
+   * equivalents (yearly total ÷ 12), matching the plan card above.
+   */
+  interval: "month" | "year";
   tiers: ReadonlyArray<AgencyVolumeTier>;
   labels: AgencyVolumeStripLabels;
   /** Mailto/href used by the custom-bracket "Contact sales" link. */
   contactHref: string;
   /**
-   * When set (e.g. `0.6` for the founding offer), each priced row shows the
-   * struck base rate next to the discounted `base × multiplier` rate in the
-   * gold accent. Absent → plain base rates, so the app portal — which never
-   * passes this — renders unchanged.
+   * When set (e.g. `0.6` for the founding offer), each priced bracket shows
+   * the struck base rate next to the discounted `base × multiplier` rate in
+   * the gold accent. Absent → plain base rates.
    */
   foundingMultiplier?: number;
 }
@@ -61,185 +67,111 @@ const fmtDiscount = (amount: number, multiplier: number, currency: Currency): st
 };
 
 /**
- * Volume-pricing breakdown rendered beneath the Agency tier card. The first
- * bracket matches the headline price on the card; the lower brackets show
- * the per-site discount as the portfolio grows. The `null`-priced bracket
- * (custom) routes to sales because we don't expose per-seat pricing publicly
- * for very large agencies.
+ * Graduated per-site pricing for one Cloud option at one billing interval,
+ * rendered beneath the plan cards. The brackets are graduated: each rate
+ * applies to the sites inside its bracket, so they are labelled as site
+ * ranges rather than as a price every site moves to. The `null`-priced
+ * bracket (25+ sites) routes to sales.
+ *
+ * One horizontal row of brackets on wide screens, two columns on phones, no
+ * scrolling (specs/cloud-volume-pricing-design.md "Volume pricing",
+ * 2026-10-12). Until then the strip was a two-interval table per plan.
  *
  * Spec: pricing-v2-implementation.md §8.1.
  */
 export const AgencyVolumeStrip: FC<AgencyVolumeStripProps> = ({
   currency,
+  interval,
   tiers,
   labels,
   contactHref,
   foundingMultiplier,
-}) => (
-  <section
-    aria-labelledby="agency-volume-title"
-    className="mx-auto mt-16 w-full max-w-5xl rounded-3xl border border-neutral-200 bg-white p-8 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:ring-1 dark:ring-white/[0.04]"
-  >
-    <h3
-      id="agency-volume-title"
-      className="mb-2 text-sm font-bold tracking-widest text-brand-600 uppercase dark:text-brand-400"
+}) => {
+  const titleId = useId();
+  return (
+    <section
+      aria-labelledby={titleId}
+      className="mx-auto mt-10 w-full max-w-6xl rounded-2xl border border-neutral-200 bg-white p-5 shadow-raised sm:p-6 dark:border-neutral-800 dark:bg-neutral-900 dark:ring-1 dark:ring-white/[0.04]"
     >
-      {labels.eyebrow}
-    </h3>
-    <h4 className="mb-6 text-2xl font-bold text-neutral-900 dark:text-white">
-      {labels.title}
-    </h4>
-
-    {/* Mobile (< sm): each tier is a card with the bracket label on top
-        and Yearly/Monthly stacked as definition pairs. The 3-column
-        table version crams "1 – 4 sites" into two lines on a 390-430px
-        viewport and the "Contact sales for custom pricing" CTA wraps
-        awkwardly — the card layout fixes both. */}
-    <div className="flex flex-col gap-3 sm:hidden">
-      {tiers.map((tier) => {
-        const yearly = currency === "eur" ? tier.eurYearly : tier.usdYearly;
-        const monthly = currency === "eur" ? tier.eurMonthly : tier.usdMonthly;
-        const isCustomBracket = yearly === null;
-
-        return (
-          <div
-            key={tier.id}
-            className="flex flex-col gap-3 rounded-2xl border border-neutral-200 p-4 dark:border-neutral-800/60"
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+        <div>
+          {/* The eyebrow is the heading and the title a paragraph: the www
+              house pattern for shared pricing blocks (since 2026-09-26). */}
+          <h3
+            id={titleId}
+            className="text-xs font-bold tracking-widest text-brand-700 uppercase dark:text-brand-300"
           >
-            <p className="text-sm font-bold text-neutral-900 dark:text-white">
-              {tier.rangeLabel}
-            </p>
-            {isCustomBracket ? (
-              <a
-                href={contactHref}
-                className="self-start text-sm font-bold text-brand-600 hover:underline dark:text-brand-400"
-              >
-                {labels.contactCta}
-              </a>
-            ) : (
-              <dl className="flex flex-col gap-2 text-sm">
-                <div className="flex items-baseline justify-between gap-3">
-                  <dt className="text-xs font-bold tracking-wider text-neutral-500 uppercase">
-                    {labels.colYearly}
-                  </dt>
-                  <dd className="text-right text-neutral-700 dark:text-neutral-200">
-                    {foundingMultiplier ? (
-                      <>
-                        <span className="mr-1.5 text-neutral-400 line-through decoration-red-500 decoration-2">
-                          {fmt(yearly!, currency)}
-                        </span>
-                        <span className="font-bold text-gold-700 dark:text-gold-300">
-                          {fmtDiscount(yearly!, foundingMultiplier, currency)}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="font-bold">{fmt(yearly!, currency)}</span>
-                    )}{" "}
-                    <span className="text-neutral-500">
-                      {labels.perSiteSlashMonth}
-                    </span>
-                  </dd>
-                </div>
-                <div className="flex items-baseline justify-between gap-3">
-                  <dt className="text-xs font-bold tracking-wider text-neutral-500 uppercase">
-                    {labels.colMonthly}
-                  </dt>
-                  <dd className="text-right text-neutral-500">
-                    {foundingMultiplier ? (
-                      <>
-                        <span className="mr-1.5 line-through decoration-red-500 decoration-2">
-                          {fmt(monthly!, currency)}
-                        </span>
-                        <span className="font-bold text-gold-700 dark:text-gold-300">
-                          {fmtDiscount(monthly!, foundingMultiplier, currency)}
-                        </span>
-                      </>
-                    ) : (
-                      fmt(monthly!, currency)
-                    )}{" "}
-                    {labels.perSiteSlashMonth}
-                  </dd>
-                </div>
-              </dl>
+            {labels.eyebrow}
+          </h3>
+          <p className="mt-2 text-lg font-bold tracking-tight text-neutral-900 dark:text-white">
+            {labels.title}
+            {labels.titleDetail && (
+              <span className="font-medium text-neutral-600 dark:text-neutral-300">
+                {" · "}
+                {labels.titleDetail}
+              </span>
             )}
-          </div>
-        );
-      })}
-    </div>
+          </p>
+        </div>
+        <p className="text-xs text-neutral-600 dark:text-neutral-400">{labels.unit}</p>
+      </div>
 
-    {/* Desktop (sm+): the original 3-column table. Hidden on mobile in
-        favour of the stacked cards above. */}
-    <div className="hidden overflow-x-auto sm:block">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-neutral-200 text-left text-xs font-bold tracking-wider text-neutral-500 uppercase dark:border-neutral-800">
-            <th className="py-3 pr-4">{labels.colSites}</th>
-            <th className="py-3 pr-4">{labels.colYearly}</th>
-            <th className="py-3">{labels.colMonthly}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tiers.map((tier) => {
-            const yearly = currency === "eur" ? tier.eurYearly : tier.usdYearly;
-            const monthly = currency === "eur" ? tier.eurMonthly : tier.usdMonthly;
-            const isCustomBracket = yearly === null;
-
-            return (
-              <tr
-                key={tier.id}
-                className="border-b border-neutral-100 last:border-0 dark:border-neutral-800/60"
-              >
-                <td className="py-4 pr-4 font-bold text-neutral-900 dark:text-white">
-                  {tier.rangeLabel}
-                </td>
-                <td className="py-4 pr-4 text-neutral-700 dark:text-neutral-200">
-                  {isCustomBracket ? (
-                    <a
-                      href={contactHref}
-                      className="font-bold text-brand-600 hover:underline dark:text-brand-400"
-                    >
-                      {labels.contactCta}
-                    </a>
-                  ) : (
-                    <span>
-                      {foundingMultiplier ? (
-                        <>
-                          <span className="mr-1.5 text-neutral-400 line-through decoration-red-500 decoration-2">
-                            {fmt(yearly!, currency)}
-                          </span>
-                          <span className="font-bold text-gold-700 dark:text-gold-300">
-                            {fmtDiscount(yearly!, foundingMultiplier, currency)}
-                          </span>
-                        </>
-                      ) : (
-                        <span className="font-bold">{fmt(yearly!, currency)}</span>
-                      )}
-                      <span className="text-neutral-500"> {labels.perSiteSlashMonth}</span>
+      <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-4">
+        {tiers.map((tier, i) => {
+          const amount =
+            interval === "year"
+              ? currency === "eur"
+                ? tier.eurYearly
+                : tier.usdYearly
+              : currency === "eur"
+                ? tier.eurMonthly
+                : tier.usdMonthly;
+          return (
+            <div
+              key={tier.id}
+              // A rule between brackets on wide screens; on the two-column
+              // phone grid only the right-hand column carries one.
+              className={
+                i === 0
+                  ? "flex flex-col gap-2"
+                  : i % 2 === 1
+                    ? "flex flex-col gap-2 border-l border-neutral-200 pl-4 dark:border-neutral-700"
+                    : "flex flex-col gap-2 sm:border-l sm:border-neutral-200 sm:pl-4 sm:dark:border-neutral-700"
+              }
+            >
+              <dt className="text-xs text-neutral-600 dark:text-neutral-400">{tier.rangeLabel}</dt>
+              <dd>
+                {amount === null ? (
+                  <a
+                    href={contactHref}
+                    className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand-700 hover:underline sm:min-h-7 dark:text-brand-300"
+                  >
+                    {labels.contactCta}
+                    <ArrowUpRight aria-hidden="true" className="size-4 shrink-0" />
+                  </a>
+                ) : foundingMultiplier ? (
+                  <span className="flex flex-wrap items-baseline gap-x-1.5">
+                    <s className="text-sm text-neutral-500 decoration-red-500 decoration-2 dark:text-neutral-400">
+                      {fmt(amount, currency)}
+                    </s>
+                    <span className="text-xl font-bold tabular-nums text-gold-700 dark:text-gold-300">
+                      {fmtDiscount(amount, foundingMultiplier, currency)}
                     </span>
-                  )}
-                </td>
-                <td className="py-4 text-neutral-500">
-                  {isCustomBracket ? null : foundingMultiplier ? (
-                    <span>
-                      <span className="mr-1.5 line-through decoration-red-500 decoration-2">
-                        {fmt(monthly!, currency)}
-                      </span>
-                      <span className="font-bold text-gold-700 dark:text-gold-300">
-                        {fmtDiscount(monthly!, foundingMultiplier, currency)}
-                      </span>{" "}
-                      {labels.perSiteSlashMonth}
-                    </span>
-                  ) : (
-                    `${fmt(monthly!, currency)} ${labels.perSiteSlashMonth}`
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+                  </span>
+                ) : (
+                  <span className="text-xl font-bold tabular-nums text-neutral-900 dark:text-white">
+                    {fmt(amount, currency)}
+                  </span>
+                )}
+              </dd>
+            </div>
+          );
+        })}
+      </dl>
 
-    <p className="mt-6 text-xs leading-relaxed text-neutral-500">{labels.caption}</p>
-  </section>
-);
+      <p className="mt-5 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+        {labels.caption}
+      </p>
+    </section>
+  );
+};

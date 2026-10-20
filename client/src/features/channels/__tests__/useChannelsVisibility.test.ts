@@ -9,12 +9,12 @@
  * elsewhere to pin the loading short-circuit.
  *
  * Pinned behaviours:
- *   1. Paid plans (byok / cloud / cloud_pro) gate on the
+ *   1. Paid plans (byok / cloud) gate on the
  *      `entitlements.channels` bit. The Stripe webhook writes it for
  *      BOTH agency-bundled plans AND individual add-on purchases, so
  *      one check covers both grids.
  *   2. The previous "agency always granted" carve-out for
- *      `plan === "cloud_pro"` was wrong — `cloud_pro` exists on both
+ *      `plan === "cloud_pro"` was wrong — `cloud_pro` existed on both
  *      individual and agency grids, and the old behaviour leaked the
  *      Channels nav to individual `cloud_pro` users without the
  *      add-on. The catalog endpoint would then bounce every install as
@@ -48,21 +48,6 @@ describe("hasChannelsAccess — plan × entitlement gate", () => {
 
     it("Cloud without the entitlement is denied", () => {
       expect(hasChannelsAccess("cloud", false)).toBe(false);
-    });
-
-    it("Cloud Pro with the entitlement is granted (both individual + agency grids)", () => {
-      // Agency-bundled cloud_pro has the webhook-written entitlement;
-      // individual cloud_pro with the add-on SKU has it too — same bit,
-      // same decision.
-      expect(hasChannelsAccess("cloud_pro", true)).toBe(true);
-    });
-
-    it("Cloud Pro without the entitlement is denied (regression: pre-fix this returned true)", () => {
-      // Pre-fix bug: `plan === "cloud_pro" → true` unconditionally on
-      // the (incorrect) assumption that cloud_pro was always agency.
-      // Individual cloud_pro users without the channels add-on now
-      // correctly see the nav hidden until they purchase the add-on.
-      expect(hasChannelsAccess("cloud_pro", false)).toBe(false);
     });
   });
 

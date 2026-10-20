@@ -1,6 +1,6 @@
 "use client";
 
-import { type FC, type FormEvent, type ReactNode, useEffect, useState } from "react";
+import { type FC, type FormEvent, type ReactNode, useEffect, useId, useState } from "react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -81,6 +81,8 @@ export interface LearnCopy {
   howToFix: string;
   /** Screen-reader note on a link that opens a new tab. */
   newTab: string;
+  /** Label of a row of reference links under a report: the hub's name. */
+  rowLabel: string;
   /** Title per Learn page: the label of a reference link. */
   pages: Record<LearnSlug, string>;
 }
@@ -614,13 +616,59 @@ export const MetricTile: FC<{
 );
 
 /**
+ * The look of a Learn link, ungated: {@link LearnLink} for the tool
+ * destinations, and www's AI detector and humanizer for their own pages.
+ * With `newTab` it opens a new tab and says so to screen readers. `py-1
+ * -my-1` gives a 24px hit area without moving the line (WCAG 2.5.8).
+ */
+export const LearnAnchor: FC<{
+  href: string;
+  /** The page's slug, on `data-learn` for tests. */
+  slug: string;
+  label: string;
+  /** The screen-reader note when the link opens a new tab; absent, it stays in the tab. */
+  newTab?: string;
+  /** Size and weight of the link text. */
+  textClassName?: string;
+  /** Id of what the link is about, e.g. the task a "How to fix" fixes. */
+  describedBy?: string;
+  /** Called when a reader follows the link, for the surface's analytics. */
+  onFollow?: () => void;
+}> = ({ href, slug, label, newTab, textClassName = "text-xs font-semibold", describedBy, onFollow }) => (
+  <a
+    href={href}
+    target={newTab ? "_blank" : undefined}
+    rel={newTab ? "noopener" : undefined}
+    aria-describedby={describedBy}
+    data-learn={slug}
+    onClick={onFollow}
+    className={`group/learn -my-1 inline-flex max-w-full items-start gap-1.5 rounded-md py-1 leading-4 text-brand-700 underline-offset-2 hover:underline dark:text-brand-300 ${FOCUS_GLOW} ${textClassName}`}
+  >
+    <BookOpen className="mt-px size-3.5 shrink-0" strokeWidth={2.25} aria-hidden="true" />
+    <span className="min-w-0">{label}</span>
+    {newTab ? (
+      <>
+        <ExternalLink className="mt-0.5 size-3 shrink-0" strokeWidth={2.5} aria-hidden="true" />
+        {/* The leading space keeps the name "Intent (opens…)" where no style separates the parts. */}
+        <span className="sr-only"> {newTab}</span>
+      </>
+    ) : (
+      <ArrowRight
+        className="mt-0.5 size-3 shrink-0 transition-transform duration-fast group-hover/learn:translate-x-0.5 motion-reduce:transition-none"
+        strokeWidth={2.5}
+        aria-hidden="true"
+      />
+    )}
+  </a>
+);
+
+/**
  * A link to a Learn page. Action links pass a `label` ("How to improve",
  * "How to fix"); reference links read the page's title. It renders nothing,
  * or `fallback`, unless the surface lists the page as published, and
  * `className` goes on a wrapper that exists only with the link, so a gated
  * link leaves no gap. On www it stays in the tab; in the portal it opens www
- * in a new tab and says so to screen readers. `py-1 -my-1` gives a 24px hit
- * area without moving the line (WCAG 2.5.8).
+ * in a new tab.
  */
 export const LearnLink: FC<{
   target: LearnTarget;
@@ -636,36 +684,48 @@ export const LearnLink: FC<{
   describedBy?: string;
   /** Shown instead while the page is not published. */
   fallback?: ReactNode;
-}> = ({ target, copy, slug, label, className, textClassName = "text-xs font-semibold", describedBy, fallback = null }) => {
+}> = ({ target, copy, slug, label, className, textClassName, describedBy, fallback = null }) => {
   if (!target.published.has(slug)) return <>{fallback}</>;
   const link = (
-    <a
+    <LearnAnchor
       href={`${target.base}/${slug}`}
-      target={target.newTab ? "_blank" : undefined}
-      rel={target.newTab ? "noopener" : undefined}
-      aria-describedby={describedBy}
-      data-learn={slug}
-      onClick={target.onFollow && (() => target.onFollow?.(slug))}
-      className={`group/learn -my-1 inline-flex max-w-full items-start gap-1.5 rounded-md py-1 leading-4 text-brand-700 underline-offset-2 hover:underline dark:text-brand-300 ${FOCUS_GLOW} ${textClassName}`}
-    >
-      <BookOpen className="mt-px size-3.5 shrink-0" strokeWidth={2.25} aria-hidden="true" />
-      <span className="min-w-0">{label ?? copy.pages[slug]}</span>
-      {target.newTab ? (
-        <>
-          <ExternalLink className="mt-0.5 size-3 shrink-0" strokeWidth={2.5} aria-hidden="true" />
-          {/* The leading space keeps the name "Intent (opens…)" where no style separates the parts. */}
-          <span className="sr-only"> {copy.newTab}</span>
-        </>
-      ) : (
-        <ArrowRight
-          className="mt-0.5 size-3 shrink-0 transition-transform duration-fast group-hover/learn:translate-x-0.5 motion-reduce:transition-none"
-          strokeWidth={2.5}
-          aria-hidden="true"
-        />
-      )}
-    </a>
+      slug={slug}
+      label={label ?? copy.pages[slug]}
+      newTab={target.newTab ? copy.newTab : undefined}
+      textClassName={textClassName}
+      describedBy={describedBy}
+      onFollow={target.onFollow && (() => target.onFollow?.(slug))}
+    />
   );
   return className ? <div className={className}>{link}</div> : link;
+};
+
+/**
+ * A labelled row of Learn links under a result, e.g. "Learn: Long-tail vs
+ * short-tail keywords". The caller passes only links that render, and no row
+ * when there are none, so the label never stands alone.
+ */
+export const LearnRow: FC<{ label: string; links: ReactNode[]; testId?: string; className?: string }> = ({
+  label,
+  links,
+  testId,
+  className = "",
+}) => {
+  const labelId = useId();
+  return (
+    <div data-testid={testId} className={`flex flex-wrap items-center gap-x-4 gap-y-2 ${className}`}>
+      <p id={labelId} className="text-[11px] font-bold uppercase tracking-wider text-neutral-700 dark:text-neutral-200">
+        {label}
+      </p>
+      <ul aria-labelledby={labelId} className="flex min-w-0 flex-wrap gap-x-4 gap-y-2">
+        {links.map((link, i) => (
+          <li key={i} className="min-w-0">
+            {link}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 };
 
 /** A closed-by-default explainer under a report: "How these bands work", "How to read these numbers". */

@@ -86,7 +86,7 @@ export const ChannelsConnectionsPage = () => {
 
   // Deep-link gate (video): a `?configure=` link targeting a video
   // connection while the caller's plan no longer includes the channel
-  // (installed on Cloud Pro, then downgraded). Instead of a settings
+  // (installed on Cloud, then downgraded). Instead of a settings
   // modal for something that can't render, show the upgrade gate
   // (handoff §4) with the `unlock_video` pricing intent.
   const [showVideoGate, setShowVideoGate] = useState(false);
