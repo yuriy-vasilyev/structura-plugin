@@ -15,7 +15,7 @@ import { buildPortalSignupUrl } from "@/utils/portalLinks";
  *   - `none` (anonymous, wp.org install) — "create your free account",
  *     the first rung: register to unlock featured images, the full block
  *     library, and multi-site activation.
- *   - `free` (registered Free license) — capability-unlock Pro upsell.
+ *   - `free` (registered Free license) — capability-unlock upgrade upsell.
  *     This is the warmest lead (already signed up, actively publishing)
  *     and otherwise sees no upgrade prompt on the dashboard at all.
  *
@@ -45,13 +45,13 @@ export const UpgradeCard: FC = () => {
         cta: __("Get Free License", "structura"),
       }
     : {
-        eyebrow: __("Go Pro", "structura"),
+        eyebrow: __("Upgrade", "structura"),
         title: __("Unlock the full engine", "structura"),
         body: __(
           "The 20-point SEO protocol, live SERP research, Keyword Bank & authority links — on every post.",
           "structura"
         ),
-        cta: __("See Pro plans", "structura"),
+        cta: __("See plans", "structura"),
       };
 
   const href = buildPortalSignupUrl({

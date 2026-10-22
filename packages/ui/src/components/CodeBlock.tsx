@@ -6,13 +6,19 @@ import { Button } from "./Button";
 export interface CodeBlockProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
   /**
-   * The string the block displays and copies. Rendered verbatim in
-   * a monospace face — no escaping or syntax highlighting, on the
-   * theory that everything we surface here (license keys, slugs,
-   * IDs, REST URLs) is meant to round-trip through clipboard
+   * The string the block displays and, unless `copyValue` is set, copies.
+   * Rendered verbatim in a monospace face — no escaping or syntax
+   * highlighting, on the theory that everything we surface here (license
+   * keys, slugs, IDs, REST URLs) is meant to round-trip through clipboard
    * unmodified.
    */
   value: string;
+  /**
+   * What the copy button writes instead of `value`, when the clipboard
+   * needs another shape than the display (text shown hard-wrapped but
+   * copied unwrapped, for example). Defaults to `value`.
+   */
+  copyValue?: string;
   /**
    * Visual size. `sm` for inline placement next to body copy
    * (default), `md` for stand-alone "here is the thing to copy"
@@ -98,6 +104,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
   (
     {
       value,
+      copyValue,
       size = "sm",
       copyLabel = "Copy",
       copiedLabel = "Copied!",
@@ -126,7 +133,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
 
     const handleCopy = React.useCallback(() => {
       if (!navigator.clipboard) return;
-      void navigator.clipboard.writeText(value).then(
+      void navigator.clipboard.writeText(copyValue ?? value).then(
         () => {
           setCopied(true);
           onCopied?.();
@@ -136,7 +143,7 @@ export const CodeBlock = React.forwardRef<HTMLDivElement, CodeBlockProps>(
         // A refused write leaves the idle label; the value stays selectable.
         () => undefined,
       );
-    }, [value, resetMs, onCopied]);
+    }, [value, copyValue, resetMs, onCopied]);
 
     if (title != null) {
       // A focusable scroller is only needed when the body can actually

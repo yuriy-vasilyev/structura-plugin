@@ -85,7 +85,9 @@ export const ERROR_KEYS = {
   },
   billing: {
     noBillingProfile: "billing.noBillingProfile",
-    portalSessionFailed: "billing.portalSessionFailed",
+    // Edit billing details: no details-only portal configuration is set
+    // (specs/in-portal-billing-design.md §5).
+    detailsSessionUnavailable: "billing.detailsSessionUnavailable",
     // Add-on assignment deep-link funnel (spec §11.4).
     addonIdRequired: "billing.addonIdRequired",
     addonUnknown: "billing.addonUnknown",

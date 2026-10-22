@@ -140,6 +140,40 @@ describe("buildPortalSignupUrl — returnTo", () => {
   });
 });
 
+// The Account page's billing buttons (specs/in-portal-billing-design.md §6).
+describe("buildPortalSignupUrl — billing intents from the Account page", () => {
+  const RETURN_TO = "https://example.com/wp-admin/admin.php?page=structura#/account";
+
+  it.each(["change_volume", "fix_payment"] as const)(
+    "builds %s with the site, plan, return URL and workspace",
+    (intent) => {
+      const url = new URL(
+        buildPortalSignupUrl({
+          intent,
+          domain: "example.com",
+          plan: "cloud",
+          returnTo: RETURN_TO,
+          workspaceId: "ws-1",
+        }),
+      );
+      expect(url.origin + url.pathname).toBe("https://app.structurawp.com/");
+      expect(Object.fromEntries(url.searchParams)).toEqual({
+        intent,
+        source: "plugin",
+        domain: "example.com",
+        plan: "cloud",
+        returnTo: RETURN_TO,
+        workspaceId: "ws-1",
+      });
+    },
+  );
+
+  it("omits workspaceId until the heartbeat names the workspace", () => {
+    const url = buildPortalSignupUrl({ intent: "fix_payment", plan: "cloud" });
+    expect(new URL(url).searchParams.has("workspaceId")).toBe(false);
+  });
+});
+
 describe("buildMarketingPricingUrl — returnTo + anchor", () => {
   it("emits returnTo before the anchor fragment", () => {
     const url = buildMarketingPricingUrl({

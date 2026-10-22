@@ -3,7 +3,8 @@
  *
  * We pin:
  *   - `none` renders the "create your free account" variant
- *   - `free` renders the capability-unlock Pro variant
+ *   - `free` renders the capability-unlock upgrade variant, without the
+ *     retired "Pro" plan name (2026-10-21)
  *   - both CTAs deep-link to the portal with the `general_upgrade`
  *     intent and carry the originating plan
  *   - the card self-hides while the license tier is still resolving so a
@@ -43,12 +44,13 @@ describe("UpgradeCard — none (anonymous) tier", () => {
 });
 
 describe("UpgradeCard — free tier", () => {
-  it("renders the capability-unlock Pro variant and a general_upgrade CTA", () => {
+  it("renders the capability-unlock upgrade variant and a general_upgrade CTA", () => {
     useLicenseMock.mockReturnValue({ plan: "free", loading: false });
 
     const { container } = render(<UpgradeCard />);
 
-    expect(screen.getByText("Go Pro")).toBeTruthy();
+    expect(screen.getByText("Upgrade")).toBeTruthy();
+    expect(screen.queryByText(/\bPro\b/)).toBeNull();
     expect(screen.getByText("Unlock the full engine")).toBeTruthy();
     // Capability angle: name the engine features Free can't reach.
     expect(screen.getByText(/SEO protocol/)).toBeTruthy();
@@ -56,7 +58,7 @@ describe("UpgradeCard — free tier", () => {
     // paid-tier IntelligenceUsage card that shares the slot.
     expect(container.querySelector(".border-l-purple-500")).toBeTruthy();
 
-    const cta = screen.getByRole("link", { name: /See Pro plans/ });
+    const cta = screen.getByRole("link", { name: /See plans/ });
     const href = cta.getAttribute("href") ?? "";
     expect(href).toContain("intent=general_upgrade");
     expect(href).toContain("plan=free");

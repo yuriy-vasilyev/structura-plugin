@@ -51,6 +51,24 @@ describe("CodeBlock panel layout (title)", () => {
     expect(screen.getByRole("button", { name: "Copied" })).toBeInTheDocument();
   });
 
+  // 2026-10-21: a builder prompt is shown hard-wrapped, but Lovable's chat box
+  // kept those breaks when it was pasted, so the clipboard gets other text.
+  it("shows value but copies copyValue when it is given", async () => {
+    const unwrapped = PROMPT.replace("\n", " ");
+    render(
+      <CodeBlock value={PROMPT} copyValue={unwrapped} title="Prompt" copyLabel="Copy prompt" />
+    );
+    expect(document.querySelector("pre")?.textContent).toBe(PROMPT);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Copy prompt" }));
+      await Promise.resolve();
+    });
+
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText).toHaveBeenCalledWith(unwrapped);
+  });
+
   it("returns to the idle label after resetMs", async () => {
     vi.useFakeTimers();
     render(

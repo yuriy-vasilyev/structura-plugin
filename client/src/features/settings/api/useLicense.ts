@@ -452,7 +452,8 @@ export const useLicense = () => {
         data: { key },
       }),
     onSuccess: () => {
-      successToast(__("Pro features unlocked!", "structura"));
+      // Free keys activate here too, so no paid-plan claim (Pro retired 2026-10-12).
+      successToast(__("License activated.", "structura"));
       invalidate();
     },
   });
@@ -598,7 +599,8 @@ export const useLicense = () => {
 
       const message = !isLicensed
         ? __("Register for a Free Account to unlock %s", "structura")
-        : __("Upgrade to Pro to unlock %s", "structura");
+        : /* translators: %s: name of the locked feature. */
+          __("Upgrade to unlock %s", "structura");
 
       return {
         disabled: !hasAccess,

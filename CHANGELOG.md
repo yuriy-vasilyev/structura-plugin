@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.34.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.33.0...v2.34.0) (2026-10-22)
+
+
+### Features
+
+* **billing:** native subscription management callables ([23e4c49](https://github.com/yuriy-vasilyev/structura-core/commit/23e4c490d1e61b9aed0e50c1010aada249c451ab))
+* **channels:** record HTTP status and latency on article deliveries ([12f3697](https://github.com/yuriy-vasilyev/structura-core/commit/12f369766da67bbee68a7875603269b9b9df6c5a))
+* **client:** Account page shows the real plan, usage and billing links ([a6a1b45](https://github.com/yuriy-vasilyev/structura-core/commit/a6a1b4598095ec7ff7651f3d13f8e9c1166cd9d0))
+* let owners edit a headless site's blog URL pattern ([954b4b3](https://github.com/yuriy-vasilyev/structura-core/commit/954b4b333c2628565ee13d3ccf971fe856ebfd2d))
+* offer a post status on headless one-off runs ([1f60176](https://github.com/yuriy-vasilyev/structura-core/commit/1f601760050b0634657b6353be953306c935ce09))
+* **web:** manage the subscription in the portal instead of Stripe's ([f0029ee](https://github.com/yuriy-vasilyev/structura-core/commit/f0029ee3efdc818f382b97499a7e9c17c6ba584d))
+* **web:** replace the cycle usage card on Billing with a one-row strip ([b2bc6ca](https://github.com/yuriy-vasilyev/structura-core/commit/b2bc6cad0e38938873d4875589a015ae3ffa61f6))
+* **web:** say lifetime code instead of AppSumo and show lifetime licences as such ([d5edf79](https://github.com/yuriy-vasilyev/structura-core/commit/d5edf79eac6eda0108cab651d8525fc8226c42b6))
+* **web:** show the Article delivery state on builder sites' overview ([8334d48](https://github.com/yuriy-vasilyev/structura-core/commit/8334d48e480d06977bfbdd8be2b8d15c62713b40))
+
+
+### Bug Fixes
+
+* **billing:** report a change as syncing only while its confirm's expectation is unmet ([a276504](https://github.com/yuriy-vasilyev/structura-core/commit/a2765045561ad52d03a6a0e47a648020d58695d1))
+* **builder-prompts:** insist on every JSON-LD entry and copy the prompt unwrapped ([303d359](https://github.com/yuriy-vasilyev/structura-core/commit/303d35972d57b660b90be42211e4a458f7f07509))
+* **functions:** default builder sites to /blog/%postname% so delivered canonicals resolve ([18cf755](https://github.com/yuriy-vasilyev/structura-core/commit/18cf7552e8771b96f48aba717557c30cc715e366))
+* **web:** describe Lovable's receiver as a route inside the site ([11e1ab3](https://github.com/yuriy-vasilyev/structura-core/commit/11e1ab399d4c36336087b2050865e83994458979))
+
 ## [2.33.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.32.0...v2.33.0) (2026-10-20)
 
 

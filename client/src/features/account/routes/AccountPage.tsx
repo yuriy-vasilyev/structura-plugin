@@ -1,32 +1,54 @@
-import { useState } from "react";
-import { __ } from "@wordpress/i18n";
+import { useId, useState } from "react";
+import { __, _n, sprintf } from "@wordpress/i18n";
 import {
-  Activity,
-  ArrowRight,
-  Award,
+  AlertCircle,
   BookOpen,
   ExternalLink,
   Key,
   MessageSquare,
   ShieldCheck,
-  UserCircle,
   Users,
   Zap,
 } from "lucide-react";
-import { Badge, Button, Card, Checkbox, cn, ConfirmDialog, InputField, Tooltip } from "@structura/ui";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  ConfirmDialog,
+  InputField,
+  ProgressBar,
+  Skeleton,
+  Tooltip,
+} from "@structura/ui";
 import { useLicense } from "@/features/settings";
-import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
+import {
+  buildMarketingPricingUrl,
+  buildPortalSignupUrl,
+  type PortalIntent,
+} from "@/utils/portalLinks";
 import { formatPlanName } from "@/utils/planLabel";
 import {
+  managedPostsUsage,
   selectOwnActivationUsage,
   useUsageAnalytics,
   type CycleUsageView,
+  type ManagedActivationUsage,
 } from "@/features/dashboard/api/useUsageAnalytics";
+import { resolveIntlLocale } from "@/features/channels/components/SearchPerformanceSection";
 import { PageContainer } from "@/components/Layout/PageContainer";
 import { AddonsSection } from "../components/AddonsSection";
 import { WorkspaceMembershipCard } from "../components/WorkspaceMembershipCard";
 import { docsUrl } from "@/utils/docsUrl";
 import { type PlanId } from "@structura/types";
+
+type ManagedCycle = Extract<CycleUsageView, { kind: "managed" }>;
+
+/** Returns the activation id the plugin config names, when it does. */
+function ownActivationId(): string | undefined {
+  return typeof window !== "undefined" ? window.structuraConfig?.activation_id : undefined;
+}
 
 /**
  * Returns this site's Cloud posts per month, as the license sets it, from the
@@ -37,22 +59,160 @@ export function cloudPostsPerSite(cycle: CycleUsageView | null | undefined): num
   if (!cycle || cycle.kind !== "managed") return null;
   // Every site on a license shares its cap, so any row answers when this
   // site's row cannot be matched (plugin builds without `activation_id`).
-  const row =
-    selectOwnActivationUsage(
-      cycle,
-      typeof window !== "undefined" ? window.structuraConfig?.activation_id : undefined
-    ) ?? cycle.activations[0];
+  const row = selectOwnActivationUsage(cycle, ownActivationId()) ?? cycle.activations[0];
   return typeof row?.postsIncluded === "number" ? row.postsIncluded : null;
 }
+
+/**
+ * Returns this site's row of the managed cycle view. Null when the row
+ * cannot be matched on a workspace with several sites, where another
+ * site's numbers would read as this site's.
+ */
+export function ownManagedUsage(cycle: ManagedCycle): ManagedActivationUsage | null {
+  return (
+    selectOwnActivationUsage(cycle, ownActivationId()) ??
+    (cycle.activations.length === 1 ? cycle.activations[0] : null)
+  );
+}
+
+/** Returns the reset date in the admin's language, in UTC like the monthly allowance. */
+function formatResetDate(ms: number): string {
+  return new Intl.DateTimeFormat(resolveIntlLocale(), {
+    dateStyle: "medium",
+    timeZone: "UTC",
+  }).format(new Date(ms));
+}
+
+/** One allowance as a caption over a bar that the caption names. */
+const UsageMeter = ({ used, total, label }: { used: number; total: number; label: string }) => {
+  const labelId = useId();
+  return (
+    <div className="min-w-0">
+      <p id={labelId} className="m-0! text-xs font-semibold text-gray-700 dark:text-gray-200">
+        {label}
+      </p>
+      <ProgressBar
+        value={used}
+        max={total}
+        intent={used >= total ? "warning" : "brand"}
+        aria-labelledby={labelId}
+        className="mt-1.5"
+      />
+    </div>
+  );
+};
+
+/** "Resets Nov 1, 2026 · UTC" under the usage. */
+const ResetLine = ({ at }: { at: number }) => (
+  <p className="mt-4! mb-0! text-xs text-gray-500 dark:text-gray-400">
+    {sprintf(
+      /* translators: %s: date this site's monthly allowance resets, e.g. "Nov 1, 2026". */
+      __("Resets %s · UTC", "structura"),
+      formatResetDate(at)
+    )}
+  </p>
+);
+
+/**
+ * This site's usage this month (specs/in-portal-billing-design.md §6): posts
+ * and images against the allowance on Cloud, counts on BYOK. Loading and
+ * unreadable usage say so instead of showing a zero. The cycle view sends no
+ * video counts, so video is not shown here.
+ */
+const SiteUsage = ({ usage }: { usage: ReturnType<typeof useUsageAnalytics> }) => {
+  if (usage.isLoading) {
+    return (
+      <div role="status" className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <span className="sr-only">{__("Loading this month's usage…", "structura")}</span>
+        <Skeleton className="h-8" />
+        <Skeleton className="h-8" />
+      </div>
+    );
+  }
+  const cycle = usage.data?.cycleUsage ?? null;
+  if (cycle?.kind === "managed") {
+    const row = ownManagedUsage(cycle);
+    const posts = row ? managedPostsUsage(row) : null;
+    if (row && posts) {
+      return (
+        <div className="mt-6">
+          <div
+            role="group"
+            aria-label={__("This month's usage", "structura")}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+          >
+            <UsageMeter
+              used={posts.postsUsed}
+              total={posts.postsIncluded}
+              label={sprintf(
+                /* translators: 1: posts delivered to this site this month, 2: posts included per month. */
+                _n("%1$d of %2$d post delivered", "%1$d of %2$d posts delivered", posts.postsIncluded, "structura"),
+                posts.postsUsed,
+                posts.postsIncluded
+              )}
+            />
+            {row.imagesIncluded > 0 && (
+              <UsageMeter
+                used={row.imagesUsed}
+                total={row.imagesIncluded}
+                label={sprintf(
+                  /* translators: 1: images delivered to this site this month, 2: images included per month. */
+                  _n("%1$d of %2$d image", "%1$d of %2$d images", row.imagesIncluded, "structura"),
+                  row.imagesUsed,
+                  row.imagesIncluded
+                )}
+              />
+            )}
+          </div>
+          <ResetLine at={cycle.cycleResetsAt} />
+        </div>
+      );
+    }
+  }
+  if (cycle?.kind === "byok") {
+    return (
+      <div className="mt-6">
+        <div
+          role="group"
+          aria-label={__("This month's usage", "structura")}
+          className="grid grid-cols-1 gap-2 text-xs font-semibold text-gray-700 sm:grid-cols-3 dark:text-gray-200"
+        >
+          <p className="m-0!">
+            {sprintf(
+              /* translators: %d: posts delivered to this site this month. */
+              _n("%d post delivered this month", "%d posts delivered this month", cycle.postsUsed, "structura"),
+              cycle.postsUsed
+            )}
+          </p>
+          <p className="m-0!">
+            {sprintf(
+              /* translators: %d: images delivered to this site this month. */
+              _n("%d image this month", "%d images this month", cycle.imagesUsed, "structura"),
+              cycle.imagesUsed
+            )}
+          </p>
+        </div>
+        <ResetLine at={cycle.cycleResetsAt} />
+      </div>
+    );
+  }
+  return (
+    <p className="mt-6! mb-0! text-sm text-gray-500 dark:text-gray-400">
+      {__("This month's usage is not available right now.", "structura")}
+    </p>
+  );
+};
 
 export const Account = () => {
   const {
     isLicensed,
     plan,
+    status,
     license,
     cloudStatus,
     entitlements,
     graceperiods,
+    workspace,
     activate,
     deactivate,
     processing,
@@ -61,74 +221,54 @@ export const Account = () => {
   // One Cloud card for every volume option since 2026-10-12; the posts
   // number comes from the license, not the plan id.
   const isCloud = (plan as PlanId) === "cloud";
-  const { data: usageData } = useUsageAnalytics();
-  const cloudPosts = isCloud ? cloudPostsPerSite(usageData?.cycleUsage) : null;
+  const usage = useUsageAnalytics();
+  const cloudPosts = isCloud ? cloudPostsPerSite(usage.data?.cycleUsage) : null;
 
   const [licenseKeyInput, setLicenseKeyInput] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   // Opt-in hard remove — off by default (a plain disconnect is reversible).
   const [purge, setPurge] = useState(false);
 
-  // Status mapping aligned with the new HTML Design
-  const statusConfig = {
-    none: {
-      title: __("Anonymous Mode", "structura"),
-      desc: __(
-        "Connect a free account to unlock Headings, Featured Images, and Scheduled tasks.",
-        "structura"
-      ),
-      icon: <UserCircle className="h-7 w-7" />,
-      theme: "text-neutral-600 bg-neutral-50 ring-neutral-100",
-    },
-    free: {
-      title: __("Registered Architect", "structura"),
-      desc: __(
-        "Your account is connected. Upgrade to Pro for high-authority SEO rules and bulk synthesis.",
-        "structura"
-      ),
-      icon: <Activity className="h-7 w-7" />,
-      theme:
-        "text-emerald-600 bg-emerald-50 ring-emerald-100 dark:text-emerald-400 dark:bg-emerald-950/30 dark:ring-emerald-900/50",
-    },
-    pro: {
-      title: __("Pro Architect", "structura"),
-      desc: __(
-        "All systems operational. You have full access to the Structura ecosystem.",
-        "structura"
-      ),
-      icon: <Award className="h-7 w-7" />,
-      theme:
-        "text-brand-600 bg-brand-50 ring-brand-100 dark:text-brand-400 dark:bg-brand-950/30 dark:ring-brand-900/50",
-    },
-    cloud: {
-      title: __("Cloud Architect", "structura"),
-      desc: __(
-        "Fully managed AI — no API keys required. Maximum output, zero maintenance.",
-        "structura"
-      ),
-      icon: <Zap className="h-7 w-7" />,
-      theme:
-        "text-violet-600 bg-violet-50 ring-violet-100 dark:text-violet-400 dark:bg-violet-950/30 dark:ring-violet-900/50",
-    },
-  };
-
   // We branch on `plan` directly (same source the License Activation badge
   // and the nav use) rather than on `isPaidLicense`. `isPaidLicense` also
   // requires a successful cloud heartbeat, so for Cloud sites
   // where the heartbeat hasn't resolved yet — or where the locally stored
   // `license.is_pro` flag is stale after a recent upgrade — the hero would
-  // otherwise flash the free-tier "Registered Architect" copy while the
-  // badge already says the paid tier. Using `plan` keeps every surface on
-  // the account page telling the same story.
-  const paidPlan = (plan as PlanId) === "cloud" || (plan as PlanId) === "byok";
+  // otherwise flash the Free copy while the badge already says the paid
+  // tier. Using `plan` keeps every surface on the account page telling
+  // the same story.
+  const paidPlan = isCloud || (plan as PlanId) === "byok";
+  // Only the heartbeat says a payment failed; a transport error reads as
+  // "active" (useLicense), so a cloud blip never shows this variant. The
+  // heartbeat does not say who pays, so the copy sends everyone to the
+  // portal, which decides (specs/in-portal-billing-design.md §6).
+  const paymentAttention = status === "past_due" || status === "unpaid";
+  // An inactive license (plan "none" with a key) still reaches the portal.
+  const connected = isLicensed || Boolean(license.masked_key);
 
-  const currentStatus = isCloud
-    ? statusConfig.cloud
+  const domain = typeof window !== "undefined" ? window.location.hostname : undefined;
+  const returnTo = typeof window !== "undefined" ? window.location.href : undefined;
+  /** Returns the portal link for a hero button; billing intents also name the site's workspace. */
+  const portalLink = (intent: PortalIntent) =>
+    buildPortalSignupUrl({
+      intent,
+      domain,
+      plan,
+      returnTo,
+      workspaceId: intent === "manage_account" ? undefined : workspace?.id,
+    });
+
+  const heroTitle = isLicensed ? formatPlanName(plan, cloudPosts) : __("Anonymous Mode", "structura");
+  const heroDescription = isCloud
+    ? __("Managed AI for this site. Your monthly allowance includes research, writing and images.", "structura")
     : (plan as PlanId) === "byok"
-      ? statusConfig.pro
+      ? __("This site writes with your own AI provider key. The provider bills that usage directly.", "structura")
       : isLicensed
-        ? statusConfig.free
-        : statusConfig.none;
+        ? __("Your account is connected. Upgrade for high-authority SEO rules and bulk synthesis.", "structura")
+        : __(
+            "Connect a free account to unlock Headings, Featured Images, and Scheduled tasks.",
+            "structura"
+          );
 
   return (
     <>
@@ -138,27 +278,60 @@ export const Account = () => {
           <h1 className="m-0! text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
             {__("Account & License", "structura")}
           </h1>
-          <p className="mt-1! mb-0! text-xs font-bold tracking-[0.2em] text-gray-400 uppercase dark:text-gray-500">
-            {__("Manage your Structura identity and subscription tier", "structura")}
+          <p className="mt-1! mb-0! text-sm text-gray-500 dark:text-gray-400">
+            {__("Your plan and usage for this site.", "structura")}
           </p>
         </header>
 
         <div className="space-y-6">
-          {/* TIER HERO CARD */}
+          {/* PAYMENT ATTENTION — the heartbeat reports a failed payment
+              (specs/in-portal-billing-design.md §6). The portal's billing
+              page takes the card update and the open invoice. */}
+          {paymentAttention && (
+            <Alert variant="warning" role="status">
+              <AlertCircle />
+              <Alert.Title>{__("Your payment needs attention", "structura")}</Alert.Title>
+              <Alert.Description>
+                {__(
+                  "We could not collect your latest payment. Update your payment method, then check the outstanding invoice.",
+                  "structura"
+                )}
+              </Alert.Description>
+              <Alert.Action>
+                {/* A button, not a link: an Alert recolours every link inside
+                    it, and its `.button` opt-out is wp-admin's own button class. */}
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={() => window.open(portalLink("fix_payment"), "_blank", "noopener,noreferrer")}
+                >
+                  {__("Fix payment in customer portal", "structura")}
+                  <ExternalLink className="ml-2 size-4" />
+                </Button>
+              </Alert.Action>
+            </Alert>
+          )}
+
+          {/* PLAN HERO — the plan as the portal names it, this site's usage
+              this month, and the way to the customer portal. Buttons only
+              navigate; the portal checks who may change billing. */}
           <Card className="p-8! shadow-sm">
-            <div className="mb-8 flex items-start gap-5">
-              <div className={cn("rounded-xl p-3 ring-1 transition-colors", currentStatus.theme)}>
-                {currentStatus.icon}
-              </div>
-              <div>
-                <h2 className="mt-0! mb-1! text-lg leading-none font-bold text-gray-900 dark:text-white">
-                  {currentStatus.title}
-                </h2>
-                <p className="m-0! max-w-md text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-                  {currentStatus.desc}
-                </p>
-              </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              {/* `!` on the colours too: wp-admin's own heading colour wins otherwise. */}
+              <h2 className="m-0! text-2xl leading-tight font-bold tracking-tight text-gray-900! dark:text-white!">
+                {heroTitle}
+              </h2>
+              {paidPlan &&
+                (paymentAttention ? (
+                  <Badge intent="warning">{__("Payment overdue", "structura")}</Badge>
+                ) : status === "active" ? (
+                  <Badge intent="success">{__("Active", "structura")}</Badge>
+                ) : null)}
             </div>
+            <p className="mt-2! mb-0! max-w-xl text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              {heroDescription}
+            </p>
+
+            {paidPlan && <SiteUsage usage={usage} />}
 
             {/* Anonymous installs saw a description of what a free account
                 unlocks but NO way to get one — the page's only affordance
@@ -166,7 +339,7 @@ export const Account = () => {
                 Primary CTA opens portal signup carrying the site's domain
                 so the claim flow can promote this shadow workspace. */}
             {!isLicensed && (
-              <div className="mb-8 flex flex-wrap items-center gap-3">
+              <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Button
                   href={buildPortalSignupUrl({
                     intent: "general_upgrade",
@@ -195,31 +368,43 @@ export const Account = () => {
               </div>
             )}
 
-            {/* Visual Progress Bar (Micro-interaction)
-                Two-segment journey: connect → upgrade. The second segment
-                is tinted to match the current paid tier (violet for Cloud,
-                brand-blue for BYOK), mirroring the hero card's tier accent. Keyed off `plan` — same source
-                as the hero copy — so the two never disagree while the cloud
-                heartbeat is in flight. */}
-            <div className="flex items-center gap-3 px-1">
-              <div
-                className={cn(
-                  "h-2 flex-1 rounded-full transition-colors duration-500",
-                  isLicensed ? "bg-emerald-500" : "bg-gray-200 dark:bg-neutral-800"
+            {/* Manage account was in License Activation until 2026-10-21;
+                the hero holds it now, as in the billing design. The primary
+                action comes first in the DOM, so it also stacks first on a phone. */}
+            {connected && (
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                {isCloud && (
+                  <Button
+                    href={portalLink("change_volume")}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full sm:w-auto"
+                  >
+                    {__("Change volume in customer portal", "structura")}
+                    <ExternalLink className="ml-2 size-4" />
+                  </Button>
                 )}
-              />
-              <ArrowRight size={12} className="text-gray-300 dark:text-gray-700" />
-              <div
-                className={cn(
-                  "h-2 flex-[1.5] rounded-full transition-colors duration-500",
-                  isCloud
-                    ? "bg-violet-500"
-                    : (plan as PlanId) === "byok"
-                      ? "bg-brand-500"
-                      : "bg-gray-200 dark:bg-neutral-800"
+                <Button
+                  variant="secondary"
+                  href={portalLink("manage_account")}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full sm:w-auto"
+                >
+                  {__("Manage account", "structura")}
+                  <ExternalLink className="ml-2 size-4" />
+                </Button>
+              </div>
+            )}
+
+            {paidPlan && (
+              <p className="mt-4! mb-0! text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                {__(
+                  "Billing changes are made in the customer portal. You may need to sign in as the payer.",
+                  "structura"
                 )}
-              />
-            </div>
+              </p>
+            )}
           </Card>
 
           {/* PHASE 3.7 — workspace membership advisory. Self-gates
@@ -334,28 +519,7 @@ export const Account = () => {
                   )}
                 </div>
 
-                {/* Manage account opens the customer portal (billing,
-                    subscription, site activations). Shown for every
-                    connected account — free and paid alike — since the
-                    header dropdown is the only other route to it. */}
                 <div className="flex items-center gap-3">
-                  <Button asChild variant="secondary">
-                    <a
-                      href={buildPortalSignupUrl({
-                        intent: "manage_account",
-                        domain:
-                          typeof window !== "undefined"
-                            ? window.location.hostname
-                            : undefined,
-                        plan,
-                      })}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <ExternalLink className="size-4" />
-                      <span className="ml-2">{__("Manage account", "structura")}</span>
-                    </a>
-                  </Button>
                   <Button
                     variant="danger"
                     onClick={() => setConfirmDialogOpen(true)}

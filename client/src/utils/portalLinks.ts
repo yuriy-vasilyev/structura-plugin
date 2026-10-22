@@ -60,8 +60,15 @@
  *     isn't entitled. The AddonCard previously hardcoded a `pricingAnchor`
  *     fragment, now passed through alongside the intent.
  *   - `manage_account`        — "open the app" links where the user
- *     already has an account (Header, LicenseStatusBanner). Not an
- *     upsell — the portal lands them on their dashboard.
+ *     already has an account (Header, LicenseStatusBanner, the Account
+ *     page). Not an upsell — the portal lands them on their dashboard.
+ *   - `change_volume`         — Account page "Change volume in customer
+ *     portal" on Cloud (specs/in-portal-billing-design.md §6). The portal
+ *     opens its change editor at `/billing/change`.
+ *   - `fix_payment`           — Account page "Fix payment in customer
+ *     portal" while the heartbeat reports `past_due` or `unpaid`. The
+ *     portal opens `/billing`, where the payer updates the card and pays
+ *     the open invoice.
  *   - `general_upgrade`       — generic "Upgrade" / "View pricing" CTAs
  *     that aren't tied to a single feature lock (CampaignsPage Free
  *     banner, the Dashboard UpgradeCard, GeneratePostPage campaign-tier
@@ -82,6 +89,8 @@ export type PortalIntent =
   | "unlock_video"
   | "unlock_addon"
   | "manage_account"
+  | "change_volume"
+  | "fix_payment"
   | "general_upgrade";
 
 export interface PortalSignupLinkArgs {
@@ -106,6 +115,13 @@ export interface PortalSignupLinkArgs {
    * validates the origin server-side.
    */
   returnTo?: string;
+  /**
+   * The workspace this site belongs to, from the license heartbeat
+   * (`cloudStatus.workspace.id`). Non-secret context for the billing
+   * intents: the portal selects that workspace when the signed-in user
+   * is a member of it, and never authorizes anything from it.
+   */
+  workspaceId?: string;
 }
 
 const PORTAL_BASE_URL = "https://app.structurawp.com";
@@ -128,6 +144,7 @@ export function buildPortalSignupUrl(args: PortalSignupLinkArgs): string {
   if (args.domain) params.set("domain", args.domain);
   if (args.plan) params.set("plan", args.plan);
   if (args.returnTo) params.set("returnTo", args.returnTo);
+  if (args.workspaceId) params.set("workspaceId", args.workspaceId);
   return `${PORTAL_BASE_URL}/?${params.toString()}`;
 }
 

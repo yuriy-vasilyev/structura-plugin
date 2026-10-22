@@ -11877,3 +11877,76 @@ msgid ""
 msgstr ""
 "Saisissez une URL complète, y compris https://. Les paramètres de suivi sont "
 "conservés tels quels."
+
+msgid "Your plan and usage for this site."
+msgstr "Votre offre et l'utilisation de ce site."
+
+msgid "Your payment needs attention"
+msgstr "Votre paiement nécessite votre attention"
+
+msgid "We could not collect your latest payment. Update your payment method, then check the outstanding invoice."
+msgstr "Nous n'avons pas pu encaisser votre dernier paiement. Mettez à jour votre moyen de paiement, puis vérifiez la facture impayée."
+
+msgid "Fix payment in customer portal"
+msgstr "Régler le paiement dans le portail client"
+
+msgid "Change volume in customer portal"
+msgstr "Modifier le volume dans le portail client"
+
+msgid "Billing changes are made in the customer portal. You may need to sign in as the payer."
+msgstr "Les modifications de facturation se font dans le portail client. Vous devrez peut-être vous connecter en tant que personne qui paie."
+
+msgid "Managed AI for this site. Your monthly allowance includes research, writing and images."
+msgstr "IA gérée pour ce site. Votre quota mensuel comprend la recherche, la rédaction et les images."
+
+msgid "This site writes with your own AI provider key. The provider bills that usage directly."
+msgstr "Ce site écrit avec votre propre clé de fournisseur d'IA. Le fournisseur vous facture directement cette utilisation."
+
+msgid "Your account is connected. Upgrade for high-authority SEO rules and bulk synthesis."
+msgstr "Votre compte est connecté. Passez à une offre supérieure pour les règles SEO de haute autorité et la synthèse en masse."
+
+msgid "Payment overdue"
+msgstr "Paiement en retard"
+
+msgid "Loading this month's usage…"
+msgstr "Chargement de l'utilisation de ce mois…"
+
+msgid "This month's usage is not available right now."
+msgstr "L'utilisation de ce mois n'est pas disponible pour le moment."
+
+msgid "This month's usage"
+msgstr "Utilisation de ce mois"
+
+msgid "Resets %s · UTC"
+msgstr "Réinitialisation le %s · UTC"
+
+msgid "%1$d of %2$d post delivered"
+msgid_plural "%1$d of %2$d posts delivered"
+msgstr[0] "%1$d sur %2$d article livré"
+msgstr[1] "%1$d sur %2$d articles livrés"
+
+msgid "%1$d of %2$d image"
+msgid_plural "%1$d of %2$d images"
+msgstr[0] "%1$d sur %2$d image"
+msgstr[1] "%1$d sur %2$d images"
+
+msgid "%d post delivered this month"
+msgid_plural "%d posts delivered this month"
+msgstr[0] "%d article livré ce mois-ci"
+msgstr[1] "%d articles livrés ce mois-ci"
+
+msgid "%d image this month"
+msgid_plural "%d images this month"
+msgstr[0] "%d image ce mois-ci"
+msgstr[1] "%d images ce mois-ci"
+
+msgid "Cloud · %d post"
+msgid_plural "Cloud · %d posts"
+msgstr[0] "Cloud · %d article"
+msgstr[1] "Cloud · %d articles"
+
+msgid "License activated."
+msgstr "Licence activée."
+
+msgid "Upgrade to unlock %s"
+msgstr "Passez à une offre supérieure pour débloquer %s"

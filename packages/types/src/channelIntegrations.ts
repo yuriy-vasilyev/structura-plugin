@@ -102,3 +102,49 @@ export function receiverPlatformFor(platform: SitePlatform): BuilderPlatform | n
 export function sitePlatformFromBuilder(builder: BuilderPlatform): SitePlatform {
   return builder === "custom" ? "backend" : builder;
 }
+
+/**
+ * Where the builder prompt puts articles on Lovable, Bolt, v0 and Replit
+ * sites ("Add /blog and /blog/[slug]"), so delivered canonical URLs and
+ * internal links resolve. Found 2026-10-21: a Lovable site rendered our
+ * `/<slug>` canonical verbatim and it 404ed.
+ */
+export const BUILDER_PERMALINK_SCHEMA = "/blog/%postname%";
+
+/** Returns the permalink schema a builder platform needs, or undefined when the site owner decides. */
+export function defaultPermalinkSchemaFor(platform: SitePlatform | undefined): string | undefined {
+  // The AI builders are the builder platforms that are also site platforms;
+  // `custom` code is `backend` and routes posts wherever its owner chose.
+  return platform !== undefined && (BUILDER_PLATFORMS as readonly string[]).includes(platform)
+    ? BUILDER_PERMALINK_SCHEMA
+    : undefined;
+}
+
+/** Longest permalink schema a site may store. */
+export const MAX_PERMALINK_SCHEMA_LENGTH = 200;
+
+/**
+ * The tokens post URLs resolve, any case: exactly what `postPublicUrl`
+ * (functions/src/headless/posts/context.ts) and `composePublicPostUrl`
+ * (web/src/features/sites/lib/postPaths.ts) replace.
+ */
+const PERMALINK_TOKENS = /%(?:postname|lang|year|category)%/gi;
+
+/**
+ * Returns whether `schema` is a permalink schema a site may store: at most
+ * {@link MAX_PERMALINK_SCHEMA_LENGTH} characters, starting with `/` and
+ * containing `%postname%`, made only of letters a-z (any case), digits, `-`,
+ * `_`, `.`, `/` and the tokens `%postname%`, `%lang%`, `%year%` and
+ * `%category%`, with no `..` and no `//` (the start of another host). Any
+ * other `%` is refused: post URLs carried it as a literal, an invalid
+ * percent-escape that 404s (2026-10-21).
+ */
+export function isValidPermalinkSchema(schema: string): boolean {
+  return (
+    schema.length <= MAX_PERMALINK_SCHEMA_LENGTH &&
+    schema.startsWith("/") &&
+    /%postname%/i.test(schema) &&
+    !/\/\/|\.\./.test(schema) &&
+    /^[A-Za-z0-9._/-]*$/.test(schema.replace(PERMALINK_TOKENS, ""))
+  );
+}

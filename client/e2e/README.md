@@ -43,6 +43,12 @@ Overrides via env: `WP_BASE_URL` (default `http://structura-core.ddev.site`),
   uncaught exception fired. Cloud-backed data may be empty/erroring without a
   connected license on a local WP — that's a handled state, not a crash, and
   the console guard (`support/fixtures.ts`) ignores that noise.
+- **Account & License:** `account-billing.spec.ts` routes the heartbeat and
+  usage reads to a Cloud 30 fixture and checks the plan hero, this site's
+  usage, the customer portal links and the failed-payment variant
+  (specs/in-portal-billing-design.md §6), with screenshots in
+  `client/test-results/account-billing/`. It needs a connected license on the
+  local site and writes nothing.
 
 ## Why this isn't in the merge-gate CI (yet)
 

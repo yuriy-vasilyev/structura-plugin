@@ -11860,3 +11860,76 @@ msgid ""
 msgstr ""
 "Gib eine vollständige URL inklusive https:// ein. Tracking-Parameter bleiben "
 "unverändert."
+
+msgid "Your plan and usage for this site."
+msgstr "Dein Tarif und die Nutzung dieser Website."
+
+msgid "Your payment needs attention"
+msgstr "Problem mit deiner Zahlung"
+
+msgid "We could not collect your latest payment. Update your payment method, then check the outstanding invoice."
+msgstr "Wir konnten deine letzte Zahlung nicht einziehen. Aktualisiere deine Zahlungsmethode und prüfe dann die offene Rechnung."
+
+msgid "Fix payment in customer portal"
+msgstr "Zahlung im Kundenportal klären"
+
+msgid "Change volume in customer portal"
+msgstr "Volumen im Kundenportal ändern"
+
+msgid "Billing changes are made in the customer portal. You may need to sign in as the payer."
+msgstr "Änderungen an der Abrechnung nimmst du im Kundenportal vor. Eventuell musst du dich dort als zahlende Person anmelden."
+
+msgid "Managed AI for this site. Your monthly allowance includes research, writing and images."
+msgstr "Verwaltete KI für diese Website. Dein monatliches Kontingent umfasst Recherche, Texte und Bilder."
+
+msgid "This site writes with your own AI provider key. The provider bills that usage directly."
+msgstr "Diese Website schreibt mit deinem eigenen KI-Schlüssel. Der Anbieter rechnet diese Nutzung direkt mit dir ab."
+
+msgid "Your account is connected. Upgrade for high-authority SEO rules and bulk synthesis."
+msgstr "Dein Konto ist verbunden. Führe ein Upgrade durch, um hochwertige SEO-Regeln und Massensynthese zu erhalten."
+
+msgid "Payment overdue"
+msgstr "Zahlung überfällig"
+
+msgid "Loading this month's usage…"
+msgstr "Die Nutzung dieses Monats wird geladen…"
+
+msgid "This month's usage is not available right now."
+msgstr "Die Nutzung dieses Monats ist gerade nicht verfügbar."
+
+msgid "This month's usage"
+msgstr "Nutzung in diesem Monat"
+
+msgid "Resets %s · UTC"
+msgstr "Wird am %s zurückgesetzt · UTC"
+
+msgid "%1$d of %2$d post delivered"
+msgid_plural "%1$d of %2$d posts delivered"
+msgstr[0] "%1$d von %2$d Beitrag geliefert"
+msgstr[1] "%1$d von %2$d Beiträgen geliefert"
+
+msgid "%1$d of %2$d image"
+msgid_plural "%1$d of %2$d images"
+msgstr[0] "%1$d von %2$d Bild"
+msgstr[1] "%1$d von %2$d Bildern"
+
+msgid "%d post delivered this month"
+msgid_plural "%d posts delivered this month"
+msgstr[0] "%d Beitrag diesen Monat geliefert"
+msgstr[1] "%d Beiträge diesen Monat geliefert"
+
+msgid "%d image this month"
+msgid_plural "%d images this month"
+msgstr[0] "%d Bild diesen Monat"
+msgstr[1] "%d Bilder diesen Monat"
+
+msgid "Cloud · %d post"
+msgid_plural "Cloud · %d posts"
+msgstr[0] "Cloud · %d Beitrag"
+msgstr[1] "Cloud · %d Beiträge"
+
+msgid "License activated."
+msgstr "Lizenz aktiviert."
+
+msgid "Upgrade to unlock %s"
+msgstr "Führe ein Upgrade durch, um %s freizuschalten"
