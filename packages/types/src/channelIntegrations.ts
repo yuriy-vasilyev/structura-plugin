@@ -14,12 +14,13 @@ export type BuilderPlatform = (typeof BUILDER_PLATFORMS)[number];
 /**
  * Platforms the site guess on `/connect` can name from a live site.
  * `DETECTED_BUILDERS` identify themselves only on their own hosts
- * (`*.lovable.app`, `*.bolt.host`, `*.replit.app`); `CLOSED_PLATFORMS`
- * always identify themselves and cannot receive Article delivery, so the
- * flow stops before a site is created. Spec:
+ * (`*.lovable.app`, `*.bolt.host`, `*.replit.app`), except v0, whose pages
+ * carry v0's generator tag on any host; `CLOSED_PLATFORMS` always
+ * identify themselves and cannot receive Article delivery, so the flow
+ * stops before a site is created. Spec:
  * specs/connect-platform-picker-brief.md §4.2, §13.
  */
-export const DETECTED_BUILDERS = ["lovable", "bolt", "replit"] as const;
+export const DETECTED_BUILDERS = ["lovable", "bolt", "v0", "replit"] as const;
 
 /** One of {@link DETECTED_BUILDERS}. */
 export type DetectedBuilder = (typeof DETECTED_BUILDERS)[number];
@@ -39,11 +40,11 @@ export interface DetectSitePlatformRequest {
 
 /**
  * What `detectSitePlatform` learned about a site. `host` is the bare host
- * (lowercase, no `www.`) of the URL that was checked. `nextjs` covers v0 and
- * hand-written Next.js alike because both use the same receiver route.
- * `looksLikeApp` is true when an SPA bundle (Vite `/assets/index-*.js`)
- * was seen without any platform marker, so the picker can suggest
- * "Your own code".
+ * (lowercase, no `www.`) of the URL that was checked. A v0 site is a
+ * `builder` while its generator tag is there; `nextjs` is any other Next.js
+ * or Vercel site. `looksLikeApp` is true when an SPA bundle (Vite
+ * `/assets/index-*.js`) was seen without any platform marker, so the
+ * picker can suggest "Your own code".
  */
 export type DetectSitePlatformResult =
   | { result: "builder"; platform: DetectedBuilder; host: string }

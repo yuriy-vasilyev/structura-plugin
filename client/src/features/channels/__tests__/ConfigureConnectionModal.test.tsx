@@ -1571,3 +1571,104 @@ describe("ConfigureConnectionModal — Google Search Console connect flow", () =
     });
   });
 });
+
+describe("ConfigureConnectionModal — credential channels (recipient edit in place)", () => {
+  const emailConnection = () =>
+    makeConnection({
+      integrationId: "email-owner",
+      displayName: "Email the owner",
+      externalAccountId: "owner@example.com",
+      externalAccountMeta: undefined,
+    });
+
+  it("prefills the recipient from externalAccountId and explains when it fires", () => {
+    renderWithClient(
+      <ConfigureConnectionModal connection={emailConnection()} open onClose={() => {}} />,
+    );
+    expect(screen.getByLabelText(/recipient email/i)).toHaveValue("owner@example.com");
+    // Notifier copy: the modal says review posts are sent too, so the
+    // "publish-only" reading of the channel card doesn't survive Configure.
+    expect(screen.getByText(/posts held for review link to the editor/i)).toBeInTheDocument();
+  });
+
+  it("sends only the changed recipient as `credentials` on save", async () => {
+    apiFetchMock.mockResolvedValueOnce({ success: true, connection: emailConnection() });
+    const onClose = vi.fn();
+    renderWithClient(
+      <ConfigureConnectionModal connection={emailConnection()} open onClose={onClose} />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/recipient email/i), {
+      target: { value: " editor@example.com " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /save settings/i }));
+
+    await waitFor(() => {
+      expect(apiFetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: "/structura/v1/channels/connections/settings",
+          data: expect.objectContaining({
+            connection_id: "conn-1",
+            credentials: { recipientEmail: "editor@example.com" },
+          }),
+        }),
+      );
+    });
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  });
+
+  it("omits `credentials` entirely when the recipient was not changed", async () => {
+    apiFetchMock.mockResolvedValueOnce({ success: true, connection: emailConnection() });
+    renderWithClient(
+      <ConfigureConnectionModal connection={emailConnection()} open onClose={() => {}} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /save settings/i }));
+
+    await waitFor(() => expect(apiFetchMock).toHaveBeenCalled());
+    const data = (apiFetchMock.mock.calls[0][0] as { data: Record<string, unknown> }).data;
+    expect(data).not.toHaveProperty("credentials");
+  });
+
+  it("blocks Save while the recipient field is empty", () => {
+    renderWithClient(
+      <ConfigureConnectionModal connection={emailConnection()} open onClose={() => {}} />,
+    );
+    fireEvent.change(screen.getByLabelText(/recipient email/i), { target: { value: "" } });
+    expect(screen.getByRole("button", { name: /save settings/i })).toBeDisabled();
+  });
+
+  it("keeps a masked Telegram token out of the payload when left blank", async () => {
+    const telegram = makeConnection({
+      integrationId: "telegram",
+      displayName: "Telegram",
+      externalAccountId: "-1001",
+      externalAccountMeta: undefined,
+    });
+    apiFetchMock.mockResolvedValueOnce({ success: true, connection: telegram });
+    renderWithClient(<ConfigureConnectionModal connection={telegram} open onClose={() => {}} />);
+
+    const token = screen.getByLabelText(/bot token/i);
+    expect(token).toHaveValue("");
+    expect(screen.getAllByText("Leave blank to keep the saved value.")).toHaveLength(1);
+    expect(screen.getByLabelText(/chat id/i)).toHaveValue("-1001");
+
+    fireEvent.change(screen.getByLabelText(/chat id/i), { target: { value: "-1002" } });
+    fireEvent.click(screen.getByRole("button", { name: /save settings/i }));
+
+    await waitFor(() => expect(apiFetchMock).toHaveBeenCalled());
+    const data = (apiFetchMock.mock.calls[0][0] as { data: Record<string, unknown> }).data;
+    expect(data.credentials).toEqual({ chatId: "-1002" });
+  });
+
+  it("renders no credential inputs for a non-credential channel", () => {
+    renderWithClient(
+      <ConfigureConnectionModal
+        connection={makeConnection({ externalAccountMeta: orgMeta })}
+        open
+        onClose={() => {}}
+      />,
+    );
+    expect(screen.queryByLabelText(/recipient email/i)).toBeNull();
+  });
+});

@@ -11846,3 +11846,6 @@ msgstr "Licencia activada."
 
 msgid "Upgrade to unlock %s"
 msgstr "Mejora tu plan para desbloquear %s"
+
+msgid "Picked for you: the top-ranked suggestion. Choose another below or clear it."
+msgstr "Elegida para ti: la sugerencia mejor clasificada. Elige otra abajo o quítala."

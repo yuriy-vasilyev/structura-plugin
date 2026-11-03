@@ -11950,3 +11950,6 @@ msgstr "Licence activée."
 
 msgid "Upgrade to unlock %s"
 msgstr "Passez à une offre supérieure pour débloquer %s"
+
+msgid "Picked for you: the top-ranked suggestion. Choose another below or clear it."
+msgstr "Choisie pour vous : la suggestion la mieux classée. Choisissez-en une autre ci-dessous ou effacez-la."

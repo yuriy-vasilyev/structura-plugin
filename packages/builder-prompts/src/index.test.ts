@@ -11,6 +11,34 @@ import {
 
 const PROMPT_PLATFORMS = BUILDER_PLATFORMS.filter((p) => p !== "custom");
 
+/** Returns a paragraph every platform shares, from the unwrapped prompt. */
+function shared(locale: SupportedLocale, name: "verification" | "storage" | "ending"): string {
+  const index = { verification: 3, storage: 4, ending: 5 }[name];
+  return builderPrompt("lovable", locale, { wrap: false })!.split("\n\n")[index];
+}
+
+// How each locale words the secret rule: "never" ... "database".
+const NEVER: Record<SupportedLocale, string> = {
+  en: "never",
+  de: "nie",
+  es: "nunca",
+  fr: "jamais",
+};
+const DATABASE: Record<SupportedLocale, string> = {
+  en: "database",
+  de: "Datenbank",
+  es: "base de datos",
+  fr: "base de données",
+};
+
+// How each locale words the value the builder tests with until it has the secret.
+const TEMPORARY_VALUE: Record<SupportedLocale, string> = {
+  en: "temporary value",
+  de: "vorläufigen Wert",
+  es: "valor provisional",
+  fr: "valeur provisoire",
+};
+
 describe("builderPrompt", () => {
   it("covers Lovable, Bolt, v0 and Replit, and has no prompt for Custom", () => {
     expect(PROMPT_PLATFORMS).toEqual(["lovable", "bolt", "v0", "replit"]);
@@ -84,6 +112,70 @@ describe("builderPrompt", () => {
       expect(builderPrompt("replit", locale)).toContain("/api/structura");
       expect(builderPrompt("replit", locale)).toContain("JSON");
     });
+
+    // 2026-10-22: Bolt stored post.featuredImage as a JSON string and used that
+    // string as the <img src> and og:image, so the hero image broke.
+    it("says post.featuredImage is an object and where its url and alt go", () => {
+      const storage = shared(locale, "storage");
+      expect(storage).toMatch(/\bpost\.featuredImage\b[^.]*\burl\b[^.]*\balt\b/);
+      expect(storage).toContain("og:image");
+    });
+
+    // 2026-10-23: v0 required a post.content string the contract never sends and
+    // answered every delivery with 422 "Unsupported schema".
+    it("names post.html as the article body and says there is no post.content", () => {
+      const storage = shared(locale, "storage");
+      expect(storage).toMatch(/\bpost\.html\b/);
+      expect(storage).toMatch(/\bpost\.markdown\b/);
+      expect(storage).toMatch(/\bpost\.content\b/);
+    });
+
+    // 2026-10-22: Bolt kept the secret in a database vault and returned it from
+    // a function anyone with the public anon key could call.
+    it("keeps the signing secret out of databases and away from the browser", () => {
+      const verification = shared(locale, "verification");
+      expect(verification).toMatch(
+        new RegExp(`${SIGNING_SECRET_ENV_VAR}[^.]*\\b${NEVER[locale]}\\b[^.]*${DATABASE[locale]}`)
+      );
+      expect(verification).toMatch(/\bvault\b/i);
+    });
+
+    // 2026-10-22: Bolt's article page rendered none of the JSON-LD, and the site
+    // claimed a sitemap and real 404s that its static host cannot serve.
+    it("ends by checking a delivered article page and the host's 404 and sitemap limits", () => {
+      const ending = shared(locale, "ending");
+      expect(ending).toMatch(/JSON-LD|application\/ld\+json/);
+      expect(ending).toContain("404");
+      expect(ending).toContain("/sitemap.xml");
+    });
+
+    // 2026-10-22: v0's route answered our normal test send with 422
+    // {"error":"Unsupported event"}; the prompt said to reject unsupported events
+    // without naming the one we send.
+    it("names the one supported event and schema version, and the status for others", () => {
+      const verification = shared(locale, "verification");
+      expect(verification).toContain('"post.published"');
+      expect(verification).toContain("schema_version 1");
+      expect(verification).toContain("422");
+    });
+
+    // 2026-10-22: v0 asked for the signing secret before building the route, as
+    // Lovable did on 2026-10-21, but the portal shows the secret only after the
+    // receiver URL is pasted.
+    it.each(PROMPT_PLATFORMS)(
+      "tells %s to test with a temporary secret and ask for the real one after the URL",
+      (platform) => {
+        const prompt = builderPrompt(platform, locale, { wrap: false })!;
+        const paragraphs = prompt.split("\n\n");
+        expect(paragraphs[5]).toMatch(
+          new RegExp(`${SIGNING_SECRET_ENV_VAR}[^.]*${TEMPORARY_VALUE[locale]}`)
+        );
+        // Said once, in the shared ending, not again in Lovable's receiver.
+        expect(prompt.split(TEMPORARY_VALUE[locale])).toHaveLength(2);
+        // The receiver paragraph still says where the secret lives.
+        expect(paragraphs[2]).toContain(SIGNING_SECRET_ENV_VAR);
+      }
+    );
   });
 
   // 2026-10-21: Lovable's receiver emitted only the HowTo and FAQPage nodes and

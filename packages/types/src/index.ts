@@ -1715,9 +1715,31 @@ export interface SiteIdentity {
    * Resolved custom-logo URL (or site icon as fallback). Empty string is a
    * sentinel for "set on this site, but the file is gone" — we keep the
    * entry rather than dropping it so a cloud reader can distinguish
-   * "never synced" from "synced but cleared".
+   * "never synced" from "synced but cleared". A logo uploaded in the
+   * customer portal instead while {@link logoSource} is `"portal"`.
    */
   logoUrl?: string;
+  /**
+   * `"portal"` while `logoUrl` is a logo uploaded in the customer portal
+   * (2026-10-23). On a WordPress site it then wins over the logo the plugin
+   * syncs, until a plugin push brings a non-empty WordPress logo that
+   * differs from {@link wpLogoUrl}: the owner set a different logo in
+   * WordPress, so that logo replaces the upload and this field is deleted.
+   * An empty WordPress logo never does. Clearing the logo in the portal
+   * deletes it too. Absent: `logoUrl` follows the plugin. Spec:
+   * `specs/site-identity-headless.md` §3.4.
+   */
+  logoSource?: "portal";
+  /**
+   * The logo the WordPress plugin last pushed (`""` when WordPress has none),
+   * stored on every push since 2026-10-23 whichever logo `logoUrl` shows, so
+   * a push can tell a logo changed in WordPress from the same one sent
+   * again. Absent on headless sites and on WordPress sites the plugin has
+   * not pushed to since. Clearing a portal logo puts it back into
+   * `logoUrl`; every other reader uses `logoUrl`. Spec:
+   * `specs/site-identity-headless.md` §3.4.
+   */
+  wpLogoUrl?: string;
   /**
    * `home_url('/')` — the WP install's own origin. Stored normalised (no
    * trailing slash). May differ from `domain` when WP_HOME is not the

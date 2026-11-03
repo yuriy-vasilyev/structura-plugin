@@ -1,5 +1,38 @@
 # Changelog
 
+## [2.35.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.34.0...v2.35.0) (2026-11-03)
+
+
+### Features
+
+* **channels:** edit the recipient of email, Telegram and WhatsApp channels in place ([18f2ab0](https://github.com/yuriy-vasilyev/structura-core/commit/18f2ab06c4122e509a6a3568d5f68481444891bb))
+* **client:** suggest and pre-pick the focus keyphrase once a one-off post's topic settles ([9862f1f](https://github.com/yuriy-vasilyev/structura-core/commit/9862f1fce220801a6c84798ff1c78e9746644f6a))
+* **functions:** accept a portal logo on WordPress sites and keep it over the plugin's ([a5b954b](https://github.com/yuriy-vasilyev/structura-core/commit/a5b954ba66939371bf1c7447292da4f0f5a69419))
+* **functions:** run the stock grounding audit as a batch stage instead of a sync call in the poller ([4b03e75](https://github.com/yuriy-vasilyev/structura-core/commit/4b03e75f8cc1d2e34d129387da111bb3becafddd))
+* **web:** save the Article delivery connection as soon as the secret appears ([542b439](https://github.com/yuriy-vasilyev/structura-core/commit/542b4393621605ac98b37b2dddb1497a29938e2d))
+* **web:** suggest and pre-pick the focus keyphrase once a one-off post's topic settles ([d57bc04](https://github.com/yuriy-vasilyev/structura-core/commit/d57bc04f1b9fb8750e8ca6ff9fdd30d7f6ebe32c))
+
+
+### Bug Fixes
+
+* **builder-prompts:** describe the featured image, keep the secret out of databases and check the rendered page ([496fff8](https://github.com/yuriy-vasilyev/structura-core/commit/496fff85c8ced3476291986aa808144ba75b907f))
+* **builder-prompts:** name post.html as the article body and say there is no post.content ([5588c32](https://github.com/yuriy-vasilyev/structura-core/commit/5588c32466ce431ac24f67a19745ed7dc65863d7))
+* **builder-prompts:** name the supported event and hold the secret until the receiver URL ([0d2de08](https://github.com/yuriy-vasilyev/structura-core/commit/0d2de0893693d44dd39581a39ba0e2025757a679))
+* **functions:** hand WP stock-served delivery to a Cloud Tasks worker instead of running it after the response ([6d299ed](https://github.com/yuriy-vasilyev/structura-core/commit/6d299ed07c8b6a9146153636e1d3e6b3f0f9afd4))
+* **functions:** recognise v0 sites from their generator tag on /connect ([240430e](https://github.com/yuriy-vasilyev/structura-core/commit/240430e2fe95e74d41a640b7fb89ed65c2889861))
+* **functions:** record a publishing step on headless runs and name it without WordPress ([a24b4e4](https://github.com/yuriy-vasilyev/structura-core/commit/a24b4e4158ebeaced0f5376006b8d9b16e971b84))
+* **functions:** reject malformed license keys before the lookup ([307edb0](https://github.com/yuriy-vasilyev/structura-core/commit/307edb02bcd44cc4c97020996f2eea5a655e44c3))
+* **functions:** resolve Google /goto result links from Serper before they reach research and authority discovery ([aa09516](https://github.com/yuriy-vasilyev/structura-core/commit/aa095160773beb1cb2d0e184ee19f46226e1842f))
+* **functions:** say the Email channel also fires when a post is held for review ([ad56329](https://github.com/yuriy-vasilyev/structura-core/commit/ad563298fddbb56bdb1d5b4b4c630d24de07a86d))
+* **functions:** treat provider capacity shedding as transient and stop paging ops for it ([6148295](https://github.com/yuriy-vasilyev/structura-core/commit/61482956bc5b549fa724b0e197fa551ea345a0ec))
+* **web:** a held Generate click takes the top keyphrase from a manual Suggest too ([897952a](https://github.com/yuriy-vasilyev/structura-core/commit/897952a50cb90788ed05dba438bcd4441348649a))
+* **web:** drop the owner suffix from a Replit host's site name and settle the language field while detecting ([9c5f1de](https://github.com/yuriy-vasilyev/structura-core/commit/9c5f1dee19f7dd2a842160898dcc058f402f9139))
+* **web:** keep a WordPress site's identity out of the wizard's final save ([53bd437](https://github.com/yuriy-vasilyev/structura-core/commit/53bd437117c072785ca6c250aaa86cbb005a2575))
+* **web:** keep the signing secret on Back from the wizard's Verify part and let a saved card re-save a passed test ([fb7ff2c](https://github.com/yuriy-vasilyev/structura-core/commit/fb7ff2c0650ce56d9523e14557202b6d60fbbd16))
+* **web:** name channels on the Activity tab and run page instead of printing integration ids ([9f5070c](https://github.com/yuriy-vasilyev/structura-core/commit/9f5070c405cabe2ecc89b42802b62ed589230cab))
+* **web:** open the portal post view from a headless run's post card and channel chips ([f3ce1f1](https://github.com/yuriy-vasilyev/structura-core/commit/f3ce1f1feea24e442822fab2c87a018d4be9dfba))
+* **web:** skip finished wizard steps after a platform change and save the rename on Site info ([2717f35](https://github.com/yuriy-vasilyev/structura-core/commit/2717f35390fd97376a9e912e9d22530b8e67add5))
+
 ## [2.34.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.33.0...v2.34.0) (2026-10-22)
 
 

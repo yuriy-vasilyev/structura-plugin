@@ -29,6 +29,7 @@ import { ConfigureConnectionModal } from "../components/ConfigureConnectionModal
 import { InstallModal } from "../components/InstallModal";
 import { VideoUpgradeGate } from "../components/VideoGates";
 import { VIDEO_INTEGRATION_ID } from "../videoChannel";
+import { isCredentialEditableIntegration } from "../credentialFields";
 import { PageContainer } from "@/components/Layout/PageContainer";
 import type { ConnectionSummary, IntegrationCatalogEntry } from "../types";
 
@@ -255,7 +256,14 @@ export const ChannelsConnectionsPage = () => {
             // OAuth doesn't have). All edits still require a UUID
             // doc id so the save-in-place flow has a target.
             const canEdit = !!catalogEntry && !!connection.connectionId;
-            const isOAuthEdit = catalogEntry?.authType === "oauth2";
+            // Credential rows (email / Telegram / WhatsApp) also edit in
+            // ConfigureConnectionModal since 2026-11-03: it shows the
+            // saved recipient and patches it in place, where the
+            // InstallModal re-asked for every field and re-saved the
+            // whole connection. Only webhook rows still reopen InstallModal.
+            const opensConfigure =
+              catalogEntry?.authType === "oauth2" ||
+              isCredentialEditableIntegration(connection.integrationId);
 
             return (
               // Key on connectionId (UUID) when present so two Slack webhooks
@@ -280,7 +288,7 @@ export const ChannelsConnectionsPage = () => {
                 onEdit={
                   canEdit
                     ? (conn) => {
-                        if (isOAuthEdit) {
+                        if (opensConfigure) {
                           // OAuth edits go through the settings-only
                           // modal: bindings + locale + cadence, no
                           // token round-trip. The InstallModal can't

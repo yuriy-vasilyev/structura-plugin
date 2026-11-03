@@ -156,7 +156,8 @@ class Channels_Connections_Service implements Channels_Connections_Service_Inter
         ?string $selected_organization_urn = null,
         ?string $video_voice = null,
         ?string $video_style = null,
-        ?string $selected_gsc_property = null
+        ?string $selected_gsc_property = null,
+        ?array $credentials = null
     ) {
         if ($connection_id === '') {
             return new \WP_Error(
@@ -222,6 +223,12 @@ class Channels_Connections_Service implements Channels_Connections_Service_Inter
         // only a non-empty value rides the wire (`null`/`''` = untouched).
         if ($selected_gsc_property !== null && $selected_gsc_property !== '') {
             $payload['selected_gsc_property'] = $selected_gsc_property;
+        }
+        // Recipient / token edit for credential channels. Forwarded verbatim
+        // (blank values included: the cloud reads a blank as "keep the
+        // stored secret"); an empty map is the same as not editing.
+        if ($credentials !== null && $credentials !== []) {
+            $payload['credentials'] = $credentials;
         }
 
         return $this->call(self::ENDPOINT_UPDATE_SETTINGS, $payload, 'update_settings');
@@ -296,7 +303,9 @@ class Channels_Connections_Service implements Channels_Connections_Service_Inter
         array $credentials,
         ?string $display_name = null,
         ?string $notification_locale = null,
-        ?string $connection_id = null
+        ?string $connection_id = null,
+        ?array $bound_campaign_ids = null,
+        ?int $post_cadence_n = null
     ) {
         if ($integration_id === '') {
             return new \WP_Error(
@@ -323,6 +332,16 @@ class Channels_Connections_Service implements Channels_Connections_Service_Inter
         }
         if ($connection_id !== null && $connection_id !== '') {
             $payload['connection_id'] = $connection_id;
+        }
+        // Bindings + cadence were never forwarded on this route until
+        // 2026-11-03: the install form sent them, the proxy dropped them,
+        // and every email / Telegram / WhatsApp install landed unbound at
+        // cadence 1. Same sentinels as update_connection_settings().
+        if ($bound_campaign_ids !== null) {
+            $payload['bound_campaign_ids'] = $bound_campaign_ids;
+        }
+        if ($post_cadence_n !== null) {
+            $payload['post_cadence_n'] = $post_cadence_n;
         }
 
         return $this->call(self::ENDPOINT_SAVE_CREDENTIAL, $payload, 'save_credential');

@@ -95,6 +95,8 @@ interface Channels_Connections_Service_Interface
      * @param string|null          $display_name       Optional human label.
      * @param string|null          $notification_locale Per-connection locale override.
      * @param string|null          $connection_id      Existing UUID to update (edit flow).
+     * @param array<int, int|string>|null $bound_campaign_ids Per-campaign binding list; `null` = unbound.
+     * @param int|null             $post_cadence_n     "Every Nth post" cadence; `null` = cloud default (1).
      *
      * @return array{connection: array<string, mixed>}|\WP_Error
      */
@@ -103,7 +105,9 @@ interface Channels_Connections_Service_Interface
         array $credentials,
         ?string $display_name = null,
         ?string $notification_locale = null,
-        ?string $connection_id = null
+        ?string $connection_id = null,
+        ?array $bound_campaign_ids = null,
+        ?int $post_cadence_n = null
     );
 
     /**
@@ -123,6 +127,7 @@ interface Channels_Connections_Service_Interface
      * @param string|null                     $video_voice             Video-only voiceover voice id (e.g. `'ava'`). `null` = leave untouched; the cloud validates the id against its voice catalog. Ignored for non-video connections.
      * @param string|null                     $video_style             Video-only visual-style preset id (`'clean'|'bold'|'kinetic'`). Same semantics as `$video_voice`.
      * @param string|null                     $selected_gsc_property   Google Search Console only: the property this connection reads (`'https://example.com/'` or `'sc-domain:example.com'`). `null` or `''` = leave untouched — unlike the LinkedIn URN there is NO empty-string sentinel; the cloud validates the value against the properties captured at connect and 400s on anything else. Ignored for non-GSC connections.
+     * @param array<string, string>|null      $credentials             Credential channels only (email-owner, telegram, whatsapp): recipient / token fields to replace. Blank values keep the stored secret on the cloud. `null` or `[]` = untouched.
      *
      * @return array{connection: array<string, mixed>}|\WP_Error
      */
@@ -135,7 +140,8 @@ interface Channels_Connections_Service_Interface
         ?string $selected_organization_urn = null,
         ?string $video_voice = null,
         ?string $video_style = null,
-        ?string $selected_gsc_property = null
+        ?string $selected_gsc_property = null,
+        ?array $credentials = null
     );
 
     /**

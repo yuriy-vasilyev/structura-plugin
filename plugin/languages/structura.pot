@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T23:12:12+00:00\n"
+"POT-Creation-Date: 2026-11-03T14:01:06+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: structura\n"
@@ -50,10 +50,10 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5058
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5123
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5231
-#: plugin/includes/Api/Rest_Api.php:1883 plugin/includes/Api/Rest_Api.php:6526
-#: plugin/includes/Api/Rest_Api.php:6615 plugin/includes/Api/Rest_Api.php:6663
-#: plugin/includes/Api/Rest_Api.php:6818 plugin/includes/Api/Rest_Api.php:6884
-#: plugin/includes/Api/Rest_Api.php:6990
+#: plugin/includes/Api/Rest_Api.php:1883 plugin/includes/Api/Rest_Api.php:6561
+#: plugin/includes/Api/Rest_Api.php:6650 plugin/includes/Api/Rest_Api.php:6698
+#: plugin/includes/Api/Rest_Api.php:6853 plugin/includes/Api/Rest_Api.php:6919
+#: plugin/includes/Api/Rest_Api.php:7025
 msgid "Campaign ID is required."
 msgstr ""
 
@@ -457,16 +457,16 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4154
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:155
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:233
-#: plugin/includes/Api/Rest_Api.php:5484 plugin/includes/Api/Rest_Api.php:5703
-#: plugin/includes/Channels/Channels_Connections_Service.php:164
-#: plugin/includes/Channels/Channels_Connections_Service.php:339
+#: plugin/includes/Api/Rest_Api.php:5484 plugin/includes/Api/Rest_Api.php:5738
+#: plugin/includes/Channels/Channels_Connections_Service.php:165
+#: plugin/includes/Channels/Channels_Connections_Service.php:358
 msgid "Connection id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4118
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:198
-#: plugin/includes/Api/Rest_Api.php:5667
-#: plugin/includes/Channels/Channels_Connections_Service.php:304
+#: plugin/includes/Api/Rest_Api.php:5700
+#: plugin/includes/Channels/Channels_Connections_Service.php:313
 msgid "Integration id is required."
 msgstr ""
 
@@ -477,8 +477,8 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:104
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:224
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:254
-#: plugin/includes/Api/Rest_Api.php:5784 plugin/includes/Api/Rest_Api.php:6068
-#: plugin/includes/Api/Rest_Api.php:6115
+#: plugin/includes/Api/Rest_Api.php:5819 plugin/includes/Api/Rest_Api.php:6103
+#: plugin/includes/Api/Rest_Api.php:6150
 #: plugin/includes/Progress/Runs_Service.php:57
 #: plugin/includes/Progress/Runs_Service.php:116
 #: plugin/includes/Progress/Runs_Service.php:236
@@ -489,36 +489,36 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4389
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:144
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:151
-#: plugin/includes/Api/Rest_Api.php:5944
+#: plugin/includes/Api/Rest_Api.php:5979
 #: plugin/includes/Progress/Runs_Service.php:156
 #: plugin/includes/Progress/Runs_Service.php:163
 msgid "campaign_id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4512
-#: plugin/includes/Api/Rest_Api.php:6082
+#: plugin/includes/Api/Rest_Api.php:6117
 msgid "Active admin session required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4580
-#: plugin/includes/Api/Rest_Api.php:6150
+#: plugin/includes/Api/Rest_Api.php:6185
 msgid "run_id and cancelled_by are required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4588
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:262
-#: plugin/includes/Api/Rest_Api.php:6158
+#: plugin/includes/Api/Rest_Api.php:6193
 #: plugin/includes/Progress/Runs_Service.php:274
 msgid "cancelled_by must be \"user\" or \"system\"."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4639
-#: plugin/includes/Api/Rest_Api.php:6209
+#: plugin/includes/Api/Rest_Api.php:6244
 msgid "integration_id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4840
-#: plugin/includes/Api/Rest_Api.php:6407
+#: plugin/includes/Api/Rest_Api.php:6442
 msgid "Campaign limit reached for your current plan."
 msgstr ""
 
@@ -529,133 +529,133 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4861
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4927
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5189
-#: plugin/includes/Api/Rest_Api.php:6493 plugin/includes/Api/Rest_Api.php:6576
-#: plugin/includes/Api/Rest_Api.php:6948
+#: plugin/includes/Api/Rest_Api.php:6528 plugin/includes/Api/Rest_Api.php:6611
+#: plugin/includes/Api/Rest_Api.php:6983
 msgid "Cloud did not return campaign document."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4875
-#: plugin/includes/Api/Rest_Api.php:6507
+#: plugin/includes/Api/Rest_Api.php:6542
 msgid "New campaign deployed successfully."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4938
-#: plugin/includes/Api/Rest_Api.php:6587
+#: plugin/includes/Api/Rest_Api.php:6622
 msgid "Campaign architecture updated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4991
-#: plugin/includes/Api/Rest_Api.php:6641
+#: plugin/includes/Api/Rest_Api.php:6676
 msgid "Failed to fetch stock summary."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5028
-#: plugin/includes/Api/Rest_Api.php:6788
+#: plugin/includes/Api/Rest_Api.php:6823
 msgid "Failed to enable pre-generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5048
-#: plugin/includes/Api/Rest_Api.php:6808
+#: plugin/includes/Api/Rest_Api.php:6843
 msgid "Not authenticated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5087
-#: plugin/includes/Api/Rest_Api.php:6848
+#: plugin/includes/Api/Rest_Api.php:6883
 msgid "Campaign cleared."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5153
-#: plugin/includes/Api/Rest_Api.php:6915
+#: plugin/includes/Api/Rest_Api.php:6950
 msgid "Source campaign payload was empty."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5172
-#: plugin/includes/Api/Rest_Api.php:6931
+#: plugin/includes/Api/Rest_Api.php:6966
 msgid "(Copy)"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5201
-#: plugin/includes/Api/Rest_Api.php:6960
+#: plugin/includes/Api/Rest_Api.php:6995
 msgid "Campaign cloned successfully."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5239
-#: plugin/includes/Api/Rest_Api.php:6998
+#: plugin/includes/Api/Rest_Api.php:7033
 msgid "Campaign not found in cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5248
-#: plugin/includes/Api/Rest_Api.php:7007
+#: plugin/includes/Api/Rest_Api.php:7042
 msgid "Failed to update campaign status."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5259
-#: plugin/includes/Api/Rest_Api.php:7018
+#: plugin/includes/Api/Rest_Api.php:7053
 msgid "Campaign resumed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5260
-#: plugin/includes/Api/Rest_Api.php:7019
+#: plugin/includes/Api/Rest_Api.php:7054
 msgid "Campaign paused."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5292
-#: plugin/includes/Api/Rest_Api.php:7051
+#: plugin/includes/Api/Rest_Api.php:7086
 msgid "Failed to list visual presets."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5304
-#: plugin/includes/Api/Rest_Api.php:7063
+#: plugin/includes/Api/Rest_Api.php:7098
 msgid "Failed to create visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5320
-#: plugin/includes/Api/Rest_Api.php:7079
+#: plugin/includes/Api/Rest_Api.php:7114
 msgid "Failed to update visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5338
-#: plugin/includes/Api/Rest_Api.php:7097
+#: plugin/includes/Api/Rest_Api.php:7132
 msgid "Failed to fork visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5351
-#: plugin/includes/Api/Rest_Api.php:7110
+#: plugin/includes/Api/Rest_Api.php:7145
 msgid "Failed to delete visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5362
-#: plugin/includes/Api/Rest_Api.php:7121
+#: plugin/includes/Api/Rest_Api.php:7156
 msgid "Failed to bind visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5407
-#: plugin/includes/Api/Rest_Api.php:7262
+#: plugin/includes/Api/Rest_Api.php:7297
 msgid "Failed to fork persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5418
-#: plugin/includes/Api/Rest_Api.php:7273
+#: plugin/includes/Api/Rest_Api.php:7308
 msgid "Failed to set default persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5428
-#: plugin/includes/Api/Rest_Api.php:7304
+#: plugin/includes/Api/Rest_Api.php:7339
 msgid "Failed to list workspace keys."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5439
-#: plugin/includes/Api/Rest_Api.php:7315
+#: plugin/includes/Api/Rest_Api.php:7350
 msgid "Credential id and provider are required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5442
-#: plugin/includes/Api/Rest_Api.php:7318
+#: plugin/includes/Api/Rest_Api.php:7353
 msgid "Failed to bind workspace key."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:264
-#: plugin/includes/Channels/Channels_Connections_Service.php:370
+#: plugin/includes/Channels/Channels_Connections_Service.php:389
 msgid "Integration id and redirect URI are required."
 msgstr ""
 
@@ -663,7 +663,7 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Channels/Channels_Events_Service.php:80
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:310
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:319
-#: plugin/includes/Channels/Channels_Connections_Service.php:419
+#: plugin/includes/Channels/Channels_Connections_Service.php:438
 #: plugin/includes/Channels/Channels_Events_Service.php:106
 #: plugin/includes/Progress/Runs_Service.php:322
 #: plugin/includes/Progress/Runs_Service.php:331
@@ -673,7 +673,7 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:368
 #: .tmp-wporg/structura/includes/Channels/Channels_Events_Service.php:133
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:378
-#: plugin/includes/Channels/Channels_Connections_Service.php:481
+#: plugin/includes/Channels/Channels_Connections_Service.php:500
 #: plugin/includes/Channels/Channels_Events_Service.php:159
 #: plugin/includes/Progress/Runs_Service.php:390
 msgid "Cloud request failed."
@@ -1433,45 +1433,45 @@ msgstr ""
 msgid "Site removed."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:5611
+#: plugin/includes/Api/Rest_Api.php:5644
 #: plugin/includes/Channels/Channels_Events_Service.php:68
 msgid "Video job id is required."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6420
+#: plugin/includes/Api/Rest_Api.php:6455
 msgid ""
 "This publishing schedule is more frequent than your current plan allows."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6432
+#: plugin/includes/Api/Rest_Api.php:6467
 msgid "Cloud rejected the campaign request."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6708
+#: plugin/includes/Api/Rest_Api.php:6743
 msgid "Failed to fetch stock."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6724
+#: plugin/includes/Api/Rest_Api.php:6759
 msgid "Failed to delete the stock entry."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6739
+#: plugin/includes/Api/Rest_Api.php:6774
 msgid "Failed to empty the stock."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6754
+#: plugin/includes/Api/Rest_Api.php:6789
 msgid "Failed to regenerate the stock."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7285
+#: plugin/includes/Api/Rest_Api.php:7320
 msgid "Failed to add persona to this site."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7294
+#: plugin/includes/Api/Rest_Api.php:7329
 msgid "Failed to remove persona from this site."
 msgstr ""
 
-#: plugin/includes/Channels/Channels_Connections_Service.php:243
+#: plugin/includes/Channels/Channels_Connections_Service.php:250
 msgid "Post URL is required."
 msgstr ""
 
@@ -1801,14 +1801,14 @@ msgstr ""
 #: client/src/components/Layout/Header.tsx:220
 #: client/src/components/Layout/Header.tsx:316
 #: client/src/features/account/components/AddonCard.tsx:177
-#: client/src/features/account/routes/AccountPage.tsx:455
+#: client/src/features/account/routes/AccountPage.tsx:456
 #: client/src/features/dashboard/components/UpgradeCard.tsx:48
 msgid "Upgrade"
 msgstr ""
 
 #: client/src/components/Layout/Header.tsx:235
 #: client/src/components/Layout/Header.tsx:327
-#: client/src/features/account/routes/AccountPage.tsx:393
+#: client/src/features/account/routes/AccountPage.tsx:394
 msgid "Manage account"
 msgstr ""
 
@@ -2168,7 +2168,7 @@ msgstr ""
 #: client/src/components/Shared/SelectionCard.tsx:81
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:869
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:498
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1016
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1071
 msgid "Required"
 msgstr ""
 
@@ -2236,13 +2236,13 @@ msgstr ""
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:515
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:268
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:313
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1118
-#: client/src/features/channels/components/AddCredentialForm.tsx:473
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1180
+#: client/src/features/channels/components/AddCredentialForm.tsx:344
 #: client/src/features/channels/components/AddWebhookForm.tsx:505
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:357
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:399
 #: client/src/features/channels/components/GscConnectFlow.tsx:678
 #: client/src/features/channels/components/GscConnectFlow.tsx:720
-#: client/src/features/channels/components/InstallModal.tsx:404
+#: client/src/features/channels/components/InstallModal.tsx:403
 #: client/src/features/personas/components/PersonaEditor.tsx:186
 #: client/src/features/settings/components/QuickSetupConfirmModal.tsx:153
 #: client/src/features/settings/routes/VisualsPage.tsx:857
@@ -2429,57 +2429,57 @@ msgid "Active"
 msgstr ""
 
 #: client/src/features/account/routes/AccountPage.tsx:353
-#: client/src/features/account/routes/AccountPage.tsx:474
+#: client/src/features/account/routes/AccountPage.tsx:475
 msgid "Create Free Account"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:382
+#: client/src/features/account/routes/AccountPage.tsx:383
 msgid "Change volume in customer portal"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:401
+#: client/src/features/account/routes/AccountPage.tsx:402
 msgid ""
 "Billing changes are made in the customer portal. You may need to sign in as "
 "the payer."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:419
+#: client/src/features/account/routes/AccountPage.tsx:420
 msgid "License Activation"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:427
+#: client/src/features/account/routes/AccountPage.tsx:428
 #: client/src/features/onboarding/components/WizardLicenseGate.tsx:122
 msgid "License Key"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:447
+#: client/src/features/account/routes/AccountPage.tsx:448
 msgid "Paste your license key first."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:454
+#: client/src/features/account/routes/AccountPage.tsx:455
 msgid "Connect Account"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:460
+#: client/src/features/account/routes/AccountPage.tsx:461
 msgid "No license key yet? It comes with your account."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:491
+#: client/src/features/account/routes/AccountPage.tsx:492
 #: client/src/features/settings/routes/VisualsPage.tsx:910
 msgid "View Pricing"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:503
+#: client/src/features/account/routes/AccountPage.tsx:504
 msgid "Cloud Connection Verified"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:513
+#: client/src/features/account/routes/AccountPage.tsx:514
 msgid ""
 "Your license is currently inactive. Please contact support if you believe "
 "this is an error."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:527
+#: client/src/features/account/routes/AccountPage.tsx:528
 #: client/src/features/ai-engine/components/InstalledProviderCard.tsx:215
 #: client/src/features/ai-engine/components/InstalledProviderCard.tsx:240
 #: client/src/features/ai-engine/components/ProviderCard.tsx:143
@@ -2491,35 +2491,35 @@ msgstr ""
 msgid "Disconnect"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:564
+#: client/src/features/account/routes/AccountPage.tsx:565
 msgid "Documentation"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:567
+#: client/src/features/account/routes/AccountPage.tsx:568
 msgid "Learn how to master the Architect and configure custom personas."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:591
+#: client/src/features/account/routes/AccountPage.tsx:592
 msgid "Support Portal"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:594
+#: client/src/features/account/routes/AccountPage.tsx:595
 msgid "Get help from our architects if you run into any issues."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:617
+#: client/src/features/account/routes/AccountPage.tsx:618
 msgid "Community Forum"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:620
+#: client/src/features/account/routes/AccountPage.tsx:621
 msgid "Ask the community and browse existing support topics."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:646
+#: client/src/features/account/routes/AccountPage.tsx:647
 msgid "Disconnect Account"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:647
+#: client/src/features/account/routes/AccountPage.tsx:648
 msgid ""
 "Are you sure? This site will revert to Anonymous Mode and all scheduled "
 "campaign work will stop. If you later activate a different license, you'll "
@@ -2527,19 +2527,19 @@ msgid ""
 "and channel connections won't transfer over."
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:655
+#: client/src/features/account/routes/AccountPage.tsx:656
 msgid "Delete permanently"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:656
+#: client/src/features/account/routes/AccountPage.tsx:657
 msgid "Disconnect Site"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:661
+#: client/src/features/account/routes/AccountPage.tsx:662
 msgid "Permanently delete all data for this site"
 msgstr ""
 
-#: client/src/features/account/routes/AccountPage.tsx:662
+#: client/src/features/account/routes/AccountPage.tsx:663
 msgid ""
 "Erases everything we store for this site — it can't be restored. Shared "
 "personas, AI keys and presets are kept."
@@ -3019,7 +3019,7 @@ msgid "%1$s is %2$s — files can be up to 10 MB."
 msgstr ""
 
 #: client/src/features/campaigns/api/uploadResearchDoc.ts:65
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:232
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:235
 msgid "We couldn't read this file — it may be corrupt or image-only."
 msgstr ""
 
@@ -3447,13 +3447,13 @@ msgstr ""
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:30
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:1130
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:1138
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:49
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:52
 msgid "Publish immediately"
 msgstr ""
 
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:31
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:1134
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:50
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:53
 msgid "Save as draft"
 msgstr ""
 
@@ -3462,7 +3462,7 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:202
 #: client/src/features/campaigns/components/steps/StepObjective.tsx:67
 #: client/src/features/campaigns/routes/CampaignsPage.tsx:701
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:552
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:599
 msgid "Random persona"
 msgstr ""
 
@@ -3470,14 +3470,14 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/SimpleStepSummary.tsx:150
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:57
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:705
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:831
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:886
 msgid "Post Length"
 msgstr ""
 
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:111
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:97
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:82
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:851
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:906
 msgid "Words"
 msgstr ""
 
@@ -3488,19 +3488,19 @@ msgstr ""
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:158
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:167
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:709
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:862
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:917
 msgid "Post Status"
 msgstr ""
 
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:168
 #: client/src/features/campaigns/components/WritingApproachOverride.tsx:89
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:863
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:918
 msgid "Select…"
 msgstr ""
 
 #: client/src/features/campaigns/components/CoreContentSettings.tsx:182
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:88
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:876
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:931
 msgid ""
 "Free and anonymous installs are capped at 500 words per post. Paid plans "
 "have no word limit."
@@ -3701,7 +3701,7 @@ msgid "Next Phase"
 msgstr ""
 
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:542
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1134
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1196
 msgid "Generate Now"
 msgstr ""
 
@@ -3868,7 +3868,7 @@ msgid "Image provider"
 msgstr ""
 
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:108
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:145
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:238
 msgid "Focus keyphrase"
 msgstr ""
 
@@ -3988,106 +3988,112 @@ msgstr ""
 msgid "Parsed Autonomous Rhythm"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:159
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:253
 msgid "Clear keyphrase"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:170
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:264
+msgid ""
+"Picked for you: the top-ranked suggestion. Choose another below or clear it."
+msgstr ""
+
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:276
 msgid ""
 "Pick one focus keyphrase and every heading, section, and meta field is "
 "optimized around it. Suggest pulls ranked candidates with real monthly "
 "search volume."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:177
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:283
 msgid "Suggest keyphrases"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:181
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:287
 msgid "Describe the post topic above first."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:191
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:297
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1177
 msgid "Finding your best keyphrase…"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:200
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:306
 msgid "Pick one — it becomes your focus keyphrase."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:202
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:308
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:475
 msgid "Live data"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:204
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:310
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:477
 msgid "AI estimate"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:209
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:320
 msgid "Re-suggest"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:251
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:362
 msgid "What searchers also ask"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:272
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:383
 msgid "No live search data for that topic. Enter your own focus keyphrase."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:282
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:393
 msgid ""
 "Couldn't reach the keyword service. The post can still generate — enter a "
 "keyphrase manually or retry."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:289
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:400
 #: client/src/features/campaigns/components/StockTab.tsx:294
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:236
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:239
 #: client/src/features/channels/components/SearchPerformanceSection.tsx:111
 msgid "Retry"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:300
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:340
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:411
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:451
 msgid "Authority sources"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:302
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:413
 msgid "· optional"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:306
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:417
 msgid ""
 "Reputable domains the post can cite as outbound links for E-E-A-T. Discover "
 "them automatically or add your own — leave empty to let the writer choose."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:336
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:447
 msgid "Discover authority sources"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:337
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:448
 #: client/src/utils/chipListLabels.ts:20
 msgid "Suggested — tap to add"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:338
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:449
 msgid "No authority sources yet."
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:339
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:450
 msgid "Add a domain (e.g. developer.mozilla.org)"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:371
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:375
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:482
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:486
 msgid "…or type your own keyphrase"
 msgstr ""
 
-#: client/src/features/campaigns/components/SeoTargetingSection.tsx:385
+#: client/src/features/campaigns/components/SeoTargetingSection.tsx:496
 msgid "Use"
 msgstr ""
 
@@ -4100,7 +4106,7 @@ msgid "Pre-generating"
 msgstr ""
 
 #: client/src/features/campaigns/components/StockTab.tsx:55
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:261
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:264
 #: client/src/features/channels/components/VideoEventRow.tsx:131
 msgid "Ready"
 msgstr ""
@@ -4859,7 +4865,7 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:166
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1033
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:930
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:985
 msgid ""
 "Image generation is unavailable because WordPress can't write to your "
 "uploads folder. Posts will still publish without images."
@@ -4868,7 +4874,7 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:192
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1064
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:694
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:998
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1053
 msgid "Content Blocks"
 msgstr ""
 
@@ -4887,7 +4893,7 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:235
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1191
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:845
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:975
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1030
 msgid "Disclosure Notice"
 msgstr ""
 
@@ -5095,7 +5101,7 @@ msgid "Moved to position 1"
 msgstr ""
 
 #: client/src/features/campaigns/components/steps/keywordBankLabels.ts:66
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:240
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:243
 #: client/src/utils/chipListLabels.ts:14 client/src/utils/referralLabels.ts:59
 #: client/src/utils/referralLabels.ts:61
 msgid "Remove %s"
@@ -5282,8 +5288,8 @@ msgid "No language matches “%s”."
 msgstr ""
 
 #: client/src/features/campaigns/labels.ts:150
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:257
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:875
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:260
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:946
 msgid "%1$d of %2$d"
 msgstr ""
 
@@ -5567,7 +5573,7 @@ msgid "Quick Wins"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:1120
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:801
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:872
 #: client/src/utils/campaignModeMeta.ts:42
 msgid "Default"
 msgstr ""
@@ -5583,7 +5589,7 @@ msgid ""
 msgstr ""
 
 #: client/src/features/campaigns/routes/CampaignsPage.tsx:144
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:597
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:644
 msgid "Connect an AI provider in the AI Engine settings first."
 msgstr ""
 
@@ -5940,238 +5946,238 @@ msgstr ""
 msgid "Your campaign strategy…"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:97
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:100
 msgid "Featured images"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:98
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:101
 msgid "Headings"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:99
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:102
 msgid "A campaign that publishes every week"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:104
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:107
 msgid "Every content block: lists, tables, quotes and more"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:105
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:108
 msgid "SEO targeting with live search data"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:106
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:194
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:109
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:197
 msgid "Research material"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:107
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:110
 msgid "FAQ sections and action steps"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:108
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:111
 msgid "Internal and authority links"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:109
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:112
 msgid "E-E-A-T signals"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:139
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:142
 msgid "More with a paid plan"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:140
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:143
 msgid "More with a free account or a paid plan"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:147
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:150
 msgid "Free account"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:153
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:156
 msgid "Paid plans"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:166
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:169
 msgid "Get free account"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:177
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:180
 #: client/src/features/dashboard/components/UpgradeCard.tsx:54
 msgid "See plans"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:195
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:198
 #: client/src/features/onboarding/components/WizardGscConnectCard.tsx:288
 msgid "Optional"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:196
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:199
 msgid "Attach research, briefs or notes — the post will draw on them."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:200
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:203
 msgid "Click to upload"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:201
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:204
 msgid "or drag and drop"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:202
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:205
 msgid "PDF, DOCX, TXT, MD or HTML · up to 10 MB each · up to 5 files"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:206
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:209
 msgid "Drop to attach"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:207
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:210
 msgid "Uploading & reading…"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:217
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:220
 msgid "≈%s words read"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:224
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:227
 msgid "Long document — we'll use the first ~%d pages."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:229
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:232
 msgid "Long document — we'll use the first ~%s words."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:243
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:246
 msgid "Cancel upload"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:249
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:252
 msgid "Add more files · %1$d of %2$d"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:253
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:256
 msgid "5 of 5 files attached — remove one to add another."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:569
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:616
 msgid "Generate a Post"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:571
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:618
 msgid "Create a single post right now using AI."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:593
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:640
 msgid ""
 "The selected text provider isn't connected. Choose a connected provider "
 "below, or connect it in the AI Engine settings."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:605
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:652
 msgid "Connect AI Provider"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:618
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:665
 msgid ""
 "Weekly post limit reached — this site has used all %d of its one-off posts "
 "this week. Your allowance resets on Monday (UTC)."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:630
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:677
 msgid "%1$d of %2$d one-off posts used this week."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:641
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:688
 msgid "What should we write about?"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:645
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:692
 msgid "Generate post strategy"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:646
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:693
 msgid "We'll study your site and draft a focused objective."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:650
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:697
 msgid "Describe your post topic or objective"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:652
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:699
 msgid ""
 "e.g. Write an in-depth guide on React server components for mid-level "
 "developers, covering streaming, suspense boundaries, and real-world "
 "migration patterns..."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:662
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:710
 msgid "Please describe your topic in at least 20 characters."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:693
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:741
 msgid "SEO Targeting"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:699
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:754
 msgid "AI & Persona"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:799
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:854
 msgid "Select persona…"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:885
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:940
 msgid "Content Options"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:893
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:897
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:948
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:952
 #: client/src/features/progress/routes/RunDetailPage.tsx:816
 msgid "Featured image"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:958
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:962
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1013
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1017
 msgid "AI disclosure"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1063
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1118
 msgid "Content Features"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1066
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1121
 msgid "FAQ section"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1071
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1126
 msgid "Action steps"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1076
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1131
 msgid "Supporting statistics"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1081
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1136
 msgid "Internal linking"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1086
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1141
 msgid "Authority outbound links"
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1104
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1159
 msgid ""
 "Readability, keyphrase placement, SERP analysis, and meta fields are "
 "optimised automatically on every post."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1126
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:1188
 msgid "Weekly post limit reached — your allowance resets on Monday."
 msgstr ""
 
-#: client/src/features/campaigns/routes/GeneratePostPage.tsx:211
+#: client/src/features/campaigns/routes/GeneratePostPage.tsx:214
 msgid "%d page read"
 msgid_plural "%d pages read"
 msgstr[0] ""
@@ -6295,134 +6301,72 @@ msgstr ""
 msgid "Could not restart the render. Please try again."
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:70
-msgid "Recipient email"
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:73
-msgid "The email address that receives publish notifications."
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:79
-msgid "Bot token"
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:84
-msgid "Create a bot via %s on Telegram to get this token."
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:90
-msgid "Chat ID"
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:93
-msgid ""
-"Numeric chat/group ID, or @channel username. Use @userinfobot to find yours."
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:102
-msgid "Phone number ID"
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:105
-msgid "From your WhatsApp Business Platform dashboard (API Setup page)."
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:112
-msgid "Access token"
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:115
-msgid "A permanent or temporary access token from Meta for Developers."
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:122
-msgid "Recipient phone"
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:125
-msgid ""
-"The phone number to receive notifications, in E.164 format (e.g. "
-"+14155238886)."
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:291
+#: client/src/features/channels/components/AddCredentialForm.tsx:170
 msgid "Preparing your IndexNow keyfile…"
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:317
+#: client/src/features/channels/components/AddCredentialForm.tsx:196
 msgid "Keyfile setup"
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:321
+#: client/src/features/channels/components/AddCredentialForm.tsx:200
 msgid ""
 "IndexNow needs a verification file at the URL below. Download it and upload "
 "it to the root of your public website."
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:325
+#: client/src/features/channels/components/AddCredentialForm.tsx:204
 msgid ""
 "Structura serves the IndexNow verification file automatically — no upload "
 "needed. The URL below is what the IndexNow aggregator will check."
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:343
+#: client/src/features/channels/components/AddCredentialForm.tsx:222
 msgid "Download %s"
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:349
+#: client/src/features/channels/components/AddCredentialForm.tsx:228
 msgid ""
 "After connecting, you can run “Verify” on the connection row to check that "
 "IndexNow can reach your keyfile."
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:360
+#: client/src/features/channels/components/AddCredentialForm.tsx:239
 msgid "Read the IndexNow guide"
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:375
-msgid ""
-"Paste the value again to save changes \\u2014 we never display saved secrets "
-"for security."
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:406
+#: client/src/features/channels/components/AddCredentialForm.tsx:277
 #: client/src/features/channels/components/AddWebhookForm.tsx:369
 msgid "Display name (optional)"
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:420
+#: client/src/features/channels/components/AddCredentialForm.tsx:291
 #: client/src/features/channels/components/AddWebhookForm.tsx:476
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:463
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:534
 msgid "Notification language"
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:422
+#: client/src/features/channels/components/AddCredentialForm.tsx:293
 msgid "Choose a language\\u2026"
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:455
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:495
+#: client/src/features/channels/components/AddCredentialForm.tsx:326
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:566
 msgid "Render a video every Nth post"
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:456
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:496
+#: client/src/features/channels/components/AddCredentialForm.tsx:327
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:567
 msgid "Every published post gets a video while your monthly quota lasts."
 msgstr ""
 
-#: client/src/features/channels/components/AddCredentialForm.tsx:484
-#: client/src/features/channels/components/AddWebhookForm.tsx:528
-msgid "Save changes"
-msgstr ""
-
-#: client/src/features/channels/components/AddCredentialForm.tsx:485
+#: client/src/features/channels/components/AddCredentialForm.tsx:353
 #: client/src/features/channels/components/AddWebhookForm.tsx:528
 msgid "Connect channel"
 msgstr ""
 
 #: client/src/features/channels/components/AddWebhookForm.tsx:118
-#: client/src/features/channels/components/InstallModal.tsx:457
+#: client/src/features/channels/components/InstallModal.tsx:456
 msgid "e.g. My website blog"
 msgstr ""
 
@@ -6479,8 +6423,12 @@ msgid ""
 msgstr ""
 
 #: client/src/features/channels/components/AddWebhookForm.tsx:477
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:466
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:537
 msgid "Choose a language…"
+msgstr ""
+
+#: client/src/features/channels/components/AddWebhookForm.tsx:528
+msgid "Save changes"
 msgstr ""
 
 #: client/src/features/channels/components/CadencePicker.tsx:68
@@ -6723,7 +6671,7 @@ msgid "Quota reached"
 msgstr ""
 
 #: client/src/features/channels/components/ChannelConnectionRow.tsx:313
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:529
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:600
 msgid "%1$d of %2$d videos this month"
 msgstr ""
 
@@ -6834,164 +6782,174 @@ msgstr ""
 msgid "Activity"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:341
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:383
 msgid "Personal profile"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:368
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:410
 msgid "Saving…"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:369
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:411
 msgid "Save settings"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:389
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:431
 msgid "Configure %s"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:397
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:439
 msgid ""
 "Every published post becomes a 30–60 second vertical video (9:16) — ready to "
 "upload to YouTube Shorts or TikTok."
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:401
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:447
+msgid ""
+"Sends a message for every new post: published posts link to the page, posts "
+"held for review link to the editor. Choose which campaigns and how often."
+msgstr ""
+
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:451
 msgid ""
 "Choose which campaigns this channel posts for and how often you’d like it to "
 "share. Changes apply to your next published post."
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:437
-#: client/src/features/channels/components/InstallModal.tsx:350
-msgid "Posting target"
-msgstr ""
-
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:440
-msgid "Choose where to post…"
-msgstr ""
-
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:507
-msgid "Attach featured image"
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:475
+msgid "Leave blank to keep the saved value."
 msgstr ""
 
 #: client/src/features/channels/components/ConfigureConnectionModal.tsx:508
+#: client/src/features/channels/components/InstallModal.tsx:349
+msgid "Posting target"
+msgstr ""
+
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:511
+msgid "Choose where to post…"
+msgstr ""
+
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:578
+msgid "Attach featured image"
+msgstr ""
+
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:579
 msgid ""
 "When on, your post's featured image is uploaded alongside the social post. "
 "Turn this off to share a text-only update."
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:635
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:706
 msgid "Stop voice preview"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:638
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:709
 msgid "Play sample of %s"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:738
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:809
 msgid "Voice"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:743
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:814
 msgid "Voiceover and captions follow each post’s language."
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:760
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:831
 msgid "Voiceover needs an AI key"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:765
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:836
 msgid ""
 "Videos are narrated with OpenAI or Gemini text-to-speech. Connect either key "
 "to choose from %d voices — video rendering stays paused until then."
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:777
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:848
 msgid "Connect an AI key"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:822
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:893
 msgid "Connect a %1$s API key to unlock %2$d more voices."
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:830
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:901
 msgid "Open AI keys"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:857
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:928
 msgid "Search %d voices…"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:860
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:931
 msgid "Samples are English; videos follow your post language."
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:867
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:938
 msgid "No voices match “%s”"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:871
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:942
 msgid "Clear search"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:906
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:977
 msgid ""
 "Your voice ‘%1$s’ now appears under its real name, %2$s. It’s the same voice "
 "— nothing about your videos changes."
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1084
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1087
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:987
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1058
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1155
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1158
 msgid "Visual style"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1001
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1072
 msgid "No visual preset bound yet"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1004
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1075
 msgid "Bind a preset in Visuals to control how this site's videos look."
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1013
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1084
 msgid "Open Visuals"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1019
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1090
 msgid "Until then, videos render with the stock Clean style."
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1029
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1100
 msgid "Captions top"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1030
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1101
 msgid "Captions middle"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1031
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1102
 msgid "Captions bottom"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1036
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1107
 msgid "Brand palette"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1052
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1123
 msgid "— visual preset"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1063
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1134
 msgid "Edit in Visuals"
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1068
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1139
 msgid "Video styling follows the visual preset bound to this site."
 msgstr ""
 
-#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1102
+#: client/src/features/channels/components/ConfigureConnectionModal.tsx:1173
 msgid ""
 "Presets set caption typography and transition feel. Fine-tuning arrives in a "
 "later release."
@@ -7188,27 +7146,27 @@ msgstr ""
 msgid "Install %s"
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:212
+#: client/src/features/channels/components/InstallModal.tsx:211
 msgid "This site is hidden from search engines"
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:215
+#: client/src/features/channels/components/InstallModal.tsx:214
 msgid ""
 "WordPress is currently set to discourage search engines from indexing this "
 "site, so IndexNow pings will be ignored."
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:221
+#: client/src/features/channels/components/InstallModal.tsx:220
 msgid ""
 "To fix this, go to Settings → Reading and uncheck \\u201cDiscourage search "
 "engines from indexing this site\\u201d."
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:238
+#: client/src/features/channels/components/InstallModal.tsx:237
 msgid "Your WordPress install is exposed to search engines"
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:242
+#: client/src/features/channels/components/InstallModal.tsx:241
 msgid ""
 "You\\u2019re running in headless mode, so your public website lives "
 "elsewhere — but this WordPress install isn\\u2019t currently set to "
@@ -7216,63 +7174,63 @@ msgid ""
 "site and split SEO authority between the two."
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:248
+#: client/src/features/channels/components/InstallModal.tsx:247
 msgid ""
 "To fix this, go to Settings → Reading and check \\u201cDiscourage search "
 "engines from indexing this site\\u201d."
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:305
+#: client/src/features/channels/components/InstallModal.tsx:304
 #: client/src/features/onboarding/components/WizardGscConnectCard.tsx:120
 msgid "Failed to get authorization URL. Please try again."
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:309
+#: client/src/features/channels/components/InstallModal.tsx:308
 #: client/src/features/onboarding/components/WizardGscConnectCard.tsx:127
 msgid "Connection failed."
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:321
+#: client/src/features/channels/components/InstallModal.tsx:320
 msgid ""
 "Click the button below to connect your %s account. You\\u2019ll be "
 "redirected to authorize Structura, then brought back here automatically."
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:331
+#: client/src/features/channels/components/InstallModal.tsx:330
 msgid ""
 "Access is read-only and free on every plan — Structura only reads your "
 "search performance data and never posts or changes anything."
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:346
+#: client/src/features/channels/components/InstallModal.tsx:345
 msgid "How should Structura post?"
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:355
+#: client/src/features/channels/components/InstallModal.tsx:354
 msgid "Your personal profile"
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:358
+#: client/src/features/channels/components/InstallModal.tsx:357
 msgid "A company Page you manage"
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:397
+#: client/src/features/channels/components/InstallModal.tsx:396
 msgid "Read the docs"
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:410
+#: client/src/features/channels/components/InstallModal.tsx:409
 msgid "Connect %s"
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:441
+#: client/src/features/channels/components/InstallModal.tsx:440
 msgid "e.g. #general channel"
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:449
+#: client/src/features/channels/components/InstallModal.tsx:448
 msgid "e.g. #deploys channel"
 msgstr ""
 
-#: client/src/features/channels/components/InstallModal.tsx:469
+#: client/src/features/channels/components/InstallModal.tsx:468
 msgid "e.g. Next.js revalidator"
 msgstr ""
 
@@ -7507,6 +7465,59 @@ msgstr ""
 msgid "Back to Store"
 msgstr ""
 
+#: client/src/features/channels/credentialFields.ts:50
+msgid "Recipient email"
+msgstr ""
+
+#: client/src/features/channels/credentialFields.ts:53
+msgid ""
+"Gets an email when a post publishes, and when a campaign holds one for "
+"review."
+msgstr ""
+
+#: client/src/features/channels/credentialFields.ts:62
+msgid "Bot token"
+msgstr ""
+
+#: client/src/features/channels/credentialFields.ts:67
+msgid "Create a bot via %s on Telegram to get this token."
+msgstr ""
+
+#: client/src/features/channels/credentialFields.ts:73
+msgid "Chat ID"
+msgstr ""
+
+#: client/src/features/channels/credentialFields.ts:76
+msgid ""
+"Numeric chat/group ID, or @channel username. Use @userinfobot to find yours."
+msgstr ""
+
+#: client/src/features/channels/credentialFields.ts:85
+msgid "Phone number ID"
+msgstr ""
+
+#: client/src/features/channels/credentialFields.ts:88
+msgid "From your WhatsApp Business Platform dashboard (API Setup page)."
+msgstr ""
+
+#: client/src/features/channels/credentialFields.ts:95
+msgid "Access token"
+msgstr ""
+
+#: client/src/features/channels/credentialFields.ts:98
+msgid "A permanent or temporary access token from Meta for Developers."
+msgstr ""
+
+#: client/src/features/channels/credentialFields.ts:105
+msgid "Recipient phone"
+msgstr ""
+
+#: client/src/features/channels/credentialFields.ts:108
+msgid ""
+"The phone number to receive notifications, in E.164 format (e.g. "
+"+14155238886)."
+msgstr ""
+
 #: client/src/features/channels/labels.ts:16
 #: client/src/features/onboarding/components/WizardGscConnectCard.tsx:165
 msgid "Connected"
@@ -7553,34 +7564,34 @@ msgid ""
 "channels it was dispatched to."
 msgstr ""
 
-#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:150
+#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:151
 msgid "Channel Connections"
 msgstr ""
 
-#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:153
+#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:154
 msgid ""
 "Your installed integrations. Browse the Store to add more — Structura "
 "supports Slack, Discord, LinkedIn, IndexNow, and email notifications."
 msgstr ""
 
-#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:164
-#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:229
+#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:165
+#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:230
 msgid "Browse Store"
 msgstr ""
 
-#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:182
+#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:183
 msgid "Loading connected channels"
 msgstr ""
 
-#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:210
+#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:211
 msgid "We couldn't load your channel connections."
 msgstr ""
 
-#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:220
+#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:221
 msgid "No channels connected yet"
 msgstr ""
 
-#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:221
+#: client/src/features/channels/routes/ChannelsConnectionsPage.tsx:222
 msgid ""
 "Head to the Store to pick an integration — email, WhatsApp, Slack, Discord, "
 "LinkedIn, and more."

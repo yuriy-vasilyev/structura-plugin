@@ -193,6 +193,55 @@ describe("ChannelsConnectionsPage", () => {
     expect(within(dialog).getByDisplayValue("Next.js revalidator")).toBeInTheDocument();
   });
 
+  it("opens ConfigureConnectionModal (not the install form) when the user clicks Edit on an email row", async () => {
+    // Credential rows edit in place since 2026-11-03: Configure shows the
+    // saved recipient instead of re-asking for every field.
+    const CONN_ID = "bbbbbbbb-cccc-dddd-eeee-ffffffffffff";
+    apiFetchMock
+      .mockResolvedValueOnce({
+        success: true,
+        connections: [
+          {
+            connectionId: CONN_ID,
+            integrationId: "email-owner",
+            status: "connected",
+            displayName: "Email the owner",
+            externalAccountId: "owner@example.com",
+            connectedAt: "2026-04-19T12:00:00Z",
+            lastUsedAt: null,
+            lastError: null,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        plan: "free",
+        activeAddons: [],
+        entries: [
+          {
+            id: "email-owner",
+            name: "Email the owner",
+            description: "Plain-text notification to an inbox.",
+            category: "email",
+            capabilities: ["notify"],
+            authType: "none",
+            iconUrl: "https://cdn.simpleicons.org/gmail/EA4335",
+            gating: { requiredPlan: "free", requiredAddon: null },
+          },
+        ],
+      });
+
+    renderWithClient(<ChannelsConnectionsPage />);
+
+    const editButton = await screen.findByRole("button", { name: /^edit$/i });
+    fireEvent.click(editButton);
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Configure Email the owner")).toBeInTheDocument();
+    expect(within(dialog).queryByText("Edit Email the owner")).toBeNull();
+    expect(within(dialog).getByDisplayValue("owner@example.com")).toBeInTheDocument();
+  });
+
   it("DELETEs by connectionId and refetches the list on disconnect confirmation", async () => {
     // Post-UUID migration the row stores `connectionId` — the cloud returns
     // it on list responses and the row keys delete by it, so two siblings

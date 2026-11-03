@@ -5491,28 +5491,22 @@ class Rest_Api
             ? sanitize_text_field($locale_param)
             : null;
 
-        // Bindings: null sentinel means "leave untouched"; an empty array
-        // means "explicitly clear any existing binding." Anything that's
-        // neither array nor null is treated as null so a malformed payload
-        // doesn't accidentally wipe the user's selection.
-        $bindings_param      = $request->get_param('bound_campaign_ids');
-        $bound_campaign_ids  = null;
-        if (is_array($bindings_param)) {
-            $bound_campaign_ids = [];
-            foreach ($bindings_param as $v) {
-                if (is_int($v) || (is_string($v) && $v !== '')) {
-                    $bound_campaign_ids[] = is_string($v) ? sanitize_text_field($v) : $v;
+        $bound_campaign_ids = $this->read_bound_campaign_ids($request);
+        $post_cadence_n     = $this->read_post_cadence_n($request);
+
+        // Recipient / token edit for credential channels (email-owner,
+        // telegram, whatsapp). Same shape and sanitisation as the install
+        // route; blank values ride the wire because the cloud reads a blank
+        // as "keep the stored secret". `null` when the field is absent.
+        $credentials_param = $request->get_param('credentials');
+        $credentials       = null;
+        if (is_array($credentials_param)) {
+            $credentials = [];
+            foreach ($credentials_param as $key => $value) {
+                if (is_string($key) && is_string($value)) {
+                    $credentials[sanitize_text_field($key)] = sanitize_text_field($value);
                 }
             }
-        }
-
-        // Cadence: clamp at the REST boundary to [1, 50] so a malicious or
-        // typoed client can't park the connection in a never-firing state.
-        // The cloud re-clamps with the same range — defense in depth.
-        $cadence_param  = $request->get_param('post_cadence_n');
-        $post_cadence_n = null;
-        if (is_numeric($cadence_param)) {
-            $post_cadence_n = max(1, min(50, (int)$cadence_param));
         }
 
         // "Attach featured image" toggle for publishable+image channels
@@ -5569,12 +5563,51 @@ class Rest_Api
             $video_voice,
             $video_style,
             $selected_gsc_property,
+            $credentials,
         );
         if (is_wp_error($result)) {
             return $result;
         }
 
         return rest_ensure_response($result);
+    }
+
+    /**
+     * Returns the sanitised `bound_campaign_ids` list, or null when absent.
+     *
+     * Null means "leave untouched"; an empty array means "explicitly clear
+     * any existing binding." Anything that is neither array nor null is
+     * treated as null so a malformed payload can't wipe the selection.
+     *
+     * @return array<int, int|string>|null
+     */
+    private function read_bound_campaign_ids($request): ?array
+    {
+        $bindings_param = $request->get_param('bound_campaign_ids');
+        if ( ! is_array($bindings_param)) {
+            return null;
+        }
+        $bound_campaign_ids = [];
+        foreach ($bindings_param as $v) {
+            if (is_int($v) || (is_string($v) && $v !== '')) {
+                $bound_campaign_ids[] = is_string($v) ? sanitize_text_field($v) : $v;
+            }
+        }
+
+        return $bound_campaign_ids;
+    }
+
+    /**
+     * Returns `post_cadence_n` clamped to [1, 50], or null when absent.
+     *
+     * Clamped at the REST boundary so a malicious or typoed client can't
+     * park the connection in a never-firing state; the cloud re-clamps.
+     */
+    private function read_post_cadence_n($request): ?int
+    {
+        $cadence_param = $request->get_param('post_cadence_n');
+
+        return is_numeric($cadence_param) ? max(1, min(50, (int)$cadence_param)) : null;
     }
 
     /**
@@ -5675,6 +5708,8 @@ class Rest_Api
             $display_name,
             $notification_locale,
             $connection_id,
+            $this->read_bound_campaign_ids($request),
+            $this->read_post_cadence_n($request),
         );
         if (is_wp_error($result)) {
             return $result;

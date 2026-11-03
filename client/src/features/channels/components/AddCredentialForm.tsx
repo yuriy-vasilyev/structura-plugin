@@ -4,9 +4,12 @@
  * is `"apikey"` or `"none"`.
  *
  * Each integration has a different set of credential fields; the form schema
- * is driven by `CREDENTIAL_FIELDS[entry.id]`. Adding a new credential-based
- * integration is: add an entry to `CREDENTIAL_FIELDS` + register the
- * validation function on the cloud endpoint.
+ * is driven by `CREDENTIAL_FIELDS[entry.id]` (`../credentialFields.ts`).
+ * Adding a new credential-based integration is: add an entry there +
+ * register the validation function on the cloud endpoint.
+ *
+ * Install only. Editing a saved recipient / token happens in
+ * `ConfigureConnectionModal`, which patches the credentials in place.
  *
  * The form POSTs to `/structura/v1/channels/connections/credential` (WP REST
  * proxy) which forwards to the cloud `channelsSaveCredentialConnection`
@@ -16,119 +19,15 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { __, sprintf } from "@wordpress/i18n";
-import { Download, ExternalLink, Plus, Save } from "lucide-react";
+import { Download, ExternalLink, Plus } from "lucide-react";
 import { Button, InputField, Select } from "@structura/ui";
 import { docsUrl } from "@/utils/docsUrl";
 import { useChannelConnectionMutations } from "../api/useChannelConnectionMutations";
 import { useIndexNowKey } from "../api/useIndexNow";
 import type { ConnectionSummary, IntegrationCatalogEntry } from "../types";
+import { CREDENTIAL_FIELDS } from "../credentialFields";
 import { CampaignBindingsPicker } from "./CampaignBindingsPicker";
 import { CadencePicker } from "./CadencePicker";
-
-// ── Per-integration field definitions ──────────────────────────────────────
-
-interface CredentialFieldDef {
-  /** Key sent in the `credentials` map (matches the cloud validation). */
-  key: string;
-  /** Human label for the field. */
-  label: string;
-  /** Placeholder hint. */
-  placeholder: string;
-  /**
-   * HTML input type — `"password"` masks API tokens, `"email"` triggers
-   * browser email validation, `"text"` is the default.
-   */
-  type?: "text" | "email" | "password";
-  /**
-   * Optional helper line shown beneath the field. Useful for explaining
-   * where to find a value (e.g. "Create a bot via @BotFather on Telegram").
-   */
-  help?: string;
-}
-
-/**
- * Registry of credential fields keyed by integration id. The order of fields
- * in each array matches the visual order in the form.
- *
- * Keep field keys in lockstep with the cloud-side validation functions:
- *   - email-owner: `validateRecipientEmail` in EmailOwnerIntegration.ts
- *   - telegram:    `validateTelegramCredentials` in TelegramIntegration.ts
- *   - whatsapp:    `validateWhatsAppCredentials` in WhatsAppIntegration.ts
- */
-const CREDENTIAL_FIELDS: Record<string, CredentialFieldDef[]> = {
-  // IndexNow needs no credentials — the integration fires an auth-less HTTP
-  // ping. The user only picks a display name + notification locale.
-  indexnow: [],
-  // Video renders happen entirely cloud-side — nothing to authenticate.
-  // Install just creates the connection with the cloud defaults (voice
-  // Ava, style Clean); the post-install configure hand-off (InstallModal)
-  // opens the settings modal where voice/style/cadence live.
-  video: [],
-  "email-owner": [
-    {
-      key: "recipientEmail",
-      label: __("Recipient email", "structura"),
-      placeholder: "you@example.com",
-      type: "email",
-      help: __("The email address that receives publish notifications.", "structura"),
-    },
-  ],
-  telegram: [
-    {
-      key: "botToken",
-      label: __("Bot token", "structura"),
-      placeholder: "123456789:ABCdefGHIjklMNOpqrsTUVwxyz",
-      type: "password",
-      help: sprintf(
-        // translators: %s is the BotFather username
-        __("Create a bot via %s on Telegram to get this token.", "structura"),
-        "@BotFather",
-      ),
-    },
-    {
-      key: "chatId",
-      label: __("Chat ID", "structura"),
-      placeholder: "-1001234567890",
-      type: "text",
-      help: __(
-        "Numeric chat/group ID, or @channel username. Use @userinfobot to find yours.",
-        "structura",
-      ),
-    },
-  ],
-  whatsapp: [
-    {
-      key: "phoneNumberId",
-      label: __("Phone number ID", "structura"),
-      placeholder: "1234567890123456",
-      type: "text",
-      help: __(
-        "From your WhatsApp Business Platform dashboard (API Setup page).",
-        "structura",
-      ),
-    },
-    {
-      key: "accessToken",
-      label: __("Access token", "structura"),
-      placeholder: "EAABsbCS1iZA8BO…",
-      type: "password",
-      help: __(
-        "A permanent or temporary access token from Meta for Developers.",
-        "structura",
-      ),
-    },
-    {
-      key: "recipientPhone",
-      label: __("Recipient phone", "structura"),
-      placeholder: "+14155238886",
-      type: "text",
-      help: __(
-        "The phone number to receive notifications, in E.164 format (e.g. +14155238886).",
-        "structura",
-      ),
-    },
-  ],
-};
 
 // ── Notification locale options (shared with AddWebhookForm) ───────────────
 
@@ -144,7 +43,6 @@ const NOTIFICATION_LOCALE_OPTIONS = [
 
 interface AddCredentialFormProps {
   entry: IntegrationCatalogEntry;
-  editingConnection?: ConnectionSummary;
   /**
    * Fires after a successful save with the connection the cloud returned.
    * The summary (esp. its `connectionId`) lets install flows hand off to
@@ -157,11 +55,9 @@ interface AddCredentialFormProps {
 
 export const AddCredentialForm = ({
   entry,
-  editingConnection,
   onSuccess,
   onCancel,
 }: AddCredentialFormProps) => {
-  const isEdit = Boolean(editingConnection);
   const fields = CREDENTIAL_FIELDS[entry.id] ?? [];
   // Video is a renderer, not a notifier — there's no notification whose
   // language could be picked (voiceover + captions follow each post's own
@@ -169,33 +65,19 @@ export const AddCredentialForm = ({
   const isVideo = entry.id === "video";
 
   // Build initial credential state — empty strings for each field key.
-  // On edit, credentials are NOT pre-populated (secrets are never echoed
-  // back from the cloud, same pattern as the webhook form).
   const emptyCredentials = () =>
     Object.fromEntries(fields.map((f) => [f.key, ""]));
 
   const [credentials, setCredentials] = useState<Record<string, string>>(
     emptyCredentials,
   );
-  const [displayName, setDisplayName] = useState(
-    editingConnection?.displayName ?? "",
-  );
-  const [notificationLocale, setNotificationLocale] = useState<string>(
-    editingConnection?.notificationLocale ?? "system",
-  );
+  const [displayName, setDisplayName] = useState("");
+  const [notificationLocale, setNotificationLocale] = useState<string>("system");
   // Per-campaign binding filter — see `boundCampaignIds` on ConnectionSummary.
-  // `null` = fire for every campaign (the default). Seeded from the existing
-  // summary in edit mode so an in-place edit preserves the allowlist unless
-  // the user deliberately changes it.
-  const [boundCampaignIds, setBoundCampaignIds] = useState<(string | number)[] | null>(
-    editingConnection?.boundCampaignIds ?? null,
-  );
-  // "Every Nth post" cadence — defaults to 1 (every post). Seeded from
-  // the existing summary in edit mode so the user's previous choice
-  // survives an unrelated form save.
-  const [postCadenceN, setPostCadenceN] = useState<number>(
-    editingConnection?.postCadenceN ?? 1,
-  );
+  // `null` = fire for every campaign (the default).
+  const [boundCampaignIds, setBoundCampaignIds] = useState<(string | number)[] | null>(null);
+  // "Every Nth post" cadence — defaults to 1 (every post).
+  const [postCadenceN, setPostCadenceN] = useState<number>(1);
 
   const { saveCredential, isSaving, saveError } =
     useChannelConnectionMutations();
@@ -251,7 +133,6 @@ export const AddCredentialForm = ({
     try {
       const result = await saveCredential({
         integration_id: entry.id,
-        connection_id: editingConnection?.connectionId,
         credentials: trimmed,
         display_name: displayName.trim() || undefined,
         // Video hides the locale select entirely — omit the field so the
@@ -263,13 +144,11 @@ export const AddCredentialForm = ({
         bound_campaign_ids: boundCampaignIds,
         post_cadence_n: postCadenceN,
       });
-      if (!isEdit) {
-        setCredentials(emptyCredentials());
-        setDisplayName("");
-        setNotificationLocale("system");
-        setBoundCampaignIds(null);
-        setPostCadenceN(1);
-      }
+      setCredentials(emptyCredentials());
+      setDisplayName("");
+      setNotificationLocale("system");
+      setBoundCampaignIds(null);
+      setPostCadenceN(1);
       onSuccess?.(result?.connection);
     } catch {
       // Mutation hook surfaces the message via `saveError`.
@@ -370,14 +249,6 @@ export const AddCredentialForm = ({
       {/* Credential fields */}
       {fields.map((field, idx) => (
         <div key={field.key} className="space-y-1">
-          {isEdit && field.type === "password" && (
-            <p className="m-0! rounded-md bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
-              {__(
-                "Paste the value again to save changes \u2014 we never display saved secrets for security.",
-                "structura",
-              )}
-            </p>
-          )}
           <InputField
             label={field.label}
             placeholder={field.placeholder}
@@ -478,12 +349,8 @@ export const AddCredentialForm = ({
           loading={isSaving}
           disabled={!allFilled || (isIndexNow && !indexnow.data)}
         >
-          {isEdit ? <Save size={14} /> : <Plus size={14} />}
-          <span className="ml-1">
-            {isEdit
-              ? __("Save changes", "structura")
-              : __("Connect channel", "structura")}
-          </span>
+          <Plus size={14} />
+          <span className="ml-1">{__("Connect channel", "structura")}</span>
         </Button>
       </div>
     </form>

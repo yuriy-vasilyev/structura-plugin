@@ -45,6 +45,9 @@ import { CONTENT_BLOCKS } from "@/features/settings/constants";
 import { getCampaignFormDataForLicense } from "@/features/campaigns/helpers";
 import { isManagedPlan, type PlanId } from "@structura/types";
 
+/** Shortest topic that can be submitted or seed a keyphrase suggestion. */
+const MIN_TOPIC_LENGTH = 20;
+
 const POST_STATUS_OPTIONS: Array<{ value: CampaignPostStatus; label: string }> = [
   { value: "publish", label: __("Publish immediately", "structura") },
   { value: "draft", label: __("Save as draft", "structura") },
@@ -294,6 +297,7 @@ const GeneratePostPage = () => {
     const data = await suggest("campaign", { provider, context: [] });
     if (data?.strategy) {
       update("identity", { objective: data.strategy as string });
+      settleTopic(data.strategy as string);
     }
   };
 
@@ -346,6 +350,25 @@ const GeneratePostPage = () => {
     getCampaignFormDataForLicense({ isPaidLicense, isLicensed })
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // 2026-10-23 (customer portal parity): the keyphrase only filled on a click
+  // of Suggest keyphrases, so a topic sent straight away ran with no focus
+  // keyphrase. The topic settles when the field loses focus or Generate post
+  // strategy writes it, and SEO Targeting suggests and pre-picks for it.
+  const [settledTopic, setSettledTopic] = useState("");
+  const settleTopic = (topic: string) => {
+    const trimmed = topic.trim();
+    if (trimmed.length >= MIN_TOPIC_LENGTH) setSettledTopic(trimmed);
+  };
+  const [keyphraseBusy, setKeyphraseBusy] = useState(false);
+  // The click handler and the held-run effect read the ref: the click that
+  // blurred the topic field arrives before React has rendered the pending state.
+  const keyphraseBusyRef = useRef(false);
+  const onKeyphrasePending = (busy: boolean) => {
+    keyphraseBusyRef.current = busy;
+    setKeyphraseBusy(busy);
+  };
+  const [submitQueued, setSubmitQueued] = useState(false);
 
   // Site-scoped: the whole workspace library here listed every sibling
   // site's voice on a multi-site workspace (2026-09-22). Declared after
@@ -452,7 +475,7 @@ const GeneratePostPage = () => {
       seoRules: { ...formData.intelligence.seoRules, [key]: value },
     } as Partial<CampaignFormData["intelligence"]>);
 
-  const isValid = formData.identity.objective.length >= 20;
+  const isValid = formData.identity.objective.length >= MIN_TOPIC_LENGTH;
   const hasApiKey = activeProviders.length > 0;
   // Persona hard-block (2026-05-25). Every post is attributed to a
   // persona — a pinned id or the "random" rotation — so a zero-persona
@@ -499,8 +522,10 @@ const GeneratePostPage = () => {
   // `VisualStyleFallbackNotice` below just makes the user aware.
   const wantsAnyImage = formData.structure.featuredImage || formData.structure.bodyImages;
 
-  const handleGenerate = async () => {
-    if (!isValid || !isEngineReady || hasNoPersonas || atWeeklyCap) return;
+  const canGenerate = isValid && isEngineReady && !hasNoPersonas && !atWeeklyCap;
+
+  /** Sends the run with the form as it stands. */
+  const submit = async () => {
     // Only ready rows are submitted (handoff §State Management): busy rows
     // haven't produced a server ref yet and failed rows never will. The
     // refs ride at the campaign's TOP level so the run's inputSnapshot
@@ -529,6 +554,28 @@ const GeneratePostPage = () => {
       // Error toast handled by mutation
     }
   };
+
+  const handleGenerate = () => {
+    if (!canGenerate) return;
+    // 2026-10-23: a click on Generate Now straight from the topic field blurs
+    // it, which starts the keyphrase suggestion. Hold the run until that
+    // lands instead of sending it without a keyphrase.
+    if (keyphraseBusyRef.current) {
+      setSubmitQueued(true);
+      return;
+    }
+    void submit();
+  };
+
+  // Sends a held run once the suggestion has landed, with whatever it picked
+  // (a manual Suggest picks its top candidate too while a run is held); an
+  // empty or failed suggestion still sends it, without a keyphrase.
+  useEffect(() => {
+    if (!submitQueued || keyphraseBusyRef.current) return;
+    setSubmitQueued(false);
+    if (canGenerate) void submit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submitQueued, keyphraseBusy]);
 
   // Persona options
   //
@@ -655,9 +702,10 @@ const GeneratePostPage = () => {
           )}
           value={formData.identity.objective}
           onChange={(e) => update("identity", { objective: e.target.value })}
+          onBlur={(e) => settleTopic(e.target.value)}
           rows={4}
         />
-        {formData.identity.objective.length > 0 && formData.identity.objective.length < 20 && (
+        {formData.identity.objective.length > 0 && !isValid && (
           <p className="m-0! text-xs text-amber-500">
             {__("Please describe your topic in at least 20 characters.", "structura")}
           </p>
@@ -691,7 +739,14 @@ const GeneratePostPage = () => {
       {/* ── 1.5 SEO Targeting ────────────────────────────────── */}
       {isPaidLicense && (
         <Section title={__("SEO Targeting", "structura")}>
-          <SeoTargetingSection formData={formData} onChange={patch} isPaidLicense />
+          <SeoTargetingSection
+            formData={formData}
+            onChange={patch}
+            isPaidLicense
+            autoSuggestSeed={settledTopic}
+            onPendingChange={onKeyphrasePending}
+            pickTopOnSettle={submitQueued}
+          />
         </Section>
       )}
 
@@ -1114,13 +1169,20 @@ const GeneratePostPage = () => {
 
       {/* ── Actions ────────────────────────────────────────── */}
       <div className="flex items-center justify-end gap-3">
+        {/* A held click says what it waits for (customer portal parity). */}
+        <span
+          role="status"
+          className="mr-auto min-w-0 truncate text-xs text-neutral-600 dark:text-neutral-400"
+        >
+          {submitQueued ? __("Finding your best keyphrase…", "structura") : null}
+        </span>
         <Button variant="secondary" onClick={() => navigate(-1)}>
           {__("Cancel", "structura")}
         </Button>
         <Button
           onClick={handleGenerate}
-          loading={isGenerating}
-          disabled={!isValid || !isEngineReady || hasNoPersonas || atWeeklyCap}
+          loading={isGenerating || submitQueued}
+          disabled={!canGenerate}
           title={
             atWeeklyCap
               ? __(

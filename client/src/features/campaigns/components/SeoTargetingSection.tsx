@@ -6,8 +6,12 @@
  *
  * Paid plans only. None/Free render nothing (owner review 2026-10-06): the
  * page lists what a paid plan adds in one card above its actions.
+ *
+ * Given a settled topic (`autoSuggestSeed`), discovery also runs by itself and
+ * pre-picks the top-ranked candidate, once per distinct seed (customer portal
+ * parity, 2026-10-23).
  */
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { __ } from "@wordpress/i18n";
 import { buildChipListLabels } from "@/utils/chipListLabels";
 import {
@@ -42,12 +46,32 @@ interface SeoTargetingSectionProps {
   formData: CampaignFormData;
   onChange: (patch: Partial<CampaignFormData>) => void;
   isPaidLicense: boolean;
+  /**
+   * The settled topic ("" until the page settles one). Each distinct seed
+   * runs discovery once and pre-picks the top-ranked candidate; never while a
+   * keyphrase is selected or a run is in flight.
+   */
+  autoSuggestSeed?: string;
+  /**
+   * Reports whether a discovery run is in flight: true as the run starts,
+   * false once its result (and any pick) has rendered, or on unmount.
+   */
+  onPendingChange?: (pending: boolean) => void;
+  /**
+   * True while the page holds a Generate Now click for the run in flight. The
+   * run then picks its top candidate if nothing is selected: the chips it
+   * would show are never seen.
+   */
+  pickTopOnSettle?: boolean;
 }
 
 export const SeoTargetingSection = ({
   formData,
   onChange,
   isPaidLicense,
+  autoSuggestSeed,
+  onPendingChange,
+  pickTopOnSettle = false,
 }: SeoTargetingSectionProps) => {
   const {
     discoverKeywordsDetached,
@@ -61,24 +85,52 @@ export const SeoTargetingSection = ({
   const [dataPath, setDataPath] = useState<"provider" | "legacy" | null>(null);
   const [ownInput, setOwnInput] = useState("");
   const [authoritySuggested, setAuthoritySuggested] = useState<string[]>([]);
+  // True while the selection is the one a run picked by itself.
+  const [autoPicked, setAutoPicked] = useState(false);
+  // The seed the last discovery ran for, so a seed runs once, and the latest
+  // settled seed, so a run whose topic changed meanwhile picks nothing.
+  const lastRunSeedRef = useRef("");
+  const autoSeedRef = useRef("");
+  // Read when a run lands, not when it started: the page holds its click
+  // after the run starts, and the topic can be edited while it runs. Synced
+  // on every commit, before any later promise callback can read them.
+  const pickTopOnSettleRef = useRef(pickTopOnSettle);
+  const identityRef = useRef(formData.identity);
+  useLayoutEffect(() => {
+    pickTopOnSettleRef.current = pickTopOnSettle;
+    identityRef.current = formData.identity;
+  });
 
   const objective = formData.identity.objective.trim();
   const selected = formData.identity.focusKeyphrase ?? "";
   const authorityDomains = formData.authority?.domains ?? [];
+  const loading = phase === "loading";
 
+  // Merges into the identity as last committed: a run that lands after the
+  // topic was edited must not write the old topic back.
   const setFocus = (kp: string) =>
-    onChange({ identity: { ...formData.identity, focusKeyphrase: kp } });
+    onChange({ identity: { ...identityRef.current, focusKeyphrase: kp } });
 
-  // Paid only: Generate a Post renders no locked teaser since the owner
-  // review of 2026-10-06 (one plan card above the actions instead).
-  if (!isPaidLicense) return null;
+  /** Selects the keyphrase the user chose ("" clears it). */
+  const choose = (kp: string) => {
+    setAutoPicked(false);
+    setFocus(kp);
+  };
 
   // ── Keyphrase discovery ───────────────────────────────────────────────────
-  const runSuggest = () => {
-    if (!objective) return;
+  // `discoverKeywordsDetached` is `mutateAsync`, not `mutate` with callbacks:
+  // StrictMode's double mount detaches the observer of a mutation started on
+  // the first pass, so its callbacks never fire (the campaign keyword step's
+  // stuck loader, 2026-10-08). The promise settles either way.
+  const runSuggest = (seed: string, autoPick = false) => {
+    if (!seed) return;
+    lastRunSeedRef.current = seed;
     setPhase("loading");
+    // Now, not after the next render: a click on Generate Now that blurred
+    // the topic field reaches the page before that render does.
+    onPendingChange?.(true);
     discoverKeywordsDetached({
-      keyphrase: objective,
+      keyphrase: seed,
       language: formData.intelligence.language || "default",
       provider: formData.intelligence.textProvider,
     })
@@ -91,14 +143,55 @@ export const SeoTargetingSection = ({
         setCandidates(next);
         setDataPath(res?.meta?.path ?? null);
         setPhase(next.length > 0 ? "results" : "empty");
+        const top = next[0]?.keyword;
+        if (!top) return;
+        if (autoPick && seed === autoSeedRef.current) {
+          setFocus(top);
+          setAutoPicked(true);
+        } else if (pickTopOnSettleRef.current && !identityRef.current.focusKeyphrase) {
+          // A held click during a manual Suggest: the user asked for a
+          // keyphrase and is leaving, so the top one goes with the post
+          // rather than nothing. A keyphrase already picked stays.
+          setFocus(top);
+          setAutoPicked(true);
+        }
       })
       .catch(() => setPhase("error"));
   };
 
+  // 2026-10-23 (customer portal parity): the one-off form only filled the
+  // keyphrase on a click of Suggest keyphrases, so a post sent straight from
+  // the topic ran with no focus keyphrase. Discover by itself once the page
+  // settles a topic. Re-checked when a run ends, so a topic settled mid-run
+  // gets its own run.
+  useEffect(() => {
+    const autoSeed = autoSuggestSeed?.trim() ?? "";
+    autoSeedRef.current = autoSeed;
+    if (!isPaidLicense || !autoSeed || autoSeed === lastRunSeedRef.current) return;
+    if (selected || loading) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- starting the request is the effect's job; the loading phase is its state
+    runSuggest(autoSeed, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSuggestSeed, loading, isPaidLicense]);
+
+  // The end of a run is reported from the cleanup, after the render that shows
+  // its result, so a held click sees the pick. It also runs on unmount: a run
+  // started while the license read as paid must not hold the page's click once
+  // the section is gone.
+  useEffect(() => {
+    if (!loading) return;
+    return () => onPendingChange?.(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
+  // Paid only: Generate a Post renders no locked teaser since the owner
+  // review of 2026-10-06 (one plan card above the actions instead).
+  if (!isPaidLicense) return null;
+
   const useOwn = () => {
     const v = ownInput.trim();
     if (!v) return;
-    setFocus(v);
+    choose(v);
     setOwnInput("");
   };
 
@@ -146,21 +239,34 @@ export const SeoTargetingSection = ({
         </label>
 
         {selected && (
-          <div className="border-brand-500 bg-brand-50 dark:border-brand-500/60 dark:bg-brand-500/10 mb-3 flex items-center gap-3 rounded-xl border-[1.5px] p-3">
-            <span className="bg-brand-600 grid h-8 w-8 flex-none place-items-center rounded-lg text-white">
-              <Target size={16} />
-            </span>
-            <span className="min-w-0 flex-1 truncate text-sm font-bold text-neutral-900 dark:text-white">
-              {selected}
-            </span>
-            <button
-              type="button"
-              onClick={() => setFocus("")}
-              aria-label={__("Clear keyphrase", "structura")}
-              className="grid h-6 w-6 flex-none place-items-center rounded-full text-neutral-400 hover:text-neutral-700"
-            >
-              <X size={15} />
-            </button>
+          <div className="mb-3">
+            <div className="border-brand-500 bg-brand-50 dark:border-brand-500/60 dark:bg-brand-500/10 flex items-center gap-3 rounded-xl border-[1.5px] p-3">
+              <span className="bg-brand-600 grid h-8 w-8 flex-none place-items-center rounded-lg text-white">
+                <Target size={16} />
+              </span>
+              <span className="min-w-0 flex-1 truncate text-sm font-bold text-neutral-900 dark:text-white">
+                {selected}
+              </span>
+              <button
+                type="button"
+                onClick={() => choose("")}
+                aria-label={__("Clear keyphrase", "structura")}
+                className="grid h-6 w-6 flex-none place-items-center rounded-full text-neutral-400 hover:text-neutral-700"
+              >
+                <X size={15} />
+              </button>
+            </div>
+            {autoPicked && (
+              <p
+                role="status"
+                className="mt-1.5! mb-0! text-[11px] leading-snug text-neutral-500 dark:text-neutral-400"
+              >
+                {__(
+                  "Picked for you: the top-ranked suggestion. Choose another below or clear it.",
+                  "structura",
+                )}
+              </p>
+            )}
           </div>
         )}
 
@@ -172,7 +278,7 @@ export const SeoTargetingSection = ({
                 "structura",
               )}
             </p>
-            <Button onClick={runSuggest} disabled={!objective}>
+            <Button onClick={() => runSuggest(objective)} disabled={!objective}>
               <Sparkles size={14} className="mr-1.5" />
               {__("Suggest keyphrases", "structura")}
             </Button>
@@ -204,7 +310,12 @@ export const SeoTargetingSection = ({
                   <Badge intent="warning">{__("AI estimate", "structura")}</Badge>
                 ) : null}
               </span>
-              <Button variant="secondary" size="sm" onClick={runSuggest} loading={isDiscoveringKeywords}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => runSuggest(objective)}
+                loading={isDiscoveringKeywords}
+              >
                 <RefreshCw size={14} className="mr-1.5" />
                 {__("Re-suggest", "structura")}
               </Button>
@@ -218,7 +329,7 @@ export const SeoTargetingSection = ({
                   <button
                     key={c.keyword}
                     type="button"
-                    onClick={() => setFocus(c.keyword)}
+                    onClick={() => choose(c.keyword)}
                     className={cn(
                       "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors",
                       on
@@ -284,7 +395,7 @@ export const SeoTargetingSection = ({
                 "structura",
               )}
             </p>
-            <Button variant="secondary" size="sm" onClick={runSuggest}>
+            <Button variant="secondary" size="sm" onClick={() => runSuggest(objective)}>
               <RefreshCw size={14} className="mr-1.5" />
               {__("Retry", "structura")}
             </Button>

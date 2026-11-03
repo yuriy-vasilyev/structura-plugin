@@ -155,7 +155,6 @@ function InstallBody({
           {entry.id === "indexnow" && <IndexNowVisibilityWarning />}
           <AddCredentialForm
             entry={entry}
-            editingConnection={editingConnection}
             onSuccess={handleCredentialSuccess}
             onCancel={onClose}
           />

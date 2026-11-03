@@ -67,6 +67,7 @@ import {
   Button,
   Combobox,
   Dialog,
+  InputField,
   PresetRadioCard,
   PresetRadioCardGroup,
   QuotaMeter,
@@ -95,6 +96,11 @@ import { useChannelConnectionMutations } from "../api/useChannelConnectionMutati
 import { CadencePicker } from "./CadencePicker";
 import { CampaignBindingsPicker } from "./CampaignBindingsPicker";
 import { GscConnectModal } from "./GscConnectFlow";
+import {
+  CREDENTIAL_FIELDS,
+  credentialExternalIdKey,
+  isCredentialEditableIntegration,
+} from "../credentialFields";
 import {
   GSC_INTEGRATION_ID,
   type BoundVisualPresetSummary,
@@ -269,6 +275,38 @@ const StandardConfigureConnectionModal = ({
         : (availableOrgs[0]?.organizationUrn ?? PERSONAL_TARGET)),
   );
 
+  // Recipient / token fields for credential channels (email / Telegram /
+  // WhatsApp). The one field the cloud echoes back unencrypted
+  // (`externalAccountId`) is prefilled; secrets start blank and a blank
+  // keeps the stored value, so only what the user typed rides the wire.
+  const credentialFields = isCredentialEditableIntegration(connection.integrationId)
+    ? CREDENTIAL_FIELDS[connection.integrationId] ?? []
+    : [];
+  const externalIdKey = credentialExternalIdKey(connection.integrationId);
+  const [credentials, setCredentials] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      credentialFields.map((f) => [
+        f.key,
+        f.key === externalIdKey ? (connection.externalAccountId ?? "") : "",
+      ]),
+    ),
+  );
+  const credentialEdits = Object.fromEntries(
+    Object.entries(credentials)
+      .map(([key, value]) => [key, value.trim()] as const)
+      // The prefilled recipient only counts as an edit once it differs.
+      .filter(
+        ([key, typed]) =>
+          typed !== "" &&
+          (key !== externalIdKey || typed !== (connection.externalAccountId ?? "")),
+      ),
+  );
+  const hasCredentialEdits = Object.keys(credentialEdits).length > 0;
+  // The recipient field is the one we show filled, so clearing it is a
+  // mistake, not "keep the old one": block Save until it holds a value.
+  const recipientCleared =
+    externalIdKey !== null && (credentials[externalIdKey] ?? "").trim() === "";
+
   const { updateSettings, isSaving } = useChannelConnectionMutations();
 
   const handleSave = async () => {
@@ -318,6 +356,10 @@ const StandardConfigureConnectionModal = ({
         ...(supportsTargetPicker
           ? { selected_organization_urn: postingTarget }
           : {}),
+        // Only the credential fields the user actually changed. Omitted
+        // entirely when nothing was typed so an unrelated settings save
+        // never touches the secret doc.
+        ...(hasCredentialEdits ? { credentials: credentialEdits } : {}),
       });
       onClose();
     } catch (err) {
@@ -362,7 +404,7 @@ const StandardConfigureConnectionModal = ({
         onClick={() => {
           void handleSave();
         }}
-        disabled={isSaving}
+        disabled={isSaving || recipientCleared}
       >
         {isSaving
           ? __("Saving…", "structura")
@@ -398,14 +440,43 @@ const StandardConfigureConnectionModal = ({
                   "Every published post becomes a 30–60 second vertical video (9:16) — ready to upload to YouTube Shorts or TikTok.",
                   "structura",
                 )
-              : __(
-                  "Choose which campaigns this channel posts for and how often you’d like it to share. Changes apply to your next published post.",
-                  "structura",
-                )}
+              : supportsNotificationLocale
+                ? // Notifier channels fire on every new post, not only on
+                  // publish: a post a campaign holds for review goes out
+                  // with review copy and an editor link.
+                  __(
+                    "Sends a message for every new post: published posts link to the page, posts held for review link to the editor. Choose which campaigns and how often.",
+                    "structura",
+                  )
+                : __(
+                    "Choose which campaigns this channel posts for and how often you’d like it to share. Changes apply to your next published post.",
+                    "structura",
+                  )}
           </Dialog.Description>
         </Dialog.Header>
         <Dialog.Body>
           <div className="space-y-5">
+            {credentialFields.map((field) => (
+              <div key={field.key} className="space-y-1">
+                <InputField
+                  label={field.label}
+                  placeholder={field.placeholder}
+                  value={credentials[field.key] ?? ""}
+                  onChange={(e) =>
+                    setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }))
+                  }
+                  type={field.type ?? "text"}
+                  required={field.key === externalIdKey}
+                  autoComplete="off"
+                />
+                <p className="m-0! text-[11px] leading-relaxed text-neutral-500 dark:text-neutral-400">
+                  {field.key === externalIdKey
+                    ? field.help
+                    : __("Leave blank to keep the saved value.", "structura")}
+                </p>
+              </div>
+            ))}
+
             {isVideo && (
               <>
                 <VideoVoiceSection

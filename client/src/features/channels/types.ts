@@ -786,6 +786,15 @@ export interface UpdateConnectionSettingsInput {
    * send-only-for-video rule as {@link video_voice}.
    */
   video_style?: string;
+  /**
+   * Credential channels only (email-owner, telegram, whatsapp): the
+   * recipient / token fields to replace, keyed like the install
+   * `credentials` map. Blank values keep the stored secret on the cloud,
+   * so a masked token field can stay empty while the chat id changes.
+   * Omit when nothing was typed. Needs plugin >= 2.35.0 (proxy forwards
+   * the field) and the 2026-11-03 cloud.
+   */
+  credentials?: Record<string, string>;
 }
 
 /**

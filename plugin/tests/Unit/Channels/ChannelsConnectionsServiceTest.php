@@ -836,4 +836,128 @@ class ChannelsConnectionsServiceTest extends TestCase
             '',
         );
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    //  SETTINGS — recipient / token edit for credential channels. The map
+    //  rides the wire verbatim (blank = "keep the stored secret" on the
+    //  cloud); null or [] = untouched.
+    // ──────────────────────────────────────────────────────────────────────
+
+    /** @test */
+    public function update_settings_forwards_credentials_including_blank_values(): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['key' => 'live_xxx', 'secret' => 'sek_yyy']);
+
+        $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->once()
+            ->withArgs(function ($endpoint, $payload, $args) {
+                return $endpoint === '/channelsUpdateConnectionSettings'
+                    && ($payload['credentials'] ?? null) === ['botToken' => '', 'chatId' => '-1002'];
+            })
+            ->andReturn(['code' => 200, 'body' => ['success' => true, 'connection' => []], 'raw' => null]);
+
+        $service = new Channels_Connections_Service();
+        $service->update_connection_settings(
+            'conn-1',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            ['botToken' => '', 'chatId' => '-1002'],
+        );
+    }
+
+    /** @test */
+    public function update_settings_omits_credentials_when_null_or_empty(): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['key' => 'live_xxx', 'secret' => 'sek_yyy']);
+
+        $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->twice()
+            ->withArgs(function ($endpoint, $payload, $args) {
+                return ! array_key_exists('credentials', $payload);
+            })
+            ->andReturn(['code' => 200, 'body' => ['success' => true, 'connection' => []], 'raw' => null]);
+
+        $service = new Channels_Connections_Service();
+        $service->update_connection_settings('conn-1', 'en');
+        $service->update_connection_settings(
+            'conn-1',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            [],
+        );
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    //  CREDENTIAL INSTALL — bindings + cadence. Until 2026-11-03 the proxy
+    //  dropped both, so every email / Telegram / WhatsApp install landed
+    //  unbound at cadence 1 regardless of what the form sent.
+    // ──────────────────────────────────────────────────────────────────────
+
+    /** @test */
+    public function save_credential_forwards_bindings_and_cadence(): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['key' => 'live_xxx', 'secret' => 'sek_yyy']);
+
+        $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->once()
+            ->withArgs(function ($endpoint, $payload, $args) {
+                return $endpoint === '/channelsSaveCredentialConnection'
+                    && ($payload['bound_campaign_ids'] ?? null) === ['camp-a', 12]
+                    && ($payload['post_cadence_n'] ?? null) === 3
+                    && ($payload['credentials'] ?? null) === ['recipientEmail' => 'owner@example.com'];
+            })
+            ->andReturn(['code' => 200, 'body' => ['success' => true, 'connection' => []], 'raw' => null]);
+
+        $service = new Channels_Connections_Service();
+        $service->save_credential_connection(
+            'email-owner',
+            ['recipientEmail' => 'owner@example.com'],
+            null,
+            null,
+            null,
+            ['camp-a', 12],
+            3,
+        );
+    }
+
+    /** @test */
+    public function save_credential_omits_bindings_and_cadence_when_null(): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['key' => 'live_xxx', 'secret' => 'sek_yyy']);
+
+        $cloud = Mockery::mock('alias:Structura\Core\Cloud_Client');
+        $cloud->shouldReceive('post')
+            ->once()
+            ->withArgs(function ($endpoint, $payload, $args) {
+                return ! array_key_exists('bound_campaign_ids', $payload)
+                    && ! array_key_exists('post_cadence_n', $payload);
+            })
+            ->andReturn(['code' => 200, 'body' => ['success' => true, 'connection' => []], 'raw' => null]);
+
+        $service = new Channels_Connections_Service();
+        $service->save_credential_connection('email-owner', ['recipientEmail' => 'owner@example.com']);
+    }
 }
