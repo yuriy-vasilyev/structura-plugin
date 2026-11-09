@@ -10,7 +10,7 @@
  */
 
 import { useMemo } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import apiFetch from "@wordpress/api-fetch";
 import { __ } from "@wordpress/i18n";
 import { isSupportedLocale } from "@structura/i18n-contracts";
@@ -337,6 +337,13 @@ const SUGGESTION_PALETTE_MAX = 6;
 
 const suggestionKey = ["visual-signature-suggestion"] as const;
 
+/**
+ * Mutation key of the thin pass. The wizard looks for a pass in flight by it:
+ * a Visuals step opened again does not start a second one, and Finish waits
+ * for it.
+ */
+export const SUGGEST_SIGNATURE_MUTATION_KEY = ["visual-signature-suggest"] as const;
+
 /** A wire or stored suggestion as a {@link VisualSignatureSuggestion}, or null when it names no library pick. */
 export function readVisualSuggestion(
   raw: SuggestVisualSignatureWire["suggestion"] | StoredVisualSuggestionWire | undefined
@@ -373,6 +380,7 @@ function suggestionLocale(): string | undefined {
 export function useSuggestVisualSignatureMutation() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: SUGGEST_SIGNATURE_MUTATION_KEY,
     mutationFn: async () => {
       const locale = suggestionLocale();
       const response = await apiFetch<SuggestVisualSignatureWire>({
@@ -395,6 +403,24 @@ export function useSuggestVisualSignatureMutation() {
         queryClient.setQueryData(suggestionKey, null);
       }
     },
+  });
+}
+
+/** Resolves once no thin pass is in flight on this page, or after `timeoutMs`. */
+export function waitForSuggestPass(queryClient: QueryClient, timeoutMs: number): Promise<void> {
+  const filters = { mutationKey: SUGGEST_SIGNATURE_MUTATION_KEY };
+  if (queryClient.isMutating(filters) === 0) return Promise.resolve();
+  return new Promise((resolve) => {
+    let stop = () => {};
+    const timer = setTimeout(() => stop(), timeoutMs);
+    const unsubscribe = queryClient.getMutationCache().subscribe(() => {
+      if (queryClient.isMutating(filters) === 0) stop();
+    });
+    stop = () => {
+      clearTimeout(timer);
+      unsubscribe();
+      resolve();
+    };
   });
 }
 

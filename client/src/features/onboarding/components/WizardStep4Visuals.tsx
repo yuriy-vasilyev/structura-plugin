@@ -22,6 +22,7 @@
 import { useEffect, useRef, useState } from "@wordpress/element";
 import { createInterpolateElement } from "@wordpress/element";
 import { __, sprintf } from "@wordpress/i18n";
+import { useIsMutating } from "@tanstack/react-query";
 import {
   Badge,
   Card,
@@ -43,6 +44,7 @@ import {
   usePublicSiteProfile,
 } from "@/features/settings";
 import {
+  SUGGEST_SIGNATURE_MUTATION_KEY,
   useSuggestVisualSignatureMutation,
   useVisualPresetsQuery,
   useVisualSignatureSuggestion,
@@ -202,6 +204,7 @@ export const WizardStep4Visuals = () => {
   const { data: presetsData } = useVisualPresetsQuery();
   const knownSuggestion = useVisualSignatureSuggestion(presetsData?.visualSuggestion);
   const suggestSignature = useSuggestVisualSignatureMutation();
+  const passInFlight = useIsMutating({ mutationKey: SUGGEST_SIGNATURE_MUTATION_KEY }) > 0;
   const [scanning, setScanning] = useState(false);
 
   // Seed the draft once: a prior in-flight draft wins when it carries a
@@ -305,7 +308,9 @@ export const WizardStep4Visuals = () => {
 
   // Run the pass once when the step opens and no answer is known: persisted
   // on the draft, stored on the activation (the preset list), or from this
-  // page load's earlier pass.
+  // page load's earlier pass. A pass started before the step was left is
+  // not run again: its answer still lands in the draft and the list, which
+  // is what this step then picks up (2026-11-09).
   const passStartedRef = useRef(false);
   useEffect(() => {
     if (passStartedRef.current || !step4 || step4.suggestion !== undefined) return;
@@ -313,13 +318,14 @@ export const WizardStep4Visuals = () => {
       applySuggestion(knownSuggestion);
       return;
     }
+    if (passInFlight) return;
     passStartedRef.current = true;
     suggestSignature
       .mutateAsync()
       .then((result) => applySuggestion(result))
       .catch(() => applySuggestion(null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step4, knownSuggestion]);
+  }, [step4, knownSuggestion, passInFlight]);
 
   const handleRescan = async () => {
     setScanning(true);

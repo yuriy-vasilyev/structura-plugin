@@ -30,8 +30,12 @@ vi.mock("@/features/settings", () => ({
 vi.mock("@/features/ai-engine/api/useUpdateAiSettings", () => ({
   useUpdateAiSettings: () => ({ mutateAsync: vi.fn() }),
 }));
-vi.mock("@/features/settings/api/useVisualPresets", () => ({
-  useVisualPresetsQuery: () => ({ data: presetsMock.current }),
+vi.mock("@/features/settings/api/useVisualPresets", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/features/settings/api/useVisualPresets")>()),
+  useVisualPresetsQuery: () => ({
+    data: presetsMock.current,
+    refetch: async () => ({ data: presetsMock.current }),
+  }),
   useVisualPresetMutations: () => ({
     create: createMock,
     update: updateMock,

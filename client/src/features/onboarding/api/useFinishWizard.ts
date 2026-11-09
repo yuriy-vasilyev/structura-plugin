@@ -20,7 +20,7 @@
  * `settings.ai.defaults` reflects the user's final pick.
  */
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
   usePublicSiteProfile,
@@ -28,8 +28,10 @@ import {
 } from "@/features/settings";
 import { useUpdateAiSettings } from "@/features/ai-engine/api/useUpdateAiSettings";
 import {
+  readVisualSuggestion,
   useVisualPresetMutations,
   useVisualPresetsQuery,
+  waitForSuggestPass,
   type VisualMedium,
 } from "@/features/settings/api/useVisualPresets";
 import { useUpdateSiteSeoSettingsMutation } from "@/features/site/api/useSiteAnalysis";
@@ -43,20 +45,35 @@ import {
 import { useWizardStore } from "../state/wizardStore";
 import { clearOnboardingDismissed } from "../utils/onboardingDismissal";
 
+/**
+ * How long Finish waits for a thin pass still reading the site before it
+ * saves without that pass's palette. The pass took 28 s on 2026-11-09 (a
+ * cold start, the homepage screenshot, the model call); the wait starts at
+ * the click and runs alongside the other saves.
+ */
+const SUGGEST_PASS_WAIT_MS = 15_000;
+
 export function useFinishWizard() {
+  const queryClient = useQueryClient();
   const { data: profile } = usePublicSiteProfile();
   const saveProfile = usePublicSiteProfileMutation();
   const saveAiSettings = useUpdateAiSettings();
   const savePositioning = useSaveWizardPositioningMutation();
   const saveSeoSettings = useUpdateSiteSeoSettingsMutation();
   const { create: createPreset, update: updatePreset } = useVisualPresetMutations();
-  const { data: presetsData } = useVisualPresetsQuery();
+  const presetsQuery = useVisualPresetsQuery();
   const markStepComplete = useSaveWizardStepMutation();
   const dismissOnboarding = useDismissOnboardingMutation();
 
   return useMutation<void, Error, void>({
     mutationFn: async () => {
       const { drafts } = useWizardStore.getState();
+      // A thin pass still reading the site lands its palette in the step-4
+      // draft and on the activation; colours already there never change.
+      const passSettled =
+        drafts.step4 && !drafts.step4.palette?.length
+          ? waitForSuggestPass(queryClient, SUGGEST_PASS_WAIT_MS)
+          : Promise.resolve();
 
       // ── Step 1: site identity ──────────────────────────────────
       if (drafts.step1 && profile) {
@@ -122,37 +139,53 @@ export function useFinishWizard() {
       }
 
       // ── Step 4: visual preset ──────────────────────────────────
-      if (drafts.step4) {
+      // Read once the thin pass has had its chance to answer.
+      await passSettled;
+      let step4 = useWizardStore.getState().drafts.step4;
+      let presetsData = presetsQuery.data;
+      let storedPalette: string[] = [];
+      if (step4 && !step4.palette?.length) {
+        // A pass that answered after the step was left, or on an earlier
+        // page load, is stored on the activation: refetch the list to see it.
+        presetsData = (await presetsQuery.refetch()).data ?? presetsData;
+        step4 = useWizardStore.getState().drafts.step4;
+        storedPalette = readVisualSuggestion(presetsData?.visualSuggestion)?.palette ?? [];
+      }
+      if (step4) {
+        // A signature without colours renders in the neutral set: a draft
+        // that missed the pass's answer takes the stored palette (2026-11-09).
+        const palette =
+          step4.signature && !step4.palette?.length && storedPalette.length > 0
+            ? storedPalette
+            : step4.palette;
         const content = {
-          global_art_direction: drafts.step4.globalArtDirection,
-          aspect_ratio: drafts.step4.aspectRatio,
-          format: drafts.step4.format,
-          optimize_on_upload: drafts.step4.optimizeOnUpload,
+          global_art_direction: step4.globalArtDirection,
+          aspect_ratio: step4.aspectRatio,
+          format: step4.format,
+          optimize_on_upload: step4.optimizeOnUpload,
           // Persist the rendering medium picked on the medium cards so the
           // preset (and every generated image) matches it.
-          medium: drafts.step4.medium as VisualMedium,
+          medium: step4.medium as VisualMedium,
           // Video styling (video-visuals handoff §4) — keys are OMITTED
           // (not defaulted) when the draft carries none: the video row
           // only writes them on eligible plans, and a pre-video draft
           // restored from localStorage must never clobber a preset's
           // saved video styling with defaults.
-          ...(drafts.step4.videoStyle !== undefined
-            ? { video_style: drafts.step4.videoStyle }
+          ...(step4.videoStyle !== undefined
+            ? { video_style: step4.videoStyle }
             : {}),
-          ...(drafts.step4.videoArtDirection !== undefined
-            ? { video_art_direction: drafts.step4.videoArtDirection }
+          ...(step4.videoArtDirection !== undefined
+            ? { video_art_direction: step4.videoArtDirection }
             : {}),
-          ...(drafts.step4.captionPlacement !== undefined
-            ? { caption_placement: drafts.step4.captionPlacement }
+          ...(step4.captionPlacement !== undefined
+            ? { caption_placement: step4.captionPlacement }
             : {}),
-          ...(drafts.step4.palette !== undefined
-            ? { palette: drafts.step4.palette }
-            : {}),
+          ...(palette !== undefined ? { palette } : {}),
           // The picked signature saves even with no prompt text: a curated or
           // custom signature makes the art direction optional (spec §4).
           // `null` (a bound free-prompt preset kept as is) and absent (a
           // draft from before 2026-11-09) leave the stored one alone.
-          ...(drafts.step4.signature ? { signature: drafts.step4.signature } : {}),
+          ...(step4.signature ? { signature: step4.signature } : {}),
         };
         const boundId = presetsData?.boundPresetId ?? null;
         const boundPreset = boundId
@@ -171,10 +204,10 @@ export function useFinishWizard() {
           boundPreset.format === content.format &&
           boundPreset.optimizeOnUpload === content.optimize_on_upload &&
           boundPreset.medium === content.medium &&
-          (drafts.step4.signature === undefined ||
-            drafts.step4.signature === null ||
-            sameSignature(boundPreset.signature, drafts.step4.signature)) &&
-          JSON.stringify(boundPreset.palette ?? []) === JSON.stringify(drafts.step4.palette ?? []);
+          (step4.signature === undefined ||
+            step4.signature === null ||
+            sameSignature(boundPreset.signature, step4.signature)) &&
+          JSON.stringify(boundPreset.palette ?? []) === JSON.stringify(palette ?? []);
         try {
           if (boundId) {
             if (!unchanged) await updatePreset({ preset_id: boundId, content });

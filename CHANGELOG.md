@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.36.1](https://github.com/yuriy-vasilyev/structura-core/compare/v2.36.0...v2.36.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **client:** keep the scanned colours when the wizard is finished before the scan returns ([bbd57fe](https://github.com/yuriy-vasilyev/structura-core/commit/bbd57fef4848da2fa7d643a3bc5e0733cbf251a1))
+* **functions:** a re-scan keeps the site's stored style pick ([0e2e697](https://github.com/yuriy-vasilyev/structura-core/commit/0e2e69757e8e519cb29cd7f276c6fcb475b55860))
+* **functions:** a signature preset without a palette borrows the site's scanned colours ([51dfabd](https://github.com/yuriy-vasilyev/structura-core/commit/51dfabd7ecfa3274753057e7728c8bd9a672b586))
+* **web:** keep the scanned colours when the wizard is finished before the scan returns ([9c59590](https://github.com/yuriy-vasilyev/structura-core/commit/9c595907377c537f8f7ab3b8a10a21eb3d640fa7))
+
 ## [2.36.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.35.0...v2.36.0) (2026-11-09)
 
 

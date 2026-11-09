@@ -322,6 +322,14 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Changelog ==
 
+= 2.36.1 =
+* Fixed: finishing the setup wizard before the colour scan had returned
+  saved the chosen style without your brand colours. The wizard now waits
+  for the scan and falls back to the stored colours, and images use the
+  site's scanned colours even when a style was saved without them.
+* Fixed: "Re-scan site" refreshes your colours and keeps the recommended
+  style instead of changing it.
+
 = 2.36.0 =
 * New: visual signatures. The Visuals page lets you pick the look every
   image on your site shares from a library of six styles, shown in
