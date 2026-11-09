@@ -18,13 +18,16 @@
  *      path (`content.video_style` / `video_art_direction` /
  *      `caption_placement` / `palette` on the wire).
  *   5. The video-field suggest fills `videoArtDirection` + `palette` from
- *      the visual suggest response WITHOUT clobbering the image prompt;
- *      the image-style suggest ALSO fills the video fields (one pass
- *      drafts both siblings, handoff §1).
+ *      the visual suggest response WITHOUT clobbering the image prompt.
+ *      The image-style suggest that also drafted them is gone with the
+ *      visual-signature picker (2026-11-09, spec §8).
  */
 
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render as rtlRender, screen, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ToastProvider } from "@structura/ui";
+import type { ReactElement } from "react";
 import { MemoryRouter } from "react-router";
 
 vi.mock("@wordpress/i18n", () => ({
@@ -34,6 +37,9 @@ vi.mock("@wordpress/i18n", () => ({
 }));
 
 const updateMock = vi.hoisted(() => vi.fn());
+const apiFetchMock = vi.hoisted(() => vi.fn());
+// The network edge: the thin suggest pass the page runs once on load.
+vi.mock("@wordpress/api-fetch", () => ({ default: apiFetchMock }));
 const suggestMock = vi.hoisted(() => ({ fn: vi.fn() }));
 const eligibilityMock = vi.hoisted(() => ({
   current: "eligible" as "eligible" | "locked" | "unknown",
@@ -46,6 +52,7 @@ const presetsMock = vi.hoisted(() => ({
 
 vi.mock("@/features/settings", () => ({
   useDefaultProviders: () => ({ defaultImageProvider: "gemini" }),
+  usePublicSiteProfile: () => ({ data: { name: "Acme", publicUrl: "", homeUrl: "" } }),
   useLicense: () => ({
     plan: "cloud",
     isPaidLicense: true,
@@ -103,6 +110,18 @@ vi.mock("@/components/Layout/PageSubtitle", () => ({
 
 import { VisualsPage } from "../VisualsPage";
 
+/** The page needs a query client (the signature hooks) and toasts. */
+function render(ui: ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return rtlRender(
+    <QueryClientProvider client={client}>
+      <ToastProvider>{ui}</ToastProvider>
+    </QueryClientProvider>
+  );
+}
+
 function boundPreset(overrides: Record<string, unknown> = {}) {
   return {
     presetId: "p1",
@@ -134,6 +153,9 @@ function renderPage() {
 }
 
 beforeEach(() => {
+  apiFetchMock
+    .mockReset()
+    .mockResolvedValue({ suggestion: null, homepageRead: false, reason: "error" });
   updateMock.mockReset().mockResolvedValue({ success: true });
   suggestMock.fn.mockReset();
   eligibilityMock.current = "eligible";
@@ -246,10 +268,11 @@ describe("VisualsPage — Video section (eligible plan)", () => {
       ).toHaveValue("NEW VIDEO DIRECTION"),
     );
     // The image prompt is a sibling, never merged — the video suggest
-    // must not replace it.
-    expect(
-      screen.getByRole("textbox", { name: /global art direction/i }),
-    ).toHaveValue("IMAGE STYLE PROMPT");
+    // must not replace it. The preset has no signature, so it shows as the
+    // free prompt.
+    expect(screen.getByRole("textbox", { name: /your prompt/i })).toHaveValue(
+      "IMAGE STYLE PROMPT",
+    );
 
     // The drafted palette rides the next save.
     fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
@@ -265,24 +288,11 @@ describe("VisualsPage — Video section (eligible plan)", () => {
     });
   });
 
-  it("image suggest also fills the video art direction + palette (one pass, both siblings)", async () => {
-    suggestMock.fn.mockResolvedValue({
-      prompt: "NEW IMAGE STYLE",
-      videoArtDirection: "NEW VIDEO DIRECTION",
-      palette: ["#ABCDEF"],
-    });
+  it("keeps the video suggest when the image-style suggest panel is gone", () => {
     renderPage();
 
-    fireEvent.click(screen.getByRole("button", { name: /suggest image style/i }));
-
-    await waitFor(() =>
-      expect(
-        screen.getByRole("textbox", { name: /global art direction/i }),
-      ).toHaveValue("NEW IMAGE STYLE"),
-    );
-    expect(
-      screen.getByRole("textbox", { name: /video art direction/i }),
-    ).toHaveValue("NEW VIDEO DIRECTION");
+    expect(screen.getByRole("button", { name: /suggest video style/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /suggest image style/i })).toBeNull();
   });
 });
 

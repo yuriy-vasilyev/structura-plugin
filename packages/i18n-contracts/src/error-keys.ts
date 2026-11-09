@@ -198,6 +198,9 @@ export const ERROR_KEYS = {
     removeMembersFirst: "account.removeMembersFirst",
   },
   sites: {
+    // Visual signature plan gate (specs/visual-signatures.md §7): the
+    // library and the builder come with paid plans.
+    visualSignatureGated: "sites.visualSignatureGated",
     // Hard cap on the number of sites (activations) a license may own,
     // shared across surfaces (WP + Headless). Surfaced by the portal
     // "Add Site" flow when `activationsCount >= maxSites` so it can prompt an

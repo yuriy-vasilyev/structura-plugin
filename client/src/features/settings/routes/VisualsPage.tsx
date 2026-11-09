@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createRef, useEffect, useId, useMemo, useRef, useState, type RefObject } from "react";
 import { useSearchParams } from "react-router";
 import { __, sprintf } from "@wordpress/i18n";
 import {
@@ -19,6 +19,7 @@ import {
 import {
   useDefaultProviders,
   useLicense,
+  usePublicSiteProfile,
   useVisualPresetMutations,
   useVisualPresetsQuery,
   useVisualQuery,
@@ -35,21 +36,53 @@ import {
   Select,
   Switch,
   TextArea,
+  toast,
 } from "@structura/ui";
+import { canUseSignatureLibrary, isManagedPlan, type PlanId } from "@structura/types";
 import { AIProvider } from "@/features/campaigns/types";
 import { PageTitle } from "@/components/Layout/PageTitle";
 import { PageDescription } from "@/components/Layout/PageSubtitle";
 import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
 import { docsUrl } from "@/utils/docsUrl";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
+import { humanizeSuggestionError } from "@/hooks/humanizeSuggestionError";
 import {
   ContextField,
   SuggestStrategySection,
 } from "@/features/campaigns/components/SuggestStrategySection";
-import type { VisualContent, VisualPresetWire } from "@/features/settings/api/useVisualPresets";
-import { MEDIUM_OPTIONS } from "../visualMediumOptions";
+import {
+  isPlanGatedError,
+  useSuggestVisualSignatureMutation,
+  useVisualSignatureSuggestion,
+  type VisualContent,
+  type VisualPresetWire,
+  type VisualSignatureSuggestion,
+} from "@/features/settings/api/useVisualPresets";
+import {
+  selectOwnActivationUsage,
+  useUsageAnalytics,
+} from "@/features/dashboard/api/useUsageAnalytics";
 import { useVideoStylingEligibility } from "@/features/channels/hooks/useVideoStylingEligibility";
 import { VideoPresetSection, VideoStylingGateTeaser } from "../components/VideoPresetSection";
+import { SignaturePicker } from "../signatures/SignaturePicker";
+import { SignatureBuilder } from "../signatures/SignatureBuilder";
+import { BrandPaletteField } from "../signatures/BrandPaletteField";
+import { SignaturePreview } from "../signatures/SignaturePreview";
+import { signatureName } from "../signatures/signatureCopy";
+import {
+  BUILDER_FIELDS,
+  curatedSelection,
+  customDraftFromChoice,
+  houseSelection,
+  missingCustomFields,
+  newCustomDraft,
+  orderedSignatures,
+  selectionFromChoice,
+  signatureForSelection,
+  type BuilderField,
+  type CustomSignatureDraft,
+  type SignatureSelection,
+} from "../signatures/signatureModel";
 
 const aspectRatioOptions = [
   { value: "1:1", label: __("1:1 Square Format", "structura") },
@@ -101,6 +134,75 @@ function emptyDraft(fallbackFormat: string, paid: boolean): DraftState {
   };
 }
 
+/**
+ * The preset content a save sends. `signature` is the picked choice; the
+ * free prompt sends `null` on update (clearing a stored signature) and
+ * nothing on create, where absent already means free (spec §4).
+ */
+function buildContent(
+  d: DraftState,
+  selection: SignatureSelection,
+  custom: CustomSignatureDraft | null,
+  isCreate: boolean
+): VisualContent {
+  const signature = signatureForSelection(selection, custom);
+  return {
+    global_art_direction: d.global_art_direction,
+    aspect_ratio: d.aspect_ratio,
+    format: d.format,
+    optimize_on_upload: d.optimize_on_upload,
+    medium: d.medium ?? "photography",
+    ai_label: d.ai_label ?? false,
+    // Video keys are omitted (not defaulted) when the draft carries
+    // nothing — an untouched or plan-locked section must never overwrite
+    // a preset's saved video styling. See VisualContent's docblock.
+    ...(d.video_style !== undefined ? { video_style: d.video_style } : {}),
+    ...(d.video_art_direction !== undefined ? { video_art_direction: d.video_art_direction } : {}),
+    ...(d.caption_placement !== undefined ? { caption_placement: d.caption_placement } : {}),
+    ...(d.palette !== undefined ? { palette: d.palette } : {}),
+    ...(signature || !isCreate ? { signature } : {}),
+  };
+}
+
+/** An unbound site's first draft takes the thin pass's palette when it found one (spec §7). */
+function withScrapedPalette(
+  d: DraftState,
+  suggestion: VisualSignatureSuggestion | null | undefined
+): DraftState {
+  return suggestion && suggestion.palette.length > 0 ? { ...d, palette: suggestion.palette } : d;
+}
+
+/** The save payload as one string: "Unsaved changes" shows while it differs from the loaded one. */
+function snapshotOf(
+  d: DraftState,
+  selection: SignatureSelection,
+  custom: CustomSignatureDraft | null,
+  isCreate: boolean
+): string {
+  return JSON.stringify({ label: d.label, content: buildContent(d, selection, custom, isCreate) });
+}
+
+/** Where a page action sends keyboard focus once it has rendered. */
+type FocusTarget = "name" | BuilderField | "builder" | "custom-card" | "free-prompt";
+
+/** A managed plan's reset date when this site's images for the month are used up, else null. */
+function useImagesResetOn(): string | null {
+  const { data } = useUsageAnalytics();
+  const cycle = data?.cycleUsage;
+  if (!cycle || cycle.kind !== "managed" || cycle.unmetered) return null;
+  const usage =
+    selectOwnActivationUsage(
+      cycle,
+      typeof window !== "undefined" ? window.structuraConfig?.activation_id : undefined
+    ) ?? cycle.workspace;
+  if (usage.imagesIncluded <= 0 || usage.imagesUsed < usage.imagesIncluded) return null;
+  const lang = typeof document !== "undefined" ? document.documentElement.lang : "";
+  return new Date(cycle.cycleResetsAt).toLocaleDateString(lang || undefined, {
+    day: "numeric",
+    month: "long",
+  });
+}
+
 export const VisualsPage = () => {
   const { plan, isPaidLicense } = useLicense();
   const { data: presetsData, isLoading: isLoadingPresets } = useVisualPresetsQuery();
@@ -120,7 +222,11 @@ export const VisualsPage = () => {
     isBinding,
   } = useVisualPresetMutations();
   const { suggest, isSuggesting } = useMagicSuggest();
-  const { defaultImageProvider, isCloud } = useDefaultProviders();
+  const { defaultImageProvider, defaultTextProvider, isCloud } = useDefaultProviders();
+  const { data: profile } = usePublicSiteProfile();
+  const suggestion = useVisualSignatureSuggestion(presetsData?.visualSuggestion);
+  const suggestSignature = useSuggestVisualSignatureMutation();
+  const imagesResetOn = useImagesResetOn();
 
   const boundPreset = useMemo(() => {
     if (!presetsData) return null;
@@ -138,21 +244,115 @@ export const VisualsPage = () => {
   const [isPristine, setIsPristine] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState<VisualPresetWire | null>(null);
 
+  // Visual signature (specs/visual-signatures.md §8, handoff §2): what the
+  // picker has checked, the custom draft behind "Your own", and whether the
+  // builder replaces the grid. One Save in the header saves all of it.
+  const [selection, setSelection] = useState<SignatureSelection>(houseSelection);
+  const [custom, setCustom] = useState<CustomSignatureDraft | null>(null);
+  const [mode, setMode] = useState<"picker" | "builder">("picker");
+  const [customErrors, setCustomErrors] = useState<ReadonlySet<"name" | BuilderField>>(new Set());
+  const [scanning, setScanning] = useState(false);
+  // The save payload as loaded; "Unsaved changes" compares against it.
+  const [baseline, setBaseline] = useState<string | null>(null);
+
+  const boundSelection = useMemo(
+    () => (boundPreset ? selectionFromChoice(boundPreset.signature) : null),
+    [boundPreset]
+  );
+
   // `draft` is deliberately NOT in the deps: `setDraft(presetToDraft(...))`
   // returns a fresh object reference, so including it would re-run the
   // effect with each new draft → setDraft loop → "Maximum update depth
-  // exceeded" → AppErrorBoundary jams the route. We use the functional
-  // setter for the unbound init branch to read the current `draft` without
-  // a dep.
+  // exceeded" → AppErrorBoundary jams the route.
   useEffect(() => {
     if (!presetsData || isPaidLicense === undefined) return;
     if (!isPristine) return;
+    const seed = (
+      next: DraftState,
+      nextSelection: SignatureSelection,
+      nextCustom: CustomSignatureDraft | null
+    ) => {
+      setDraft(next);
+      setSelection(nextSelection);
+      setCustom(nextCustom);
+      setMode("picker");
+      setCustomErrors(new Set());
+      setBaseline(snapshotOf(next, nextSelection, nextCustom, !boundPreset));
+    };
     if (boundPreset) {
-      setDraft(presetToDraft(boundPreset, isPaidLicense ? "webp" : "png"));
+      seed(
+        presetToDraft(boundPreset, isPaidLicense ? "webp" : "png"),
+        selectionFromChoice(boundPreset.signature),
+        customDraftFromChoice(boundPreset.signature)
+      );
     } else {
-      setDraft((prev) => prev ?? emptyDraft("webp", !!isPaidLicense));
+      // Unbound: the house signature, or the thin pass's pick when the plan
+      // opens the library, in the scraped palette (spec §7). Save creates the
+      // preset and binds it.
+      seed(
+        withScrapedPalette(emptyDraft("webp", !!isPaidLicense), suggestion),
+        suggestion && canUseSignatureLibrary(plan)
+          ? curatedSelection(suggestion.pick)
+          : houseSelection(),
+        null
+      );
     }
-  }, [presetsData, boundPreset, isPaidLicense, isPristine]);
+  }, [presetsData, boundPreset, isPaidLicense, isPristine, suggestion, plan]);
+
+  // The thin pass's pick marks a card on every plan (spec §6). The preset
+  // list carries the pick stored on the activation; only when it has none
+  // does the page run the pass, once per page load.
+  const autoSuggested = useRef(false);
+  useEffect(() => {
+    if (autoSuggested.current || suggestion !== undefined) return;
+    if (plan === "none" || !presetsData) return;
+    autoSuggested.current = true;
+    suggestSignature.mutate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suggestion, plan, presetsData]);
+
+  // Focus follows the page's own moves (handoff §2.3, §2.4): into the free
+  // prompt, onto the builder heading, back to the custom card, or to the
+  // first field a save found empty.
+  const builderHeadingRef = useRef<HTMLHeadingElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const fieldRefs = useMemo(
+    () =>
+      Object.fromEntries(
+        BUILDER_FIELDS.map((field) => [field, createRef<HTMLTextAreaElement>()])
+      ) as Record<BuilderField, RefObject<HTMLTextAreaElement>>,
+    []
+  );
+  const customCardRef = useRef<HTMLButtonElement>(null);
+  const freePromptRef = useRef<HTMLTextAreaElement>(null);
+  const idBase = useId();
+  const signatureHeadingId = `${idBase}-signature`;
+  const builderHeadingId = `${idBase}-builder`;
+  const paletteHeadingId = `${idBase}-palette`;
+  const previewHeadingId = `${idBase}-preview`;
+  // Every move that sets a target also changes state, so the render it
+  // causes runs this effect once the target exists.
+  const pendingFocus = useRef<FocusTarget | null>(null);
+  const setFocusTarget = (target: FocusTarget) => {
+    pendingFocus.current = target;
+  };
+  useEffect(() => {
+    const target = pendingFocus.current;
+    if (!target) return;
+    const node =
+      target === "builder"
+        ? builderHeadingRef.current
+        : target === "custom-card"
+          ? customCardRef.current
+          : target === "free-prompt"
+            ? freePromptRef.current
+            : target === "name"
+              ? nameRef.current
+              : fieldRefs[target].current;
+    if (!node) return;
+    pendingFocus.current = null;
+    node.focus();
+  });
 
   // ── Video styling (video-visuals handoff §1) ─────────────────────────
   // Gate comes from the Video channel's cloud-computed catalog
@@ -194,66 +394,155 @@ export const VisualsPage = () => {
 
   const isShared = (boundPreset?.boundActivationCount ?? 0) > 1;
   const isBusy = isCreating || isUpdating || isForking || isRemoving || isBinding;
+  const isDirty =
+    draft !== null &&
+    baseline !== null &&
+    snapshotOf(draft, selection, custom, !boundPreset) !== baseline;
+  const upgradeHref = buildMarketingPricingUrl({
+    intent: "unlock_visuals",
+    domain: typeof window !== "undefined" ? window.location.hostname : undefined,
+    plan,
+  });
+  const siteName = profile?.name ?? "";
 
   const updateDraft = (patch: Partial<DraftState>) => {
     setIsPristine(false);
     setDraft((prev) => (prev ? { ...prev, ...patch } : null));
   };
 
-  const buildContent = (d: DraftState): VisualContent => ({
-    global_art_direction: d.global_art_direction,
-    aspect_ratio: d.aspect_ratio,
-    format: d.format,
-    optimize_on_upload: d.optimize_on_upload,
-    medium: d.medium ?? "photography",
-    ai_label: d.ai_label ?? false,
-    // Video keys are omitted (not defaulted) when the draft carries
-    // nothing — an untouched or plan-locked section must never overwrite
-    // a preset's saved video styling. See VisualContent's docblock.
-    ...(d.video_style !== undefined ? { video_style: d.video_style } : {}),
-    ...(d.video_art_direction !== undefined ? { video_art_direction: d.video_art_direction } : {}),
-    ...(d.caption_placement !== undefined ? { caption_placement: d.caption_placement } : {}),
-    ...(d.palette !== undefined ? { palette: d.palette } : {}),
-  });
+  const selectSignature = (next: SignatureSelection) => {
+    setIsPristine(false);
+    setSelection(next);
+  };
+
+  const openBuilder = () => {
+    setIsPristine(false);
+    setCustom((prev) => prev ?? newCustomDraft(siteName));
+    setSelection({ kind: "custom" });
+    setMode("builder");
+    setFocusTarget("builder");
+  };
+
+  /**
+   * The content to save, or null when a custom signature still misses a
+   * field: then the builder opens with the errors and focus on the first
+   * (handoff §2.4), and nothing is sent.
+   */
+  const contentToSave = (): VisualContent | null => {
+    if (!draft) return null;
+    if (selection.kind === "custom") {
+      const draftCustom = custom ?? newCustomDraft(siteName);
+      const missing = missingCustomFields(draftCustom);
+      if (missing.length > 0) {
+        setCustom(draftCustom);
+        setCustomErrors(new Set(missing));
+        setMode("builder");
+        setFocusTarget(missing[0]);
+        return null;
+      }
+    }
+    return buildContent(draft, selection, custom, !boundPreset);
+  };
+
+  // A refused signature (the plan gate, spec §7) puts the picker back on the
+  // saved choice; the mutation already showed the toast.
+  const handleSaveError = (err: unknown) => {
+    if (!isPlanGatedError(err)) return;
+    setSelection(boundSelection ?? houseSelection());
+    setMode("picker");
+  };
 
   const handleSaveBound = async () => {
-    if (!draft) return;
-    if (!boundPreset) {
-      // Unbound — create a new preset for this site and bind it.
-      await create({
-        label: draft.label || __("Site default", "structura"),
-        content: buildContent(draft),
-        bind_to_activation: true,
-      });
+    const content = contentToSave();
+    if (!draft || !content) return;
+    try {
+      if (!boundPreset) {
+        // Unbound — create a new preset for this site and bind it.
+        await create({
+          label: draft.label || __("Site default", "structura"),
+          content,
+          bind_to_activation: true,
+        });
+      } else {
+        await update({
+          preset_id: boundPreset.presetId,
+          label: draft.label,
+          content,
+        });
+      }
       setIsPristine(true);
-      return;
+    } catch (err) {
+      handleSaveError(err);
     }
-    await update({
-      preset_id: boundPreset.presetId,
-      label: draft.label,
-      content: buildContent(draft),
-    });
-    setIsPristine(true);
   };
 
   const handleSaveAsNew = async () => {
-    if (!draft || !boundPreset) return;
+    const content = contentToSave();
+    if (!draft || !boundPreset || !content) return;
     // Fork from the currently-bound preset, then apply the in-progress
     // edits to the new fork. Two-step because the cloud's fork endpoint
     // clones the source verbatim — we update right after to land the
     // user's edits on the new doc rather than the source.
-    const result = await fork({
-      preset_id: boundPreset.presetId,
-      label: draft.label || `${boundPreset.label} (this site)`,
-      bind_to_activation: true,
-    });
-    if (result?.preset?.presetId) {
-      await update({
-        preset_id: result.preset.presetId,
-        content: buildContent(draft),
+    try {
+      const result = await fork({
+        preset_id: boundPreset.presetId,
+        label: draft.label || `${boundPreset.label} (this site)`,
+        bind_to_activation: true,
       });
+      if (result?.preset?.presetId) {
+        await update({ preset_id: result.preset.presetId, content });
+      }
+      setIsPristine(true);
+    } catch (err) {
+      handleSaveError(err);
     }
-    setIsPristine(true);
+  };
+
+  // "Scan my site" and "Re-scan site": rerun the thin pass, replacing the
+  // palette and the pick (spec §6).
+  const handleScan = async () => {
+    setScanning(true);
+    try {
+      const result = await suggestSignature.mutateAsync();
+      if (result && result.palette.length > 0) {
+        updateDraft({ palette: result.palette });
+      } else {
+        toast.error(
+          __("Couldn’t read your site’s colours right now. Try again in a moment.", "structura")
+        );
+      }
+    } catch (err) {
+      toast.error(humanizeSuggestionError(err, { isManagedAiPlan: isManagedPlan(plan as PlanId) }));
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const draftSources: ContextField[] = [
+    ...(profile?.publicUrl || profile?.homeUrl
+      ? [{ title: profile?.name || "Homepage", url: profile.publicUrl || profile.homeUrl }]
+      : []),
+    ...(legacyConfig?.logo_url ? [{ title: "Site Logo", url: legacyConfig.logo_url }] : []),
+  ];
+
+  const previewRequest = () => {
+    if (!draft) return null;
+    if (selection.kind === "custom") {
+      // Same check as Save: the cloud refuses a custom signature with an empty field.
+      if (!contentToSave()) return null;
+    } else if (selection.kind === "free" && !draft.global_art_direction.trim()) {
+      return null;
+    }
+    return {
+      signature: signatureForSelection(selection, custom),
+      ...(selection.kind === "free"
+        ? {
+            global_art_direction: draft.global_art_direction,
+            medium: draft.medium ?? "photography",
+          }
+        : {}),
+      palette: draft.palette ?? [],
+    };
   };
 
   const handleUseHere = async (presetId: string) => {
@@ -294,22 +583,6 @@ export const VisualsPage = () => {
         ? { palette: data.palette as string[] }
         : {}),
     };
-  };
-
-  const handleMagicStyle = async (provider: string, context: ContextField[]) => {
-    const data = await suggest("visual", {
-      provider: provider as AIProvider,
-      context,
-      medium: draft?.medium ?? "photography",
-    });
-    if (data?.prompt) {
-      // One pass fills both siblings (handoff §1): the image prompt AND
-      // the video art direction + palette when the response carries them.
-      updateDraft({
-        global_art_direction: data.prompt,
-        ...videoPatchFromSuggestion(data),
-      });
-    }
   };
 
   /**
@@ -379,12 +652,17 @@ export const VisualsPage = () => {
           </PageDescription>
         </div>
 
-        {!isShared && (
-          <Button onClick={handleSaveBound} disabled={isBusy} loading={isUpdating || isCreating}>
-            <Save className="size-4" />
-            <span className="ml-2">{__("Save Changes", "structura")}</span>
-          </Button>
-        )}
+        <div className="flex flex-wrap items-center gap-3">
+          <span role="status" className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+            {isDirty ? __("Unsaved changes", "structura") : ""}
+          </span>
+          {!isShared && (
+            <Button onClick={handleSaveBound} disabled={isBusy} loading={isUpdating || isCreating}>
+              <Save className="size-4" />
+              <span className="ml-2">{__("Save Changes", "structura")}</span>
+            </Button>
+          )}
+        </div>
       </header>
 
       {/* UNBOUND BANNER */}
@@ -446,114 +724,125 @@ export const VisualsPage = () => {
         {/* MAIN ART DIRECTION PANEL */}
         <div className="space-y-6 lg:col-span-2">
           <Card>
-            <div className="mb-6">
-              <h3 className="m-0! mb-6! flex! items-center gap-2 text-sm font-bold tracking-wider text-gray-900 uppercase dark:text-white">
-                <Palette className="text-brand-500 h-4 w-4" />
-                {__("Global Image Style", "structura")}
-              </h3>
-              <SuggestStrategySection
-                isStrategizing={isSuggesting}
-                onGenerate={async (provider, context) => {
-                  await handleMagicStyle(provider, context);
-                }}
-                toggleButtonLabel={__("Suggest Image Style", "structura")}
-                contextFieldLabel={__(
-                  "Brand Resources (logo, guidelines, design system URL…)",
-                  "structura"
-                )}
-                addSourceLabel={__("Add Resource", "structura")}
-                ctaButtonLabel={__("Generate Image Style", "structura")}
-                placeholder={{
-                  title: __("Company logo", "structura"),
-                  url: `${window.location.origin}/logo.png`,
-                }}
-                initialSources={
-                  legacyConfig?.logo_url
-                    ? [{ title: __("Site Logo", "structura"), url: legacyConfig.logo_url }]
-                    : undefined
-                }
+            <div className="max-w-[420px]">
+              <InputField
+                labelStyle="prominent"
+                label={__("Preset name", "structura")}
+                value={draft.label}
+                onChange={(e) => updateDraft({ label: e.target.value })}
+                placeholder={__("Site default", "structura")}
               />
             </div>
 
-            <InputField
-              label={__("Preset name", "structura")}
-              value={draft.label}
-              onChange={(e) => updateDraft({ label: e.target.value })}
-              placeholder={__("Site default", "structura")}
-              className="mb-6"
-            />
+            <div className="my-6 h-px bg-neutral-200 dark:bg-neutral-800" />
 
-            {/* Image medium — the look applied to every generated image
-             * (the image prompt reads it on every generation since
-             * 2026-10-05), and the medium "Suggest Image Style" drafts in.
-             * A saved setting on every plan, not a Suggest parameter. */}
-            <p className="mt-0! mb-2! text-xs font-medium tracking-widest text-gray-400 uppercase dark:text-gray-500">
-              {__("Image medium", "structura")}
-            </p>
-            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {MEDIUM_OPTIONS.map((opt) => {
-                const Icon = opt.icon;
-                const active = (draft.medium ?? "photography") === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => updateDraft({ medium: opt.value })}
-                    className={cn(
-                      "flex cursor-pointer flex-col gap-1.5 rounded-xl border p-3 text-left transition-all duration-200",
-                      active
-                        ? "border-brand-500 bg-brand-50/60 dark:border-brand-400 dark:bg-brand-950/30"
-                        : "hover:border-brand-300 dark:hover:border-brand-500/40 border-gray-200 hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-sm dark:border-neutral-800 dark:hover:bg-neutral-800/40"
-                    )}
+            {/* Signature (specs/visual-signatures.md §8): the picker, or the
+             * builder in its place so Palette and Preview below render the
+             * unsaved draft (handoff decision 5). */}
+            {mode === "builder" && custom ? (
+              <SignatureBuilder
+                headingId={builderHeadingId}
+                headingRef={builderHeadingRef}
+                nameRef={nameRef}
+                fieldRefs={fieldRefs}
+                draft={custom}
+                onUpdate={(update) => {
+                  setIsPristine(false);
+                  setCustom((prev) => update(prev ?? newCustomDraft(siteName)));
+                }}
+                errors={customErrors}
+                onFieldEdited={(field) =>
+                  setCustomErrors((prev) => {
+                    if (!prev.has(field)) return prev;
+                    const next = new Set(prev);
+                    next.delete(field);
+                    return next;
+                  })
+                }
+                onBack={() => {
+                  setMode("picker");
+                  setFocusTarget("custom-card");
+                }}
+                draftProvider={defaultTextProvider}
+                draftSources={draftSources}
+              />
+            ) : (
+              <section aria-labelledby={signatureHeadingId} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                  <h3
+                    id={signatureHeadingId}
+                    className="m-0! text-base font-bold tracking-tight text-neutral-900 dark:text-white"
                   >
-                    <span
-                      className={cn(
-                        "flex h-7 w-7 items-center justify-center rounded-lg",
-                        active
-                          ? "bg-brand-500 text-white"
-                          : "bg-gray-100 text-gray-500 dark:bg-neutral-800 dark:text-neutral-400"
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <span className="text-[13px] font-bold text-gray-900 dark:text-white">
-                      {opt.label}
-                    </span>
-                    <span className="text-[11.5px] leading-snug text-gray-500 dark:text-neutral-400">
-                      {opt.desc}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+                    {__("Signature", "structura")}
+                  </h3>
+                  <p className="m-0! max-w-[62ch] text-[13px] leading-relaxed text-neutral-500 dark:text-neutral-400">
+                    {__(
+                      "Pick the look every image on this site shares. Examples are shown in neutral colours.",
+                      "structura"
+                    )}
+                  </p>
+                </div>
+                <SignaturePicker
+                  labelledBy={signatureHeadingId}
+                  signatures={orderedSignatures()}
+                  selection={selection}
+                  bound={boundSelection}
+                  plan={plan}
+                  pickId={suggestion?.pick}
+                  reason={suggestion?.reason}
+                  upgradeHref={upgradeHref}
+                  onSelect={selectSignature}
+                  extras={{
+                    custom,
+                    onOpenBuilder: openBuilder,
+                    onSelectFree: () => {
+                      selectSignature({ kind: "free" });
+                      setFocusTarget("free-prompt");
+                    },
+                  }}
+                  customCardRef={customCardRef}
+                />
+                {selection.kind === "free" && (
+                  <TextArea
+                    ref={freePromptRef}
+                    labelStyle="prominent"
+                    label={__("Your prompt", "structura")}
+                    description={__(
+                      "Describe the technique, recurring subjects and framing. We add your brand palette to it.",
+                      "structura"
+                    )}
+                    placeholder={__(
+                      "Describe the look: technique, recurring subjects, framing, what to avoid",
+                      "structura"
+                    )}
+                    rows={6}
+                    className="font-mono"
+                    value={draft.global_art_direction}
+                    onChange={(e) => updateDraft({ global_art_direction: e.target.value })}
+                  />
+                )}
+              </section>
+            )}
 
-            <p className="mt-0! mb-4! text-xs font-medium tracking-widest text-gray-400 uppercase dark:text-gray-500">
-              {__(
-                "Inject a consistent visual style into every image generated across this site.",
-                "structura"
-              )}
-            </p>
+            <div className="mt-7 mb-6 h-px bg-neutral-200 dark:bg-neutral-800" />
 
-            <TextArea
-              label={__("Global Art Direction", "structura")}
-              rows={14}
-              value={draft.global_art_direction}
-              onChange={(e) => updateDraft({ global_art_direction: e.target.value })}
-              placeholder={__("Enter global art direction directives...", "structura")}
-              className="w-full rounded-2xl border-gray-200 bg-gray-50 font-mono text-sm leading-relaxed dark:border-neutral-800 dark:bg-neutral-950"
-              hiddenLabel
+            <BrandPaletteField
+              headingId={paletteHeadingId}
+              palette={draft.palette ?? []}
+              onChange={(palette) => updateDraft({ palette })}
+              scanning={scanning}
+              onScan={handleScan}
             />
 
-            <div className="border-brand-100 bg-brand-50/50 dark:border-brand-900/30 dark:bg-brand-950/20 mt-6 flex items-start gap-3 rounded-xl border p-4">
-              <Info className="text-brand-500 mt-0.5 h-4 w-4" />
-              <p className="text-brand-900 dark:text-brand-300 m-0! text-xs leading-relaxed italic">
-                {__(
-                  "This directive is injected into the latent space of every generation to maintain a cohesive visual identity for this site.",
-                  "structura"
-                )}
-              </p>
-            </div>
+            <div className="my-6 h-px bg-neutral-200 dark:bg-neutral-800" />
+
+            <SignaturePreview
+              headingId={previewHeadingId}
+              locked={!canUseSignatureLibrary(plan)}
+              upgradeHref={upgradeHref}
+              imagesResetOn={imagesResetOn}
+              buildRequest={previewRequest}
+            />
 
             {/* VIDEO — preset-owned video styling (handoff §1). Anchor id +
              * highlight make this the `?section=video` deep-link target;
@@ -803,8 +1092,13 @@ export const VisualsPage = () => {
                       )}
                     </Badge>
                   </div>
-                  <p className="mt-1!line-clamp-2 mb-0! text-xs text-gray-500 dark:text-gray-400">
-                    {p.globalArtDirection || __("(no art direction)", "structura")}
+                  <p className="mt-1! mb-0! line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                    {/* A preset with a signature renders that, not its free text. */}
+                    {p.signature?.kind === "curated"
+                      ? signatureName(p.signature.id)
+                      : p.signature?.kind === "custom"
+                        ? p.signature.name
+                        : p.globalArtDirection || __("(no art direction)", "structura")}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">

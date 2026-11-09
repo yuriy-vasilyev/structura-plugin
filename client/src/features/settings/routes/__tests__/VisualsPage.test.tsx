@@ -16,10 +16,23 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render as rtlRender, screen, waitFor, within } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ToastProvider } from "@structura/ui";
+import type { ReactElement } from "react";
 import { MemoryRouter } from "react-router";
 
-const { licenseMock, presetsQueryMock, updateMock, createMock, forkMock, suggestMock, cloudMock } = vi.hoisted(() => ({
+const {
+  licenseMock,
+  presetsQueryMock,
+  updateMock,
+  createMock,
+  forkMock,
+  suggestMock,
+  cloudMock,
+  apiFetchMock,
+} = vi.hoisted(() => ({
+  apiFetchMock: vi.fn(),
   cloudMock: { isCloud: true },
   licenseMock: vi.fn(() => ({ plan: "none", isPaidLicense: false })),
   presetsQueryMock: vi.fn(() => ({ data: undefined as unknown, isLoading: false })),
@@ -35,6 +48,9 @@ vi.mock("@wordpress/i18n", () => ({
     text.replace(/%s|%d/g, () => String(args.shift() ?? "")),
 }));
 
+// The network edge: the thin suggest pass the page runs once on load.
+vi.mock("@wordpress/api-fetch", () => ({ default: apiFetchMock }));
+
 vi.mock("@/features/settings", () => ({
   // `isCloud` keeps SuggestStrategySection's ProviderPill out of the tree.
   useDefaultProviders: () => ({
@@ -49,6 +65,7 @@ vi.mock("@/features/settings", () => ({
   // disconnected case. The 1.8a `!isLicensed` gate was a strict
   // superset; this is the narrower discriminator.
   useLicense: licenseMock,
+  usePublicSiteProfile: () => ({ data: { name: "Northfield Garden", publicUrl: "", homeUrl: "" } }),
   useVisualPresetMutations: () => ({
     create: createMock,
     update: updateMock,
@@ -106,6 +123,24 @@ vi.mock("@structura/ui", async () => {
 
 import { VisualsPage } from "../VisualsPage";
 
+/** The page needs a query client (the signature hooks) and toasts. */
+function render(ui: ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return rtlRender(
+    <QueryClientProvider client={client}>
+      <ToastProvider>{ui}</ToastProvider>
+    </QueryClientProvider>
+  );
+}
+
+beforeEach(() => {
+  apiFetchMock
+    .mockReset()
+    .mockResolvedValue({ suggestion: null, homepageRead: false, reason: "error" });
+});
+
 describe("VisualsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -144,148 +179,6 @@ describe("VisualsPage", () => {
 
     expect(screen.queryByTestId("page-loader")).not.toBeInTheDocument();
     expect(screen.queryByText("Calibrating Optics…")).not.toBeInTheDocument();
-  });
-});
-
-/**
- * Image medium cards (restored 2026-10-05). The image prompt reads the
- * preset's medium on every generated image, so the medium is a saved
- * setting again: a card picker on every plan, persisted with the preset,
- * and the medium "Suggest Image Style" drafts in. It used to be settable
- * only from the Suggest dropdown, so Free could not change it at all.
- */
-describe("VisualsPage image medium cards", () => {
-  const boundPreset = {
-    presetId: "preset-bound",
-    label: "Bound Preset",
-    globalArtDirection: "STYLE: my own words",
-    aspectRatio: "16:9",
-    format: "webp",
-    optimizeOnUpload: true,
-    medium: "illustration",
-    boundActivationCount: 1,
-  };
-  const presetsData = () => ({ presets: [{ ...boundPreset }], boundPresetId: "preset-bound" });
-  const card = (label: string) => screen.getByRole("button", { name: new RegExp(`^${label}`) });
-  const renderPage = () =>
-    render(
-      <MemoryRouter>
-        <VisualsPage />
-      </MemoryRouter>
-    );
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    licenseMock.mockReturnValue({ plan: "byok", isPaidLicense: true });
-    presetsQueryMock.mockReturnValue({ data: presetsData(), isLoading: false });
-    updateMock.mockResolvedValue({});
-    suggestMock.mockResolvedValue({ prompt: "STYLE: drafted" });
-  });
-
-  it("renders three cards with the bound preset's medium pressed", () => {
-    renderPage();
-
-    expect(card("Photography")).toHaveAttribute("aria-pressed", "false");
-    expect(card("Illustration")).toHaveAttribute("aria-pressed", "true");
-    expect(card("3D render")).toHaveAttribute("aria-pressed", "false");
-  });
-
-  it("picking a card marks the draft dirty without suggesting, and Save persists it", async () => {
-    const view = renderPage();
-
-    fireEvent.click(card("3D render"));
-
-    expect(card("3D render")).toHaveAttribute("aria-pressed", "true");
-    expect(card("Illustration")).toHaveAttribute("aria-pressed", "false");
-    expect(suggestMock).not.toHaveBeenCalled();
-    expect(screen.getByDisplayValue("STYLE: my own words")).toBeInTheDocument();
-
-    // Dirty: a background refetch (fresh object) must not reset the pick.
-    presetsQueryMock.mockReturnValue({ data: presetsData(), isLoading: false });
-    view.rerender(
-      <MemoryRouter>
-        <VisualsPage />
-      </MemoryRouter>
-    );
-    expect(card("3D render")).toHaveAttribute("aria-pressed", "true");
-
-    const save = screen.getByRole("button", { name: "Save Changes" });
-    expect(save).toBeEnabled();
-    fireEvent.click(save);
-
-    await waitFor(() => expect(updateMock).toHaveBeenCalled());
-    const [args] = updateMock.mock.calls[0] as [
-      { preset_id: string; content: Record<string, unknown> },
-    ];
-    expect(args.preset_id).toBe("preset-bound");
-    expect(args.content.medium).toBe("3d_render");
-    expect(args.content.global_art_direction).toBe("STYLE: my own words");
-  });
-
-  it("'Generate Image Style' is a plain button that drafts in the selected medium", async () => {
-    renderPage();
-
-    fireEvent.click(card("Photography"));
-    fireEvent.click(screen.getByRole("button", { name: /Suggest Image Style/ }));
-    const cta = screen.getByRole("button", { name: /Generate Image Style/ });
-    // A plain action, not a menu trigger.
-    expect(cta).not.toHaveAttribute("aria-expanded");
-    fireEvent.click(cta);
-
-    await waitFor(() => expect(suggestMock).toHaveBeenCalled());
-    const [mode, options] = suggestMock.mock.calls[0] as [string, { medium: string }];
-    expect(mode).toBe("visual");
-    expect(options.medium).toBe("photography");
-    await waitFor(() => expect(screen.getByDisplayValue("STYLE: drafted")).toBeInTheDocument());
-    expect(card("Photography")).toHaveAttribute("aria-pressed", "true");
-  });
-
-  it("the medium dropdown and the read-only medium badge are gone", () => {
-    renderPage();
-
-    // Each medium label renders once: on its card, not again in a badge.
-    for (const label of ["Photography", "Illustration", "3D render"]) {
-      expect(screen.getAllByText(label)).toHaveLength(1);
-    }
-    fireEvent.click(screen.getByRole("button", { name: /Suggest Image Style/ }));
-    fireEvent.click(screen.getByRole("button", { name: /Generate Image Style/ }));
-    // No menu opened: still exactly one button per medium.
-    expect(
-      screen.getAllByRole("button", { name: /^(Photography|Illustration|3D render)/ })
-    ).toHaveLength(3);
-  });
-
-  // Magic suggest on every plan (2026-10-06, specs/open-providers.md §8):
-  // until then the panel was disabled with a "Pro" chip on Free.
-  it("a Free install gets a working Suggest Image Style that drafts in the picked medium", async () => {
-    licenseMock.mockReturnValue({ plan: "free", isPaidLicense: false });
-    renderPage();
-
-    const toggle = screen.getByRole("button", { name: /Suggest Image Style/ });
-    expect(toggle).toBeEnabled();
-    expect(toggle).not.toHaveTextContent("Pro");
-    fireEvent.click(card("3D render"));
-    fireEvent.click(toggle);
-    fireEvent.click(screen.getByRole("button", { name: /Generate Image Style/ }));
-
-    await waitFor(() =>
-      expect(suggestMock).toHaveBeenCalledWith("visual", expect.objectContaining({ medium: "3d_render" })),
-    );
-  });
-
-  it("a Free install can change and save the medium", async () => {
-    licenseMock.mockReturnValue({ plan: "free", isPaidLicense: false });
-    renderPage();
-
-    expect(card("Photography")).toBeEnabled();
-    fireEvent.click(card("Photography"));
-    expect(card("Photography")).toHaveAttribute("aria-pressed", "true");
-
-    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
-    await waitFor(() => expect(updateMock).toHaveBeenCalled());
-    const [args] = updateMock.mock.calls[0] as [{ content: Record<string, unknown> }];
-    expect(args.content.medium).toBe("photography");
-    expect(suggestMock).not.toHaveBeenCalled();
   });
 });
 

@@ -81,6 +81,20 @@ describe("PresetRadioCard", () => {
       expect(clean.querySelector("svg")).toBeNull();
     });
 
+    it("draws a /60 focus ring with an offset that matches the card in dark mode", () => {
+      // Visual-signatures handoff §10: the old /40 ring with no offset measured
+      // about 1.7:1 against white.
+      renderGroup();
+      const radio = screen.getByRole("radio", { name: /Clean/ });
+      expect(radio).toHaveClass(
+        "focus-visible:ring-2",
+        "focus-visible:ring-brand-500",
+        "focus-visible:ring-offset-2",
+        "dark:focus-visible:ring-offset-neutral-900"
+      );
+      expect(radio).not.toHaveClass("focus-visible:ring-brand-500/40");
+    });
+
     it("applies the selected border/tint/glow classes in both modes", () => {
       renderGroup({ value: "clean" });
       const selected = screen.getByRole("radio", { name: /Clean/ });
@@ -175,6 +189,31 @@ describe("PresetRadioCard", () => {
         "aria-checked",
         "true"
       );
+    });
+
+    it("leaves arrow keys alone when they come from a control that is not a radio", () => {
+      // Visual-signatures handoff §2.5: footer links and the "Your own" button
+      // sit inside the group. The group used to treat their arrow keys as
+      // "no radio focused" and jumped to (and selected) the first card.
+      function Harness() {
+        const [value, setValue] = useState("kinetic");
+        return (
+          <PresetRadioCardGroup aria-label="Visual style" value={value} onValueChange={setValue}>
+            {PRESETS.map((p) => (
+              <PresetRadioCard key={p.value} value={p.value} name={p.name} />
+            ))}
+            <button type="button">Build your own</button>
+          </PresetRadioCardGroup>
+        );
+      }
+      render(<Harness />);
+      const extra = screen.getByRole("button", { name: "Build your own" });
+      extra.focus();
+      for (const key of ["ArrowRight", "ArrowLeft", "Home", "End"]) {
+        expect(fireEvent.keyDown(extra, { key })).toBe(true);
+      }
+      expect(screen.getByRole("radio", { name: /Kinetic/ })).toHaveAttribute("aria-checked", "true");
+      expect(extra).toHaveFocus();
     });
 
     it("skips disabled cards during arrow navigation", () => {

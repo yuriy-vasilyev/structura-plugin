@@ -1,5 +1,45 @@
 # Changelog
 
+## [2.36.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.35.0...v2.36.0) (2026-11-09)
+
+
+### Features
+
+* **docs:** add the unlisted partner kit page in four locales ([8ba6d66](https://github.com/yuriy-vasilyev/structura-core/commit/8ba6d66228aa0926dae736e1bf5672c0ddcca40b))
+* **functions:** log AppSumo redemption rejections and post a Telegram card on redemption ([04feb34](https://github.com/yuriy-vasilyev/structura-core/commit/04feb34a2e03e41ce721b127a5bf26850804d672))
+* **functions:** pick campaign keywords by open reader questions, drop tool searches and reworded repeats, email the owner when a bank runs out ([fdd4137](https://github.com/yuriy-vasilyev/structura-core/commit/fdd41374a4c080f491841b5b25d9789ea03c3272))
+* **functions:** return the stored visual suggestion with the preset list ([651fc55](https://github.com/yuriy-vasilyev/structura-core/commit/651fc55aeeb708b724568cca7a85728b7d1d54db))
+* **functions:** the writer describes a concept for each image, not a scene ([5bd5c71](https://github.com/yuriy-vasilyev/structura-core/commit/5bd5c710a2077d91ba1365d425d3f749b0fee2e8))
+* **functions:** visual signature library, compiler, plan gate, suggest pass and preview ([82401f3](https://github.com/yuriy-vasilyev/structura-core/commit/82401f37100736846698255165ec08d168f90bc9))
+* **functions:** watchdog revives the stock entry of a stalled run, refunds the slot and tells the customer ([9a00b15](https://github.com/yuriy-vasilyev/structura-core/commit/9a00b1597a60c92b5fa9d0c5dae14e7bc50b8a1a))
+* **functions:** wp-admin twin of the visual signature preview ([c519ead](https://github.com/yuriy-vasilyev/structura-core/commit/c519eadd86ad7669d1d56bea71e07dbc4c0d0f8c))
+* **plugin:** visual signature picker in wp-admin and the proxy routes ([4962960](https://github.com/yuriy-vasilyev/structura-core/commit/4962960a0627e5f25d24898d1a67cd5d46b4e94a))
+* **ui:** signature card, toggle chip, radio tabs and field descriptions ([0c8ade5](https://github.com/yuriy-vasilyev/structura-core/commit/0c8ade5c177c06028c4c7e30808f607e337277fa))
+* **web:** show the live-run progress strip on the campaign view header ([c4d4a20](https://github.com/yuriy-vasilyev/structura-core/commit/c4d4a20c3f6dd6a762c608e039378f0439bfa40c))
+* **web:** visual signature picker, palette and builder on Visuals and in the wizard ([20815de](https://github.com/yuriy-vasilyev/structura-core/commit/20815de125e0f67fd4d85b6ddc4d0b781fbcba9d))
+* **www:** add the /partners referral program page with application form ([168fa21](https://github.com/yuriy-vasilyev/structura-core/commit/168fa21fdc3e89b52a1d503a7e45018f6efe4062))
+* **www:** add the NewName.ai badge to the footer directory rotator ([fd65cc1](https://github.com/yuriy-vasilyev/structura-core/commit/fd65cc186a5e8b0a84f2c768122caa22ab5f2965))
+* **www:** answer the URL checker and SEO validator question on the SEO checker page ([30b3bc0](https://github.com/yuriy-vasilyev/structura-core/commit/30b3bc08c31da0ffc3786816031e1d9f87248e82))
+* **www:** host the partner kit assets and link them from the kit page ([eb5f343](https://github.com/yuriy-vasilyev/structura-core/commit/eb5f343c445abee40cedb1776cd2217883db2ac5))
+* **www:** host the visual signature thumbnails ([c314fc3](https://github.com/yuriy-vasilyev/structura-core/commit/c314fc3f544511c7d986aaf1895b9f69864a7644))
+* **www:** lead the homepage title, description and eyebrow with value, not platform ([c8f2162](https://github.com/yuriy-vasilyev/structura-core/commit/c8f2162ec203a3ced3babed3fa787890fbced6cb))
+* **www:** list every live profile and directory in the Organization sameAs ([ac6f661](https://github.com/yuriy-vasilyev/structura-core/commit/ac6f661842a1cc85a2835c81ddcf3bc63f1f487e))
+
+
+### Bug Fixes
+
+* **channels:** name the email channel "Email" instead of "Email the owner" ([dcbc006](https://github.com/yuriy-vasilyev/structura-core/commit/dcbc006746b53b948551b541742598546e99c95e))
+* **docs:** migrate sidebar _meta.json files to _meta.ts so Nextra reads them ([4b805a6](https://github.com/yuriy-vasilyev/structura-core/commit/4b805a6ce0e7b1999f31ddcf7e395f38db6b0b5f))
+* **functions:** never append unfiltered keywords when the relevance re-rank fails during an automatic refresh ([015d391](https://github.com/yuriy-vasilyev/structura-core/commit/015d391765f547b07b38c429cb10855ceacc2686))
+* **functions:** raise the no-keywords notice on paid plans only, and record the MCP proxy and COGS report ([03c09ec](https://github.com/yuriy-vasilyev/structura-core/commit/03c09ec0591bb2921f6dfdeebd335d9a2d6fa575))
+* **functions:** refresh campaigns that use the site's default language and keep plugin-created bank entries intact ([f1dd3ff](https://github.com/yuriy-vasilyev/structura-core/commit/f1dd3ffdcf0fe703dd8e4a167fe5e1d343899986))
+* **functions:** run the portal Run now callable at 1 GiB so inline stock delivery does not OOM ([ab70f89](https://github.com/yuriy-vasilyev/structura-core/commit/ab70f894c5ec817c7830f835c0ff2830d2d52ccd))
+* **visual-signatures:** the AI-label reminder follows the signature's medium ([097e35f](https://github.com/yuriy-vasilyev/structura-core/commit/097e35f97ec4cd8d468db635d4dde7dc105665e7))
+* **web:** keep the token dialog buttons on one row while creating, and tell Claude Code users to reload ([abf20c5](https://github.com/yuriy-vasilyev/structura-core/commit/abf20c5ddef949c3a3bb6a58180844fe935683f8))
+* **web:** show busy state on the post editor's Update button and status segments ([996b00b](https://github.com/yuriy-vasilyev/structura-core/commit/996b00b3ea952bcd5c18c34a99d41cacd7830ff9))
+* **www:** price the agency margin calculator with Stripe's graduated tiers ([2df4e7e](https://github.com/yuriy-vasilyev/structura-core/commit/2df4e7eaffe35d9014f46f49c746ef9847a9f7bc))
+* **www:** trim EN meta titles to 60 and descriptions to 155 characters ([6d4f325](https://github.com/yuriy-vasilyev/structura-core/commit/6d4f325955b912d7229d408a7276d9e025757cfe))
+
 ## [2.35.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.34.0...v2.35.0) (2026-11-03)
 
 

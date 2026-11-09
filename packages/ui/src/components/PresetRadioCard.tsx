@@ -1,21 +1,10 @@
-import React, { createContext, forwardRef, useContext } from "react";
+import React, { forwardRef } from "react";
 import { Check } from "lucide-react";
 import { cn } from "../utils";
-
-type PresetRadioCardGroupContextValue = {
-  value?: string;
-  onValueChange: (value: string) => void;
-};
-
-const PresetRadioCardGroupContext = createContext<PresetRadioCardGroupContextValue | null>(null);
-
-const usePresetRadioCardGroupContext = () => {
-  const context = useContext(PresetRadioCardGroupContext);
-  if (!context) {
-    throw new Error("PresetRadioCard must be used within a PresetRadioCardGroup.");
-  }
-  return context;
-};
+import {
+  PresetRadioCardGroupContext,
+  usePresetRadioCardGroupContext,
+} from "./preset-radio-card-context";
 
 /** Keys the radiogroup handles for roving selection. */
 const NAVIGATION_KEYS = ["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"];
@@ -35,7 +24,8 @@ export interface PresetRadioCardGroupProps
  * Implements the standard radiogroup keyboard contract: Left/Up and
  * Right/Down move selection (wrapping), Home/End jump to the edges, and
  * moving both focuses and selects (radios select on focus). Disabled
- * cards are skipped.
+ * cards are skipped. Keys pressed on any other control inside the group
+ * (a card's footer link, a non-radio card) keep their own behaviour.
  *
  * Defaults to the handoff's 3-up grid (`grid-cols-3 gap-2.5`); override
  * via `className` for other densities. Label it with `aria-label` or
@@ -57,7 +47,11 @@ export const PresetRadioCardGroup = forwardRef<HTMLDivElement, PresetRadioCardGr
       if (radios.length === 0) return;
 
       const active = (event.target as HTMLElement).closest<HTMLButtonElement>('[role="radio"]');
-      const currentIndex = active ? radios.indexOf(active) : -1;
+      // Footer links and action buttons sit in the grid too (visual-signatures
+      // handoff §2.5); treating their arrow keys as "no radio focused" jumped
+      // to the first card and selected it.
+      if (!active) return;
+      const currentIndex = radios.indexOf(active);
 
       let nextIndex: number;
       if (event.key === "Home") {
@@ -141,7 +135,7 @@ export const PresetRadioCard = forwardRef<HTMLButtonElement, PresetRadioCardProp
     },
     ref
   ) => {
-    const group = usePresetRadioCardGroupContext();
+    const group = usePresetRadioCardGroupContext("PresetRadioCard");
     const checked = group.value === value;
     // Roving tabindex. Fallback: with no selection yet, every card is
     // tabbable so the group can't become keyboard-unreachable.
@@ -160,7 +154,9 @@ export const PresetRadioCard = forwardRef<HTMLButtonElement, PresetRadioCardProp
         }}
         className={cn(
           "group rounded-xl border p-2 text-left transition-all duration-fast ease-out",
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40",
+          // /60 plus an offset in the card's own colour: the /40 ring with no
+          // offset measured about 1.7:1 against white (visual-signatures handoff §10).
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900",
           "disabled:cursor-not-allowed disabled:opacity-55",
           checked
             ? "border-brand-600 bg-brand-50/60 shadow-glow-brand dark:border-brand-400 dark:bg-brand-500/10"

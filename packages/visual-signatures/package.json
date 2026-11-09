@@ -1,0 +1,17 @@
+{
+  "name": "@structura/visual-signatures",
+  "version": "1.0.0",
+  "description": "The visual signature library's public half: signature ids, versions, medium, palette roles, plan and thumbnails, plus the brand-palette-to-roles math. Prompt bodies live in functions/src/visualSignatures/catalog.ts. Consumed by web/client and mirrored into functions/ via `pnpm sync:visual-signatures`.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@structura/types": "workspace:*",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.9"
+  }
+}

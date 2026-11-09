@@ -159,6 +159,9 @@ importers:
       '@structura/ui':
         specifier: workspace:*
         version: link:../packages/ui
+      '@structura/visual-signatures':
+        specifier: workspace:*
+        version: link:../packages/visual-signatures
       cronstrue:
         specifier: ^3.12.0
         version: 3.14.0
@@ -489,6 +492,18 @@ importers:
         specifier: ^3.0.0
         version: 3.2.7(@types/debug@4.1.13)(@types/node@25.6.0)(jiti@2.6.1)(jsdom@28.1.0)(lightningcss@1.32.0)(terser@5.49.0)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/visual-signatures:
+    devDependencies:
+      '@structura/types':
+        specifier: workspace:*
+        version: link:../types
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@25.6.0)(jsdom@28.1.0)(lightningcss@1.32.0)(terser@5.49.0)
+
   web:
     dependencies:
       '@headlessui/react':
@@ -524,6 +539,9 @@ importers:
       '@structura/ui':
         specifier: workspace:*
         version: link:../packages/ui
+      '@structura/visual-signatures':
+        specifier: workspace:*
+        version: link:../packages/visual-signatures
       canvas-confetti:
         specifier: ^1.9.4
         version: 1.9.4

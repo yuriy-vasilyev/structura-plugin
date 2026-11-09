@@ -59,7 +59,20 @@ export interface TabsProps {
    * panel/mobile arrangement of the xs switcher.
    */
   stretch?: boolean;
-  /** Accessible label for the tablist. */
+  /**
+   * ARIA pattern. `"tabs"` (default): a tablist whose tabs show panels.
+   * `"radio"`: a radiogroup of radios (`aria-checked`, no `aria-selected` or
+   * `aria-controls`) for a strip that sets a form value, such as the
+   * visual-signature builder's Medium. Same look and keys; radios also move
+   * focus with the selection and answer Up/Down, as a radio group does.
+   */
+  semantics?: "tabs" | "radio";
+  /**
+   * Disables every item: `aria-disabled`, out of the tab order, clicks and
+   * keys ignored, the strip dimmed with the selected item still shown.
+   */
+  disabled?: boolean;
+  /** Accessible label for the tablist (or radiogroup). */
   "aria-label"?: string;
   className?: string;
 }
@@ -74,6 +87,7 @@ export interface TabsProps {
  *
  * Controlled only — the parent owns the selected id, so a wizard can persist
  * it. Renders the tab strip; the panel content is the caller's concern.
+ * With `semantics="radio"` the same strip is a radiogroup for a form value.
  */
 export const Tabs: FC<TabsProps> = ({
   items,
@@ -81,15 +95,25 @@ export const Tabs: FC<TabsProps> = ({
   onChange,
   size = "md",
   stretch = false,
+  semantics = "tabs",
+  disabled = false,
   className,
   ...rest
 }) => {
   const baseId = useId();
   const xs = size === "xs";
+  const radio = semantics === "radio";
+  const pointer = disabled ? "cursor-not-allowed" : "cursor-pointer";
 
   const enabled = items.filter((t) => !t.disabled);
 
-  const move = (dir: 1 | -1) => {
+  // Radios move focus with the selection (WAI-ARIA radio group), so a screen
+  // reader announces the new choice. The tab strip keeps its old behaviour.
+  const followFocus = (id: string, from: HTMLElement) => {
+    if (radio) from.ownerDocument.getElementById(`${baseId}-${id}`)?.focus();
+  };
+
+  const move = (dir: 1 | -1, from: HTMLElement) => {
     const idx = items.findIndex((t) => t.id === value);
     if (idx < 0) return;
     // Walk in `dir`, wrapping, until an enabled tab is found. Bounded by
@@ -98,6 +122,7 @@ export const Tabs: FC<TabsProps> = ({
       const next = items[(idx + dir * step + items.length * step) % items.length];
       if (!next.disabled) {
         if (next.id !== value) onChange(next.id);
+        followFocus(next.id, from);
         return;
       }
     }
@@ -105,7 +130,7 @@ export const Tabs: FC<TabsProps> = ({
 
   return (
     <div
-      role="tablist"
+      role={radio ? "radiogroup" : "tablist"}
       aria-label={rest["aria-label"]}
       className={cn(
         stretch ? "flex w-full" : "inline-flex max-w-full",
@@ -116,38 +141,49 @@ export const Tabs: FC<TabsProps> = ({
               "bg-neutral-100 dark:bg-neutral-800/60",
               "ring-1 ring-neutral-200/70 dark:ring-white/5",
             ),
+        disabled && "opacity-50",
         className,
       )}
       onKeyDown={(e) => {
-        if (e.key === "ArrowRight") {
+        if (disabled) return;
+        if (e.key === "ArrowRight" || (radio && e.key === "ArrowDown")) {
           e.preventDefault();
-          move(1);
-        } else if (e.key === "ArrowLeft") {
+          move(1, e.currentTarget);
+        } else if (e.key === "ArrowLeft" || (radio && e.key === "ArrowUp")) {
           e.preventDefault();
-          move(-1);
+          move(-1, e.currentTarget);
         } else if (e.key === "Home") {
           e.preventDefault();
-          if (enabled[0]) onChange(enabled[0].id);
+          if (enabled[0]) {
+            onChange(enabled[0].id);
+            followFocus(enabled[0].id, e.currentTarget);
+          }
         } else if (e.key === "End") {
           e.preventDefault();
-          if (enabled.length) onChange(enabled[enabled.length - 1].id);
+          const last = enabled[enabled.length - 1];
+          if (last) {
+            onChange(last.id);
+            followFocus(last.id, e.currentTarget);
+          }
         }
       }}
     >
       {items.map((tab) => {
         const active = tab.id === value;
+        const itemDisabled = disabled || tab.disabled;
         return (
           <button
             key={tab.id}
             type="button"
-            role="tab"
+            role={radio ? "radio" : "tab"}
             id={`${baseId}-${tab.id}`}
             title={tab.title}
-            aria-selected={active}
-            aria-controls={tab.controls}
-            aria-disabled={tab.disabled || undefined}
-            tabIndex={active && !tab.disabled ? 0 : -1}
-            onClick={tab.disabled ? undefined : () => onChange(tab.id)}
+            aria-checked={radio ? active : undefined}
+            aria-selected={radio ? undefined : active}
+            aria-controls={radio ? undefined : tab.controls}
+            aria-disabled={itemDisabled || undefined}
+            tabIndex={active && !itemDisabled ? 0 : -1}
+            onClick={itemDisabled ? undefined : () => onChange(tab.id)}
             className={cn(
               stretch ? "flex flex-1 justify-center" : "inline-flex shrink-0",
               "items-center font-bold whitespace-nowrap",
@@ -160,7 +196,8 @@ export const Tabs: FC<TabsProps> = ({
                 ? "cursor-not-allowed text-neutral-300 dark:text-neutral-600"
                 : active
                   ? cn(
-                      "cursor-pointer bg-white shadow-sm dark:bg-neutral-700",
+                      pointer,
+                      "bg-white shadow-sm dark:bg-neutral-700",
                       // xs: neutral-800/100 — quieter than the page strip's
                       // full-contrast chip (handoff "Switcher" note).
                       xs
@@ -168,10 +205,12 @@ export const Tabs: FC<TabsProps> = ({
                         : "text-neutral-900 dark:text-white",
                     )
                   : cn(
-                      "cursor-pointer text-neutral-500 dark:text-neutral-400",
-                      xs
-                        ? "hover:text-neutral-700 dark:hover:text-neutral-200"
-                        : "hover:text-neutral-800 dark:hover:text-neutral-100",
+                      pointer,
+                      "text-neutral-500 dark:text-neutral-400",
+                      !disabled &&
+                        (xs
+                          ? "hover:text-neutral-700 dark:hover:text-neutral-200"
+                          : "hover:text-neutral-800 dark:hover:text-neutral-100"),
                     ),
             )}
           >

@@ -5,7 +5,9 @@ import { cn } from "../utils";
 import {
   formFieldElementVariants,
   formFieldGroupVariants,
+  formFieldLabelRowVariants,
   formFieldLabelVariants,
+  formFieldDescriptionVariants,
 } from "../variants/form-field";
 
 export interface TextAreaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "id"> {
@@ -22,6 +24,16 @@ export interface TextAreaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaE
    * `variants/form-field.ts#formFieldLabelVariants`.
    */
   labelStyle?: "default" | "prominent";
+  /**
+   * Help line under the control. A Headless UI `Description`, so it joins
+   * the error in the control's `aria-describedby`.
+   */
+  description?: string;
+  /**
+   * Shown after the label text, e.g. a "Drafted" badge. Sits beside the
+   * `<label>`, not in it, so the field's accessible name stays `label`.
+   */
+  labelAdornment?: ReactNode;
 }
 
 export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
@@ -38,11 +50,23 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       rows,
       size = "md",
       labelStyle = "default",
+      description,
+      labelAdornment,
       ...rest
     },
     ref
   ) => {
     const elementClassName = cn(formFieldElementVariants({ size }), "resize-none leading-relaxed!");
+    const labelElement = (
+      <Label
+        className={cn(formFieldLabelVariants({ labelStyle }), {
+          "mb-0": labelAdornment != null,
+          "sr-only": hiddenLabel,
+        })}
+      >
+        {required ? `${label} *` : label}
+      </Label>
+    );
 
     return (
       <Field
@@ -51,13 +75,14 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         // Field renders a div, which `:disabled` never matches; it sets data-disabled.
         className={cn("w-full data-disabled:opacity-50", className)}
       >
-        <Label
-          className={cn(formFieldLabelVariants({ labelStyle }), {
-            "sr-only": hiddenLabel,
-          })}
-        >
-          {required ? `${label} *` : label}
-        </Label>
+        {labelAdornment != null ? (
+          <div className={formFieldLabelRowVariants({ labelStyle })}>
+            {labelElement}
+            {labelAdornment}
+          </div>
+        ) : (
+          labelElement
+        )}
 
         <div
           className={formFieldGroupVariants({
@@ -102,7 +127,21 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
           )}
         </div>
 
-        {error && <Description className="mt-2 text-sm text-red-600">{error}</Description>}
+        {/* Same error treatment as InputField: shared variant, dark tone, announced.
+         *  The old text-sm red-600 had no dark tone, 3.96:1 on dark cards
+         *  (2026-11-08 contrast audit). */}
+        {error && (
+          <Description role="alert" className={formFieldDescriptionVariants({ intent: "error" })}>
+            {error}
+          </Description>
+        )}
+        {/* A div, not Headless UI's default <p>: wp-admin's common.css gives
+         *  every p its own margin and font size. */}
+        {description && (
+          <Description as="div" className={formFieldDescriptionVariants({ intent: "default" })}>
+            {description}
+          </Description>
+        )}
       </Field>
     );
   }

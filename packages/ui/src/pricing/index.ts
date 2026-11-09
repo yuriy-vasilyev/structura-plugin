@@ -16,3 +16,4 @@ export * from "./ComparisonMatrix";
 export * from "./VolumeSelect";
 export * from "./JustThePluginSection";
 export * from "./ContactBand";
+export * from "./graduated";

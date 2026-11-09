@@ -176,7 +176,8 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
         ) : selectedOption ? (
           <span className="truncate">{selectedOption.label}</span>
         ) : (
-          <span className="truncate text-gray-400 dark:text-gray-500">{placeholder}</span>
+          // gray-400 was 2.6:1 on white, under AA (2026-11-08 contrast audit).
+          <span className="truncate text-gray-500 dark:text-gray-400">{placeholder}</span>
         )}
         <ChevronDown
           className="absolute right-3 size-4 shrink-0 text-gray-400 transition-transform duration-200"

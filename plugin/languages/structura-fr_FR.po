@@ -11953,3 +11953,447 @@ msgstr "Passez à une offre supérieure pour débloquer %s"
 
 msgid "Picked for you: the top-ranked suggestion. Choose another below or clear it."
 msgstr "Choisie pour vous : la suggestion la mieux classée. Choisissez-en une autre ci-dessous ou effacez-la."
+
+msgid "Accent"
+msgstr "Accent"
+
+msgid "Add a colour"
+msgstr "Ajouter une couleur"
+
+msgid "Add “%1$s” to %2$s"
+msgstr "Ajouter « %1$s » à %2$s"
+
+msgid "All signatures"
+msgstr "Toutes les signatures"
+
+msgid "Anything that would break the look."
+msgstr "Tout ce qui casserait l'apparence."
+
+msgid "Avoid"
+msgstr "À éviter"
+
+msgid "Black ink linework"
+msgstr "Trait à l'encre noire"
+
+msgid "Brand colours"
+msgstr "Couleurs de marque"
+
+msgid "Build from five fields"
+msgstr "Créer à partir de cinq champs"
+
+msgid "Busy backgrounds"
+msgstr "Fonds chargés"
+
+msgid "Composition"
+msgstr "Composition"
+
+msgid "Concept"
+msgstr "Concept"
+
+msgid "Confident black linework with one flat colour."
+msgstr "Un trait noir assuré et une seule couleur en aplat."
+
+msgid "Could not read your site right now."
+msgstr "Impossible de lire votre site pour le moment."
+
+msgid "Couldn’t draft from your site right now. Try again, or fill the fields yourself."
+msgstr "Impossible de rédiger à partir de votre site pour le moment. Réessayez, ou remplissez les champs vous-même."
+
+msgid "Couldn’t read your site’s colours right now. Try again in a moment."
+msgstr "Impossible de lire les couleurs de votre site pour le moment. Réessayez dans un instant."
+
+msgid "Custom"
+msgstr "Personnalisée"
+
+msgid "Describe the look in your own words."
+msgstr "Décrivez l'apparence avec vos propres mots."
+
+msgid "Describe the look: technique, recurring subjects, framing, what to avoid"
+msgstr "Décrivez l'apparence : technique, sujets récurrents, cadrage, ce qu'il faut éviter"
+
+msgid "Describe the technique, recurring subjects and framing. We add your brand palette to it."
+msgstr "Décrivez la technique, les sujets récurrents et le cadrage. Nous y ajoutons la palette de votre marque."
+
+msgid "Desks and laptops"
+msgstr "Bureaux et ordinateurs portables"
+
+msgid "Draft again"
+msgstr "Rédiger à nouveau"
+
+msgid "Draft from my site"
+msgstr "Rédiger à partir de mon site"
+
+msgid "Drafted"
+msgstr "Rédigé"
+
+msgid "Drafted the technique and what to avoid from your site."
+msgstr "La technique et ce qu'il faut éviter ont été rédigés à partir de votre site."
+
+msgid "Drafting from your site"
+msgstr "Rédaction à partir de votre site"
+
+msgid "Drafting from your site."
+msgstr "Rédaction à partir de votre site."
+
+msgid "Drawn images: line, shape and flat colour."
+msgstr "Des images dessinées : trait, formes et aplats."
+
+msgid "Edit colour %s"
+msgstr "Modifier la couleur %s"
+
+msgid "Edit colour %s, accent"
+msgstr "Modifier la couleur %s, accent"
+
+msgid "Editorial reportage"
+msgstr "Reportage éditorial"
+
+msgid "Every image on your blog shares one look. We picked one for your brand; change it now or later on the Visuals page."
+msgstr "Toutes les images de votre blog partagent une même apparence. Nous en avons choisi une pour votre marque ; changez-la maintenant ou plus tard sur la page Visuels."
+
+msgid "Eye level"
+msgstr "À hauteur des yeux"
+
+msgid "Fill this in to save the signature."
+msgstr "Remplissez ce champ pour enregistrer la signature."
+
+msgid "Five fields fix the look of every image. Draft them from your site, then change anything."
+msgstr "Cinq champs fixent l'apparence de chaque image. Rédigez-les à partir de votre site, puis modifiez ce que vous voulez."
+
+msgid "Flat colour background"
+msgstr "Fond en aplat de couleur"
+
+msgid "Floating shapes"
+msgstr "Formes flottantes"
+
+msgid "Floating slabs of glass and matte, seen from above."
+msgstr "Des plaques flottantes de verre et de mat, vues d'en haut."
+
+msgid "For example: Northfield sketchbook"
+msgstr "Par exemple : Carnet de Northfield"
+
+msgid "For example: one object centred on a plain background"
+msgstr "Par exemple : un objet centré sur un fond uni"
+
+msgid "For example: one real garden tool, hands at work"
+msgstr "Par exemple : un vrai outil de jardin, des mains au travail"
+
+msgid "For example: soft window light, shallow depth of field, muted colour"
+msgstr "Par exemple : lumière douce de fenêtre, faible profondeur de champ, couleurs sourdes"
+
+msgid "For example: text, desks and laptops, busy backgrounds"
+msgstr "Par exemple : du texte, des bureaux et des ordinateurs portables, des fonds chargés"
+
+msgid "Framing, background, angle and empty space."
+msgstr "Cadrage, arrière-plan, angle et espace vide."
+
+msgid "Free prompt"
+msgstr "Prompt libre"
+
+msgid "Glass and matte surfaces"
+msgstr "Surfaces de verre et mates"
+
+msgid "Gradients"
+msgstr "Dégradés"
+
+msgid "Hand-drawn wobble"
+msgstr "Tremblé dessiné à la main"
+
+msgid "Hands at work"
+msgstr "Des mains au travail"
+
+msgid "Hands holding one object"
+msgstr "Mains tenant un objet"
+
+msgid "Heavy filters"
+msgstr "Filtres appuyés"
+
+msgid "Hex"
+msgstr "Hex"
+
+msgid "In use"
+msgstr "Utilisée"
+
+msgid "Ink and fill"
+msgstr "Encre et aplat"
+
+msgid "Invalid visual signature."
+msgstr "Signature visuelle non valide."
+
+msgid "Isometric glass"
+msgstr "Verre isométrique"
+
+msgid "Isometric view"
+msgstr "Vue isométrique"
+
+msgid "Kept from your previous plan. If you switch to another style, you can’t pick this one again without upgrading."
+msgstr "Conservée de votre forfait précédent. Si vous passez à un autre style, vous ne pourrez plus choisir celui-ci sans changer de forfait."
+
+msgid "Layered paper shapes with soft shadows."
+msgstr "Des formes de papier superposées aux ombres douces."
+
+msgid "Lots of empty space"
+msgstr "Beaucoup d'espace vide"
+
+msgid "Materials, line and light: how the images are made."
+msgstr "Matériaux, trait et lumière : comment les images sont faites."
+
+msgid "Matte clay materials"
+msgstr "Matières mates façon argile"
+
+msgid "Miniature world"
+msgstr "Monde miniature"
+
+msgid "Motifs"
+msgstr "Motifs"
+
+msgid "Muted film colour"
+msgstr "Couleurs de film sourdes"
+
+msgid "Name this signature to save it."
+msgstr "Nommez cette signature pour l'enregistrer."
+
+msgid "Natural light, real places, one clear subject."
+msgstr "Lumière naturelle, lieux réels, un sujet clair."
+
+msgid "No brand colours yet."
+msgstr "Pas encore de couleurs de marque."
+
+msgid "No images left this month. Your allowance resets on %s."
+msgstr "Plus d'images disponibles ce mois-ci. Votre quota se renouvelle le %s."
+
+msgid "No reflections"
+msgstr "Sans reflets"
+
+msgid "No shading"
+msgstr "Sans ombrage"
+
+msgid "One flat fill colour"
+msgstr "Un seul aplat de couleur"
+
+msgid "One hero object, centred"
+msgstr "Un objet principal, centré"
+
+msgid "One real object"
+msgstr "Un vrai objet"
+
+msgid "One real object on a seamless backdrop."
+msgstr "Un objet réel sur un fond uni sans raccord."
+
+msgid "One subject, centred"
+msgstr "Un sujet, centré"
+
+msgid "Our pick for %1$s is <b>%2$s</b>, in your colours"
+msgstr "Notre choix pour %1$s : <b>%2$s</b>, dans vos couleurs"
+
+msgid "Our pick for %1$s is <b>%2$s</b>, which comes with paid plans. Until then, your images use <b>%3$s</b> in your colours"
+msgstr "Notre choix pour %1$s : <b>%2$s</b>, inclus dans les forfaits payants. D'ici là, vos images utilisent <b>%3$s</b> dans vos couleurs"
+
+msgid "Our pick for your brand"
+msgstr "Notre choix pour votre marque"
+
+msgid "Outdoor places"
+msgstr "Lieux en extérieur"
+
+msgid "Oversized everyday objects"
+msgstr "Objets du quotidien géants"
+
+msgid "Paper cut"
+msgstr "Papier découpé"
+
+msgid "Photorealistic people"
+msgstr "Personnes photoréalistes"
+
+msgid "Pick a colour"
+msgstr "Choisir une couleur"
+
+msgid "Pick the look every image on this site shares. Examples are shown in neutral colours."
+msgstr "Choisissez l'apparence que partagent toutes les images de ce site. Les exemples sont présentés en couleurs neutres."
+
+msgid "Plain background"
+msgstr "Fond uni"
+
+msgid "Plants and leaves"
+msgstr "Plantes et feuilles"
+
+msgid "Plants and soil"
+msgstr "Plantes et terre"
+
+msgid "Posed stock people"
+msgstr "Personnes de banque d'images"
+
+msgid "Preview again"
+msgstr "Nouvel aperçu"
+
+msgid "Preview it below to see it"
+msgstr "Voyez-la dans l'aperçu ci-dessous"
+
+msgid "Preview with my colours"
+msgstr "Aperçu avec mes couleurs"
+
+msgid "Re-scan"
+msgstr "Réanalyser"
+
+msgid "Re-scan site"
+msgstr "Réanalyser le site"
+
+msgid "Reading your homepage for colours…"
+msgstr "Lecture des couleurs de votre page d'accueil…"
+
+msgid "Real photographs of one subject."
+msgstr "De vraies photos d'un seul sujet."
+
+msgid "Remove"
+msgstr "Retirer"
+
+msgid "Rendered objects and figures with real materials and light."
+msgstr "Des objets et personnages rendus avec de vrais matériaux et une vraie lumière."
+
+msgid "Rendering your preview"
+msgstr "Rendu de votre aperçu"
+
+msgid "Scan my site"
+msgstr "Analyser mon site"
+
+msgid "Seamless backdrop"
+msgstr "Fond sans raccord"
+
+msgid "Seamless background"
+msgstr "Fond sans raccord"
+
+msgid "See one sample image in this style with your colours before you save. Each preview counts as one image."
+msgstr "Voyez une image d'exemple dans ce style avec vos couleurs avant d'enregistrer. Chaque aperçu compte comme une image."
+
+msgid "Seen from above"
+msgstr "Vu d'en haut"
+
+msgid "Seen straight on"
+msgstr "Vu de face"
+
+msgid "Set the technique, motifs and framing yourself."
+msgstr "Définissez vous-même la technique, les motifs et le cadrage."
+
+msgid "Shallow depth of field"
+msgstr "Faible profondeur de champ"
+
+msgid "Shown on its card in your library."
+msgstr "Affiché sur sa carte dans votre bibliothèque."
+
+msgid "Signature"
+msgstr "Signature visuelle"
+
+msgid "Simple tools"
+msgstr "Outils simples"
+
+msgid "Small figures at work"
+msgstr "Petits personnages au travail"
+
+msgid "Soft shadows"
+msgstr "Ombres douces"
+
+msgid "Soft studio light"
+msgstr "Lumière douce de studio"
+
+msgid "Soft window light"
+msgstr "Lumière douce de fenêtre"
+
+msgid "Stacked blocks"
+msgstr "Blocs empilés"
+
+msgid "Still life studio"
+msgstr "Nature morte en studio"
+
+msgid "Still reading %1$s to pick a style. <b>%2$s</b> is selected until then."
+msgstr "Nous lisons encore %1$s pour choisir un style. D'ici là, <b>%2$s</b> est sélectionné."
+
+msgid "Technique"
+msgstr "Technique"
+
+msgid "Text and lettering"
+msgstr "Texte et lettrage"
+
+msgid "Text prompt"
+msgstr "Prompt texte"
+
+msgid "That style comes with paid plans."
+msgstr "Ce style est réservé aux offres payantes."
+
+msgid "The new preview didn’t render, so your last one is still shown. Try again in a moment."
+msgstr "Le nouvel aperçu n'a pas pu être rendu, le précédent reste donc affiché. Réessayez dans un instant."
+
+msgid "The preview did not render."
+msgstr "L'aperçu n'a pas pu être rendu."
+
+msgid "The preview didn’t render. Try again in a moment."
+msgstr "L'aperçu n'a pas pu être rendu. Réessayez dans un instant."
+
+msgid "The recurring cast and objects that make your posts feel like one series."
+msgstr "Les personnages et objets récurrents qui font de vos articles une série."
+
+msgid "This site keeps its current style unless you pick one below."
+msgstr "Ce site conserve son style actuel, sauf si vous en choisissez un ci-dessous."
+
+msgid "This usually takes about 20 seconds. You can keep editing meanwhile."
+msgstr "Cela prend généralement une vingtaine de secondes. Vous pouvez continuer à modifier en attendant."
+
+msgid "Tilt-shift depth"
+msgstr "Profondeur tilt-shift"
+
+msgid "Tiny figures at work around one oversized object."
+msgstr "De minuscules personnages à l'œuvre autour d'un objet géant."
+
+msgid "Tiny workers"
+msgstr "Minuscules ouvriers"
+
+msgid "Tools on a table"
+msgstr "Outils sur une table"
+
+msgid "Until you add some, images use the neutral set above."
+msgstr "Tant que vous n'en ajoutez pas, les images utilisent les couleurs neutres ci-dessus."
+
+msgid "Up to six colours. Remove one to add another."
+msgstr "Jusqu'à six couleurs. Retirez-en une pour en ajouter une autre."
+
+msgid "Use a hex colour like #2F6B4F."
+msgstr "Utilisez une couleur hexadécimale comme #2F6B4F."
+
+msgid "Use as accent"
+msgstr "Utiliser comme accent"
+
+msgid "Visible paper grain"
+msgstr "Grain du papier visible"
+
+msgid "Visual signature"
+msgstr "Signature visuelle"
+
+msgid "Want a look of your own? Build it later on the Visuals page, or write a prompt there."
+msgstr "Envie d'une apparence bien à vous ? Créez-la plus tard sur la page Visuels, ou écrivez-y un prompt."
+
+msgid "Your colours"
+msgstr "Vos couleurs"
+
+msgid "Your colours are applied to the style you pick, in images and videos."
+msgstr "Vos couleurs sont appliquées au style choisi, dans les images et les vidéos."
+
+msgid "Your colours are applied to the style you pick, in images and videos. Edit them later on the Visuals page."
+msgstr "Vos couleurs sont appliquées au style choisi, dans les images et les vidéos. Modifiez-les plus tard sur la page Visuels."
+
+msgid "Your own"
+msgstr "La vôtre"
+
+msgid "Your own signature"
+msgstr "Votre propre signature"
+
+msgid "Your own style, in 3D render."
+msgstr "Votre propre style, en rendu 3D."
+
+msgid "Your own style, in illustration."
+msgstr "Votre propre style, en illustration."
+
+msgid "Your own style, in photography."
+msgstr "Votre propre style, en photographie."
+
+msgid "Your prompt"
+msgstr "Votre prompt"
+
+msgid "· 1 image"
+msgstr "· 1 image"

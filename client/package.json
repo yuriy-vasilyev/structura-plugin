@@ -23,6 +23,7 @@
     "@structura/tailwind-config": "workspace:*",
     "@structura/types": "workspace:*",
     "@structura/ui": "workspace:*",
+    "@structura/visual-signatures": "workspace:*",
     "cronstrue": "^3.12.0",
     "posthog-js": "^1.374.4",
     "zod": "^4.3.6",

@@ -6,6 +6,7 @@ import {
   formFieldDescriptionVariants,
   formFieldElementVariants,
   formFieldGroupVariants,
+  formFieldLabelRowVariants,
   formFieldLabelVariants,
   leftAdornmentVariants,
   rightAdornmentVariants,
@@ -50,6 +51,17 @@ export interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputEleme
    * See `variants/form-field.ts#formFieldLabelVariants` for the tokens.
    */
   labelStyle?: "default" | "prominent";
+  /**
+   * Hint under the control. A Headless UI `Description`, so it joins the
+   * error, and any `aria-describedby` you pass, in the control's
+   * description. Stays visible whatever `errorView` is.
+   */
+  description?: string;
+  /**
+   * Shown after the label text, e.g. a "Drafted" badge. Sits beside the
+   * `<label>`, not in it, so the field's accessible name stays `label`.
+   */
+  labelAdornment?: ReactNode;
 }
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
@@ -69,12 +81,24 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
       className,
       inputClassName,
       labelStyle = "default",
+      description,
+      labelAdornment,
       "aria-describedby": callerDescribedBy,
       ...rest
     },
     ref
   ) => {
     const [isFocused, setFocused] = useState(false);
+    const labelElement = (
+      <Label
+        className={cn(formFieldLabelVariants({ labelStyle }), {
+          "mb-0": labelAdornment != null,
+          "sr-only": hiddenLabel,
+        })}
+      >
+        {required ? `${label} *` : label}
+      </Label>
+    );
 
     // Determine the view variant for the description
     const descriptionView =
@@ -87,13 +111,14 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
         // Field renders a div, which `:disabled` never matches; it sets data-disabled.
         className={"group/field relative data-disabled:opacity-40"}
       >
-        <Label
-          className={cn(formFieldLabelVariants({ labelStyle }), {
-            "sr-only": hiddenLabel,
-          })}
-        >
-          {required ? `${label} *` : label}
-        </Label>
+        {labelAdornment != null ? (
+          <div className={formFieldLabelRowVariants({ labelStyle })}>
+            {labelElement}
+            {labelAdornment}
+          </div>
+        ) : (
+          labelElement
+        )}
 
         <div
           className={cn(
@@ -148,6 +173,13 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             )}
           >
             {error}
+          </Description>
+        )}
+        {/* A div, not Headless UI's default <p>: wp-admin's common.css gives
+         *  every p its own margin and font size. */}
+        {description && (
+          <Description as="div" className={formFieldDescriptionVariants({ intent: "default" })}>
+            {description}
           </Description>
         )}
       </Field>

@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { __ } from "@wordpress/i18n";
 import { Alert, Button, shouldShowAiLabelReminder } from "@structura/ui";
+import { effectiveMedium } from "@structura/visual-signatures";
 import { ArrowRight, Camera, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -31,7 +32,8 @@ export const AiLabelReminder: FC<{ imagesEnabled: boolean; language: string }> =
   const show = shouldShowAiLabelReminder({
     imagesEnabled,
     presetsLoaded: !!data,
-    preset: bound,
+    // A library or custom signature carries its own medium (2026-11-09).
+    preset: bound ? { medium: effectiveMedium(bound), aiLabel: bound.aiLabel } : bound,
     language,
     siteLanguage,
   });

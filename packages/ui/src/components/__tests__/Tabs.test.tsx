@@ -11,8 +11,9 @@
  *                   emerald emphasis pill).
  *   - `title`     — native tooltip ("Analytics is coming soon").
  */
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { Tabs, type TabItem } from "../Tabs";
 
 const items: TabItem[] = [
@@ -210,5 +211,138 @@ describe("Tabs — panel wiring", () => {
       "panel-tokens"
     );
     expect(screen.getByRole("tab", { name: "Plain" })).not.toHaveAttribute("aria-controls");
+  });
+});
+
+describe("Tabs — radio semantics (visual-signatures handoff §5)", () => {
+  // The builder's Medium picker is a form value, not a set of panels, so it
+  // renders as a radiogroup with the same look and keys.
+  const media: TabItem[] = [
+    { id: "photography", label: "Photography", controls: "medium-help" },
+    { id: "illustration", label: "Illustration" },
+    { id: "3d_render", label: "3D render" },
+  ];
+
+  it("renders a labelled radiogroup of radios with aria-checked and no tab attributes", () => {
+    render(
+      <Tabs
+        semantics="radio"
+        items={media}
+        value="illustration"
+        onChange={() => undefined}
+        aria-label="Medium"
+      />
+    );
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+    expect(screen.queryAllByRole("tab")).toHaveLength(0);
+    const group = screen.getByRole("radiogroup", { name: "Medium" });
+    const radios = within(group).getAllByRole("radio");
+    expect(radios).toHaveLength(3);
+    expect(screen.getByRole("radio", { name: "Illustration" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: "Photography" })).toHaveAttribute("aria-checked", "false");
+    for (const radio of radios) {
+      expect(radio).not.toHaveAttribute("aria-selected");
+      expect(radio).not.toHaveAttribute("aria-controls");
+    }
+  });
+
+  it("keeps the roving tabindex and the arrow, Home and End keys", () => {
+    const onChange = vi.fn();
+    render(<Tabs semantics="radio" items={media} value="illustration" onChange={onChange} />);
+    expect(screen.getByRole("radio", { name: "Illustration" })).toHaveAttribute("tabindex", "0");
+    expect(screen.getByRole("radio", { name: "Photography" })).toHaveAttribute("tabindex", "-1");
+    const group = screen.getByRole("radiogroup");
+    fireEvent.keyDown(group, { key: "ArrowRight" });
+    expect(onChange).toHaveBeenLastCalledWith("3d_render");
+    fireEvent.keyDown(group, { key: "ArrowLeft" });
+    expect(onChange).toHaveBeenLastCalledWith("photography");
+    fireEvent.keyDown(group, { key: "End" });
+    expect(onChange).toHaveBeenLastCalledWith("3d_render");
+    fireEvent.keyDown(group, { key: "Home" });
+    expect(onChange).toHaveBeenLastCalledWith("photography");
+  });
+
+  it("also answers Up and Down, as a radio group does", () => {
+    const onChange = vi.fn();
+    render(<Tabs semantics="radio" items={media} value="illustration" onChange={onChange} />);
+    const group = screen.getByRole("radiogroup");
+    fireEvent.keyDown(group, { key: "ArrowDown" });
+    expect(onChange).toHaveBeenLastCalledWith("3d_render");
+    fireEvent.keyDown(group, { key: "ArrowUp" });
+    expect(onChange).toHaveBeenLastCalledWith("photography");
+  });
+
+  it("moves focus with the selection so the new choice is announced", () => {
+    function Controlled() {
+      const [value, setValue] = useState("photography");
+      return <Tabs semantics="radio" items={media} value={value} onChange={setValue} />;
+    }
+    render(<Controlled />);
+    const photography = screen.getByRole("radio", { name: "Photography" });
+    photography.focus();
+    fireEvent.keyDown(photography, { key: "ArrowRight" });
+    const illustration = screen.getByRole("radio", { name: "Illustration" });
+    expect(illustration).toHaveAttribute("aria-checked", "true");
+    expect(illustration).toHaveFocus();
+  });
+
+  it("looks exactly like the tab strip", () => {
+    const { unmount } = render(<Tabs items={media} value="illustration" onChange={() => undefined} />);
+    const stripClass = screen.getByRole("tablist").className;
+    const activeClass = screen.getByRole("tab", { name: "Illustration" }).className;
+    const idleClass = screen.getByRole("tab", { name: "Photography" }).className;
+    unmount();
+    render(<Tabs semantics="radio" items={media} value="illustration" onChange={() => undefined} />);
+    expect(screen.getByRole("radiogroup").className).toBe(stripClass);
+    expect(screen.getByRole("radio", { name: "Illustration" }).className).toBe(activeClass);
+    expect(screen.getByRole("radio", { name: "Photography" }).className).toBe(idleClass);
+  });
+
+  it("keeps tab semantics by default", () => {
+    render(<Tabs items={media} value="photography" onChange={() => undefined} />);
+    const tab = screen.getByRole("tab", { name: "Photography" });
+    expect(tab).toHaveAttribute("aria-selected", "true");
+    expect(tab).toHaveAttribute("aria-controls", "medium-help");
+    expect(tab).not.toHaveAttribute("aria-checked");
+  });
+});
+
+describe("Tabs — group disabled (builder drafting state)", () => {
+  const media: TabItem[] = [
+    { id: "photography", label: "Photography" },
+    { id: "illustration", label: "Illustration" },
+    { id: "3d_render", label: "3D render" },
+  ];
+
+  it("disables every item: aria-disabled, out of the tab order, clicks and keys ignored", () => {
+    const onChange = vi.fn();
+    render(
+      <Tabs disabled semantics="radio" items={media} value="illustration" onChange={onChange} />
+    );
+    for (const radio of screen.getAllByRole("radio")) {
+      expect(radio).toHaveAttribute("aria-disabled", "true");
+      expect(radio).toHaveAttribute("tabindex", "-1");
+    }
+    fireEvent.click(screen.getByRole("radio", { name: "Photography" }));
+    const group = screen.getByRole("radiogroup");
+    for (const key of ["ArrowRight", "ArrowLeft", "ArrowDown", "Home", "End"]) {
+      fireEvent.keyDown(group, { key });
+    }
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("keeps the selected item's chip and dims the whole strip", () => {
+    render(<Tabs disabled items={media} value="illustration" onChange={() => undefined} />);
+    expect(screen.getByRole("tablist")).toHaveClass("opacity-50");
+    const active = screen.getByRole("tab", { name: "Illustration" });
+    expect(active).toHaveAttribute("aria-selected", "true");
+    expect(active).toHaveClass("bg-white", "shadow-sm", "cursor-not-allowed");
+    expect(active).not.toHaveClass("text-neutral-300");
+  });
+
+  it("leaves the strip enabled by default", () => {
+    render(<Tabs items={media} value="illustration" onChange={() => undefined} />);
+    expect(screen.getByRole("tablist")).not.toHaveClass("opacity-50");
+    expect(screen.getByRole("tab", { name: "Photography" })).not.toHaveAttribute("aria-disabled");
   });
 });

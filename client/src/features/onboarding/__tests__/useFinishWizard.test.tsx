@@ -186,3 +186,103 @@ describe("useFinishWizard — visual preset overwrite protection", () => {
     );
   });
 });
+
+describe("useFinishWizard — visual signature (specs/visual-signatures.md §8)", () => {
+  const savedPreset = (over: Record<string, unknown> = {}) => ({
+    presetId: "preset-1",
+    globalArtDirection: "",
+    aspectRatio: "16:9",
+    format: "webp",
+    optimizeOnUpload: true,
+    medium: "photography",
+    signature: { kind: "curated", id: "paper-cut", version: 1 },
+    palette: ["#2F6B4F"],
+    ...over,
+  });
+  const step4 = (over: Record<string, unknown> = {}) =>
+    useWizardStore.getState().setStep4Draft({
+      globalArtDirection: "",
+      aspectRatio: "16:9",
+      format: "webp",
+      optimizeOnUpload: true,
+      medium: "photography",
+      signature: { kind: "curated", id: "paper-cut", version: 1 },
+      palette: ["#2F6B4F"],
+      ...over,
+    });
+
+  it("creates the preset with the picked signature and palette, with no prompt text", async () => {
+    step4();
+
+    const { result } = renderHook(() => useFinishWizard(), { wrapper });
+    await result.current.mutateAsync();
+
+    await waitFor(() => expect(createMock).toHaveBeenCalled());
+    expect(createMock.mock.calls[0][0]).toMatchObject({
+      label: "Default",
+      bind_to_activation: true,
+      content: {
+        global_art_direction: "",
+        signature: { kind: "curated", id: "paper-cut", version: 1 },
+        palette: ["#2F6B4F"],
+      },
+    });
+  });
+
+  it("leaves an untouched bound preset alone when its signature and palette match", async () => {
+    presetsMock.current = { boundPresetId: "preset-1", presets: [savedPreset()] };
+    step4();
+
+    const { result } = renderHook(() => useFinishWizard(), { wrapper });
+    await result.current.mutateAsync();
+
+    expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it("updates the bound preset when another card was picked", async () => {
+    presetsMock.current = { boundPresetId: "preset-1", presets: [savedPreset()] };
+    step4({ signature: { kind: "curated", id: "ink-and-fill", version: 1 } });
+
+    const { result } = renderHook(() => useFinishWizard(), { wrapper });
+    await result.current.mutateAsync();
+
+    await waitFor(() => expect(updateMock).toHaveBeenCalled());
+    expect(updateMock.mock.calls[0][0].content.signature).toEqual({
+      kind: "curated",
+      id: "ink-and-fill",
+      version: 1,
+    });
+  });
+
+  it("updates the bound preset when Re-scan changed the palette", async () => {
+    presetsMock.current = { boundPresetId: "preset-1", presets: [savedPreset()] };
+    step4({ palette: ["#123456"] });
+
+    const { result } = renderHook(() => useFinishWizard(), { wrapper });
+    await result.current.mutateAsync();
+
+    await waitFor(() => expect(updateMock).toHaveBeenCalled());
+    expect(updateMock.mock.calls[0][0].content.palette).toEqual(["#123456"]);
+  });
+
+  it("a bound free prompt kept as is (null) sends no signature and stays untouched", async () => {
+    presetsMock.current = {
+      boundPresetId: "preset-1",
+      presets: [savedPreset({ signature: undefined, globalArtDirection: "Saved words" })],
+    };
+    step4({ signature: null, globalArtDirection: "Saved words" });
+
+    const { result } = renderHook(() => useFinishWizard(), { wrapper });
+    await result.current.mutateAsync();
+
+    expect(updateMock).not.toHaveBeenCalled();
+
+    // A change elsewhere saves without touching the stored (absent) signature.
+    useWizardStore
+      .getState()
+      .setStep4Draft({ ...useWizardStore.getState().drafts.step4!, aspectRatio: "1:1" });
+    await result.current.mutateAsync();
+    await waitFor(() => expect(updateMock).toHaveBeenCalled());
+    expect("signature" in updateMock.mock.calls[0][0].content).toBe(false);
+  });
+});

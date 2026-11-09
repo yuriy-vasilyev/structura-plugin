@@ -33,6 +33,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { ReferralLink } from "@structura/types";
+import type { VisualSignatureChoice } from "@structura/visual-signatures";
+
+import type { VisualSignatureSuggestion } from "@/features/settings/api/useVisualPresets";
 
 import { perActivationStorageKey } from "@/utils/storageKey";
 import type { WizardStepId } from "../api/types";
@@ -112,6 +115,20 @@ export interface VisualDraft {
   captionPlacement?: "top" | "middle" | "bottom";
   /** Suggest-extracted brand palette; first entry is the caption accent. */
   palette?: string[];
+  /**
+   * The visual signature Finish saves (specs/visual-signatures.md §8): the
+   * preselected or picked library card, or a bound preset's own choice.
+   * `null` keeps a bound free-prompt preset as it is. Absent on drafts
+   * persisted before 2026-11-09.
+   */
+  signature?: VisualSignatureChoice | null;
+  /** The user picked a card, so a later thin-pass answer no longer preselects one. */
+  signatureTouched?: boolean;
+  /**
+   * The thin pass's answer (pick, reason, palette), kept so a reload doesn't
+   * run it again; `null` when it found no pick.
+   */
+  suggestion?: VisualSignatureSuggestion | null;
 }
 
 /** Step 5 — a persona. The product point is MULTIPLE voices, so the

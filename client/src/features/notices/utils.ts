@@ -108,6 +108,12 @@ function copyDict(): Record<string, string> {
       "structura",
     ),
     "notices.generation.failed.cta": __("View campaigns", "structura"),
+    "notices.generation.stalled_refunded.title": __("A run stopped on our side", "structura"),
+    "notices.generation.stalled_refunded.body": __(
+      "A run of {{campaignName}} stopped before anything was published. The failure was on our infrastructure, not your site. The post was returned to your allowance and the prepared article will go out on the next run.",
+      "structura"
+    ),
+    "notices.generation.stalled_refunded.cta": __("View run", "structura"),
     "notices.pluginHealth.compat.title": __("Plugin compatibility check failed", "structura"),
     "notices.pluginHealth.compat.body": __(
       "Diagnostics on this site detected a compatibility issue with another plugin or theme that may affect Structura. Review the diagnostics report and apply the suggested fix.",

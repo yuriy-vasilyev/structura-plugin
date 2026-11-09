@@ -322,6 +322,47 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Changelog ==
 
+= 2.36.0 =
+* New: visual signatures. The Visuals page lets you pick the look every
+  image on your site shares from a library of six styles, shown in
+  neutral colours, or build your own from five fields. Your brand
+  colours are read from your homepage and applied to the style you pick,
+  in images and videos.
+* New: preview a style with your own colours before you save. Each
+  preview counts as one image.
+* New: the setup wizard recommends a style for your brand and preselects
+  it. Writing a style text is no longer required.
+* Improved: the house style and your own text prompt stay on every plan;
+  the library, the builder and the preview come with paid plans and show
+  as locked cards until you upgrade.
+* Improved: generated images now illustrate the point of each post with
+  one clear subject instead of a desk with a laptop. Existing images are
+  unchanged.
+* Changed: existing style texts show as "Free prompt" with the text
+  intact; the "Suggest image style" button on that text is gone.
+
+= 2.35.0 =
+* New: edit the recipient of an email, Telegram or WhatsApp channel in
+  place instead of removing and re-adding the channel.
+* New: a one-off post suggests and pre-picks the focus keyphrase once its
+  topic settles.
+* Fixed: the Email channel also fires when a post is held for review.
+
+= 2.34.0 =
+* New: the Account page shows your real plan, usage and billing links.
+* New: deliveries record the HTTP status and latency of each attempt.
+
+= 2.33.0 =
+* New: upload author photos instead of pasting a photo URL.
+* Improved: Cloud is one plan with a posts-per-site volume you choose.
+
+= 2.32.0 =
+* New: editor review notes. Leave notes in the WordPress editor and see
+  them in the Structura post meta box; the owner email flags open notes.
+* New: credit a real author per persona per site, with Person structured
+  data on every post.
+* Fixed: the cloud consent gate stays busy until the page reloads.
+
 = 2.31.0 =
 * New: campaigns no longer need keywords. Skip the keyword step and every
   post gets a fresh topic from your campaign objective, steering clear of
@@ -507,6 +548,11 @@ repository:
 [github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md](https://github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md)
 
 == Upgrade Notice ==
+
+= 2.36.0 =
+Pick an image style from a library, or build your own, with your brand
+colours applied. Existing style texts keep working as before. Safe
+upgrade — no database migrations.
 
 = 2.24.0 =
 Nicer Plugins-screen row with quick links. Safe upgrade — no database

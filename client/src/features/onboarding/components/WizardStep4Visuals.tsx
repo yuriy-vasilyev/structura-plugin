@@ -1,48 +1,41 @@
 /**
- * Step 4 — Visual-style profile.
+ * Step 4 — Visual signature (specs/visual-signatures.md §6, §8; handoff §3.8).
  *
  * Deferred-save model: the draft lives in the Zustand step4 draft and
  * persists at Finish (visual preset create/update). No per-step save.
  *
  * Hydration (2026-06-03): the draft seeds from the activation's BOUND
  * visual preset when one exists — so re-entering the wizard on a configured
- * site shows the saved style and Finish UPDATES it in place. Before this the
- * step always seeded a BLANK draft, so a site with a curated preset showed
- * an empty prompt — forcing the user to recreate a style they already had,
- * and replacing the saved preset with whatever they re-typed at Finish.
- * (The empty draft can't itself be committed — the validity gate below
- * blocks Finish until the prompt is non-empty — but the redundant rewrite +
- * accidental replacement is the regression.) Surfaced once per-site
- * re-onboarding started routing configured sites back through the wizard.
+ * site shows the saved choice and Finish UPDATES it in place. Before this the
+ * step always seeded a BLANK draft, which replaced a curated preset at Finish.
+ * A bound free-prompt or custom preset keeps its own choice until the user
+ * picks a card: the step has no "Your own" and no "Free prompt" card.
  *
- * Auto-suggest (2026-06-07, replacing the earlier "never on land" rule):
- * paid users with a BRAND LOGO from Step 1 get the style auto-drafted on
- * first land — but ONLY when the prompt is empty after hydration (no saved
- * preset, no in-flight draft), which is the overwrite hazard the old rule
- * existed for. Without a logo we can't anchor the style to the brand, so
- * there's no auto-fire — an info banner recommends adding one on Site info,
- * while the manual "AI suggest style" button stays available (it works from
- * the homepage alone).
- *
- * Validity: the visual-prompt template (globalArtDirection) must be
- * non-empty. Aspect ratio / format always have defaults.
+ * The pick (2026-11-09, replacing the visual-style auto-suggest): the thin
+ * pass reads the homepage, picks a library signature and the brand palette.
+ * Paid plans get the pick preselected and first; free plans see it first but
+ * locked, with the house signature preselected. Until the pass answers, the
+ * pick sentence says so and the house signature stays preselected. Continue
+ * is always enabled: a signature is always preselected.
  */
 
-import { useEffect, useMemo, useRef, useState } from "@wordpress/element";
+import { useEffect, useRef, useState } from "@wordpress/element";
+import { createInterpolateElement } from "@wordpress/element";
 import { __, sprintf } from "@wordpress/i18n";
 import {
   Badge,
   Card,
-  cn,
+  PaletteSwatches,
   Select,
+  Spinner,
   Switch,
-  TextArea,
-  useToast,
   VideoChannelGlyph,
   type CaptionPlacement,
   type VideoStyleKind,
 } from "@structura/ui";
-import { ChevronDown, ChevronUp, Image as ImageIcon, Sparkles } from "lucide-react";
+import { canUseSignatureLibrary } from "@structura/types";
+import { HOUSE_SIGNATURE_ID, type SignatureId } from "@structura/visual-signatures";
+import { BadgeCheck, ChevronDown, ChevronUp, PenLine, Sparkles } from "lucide-react";
 
 import {
   useDefaultProviders,
@@ -50,16 +43,26 @@ import {
   usePublicSiteProfile,
 } from "@/features/settings";
 import {
+  useSuggestVisualSignatureMutation,
   useVisualPresetsQuery,
-  type VisualMedium,
+  useVisualSignatureSuggestion,
+  type VisualSignatureSuggestion,
 } from "@/features/settings/api/useVisualPresets";
-import { MEDIUM_OPTIONS } from "@/features/settings/visualMediumOptions";
 import { AIProvider } from "@/features/campaigns/types";
-import {
-  ContextField,
-  SuggestStrategySection,
-} from "@/features/campaigns/components/SuggestStrategySection";
+import type { ContextField } from "@/features/campaigns/components/SuggestStrategySection";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
+import { SignaturePicker } from "@/features/settings/signatures/SignaturePicker";
+import { BrandPaletteSummary } from "@/features/settings/signatures/BrandPaletteField";
+import { signatureName } from "@/features/settings/signatures/signatureCopy";
+import {
+  curatedSelection,
+  houseSelection,
+  orderedSignatures,
+  selectionFromChoice,
+  signatureForSelection,
+  type SignatureSelection,
+} from "@/features/settings/signatures/signatureModel";
+import { buildMarketingPricingUrl } from "@/utils/portalLinks";
 
 import { useVideoStylingEligibility } from "@/features/channels/hooks/useVideoStylingEligibility";
 import { videoStyleById } from "@/features/channels/videoChannel";
@@ -69,7 +72,6 @@ import {
 } from "@/features/settings/components/VideoPresetSection";
 
 import { useWizardStore, type VisualDraft } from "../state/wizardStore";
-import { WizardMagicLoader } from "./WizardMagicLoader";
 
 const ASPECT_RATIOS = [
   { value: "16:9", label: __("16:9 — Hero / wide", "structura") },
@@ -93,18 +95,102 @@ const DEFAULT_DRAFT: VisualDraft = {
   format: "webp",
   optimizeOnUpload: true,
   medium: "photography",
+  signature: signatureForSelection(houseSelection(), null),
 };
 
-export const WizardStep4Visuals = () => {
-  const { isPaidLicense } = useLicense();
-  const { defaultTextProvider, hasExplicitTextDefault, isAutoResolved } = useDefaultProviders();
-  // A connected text key: what a none / free auto-suggest runs on (2026-10-06).
-  const hasTextKey = Boolean(hasExplicitTextDefault || isAutoResolved);
-  const { suggest, isSuggesting } = useMagicSuggest();
-  const { successToast, errorToast } = useToast();
-  const { data: profile } = usePublicSiteProfile();
+/**
+ * A translated sentence with `<b>` around names. Its `%1$s`… placeholders
+ * become elements holding the site and style names, so a name can never be
+ * read as markup.
+ */
+function boldSentence(template: string, values: string[]) {
+  const withTags = values.reduce(
+    (text, _, i) => text.replace(`%${i + 1}$s`, `<v${i} />`),
+    template,
+  );
+  const elements = Object.fromEntries(values.map((value, i) => [`v${i}`, <>{value}</>]));
+  return createInterpolateElement(withTags, { b: <strong />, ...elements });
+}
 
-  // Public URL + brand logo from step 1 — the sources the manual suggest reads.
+/** The pick sentence above the grid (handoff §3.8): what we picked, in which colours, and why. */
+function PickSentence({
+  siteName,
+  suggestion,
+  pending,
+  locked,
+  palette,
+}: {
+  siteName: string;
+  suggestion: VisualSignatureSuggestion | null;
+  pending: boolean;
+  locked: boolean;
+  palette: string[];
+}) {
+  if (!pending && !suggestion) return null;
+  return (
+    <div className="border-rec-line bg-rec-soft flex gap-2.5 rounded-xl border px-4 py-3.5">
+      {pending ? (
+        <Spinner size="sm" className="mt-0.5 shrink-0" />
+      ) : (
+        <BadgeCheck size={18} className="text-rec-ink mt-0.5 shrink-0" aria-hidden="true" />
+      )}
+      <div className="flex min-w-0 flex-col gap-1">
+        {pending || !suggestion ? (
+          <p role="status" className="m-0! text-sm text-neutral-900 dark:text-white">
+            {boldSentence(
+              /* translators: 1: site name, 2: the style selected meanwhile. Keep the <b> tags around 2. */
+              __(
+                "Still reading %1$s to pick a style. <b>%2$s</b> is selected until then.",
+                "structura",
+              ),
+              [siteName, signatureName(HOUSE_SIGNATURE_ID)],
+            )}
+          </p>
+        ) : (
+          <>
+            <p className="m-0! text-sm leading-relaxed text-neutral-900 dark:text-white">
+              {locked
+                ? boldSentence(
+                    /* translators: 1: site name, 2: the recommended style, 3: the style used until then. Keep the <b> tags around 2 and 3. */
+                    __(
+                      "Our pick for %1$s is <b>%2$s</b>, which comes with paid plans. Until then, your images use <b>%3$s</b> in your colours",
+                      "structura"
+                    ),
+                    [siteName, signatureName(suggestion.pick), signatureName(HOUSE_SIGNATURE_ID)]
+                  )
+                : boldSentence(
+                    /* translators: 1: site name, 2: the recommended style. Keep the <b> tags around 2. */
+                    __("Our pick for %1$s is <b>%2$s</b>, in your colours", "structura"),
+                    [siteName, signatureName(suggestion.pick)]
+                  )}
+              {palette.length > 0 && (
+                <PaletteSwatches
+                  colors={palette}
+                  size={16}
+                  max={6}
+                  label={__("Brand colours", "structura")}
+                  className="ml-1.5 inline-flex align-middle"
+                />
+              )}
+            </p>
+            {suggestion.reason && (
+              <p className="text-rec-ink m-0! text-[13px] leading-relaxed">{suggestion.reason}</p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export const WizardStep4Visuals = () => {
+  const { plan, isPaidLicense } = useLicense();
+  const { defaultTextProvider } = useDefaultProviders();
+  const { suggest } = useMagicSuggest();
+  const { data: profile } = usePublicSiteProfile();
+  const libraryOpen = canUseSignatureLibrary(plan);
+
+  // Public URL + brand logo from step 1 — the video draft's sources.
   const publicUrl = useWizardStore((s) => s.drafts.step1?.publicUrl ?? "");
   const logoUrl = useWizardStore((s) => s.drafts.step1?.logoUrl ?? "");
   const step4 = useWizardStore((s) => s.drafts.step4);
@@ -114,27 +200,31 @@ export const WizardStep4Visuals = () => {
   // The activation's existing bound preset — what Site → Visuals shows.
   // Used to HYDRATE the draft so we don't clobber a saved style at Finish.
   const { data: presetsData } = useVisualPresetsQuery();
+  const knownSuggestion = useVisualSignatureSuggestion(presetsData?.visualSuggestion);
+  const suggestSignature = useSuggestVisualSignatureMutation();
+  const [scanning, setScanning] = useState(false);
 
-  // Seed the draft once: a prior in-flight draft wins ONLY when the user
-  // actually wrote a prompt. A PRISTINE persisted draft (empty prompt — e.g.
-  // written to localStorage by a pre-hydration build, or an abandoned earlier
-  // visit) must not block hydration: an empty prompt can't be committed
-  // anyway (the validity gate below), and the saved bound preset is strictly
-  // better than a blank. Otherwise hydrate from the bound preset (so a
-  // configured site shows its real style and Finish updates rather than
-  // overwrites it); otherwise fall to defaults. Free tier can't use WebP
-  // encoding or optimize-on-upload (both Pro), so its defaults are PNG +
-  // optimize off.
+  // Seed the draft once: a prior in-flight draft wins when it carries a
+  // signature (this build wrote it) or a prompt the user wrote (an older
+  // build did). Otherwise hydrate from the bound preset (so a configured
+  // site shows its real choice and Finish updates rather than overwrites
+  // it); otherwise fall to defaults with the house signature. Free tier
+  // can't use WebP encoding or optimize-on-upload (both Pro), so its
+  // defaults are PNG + optimize off.
   const seededRef = useRef(false);
   useEffect(() => {
     if (seededRef.current) return;
     if (isPaidLicense === undefined) return; // wait until tier is known
-    // Paid: wait for the saved preset to load before seeding, so we hydrate
-    // it instead of racing in an empty default. Free: the presets query is
-    // disabled (stays undefined) — seed free-safe defaults immediately.
-    if (isPaidLicense && presetsData === undefined) return;
+    // A licensed site waits for its saved preset before seeding, so we
+    // hydrate it instead of racing in a default: since Finish writes the
+    // signature (2026-11-09), a default seeded too early would replace a
+    // free site's saved prompt with the house signature. Without a license
+    // the presets query stays disabled, so seed the defaults immediately.
+    if (plan !== "none" && presetsData === undefined) return;
     seededRef.current = true;
-    if (step4 && step4.globalArtDirection.trim().length > 0) return; // real work wins
+    if (step4 && (step4.signature !== undefined || step4.globalArtDirection.trim().length > 0)) {
+      return;
+    }
     const bound = presetsData?.boundPresetId
       ? presetsData.presets.find((p) => p.presetId === presetsData.boundPresetId)
       : undefined;
@@ -145,6 +235,10 @@ export const WizardStep4Visuals = () => {
         format: bound.format || (isPaidLicense ? "webp" : "png"),
         optimizeOnUpload: bound.optimizeOnUpload ?? Boolean(isPaidLicense),
         medium: bound.medium ?? DEFAULT_DRAFT.medium,
+        // The saved choice, or null for a free-prompt preset: Finish keeps it
+        // unless the user picks a card here.
+        signature: bound.signature ?? null,
+        ...(step4?.suggestion !== undefined ? { suggestion: step4.suggestion } : {}),
         // Video styling hydrates too (video-visuals handoff §4) — a site
         // whose preset already carries a video look must show it (and
         // Finish must update, not replace it). Absent fields stay absent;
@@ -160,31 +254,94 @@ export const WizardStep4Visuals = () => {
           ? { palette: bound.palette }
           : {}),
       });
-    } else if (!step4) {
-      // No preset and no draft → tier-aware defaults. (A pristine draft with
-      // no preset is left alone — nothing better to fill it with.)
+    } else {
+      // No preset → tier-aware defaults with the house signature.
       setStep4Draft({
         ...DEFAULT_DRAFT,
         format: isPaidLicense ? "webp" : "png",
         optimizeOnUpload: Boolean(isPaidLicense),
+        ...(step4?.suggestion !== undefined ? { suggestion: step4.suggestion } : {}),
       });
     }
-  }, [step4, setStep4Draft, isPaidLicense, presetsData]);
+  }, [step4, setStep4Draft, isPaidLicense, plan, presetsData]);
 
   const draft = step4 ?? DEFAULT_DRAFT;
   // Read the store's CURRENT draft at call time rather than the render
-  // closure: the async suggest resolves several commits after it was
-  // started, and a stale closure would wipe fields written in between
-  // (e.g. the video-defaults effect below racing the auto-suggest).
+  // closure: async answers resolve several commits after they started, and
+  // a stale closure would wipe fields written in between.
   const update = (p: Partial<VisualDraft>) => {
     const current = useWizardStore.getState().drafts.step4 ?? draft;
     setStep4Draft({ ...current, ...p });
   };
 
-  // Validity — needs an art-direction prompt.
+  // Continue is always enabled: a signature is always preselected (handoff §3.8).
   useEffect(() => {
-    setStepValid(4, draft.globalArtDirection.trim().length > 0);
-  }, [draft.globalArtDirection, setStepValid]);
+    setStepValid(4, true);
+  }, [setStepValid]);
+
+  /* ─── The thin pass: pick + palette ───────────────────────────── */
+  const hasBoundPreset = Boolean(presetsData?.boundPresetId);
+
+  /**
+   * Lands a thin-pass answer on the draft: the suggestion itself, the
+   * scraped palette when the draft has none (or on Re-scan), and on paid
+   * plans the pick as the preselection, unless the user picked a card or
+   * the site already has a saved preset.
+   */
+  const applySuggestion = (
+    result: VisualSignatureSuggestion | null,
+    opts: { replacePalette?: boolean } = {},
+  ) => {
+    const current = useWizardStore.getState().drafts.step4 ?? draft;
+    const patch: Partial<VisualDraft> = { suggestion: result };
+    if (result && result.palette.length > 0 && (opts.replacePalette || !current.palette?.length)) {
+      patch.palette = result.palette;
+    }
+    if (result && libraryOpen && !current.signatureTouched && !hasBoundPreset) {
+      patch.signature = signatureForSelection(curatedSelection(result.pick), null);
+    }
+    update(patch);
+  };
+
+  // Run the pass once when the step opens and no answer is known: persisted
+  // on the draft, stored on the activation (the preset list), or from this
+  // page load's earlier pass.
+  const passStartedRef = useRef(false);
+  useEffect(() => {
+    if (passStartedRef.current || !step4 || step4.suggestion !== undefined) return;
+    if (knownSuggestion !== undefined) {
+      applySuggestion(knownSuggestion);
+      return;
+    }
+    passStartedRef.current = true;
+    suggestSignature
+      .mutateAsync()
+      .then((result) => applySuggestion(result))
+      .catch(() => applySuggestion(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step4, knownSuggestion]);
+
+  const handleRescan = async () => {
+    setScanning(true);
+    try {
+      applySuggestion(await suggestSignature.mutateAsync(), { replacePalette: true });
+    } catch {
+      // Re-scan keeps what the step had; the pick sentence stays as it was.
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const suggestion = draft.suggestion ?? null;
+  const pending = draft.suggestion === undefined;
+  const selection: SignatureSelection = selectionFromChoice(draft.signature);
+  const pickId: SignatureId | null = suggestion?.pick ?? null;
+  const keepsOwnChoice = draft.signature !== undefined && selection.kind !== "curated";
+  const upgradeHref = buildMarketingPricingUrl({
+    intent: "unlock_visuals",
+    domain: typeof window !== "undefined" ? window.location.hostname : undefined,
+    plan,
+  });
 
   /* ─── Video styling row (video-visuals handoff §4) ────────────── */
   // Eligibility is the Video channel's cloud-computed catalog
@@ -211,416 +368,281 @@ export const WizardStep4Visuals = () => {
     });
   }, [videoEligibility, step4, setStep4Draft]);
 
-  /* ─── Manual visual-prompt suggest (paid, on demand) ──────────── */
-  const GEN_STAGES = useMemo(
-    () => [
-      __("Reading your homepage…", "structura"),
-      __("Studying your brand's look…", "structura"),
-      __("Composing a visual direction…", "structura"),
-      __("Finishing the style…", "structura"),
-    ],
-    [],
-  );
-
-  // Generate a visual style from the given sources in the medium picked on
-  // the cards (2026-10-06, matching the Visuals page; it used to be picked
-  // in the Suggest dropdown). Shared by the SuggestStrategySection panel and
-  // the auto-suggest-on-land path below. Reads the store at call time so a
-  // card picked since the last render counts.
-  const handleGenerate = async (provider: string, context: ContextField[]) => {
-    if (!provider) return;
-    const picked = ((useWizardStore.getState().drafts.step4 ?? draft).medium ||
-      "photography") as VisualMedium;
-    const data = (await suggest("visual", {
-      provider: provider as AIProvider,
-      context,
-      medium: picked,
-    })) as {
-      prompt?: string;
-      videoArtDirection?: unknown;
-      palette?: unknown;
-    } | null;
-    if (data?.prompt) {
-      // The same pass drafts the video art direction + brand palette
-      // (video-visuals handoff §4). They land SILENTLY on the draft —
-      // there's no wizard textarea for them — and only on eligible
-      // plans, so an ineligible Finish never writes video keys.
-      const videoPatch: Partial<VisualDraft> =
-        videoEligibility === "eligible"
-          ? {
-              ...(typeof data.videoArtDirection === "string" &&
-              data.videoArtDirection
-                ? { videoArtDirection: data.videoArtDirection }
-                : {}),
-              ...(Array.isArray(data.palette) &&
-              data.palette.every((c) => typeof c === "string")
-                ? { palette: data.palette as string[] }
-                : {}),
-            }
-          : {};
-      update({ medium: picked, globalArtDirection: data.prompt, ...videoPatch });
-      successToast(__("Drafted a visual style from your brand.", "structura"));
-    } else {
-      // Persist the medium choice regardless; surface the empty case
-      // (data===null means useMagicSuggest already toasted the error).
-      update({ medium: picked });
-      if (data !== null) {
-        errorToast(
-          __(
-            "We couldn't draft a style this time. Write your own below, or try again.",
-            "structura",
-          ),
-        );
-      }
-    }
-  };
-
-  // Auto-suggest on first land — builds its own sources (homepage + brand
-  // logo from step 1) and uses the current medium.
-  const runAutoSuggest = async () => {
+  // The video art direction is still drafted from the homepage on eligible
+  // plans (video-visuals handoff §4): the visual-style pass that used to
+  // draft the image style alongside it no longer runs for images, so it runs
+  // here for the video line alone, in the background, once.
+  const videoDraftStartedRef = useRef(false);
+  useEffect(() => {
+    if (videoDraftStartedRef.current) return;
+    if (videoEligibility !== "eligible" || !step4 || presetsData === undefined) return;
+    videoDraftStartedRef.current = true;
+    if (step4.videoArtDirection || !defaultTextProvider) return;
     const sources: ContextField[] = [];
     const home = publicUrl || profile?.publicUrl || profile?.homeUrl || "";
     if (home) sources.push({ title: profile?.name || "Homepage", url: home });
     if (logoUrl) sources.push({ title: "Brand logo", url: logoUrl });
-    await handleGenerate(defaultTextProvider ?? "", sources);
-  };
-
-  /* ─── Auto-suggest on first land (AI available + blank prompt) ─── */
-  // The seed effect above runs first (declaration order) and hydrates
-  // any bound preset into the draft — but its setState only lands on
-  // the NEXT render, so this effect re-checks the bound preset itself
-  // rather than trusting `draft` in the same flush. Auto-fire only
-  // when there's genuinely nothing to overwrite. No logo is required:
-  // the cloud screenshots the homepage server-side for the brand cue,
-  // so every site with AI gets an on-brand draft (the logo, when present,
-  // just refines the exact brand-mark hex).
-  const autoFiredRef = useRef(false);
-  useEffect(() => {
-    if (autoFiredRef.current) return;
-    // Every plan since 2026-10-06 (specs/open-providers.md §8): none / free
-    // auto-suggest once a text key is connected, since the draft runs on it.
-    if (!defaultTextProvider || !(isPaidLicense || hasTextKey)) return;
-    if (presetsData === undefined) return; // preset still loading
-    const bound = presetsData?.boundPresetId
-      ? presetsData.presets.find((p) => p.presetId === presetsData.boundPresetId)
-      : undefined;
-    if (bound?.globalArtDirection?.trim()) {
-      autoFiredRef.current = true; // saved style exists — never overwrite
-      return;
-    }
-    if (step4 && step4.globalArtDirection.trim().length > 0) {
-      autoFiredRef.current = true; // user (or hydration) already wrote one
-      return;
-    }
-    autoFiredRef.current = true;
-    void runAutoSuggest();
+    void suggest("visual", {
+      provider: defaultTextProvider as AIProvider,
+      context: sources,
+      medium: "photography",
+    }).then((data: { videoArtDirection?: unknown } | null) => {
+      if (typeof data?.videoArtDirection === "string" && data.videoArtDirection) {
+        update({ videoArtDirection: data.videoArtDirection });
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPaidLicense, hasTextKey, defaultTextProvider, presetsData, step4]);
+  }, [videoEligibility, step4, presetsData, defaultTextProvider]);
 
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-3 text-center">
         <h1 className="m-0! text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">
-          {__("Your visual style", "structura")}
+          {__("Visual signature", "structura")}
         </h1>
         <p className="m-0! text-base text-neutral-600 dark:text-neutral-400">
           {__(
-            "How every post's images should look. We draft a starting style from your brand — tweak anything.",
+            "Every image on your blog shares one look. We picked one for your brand; change it now or later on the Visuals page.",
             "structura",
           )}
         </p>
       </header>
 
-      {isSuggesting ? (
-        <Card className="p-8">
-          <WizardMagicLoader
-            icon={ImageIcon}
-            title={__("Designing your visual style", "structura")}
-            stages={GEN_STAGES}
-          />
-        </Card>
-      ) : (
-        <Card className="flex flex-col gap-6 p-8">
-          {/* AI suggest — the same panel as the Visuals page. Seeded with the
-              brand logo as a source; open on every plan since 2026-10-06.
-              Drafts in the medium picked on the cards below. */}
-          <SuggestStrategySection
-            isStrategizing={isSuggesting}
-            onGenerate={handleGenerate}
-            toggleButtonLabel={__("Suggest Image Style", "structura")}
-            contextFieldLabel={__(
-              "Brand Resources (logo, guidelines, design system URL…)",
-              "structura",
-            )}
-            addSourceLabel={__("Add Resource", "structura")}
-            ctaButtonLabel={__("Generate Image Style", "structura")}
-            placeholder={{
-              title: __("Company logo", "structura"),
-              url: `${window.location.origin}/logo.png`,
-            }}
-            initialSources={
-              logoUrl
-                ? [{ title: __("Site Logo", "structura"), url: logoUrl }]
-                : undefined
+      <Card className="flex flex-col gap-6 p-8">
+        <PickSentence
+          siteName={profile?.name || publicUrl || ""}
+          suggestion={suggestion}
+          pending={pending}
+          locked={!libraryOpen && pickId !== null && pickId !== HOUSE_SIGNATURE_ID}
+          palette={draft.palette ?? []}
+        />
+
+        {keepsOwnChoice && (
+          <p className="m-0! text-[13px] text-neutral-600 dark:text-neutral-400">
+            {__("This site keeps its current style unless you pick one below.", "structura")}
+          </p>
+        )}
+
+        <div className="flex flex-col gap-3">
+          <span id="structura-wizard-signature-label" className="sr-only">
+            {__("Signature", "structura")}
+          </span>
+          <SignaturePicker
+            labelledBy="structura-wizard-signature-label"
+            signatures={orderedSignatures(pickId)}
+            selection={selection}
+            plan={plan}
+            pickId={pickId}
+            upgradeHref={upgradeHref}
+            onSelect={(next) =>
+              update({ signature: signatureForSelection(next, null), signatureTouched: true })
             }
           />
+        </div>
 
-          {/* Image medium — the same cards as the Visuals page (restored
-              there 2026-10-05, here 2026-10-06), saved on the preset at
-              Finish and the medium Suggest drafts in. */}
-          <div className="flex flex-col gap-3">
-            <span className="text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-              {__("Image medium", "structura")}
-            </span>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {MEDIUM_OPTIONS.map((opt) => {
-                const Icon = opt.icon;
-                const active = (draft.medium || "photography") === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => update({ medium: opt.value })}
-                    className={cn(
-                      "flex cursor-pointer flex-col gap-1.5 rounded-xl border p-3 text-left transition-all duration-200",
-                      active
-                        ? "border-brand-500 bg-brand-50/60 dark:border-brand-400 dark:bg-brand-950/30"
-                        : "hover:border-brand-300 dark:hover:border-brand-500/40 border-gray-200 hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-sm dark:border-neutral-800 dark:hover:bg-neutral-800/40",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "flex h-7 w-7 items-center justify-center rounded-lg",
-                        active
-                          ? "bg-brand-500 text-white"
-                          : "bg-gray-100 text-gray-500 dark:bg-neutral-800 dark:text-neutral-400",
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <span className="text-[13px] font-bold text-gray-900 dark:text-white">
-                      {opt.label}
-                    </span>
-                    <span className="text-[11.5px] leading-snug text-gray-500 dark:text-neutral-400">
-                      {opt.desc}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+        <BrandPaletteSummary
+          palette={draft.palette ?? []}
+          scanning={scanning}
+          onScan={handleRescan}
+        />
 
-          {/* Art direction prompt. */}
-          <div className="flex flex-col gap-3">
-            <span className="text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-              {__("Visual prompt template", "structura")}
-            </span>
-            <TextArea
-              label={__("Visual prompt template", "structura")}
-              hiddenLabel
-              value={draft.globalArtDirection}
-              onChange={(e) => update({ globalArtDirection: e.target.value })}
-              rows={4}
-              placeholder={__(
-                "E.g. Clean editorial photography, soft natural light, muted earthy palette, shallow depth of field.",
-                "structura",
-              )}
-            />
-            <p className="m-0! text-xs text-neutral-500 dark:text-neutral-400">
+        {libraryOpen && (
+          <p className="m-0! flex! items-start gap-2 text-[13px] text-neutral-700 dark:text-neutral-300">
+            <PenLine size={14} className="text-brand-500 mt-0.5 shrink-0" aria-hidden="true" />
+            <span>
               {__(
-                "This anchors every image we generate. Be specific about palette, mood, and style.",
+                "Want a look of your own? Build it later on the Visuals page, or write a prompt there.",
                 "structura",
               )}
-            </p>
-          </div>
+            </span>
+          </p>
+        )}
 
-          {/* Video styling — collapsible row, eligible plans only
-              (video-visuals handoff §4). Collapsed: one summary line +
-              "Suggested for you". Expanded: compact style cards + the
-              placement radio — deliberately NO textarea; the drafted
-              video art direction saves silently with the preset. */}
-          {videoEligibility === "eligible" && (
-            <div>
-              <button
-                type="button"
-                aria-expanded={videoOpen}
-                onClick={() => setVideoOpen((open: boolean) => !open)}
-                className={
-                  videoOpen
-                    ? "flex w-full cursor-pointer items-center gap-3 rounded-xl rounded-b-none border border-b-0 border-neutral-200 bg-neutral-50/70 px-4 py-3 text-left transition-all dark:border-neutral-700 dark:bg-neutral-800/40"
-                    : "flex w-full cursor-pointer items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-left transition-all hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600"
-                }
-              >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300">
-                  <VideoChannelGlyph className="h-4.5 w-4.5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
-                    <span className="text-[13px] font-bold text-neutral-900 dark:text-neutral-100">
-                      {__("Video styling", "structura")}
-                    </span>
-                    <Badge intent="primary">
-                      {__("Suggested for you", "structura")}
-                    </Badge>
+        {/* Video styling — collapsible row, eligible plans only
+            (video-visuals handoff §4). Collapsed: one summary line +
+            "Suggested for you". Expanded: compact style cards + the
+            placement radio — deliberately NO textarea; the drafted
+            video art direction saves silently with the preset. */}
+        {videoEligibility === "eligible" && (
+          <div>
+            <button
+              type="button"
+              aria-expanded={videoOpen}
+              onClick={() => setVideoOpen((open: boolean) => !open)}
+              className={
+                videoOpen
+                  ? "flex w-full cursor-pointer items-center gap-3 rounded-xl rounded-b-none border border-b-0 border-neutral-200 bg-neutral-50/70 px-4 py-3 text-left transition-all dark:border-neutral-700 dark:bg-neutral-800/40"
+                  : "flex w-full cursor-pointer items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-left transition-all hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600"
+              }
+            >
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300">
+                <VideoChannelGlyph className="h-4.5 w-4.5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-2">
+                  <span className="text-[13px] font-bold text-neutral-900 dark:text-neutral-100">
+                    {__("Video styling", "structura")}
                   </span>
-                  <span className="mt-0.5 block truncate text-xs text-neutral-500 dark:text-neutral-400">
-                    {sprintf(
-                      /* translators: %s: style summary, e.g. "Kinetic · captions bottom · brand-palette accents" */
-                      __("%s — edit anytime in Visuals.", "structura"),
-                      [
-                        // Style names are the presets' proper names —
-                        // untranslated by design (videoChannel.ts).
-                        videoStyleById(draft.videoStyle).name,
-                        {
-                          top: __("captions top", "structura"),
-                          middle: __("captions middle", "structura"),
-                          bottom: __("captions bottom", "structura"),
-                        }[draft.captionPlacement ?? "bottom"],
-                        draft.palette && draft.palette.length > 0
-                          ? __("brand-palette accents", "structura")
-                          : null,
-                      ]
-                        .filter(Boolean)
-                        .join(" · "),
+                  <Badge intent="primary">
+                    {__("Suggested for you", "structura")}
+                  </Badge>
+                </span>
+                <span className="mt-0.5 block truncate text-xs text-neutral-500 dark:text-neutral-400">
+                  {sprintf(
+                    /* translators: %s: style summary, e.g. "Kinetic · captions bottom · brand-palette accents" */
+                    __("%s — edit anytime in Visuals.", "structura"),
+                    [
+                      // Style names are the presets' proper names —
+                      // untranslated by design (videoChannel.ts).
+                      videoStyleById(draft.videoStyle).name,
+                      {
+                        top: __("captions top", "structura"),
+                        middle: __("captions middle", "structura"),
+                        bottom: __("captions bottom", "structura"),
+                      }[draft.captionPlacement ?? "bottom"],
+                      draft.palette && draft.palette.length > 0
+                        ? __("brand-palette accents", "structura")
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · "),
+                  )}
+                </span>
+              </span>
+              {videoOpen ? (
+                <ChevronUp size={16} className="shrink-0 text-neutral-400" aria-hidden />
+              ) : (
+                <ChevronDown size={16} className="shrink-0 text-neutral-400" aria-hidden />
+              )}
+            </button>
+            {videoOpen && (
+              <div className="space-y-4 rounded-b-xl border border-t-0 border-neutral-200 bg-neutral-50/70 px-4 pt-3 pb-4 dark:border-neutral-700 dark:bg-neutral-800/40">
+                <div className="space-y-1.5">
+                  <span className="block text-[10px] font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
+                    {__("Style preset", "structura")}
+                  </span>
+                  <VideoStyleCards
+                    compact
+                    value={(draft.videoStyle ?? "kinetic") as VideoStyleKind}
+                    onChange={(style) => update({ videoStyle: style })}
+                    {...(draft.palette?.[0] ? { accent: draft.palette[0] } : {})}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <span className="block text-[10px] font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
+                    {__("Caption placement", "structura")}
+                  </span>
+                  <CaptionPlacementField
+                    value={(draft.captionPlacement ?? "bottom") as CaptionPlacement}
+                    onChange={(placement) =>
+                      update({ captionPlacement: placement })
+                    }
+                  />
+                </div>
+                <p className="m-0! flex! items-start gap-1.5 text-[11px] leading-relaxed text-neutral-500 dark:text-neutral-400">
+                  <Sparkles
+                    size={12}
+                    className="mt-px shrink-0 text-brand-500 dark:text-brand-400"
+                    aria-hidden
+                  />
+                  <span>
+                    {__(
+                      "Video art direction was drafted from your homepage — fine-tune it under Visuals after setup.",
+                      "structura",
                     )}
                   </span>
-                </span>
-                {videoOpen ? (
-                  <ChevronUp size={16} className="shrink-0 text-neutral-400" aria-hidden />
-                ) : (
-                  <ChevronDown size={16} className="shrink-0 text-neutral-400" aria-hidden />
-                )}
-              </button>
-              {videoOpen && (
-                <div className="space-y-4 rounded-b-xl border border-t-0 border-neutral-200 bg-neutral-50/70 px-4 pt-3 pb-4 dark:border-neutral-700 dark:bg-neutral-800/40">
-                  <div className="space-y-1.5">
-                    <span className="block text-[10px] font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
-                      {__("Style preset", "structura")}
-                    </span>
-                    <VideoStyleCards
-                      compact
-                      value={(draft.videoStyle ?? "kinetic") as VideoStyleKind}
-                      onChange={(style) => update({ videoStyle: style })}
-                      {...(draft.palette?.[0] ? { accent: draft.palette[0] } : {})}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <span className="block text-[10px] font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
-                      {__("Caption placement", "structura")}
-                    </span>
-                    <CaptionPlacementField
-                      value={(draft.captionPlacement ?? "bottom") as CaptionPlacement}
-                      onChange={(placement) =>
-                        update({ captionPlacement: placement })
-                      }
-                    />
-                  </div>
-                  <p className="m-0! flex! items-start gap-1.5 text-[11px] leading-relaxed text-neutral-500 dark:text-neutral-400">
-                    <Sparkles
-                      size={12}
-                      className="mt-px shrink-0 text-brand-500 dark:text-brand-400"
-                      aria-hidden
-                    />
-                    <span>
-                      {__(
-                        "Video art direction was drafted from your homepage — fine-tune it under Visuals after setup.",
-                        "structura",
-                      )}
-                    </span>
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Aspect ratio + format. */}
-          <div className="grid grid-cols-1 gap-4 border-t border-neutral-100 pt-6 sm:grid-cols-2 dark:border-neutral-800">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                {__("Default aspect ratio", "structura")}
-              </label>
-              <Select
-                value={draft.aspectRatio}
-                onValueChange={(val) => update({ aspectRatio: String(val) })}
-                options={ASPECT_RATIOS}
-              >
-                <Select.Trigger />
-                <Select.Content className="w-(--button-width)">
-                  {ASPECT_RATIOS.map((r) => (
-                    <Select.Item key={r.value} value={r.value}>
-                      {r.label}
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                {__("Image format", "structura")}
-                {!isPaidLicense ? (
-                  <Badge intent="premium">{__("Pro", "structura")}</Badge>
-                ) : null}
-              </label>
-              {/* Format encoding (WebP etc.) is a paid feature — free
-                  tier is fixed to PNG, mirroring the Visuals page. */}
-              <Select
-                value={draft.format}
-                onValueChange={(val) => update({ format: String(val) })}
-                options={FORMATS}
-                disabled={!isPaidLicense}
-              >
-                <Select.Trigger />
-                <Select.Content className="w-(--button-width)">
-                  {FORMATS.map((f) => (
-                    <Select.Item key={f.value} value={f.value}>
-                      {f.label}
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select>
-            </div>
+                </p>
+              </div>
+            )}
           </div>
+        )}
 
-          {/* Optimize-on-upload — Pro (alt-text + filename automation),
-              disabled on free, same as the Visuals page. */}
-          <div className="flex items-center justify-between gap-4 border-t border-neutral-100 pt-6 dark:border-neutral-800">
-            <div className="flex flex-col gap-1">
-              <span className="flex items-center gap-2 text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                {__("Optimize images on upload", "structura")}
-                {!isPaidLicense ? (
-                  <Badge intent="premium">{__("Pro", "structura")}</Badge>
-                ) : null}
-              </span>
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                {__(
-                  "Re-encode and resize generated images for fast page loads.",
-                  "structura",
-                )}
-              </span>
-            </div>
-            <Switch
-              label={__("Optimize images on upload", "structura")}
-              hiddenLabel
-              checked={draft.optimizeOnUpload}
-              onChange={(checked) => update({ optimizeOnUpload: checked })}
+        {/* Aspect ratio + format. */}
+        <div className="grid grid-cols-1 gap-4 border-t border-neutral-100 pt-6 sm:grid-cols-2 dark:border-neutral-800">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+              {__("Default aspect ratio", "structura")}
+            </label>
+            <Select
+              value={draft.aspectRatio}
+              onValueChange={(val) => update({ aspectRatio: String(val) })}
+              options={ASPECT_RATIOS}
+            >
+              <Select.Trigger />
+              <Select.Content className="w-(--button-width)">
+                {ASPECT_RATIOS.map((r) => (
+                  <Select.Item key={r.value} value={r.value}>
+                    {r.label}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+              {__("Image format", "structura")}
+              {!isPaidLicense ? (
+                <Badge intent="premium">{__("Pro", "structura")}</Badge>
+              ) : null}
+            </label>
+            {/* Format encoding (WebP etc.) is a paid feature — free
+                tier is fixed to PNG, mirroring the Visuals page. */}
+            <Select
+              value={draft.format}
+              onValueChange={(val) => update({ format: String(val) })}
+              options={FORMATS}
               disabled={!isPaidLicense}
-            />
+            >
+              <Select.Trigger />
+              <Select.Content className="w-(--button-width)">
+                {FORMATS.map((f) => (
+                  <Select.Item key={f.value} value={f.value}>
+                    {f.label}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select>
           </div>
+        </div>
 
-          <div className="rounded-md border border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
-            <p className="m-0! flex! items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400">
-              <Badge intent="info">{__("Tip", "structura")}</Badge>
-              <span>
-                {__(
-                  "Everything saves at the end. Edit later under Settings → Visuals.",
-                  "structura",
-                )}
-              </span>
-            </p>
+        {/* Optimize-on-upload — Pro (alt-text + filename automation),
+            disabled on free, same as the Visuals page. */}
+        <div className="flex items-center justify-between gap-4 border-t border-neutral-100 pt-6 dark:border-neutral-800">
+          <div className="flex flex-col gap-1">
+            <span className="flex items-center gap-2 text-sm font-medium text-neutral-900 dark:text-neutral-100">
+              {__("Optimize images on upload", "structura")}
+              {!isPaidLicense ? (
+                <Badge intent="premium">{__("Pro", "structura")}</Badge>
+              ) : null}
+            </span>
+            <span className="text-xs text-neutral-500 dark:text-neutral-400">
+              {__(
+                "Re-encode and resize generated images for fast page loads.",
+                "structura",
+              )}
+            </span>
           </div>
-        </Card>
-      )}
+          <Switch
+            label={__("Optimize images on upload", "structura")}
+            hiddenLabel
+            checked={draft.optimizeOnUpload}
+            onChange={(checked) => update({ optimizeOnUpload: checked })}
+            disabled={!isPaidLicense}
+          />
+        </div>
+
+        <div className="rounded-md border border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
+          <p className="m-0! flex! items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400">
+            <Badge intent="info">{__("Tip", "structura")}</Badge>
+            <span>
+              {__(
+                "Everything saves at the end. Edit later under Settings → Visuals.",
+                "structura",
+              )}
+            </span>
+          </p>
+        </div>
+      </Card>
     </div>
   );
 };

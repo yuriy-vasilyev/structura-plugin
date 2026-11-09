@@ -33,6 +33,9 @@ class Rest_Api
 {
     private string $namespace = 'structura/v1';
 
+    /** Rendering media a visual signature or preview may name. */
+    private const VISUAL_MEDIA = ['photography', 'illustration', '3d_render'];
+
     /**
      * Lazily-instantiated proxy for the cloud `channels*Connection` endpoints.
      * Tests inject a fake via `set_channels_connections_service()` to assert
@@ -632,6 +635,19 @@ class Rest_Api
         register_rest_route($this->namespace, '/visual-presets/(?P<id>[\w-]+)', [
             'methods'             => 'DELETE',
             'callback'            => [$this, 'delete_visual_preset'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+
+        // Visual signatures (specs/visual-signatures.md §6, §8): the thin
+        // suggest pass and "Preview with my colours".
+        register_rest_route($this->namespace, '/visual-signature/suggest', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'suggest_visual_signature'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+        register_rest_route($this->namespace, '/visual-signature/preview', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'preview_visual_signature'],
             'permission_callback' => [$this, 'check_permission'],
         ]);
 
@@ -7074,10 +7090,27 @@ class Rest_Api
         $body = is_array($response) ? ($response['body'] ?? []) : [];
         $code = is_array($response) ? (int)($response['code'] ?? 0) : 0;
         if ($code < 200 || $code >= 300 || empty($body['success'])) {
-            $error = is_array($body) && isset($body['error']) ? (string)$body['error'] : $generic_error;
-            return new \WP_Error('cloud_error', $error, ['status' => $code ?: 502]);
+            return $this->cloud_error($body, $code, $generic_error);
         }
         return rest_ensure_response($body);
+    }
+
+    /**
+     * The `WP_Error` for a refused cloud call: the cloud's message and HTTP
+     * status, plus its machine-readable `code` when it sends one, so the SPA
+     * can branch on it (`plan_gated` on a gated visual-signature save,
+     * 2026-11-09) instead of parsing the message.
+     *
+     * @param mixed $body Decoded cloud response body.
+     */
+    private function cloud_error($body, int $status, string $generic_error): \WP_Error
+    {
+        $error = is_array($body) && isset($body['error']) ? (string)$body['error'] : $generic_error;
+        $data  = ['status' => $status ?: 502];
+        if (is_array($body) && is_string($body['code'] ?? null) && $body['code'] !== '') {
+            $data['code'] = sanitize_key($body['code']);
+        }
+        return new \WP_Error('cloud_error', $error, $data);
     }
 
     public function list_visual_presets()
@@ -7089,9 +7122,13 @@ class Rest_Api
     public function create_visual_preset($request)
     {
         $params = $request->get_json_params();
+        $content = $this->sanitize_visual_content($params['content'] ?? []);
+        if (is_wp_error($content)) {
+            return $content;
+        }
         $payload = [
             'label'              => sanitize_text_field($params['label'] ?? ''),
-            'content'            => $this->sanitize_visual_content($params['content'] ?? []),
+            'content'            => $content,
             'bindToActivation'   => isset($params['bind_to_activation']) ? (bool)$params['bind_to_activation'] : true,
         ];
         $response = Cloud_Client::post('/createVisualPreset', $payload);
@@ -7108,7 +7145,11 @@ class Rest_Api
             $payload['label'] = sanitize_text_field($params['label']);
         }
         if (isset($params['content'])) {
-            $payload['content'] = $this->sanitize_visual_content($params['content'], true);
+            $content = $this->sanitize_visual_content($params['content'], true);
+            if (is_wp_error($content)) {
+                return $content;
+            }
+            $payload['content'] = $content;
         }
         $response = Cloud_Client::post('/updateVisualPreset', $payload);
         $forwarded = $this->forward_cloud_response($response, __('Failed to update visual preset.', 'structura'));
@@ -7178,8 +7219,17 @@ class Rest_Api
      * value stays out of the patch so the cloud keeps the stored one. They
      * used to be filled with defaults, so a partial save reset them. Create
      * keeps the defaults.
+     *
+     * `signature` (specs/visual-signatures.md §4, 2026-11-09) is forwarded
+     * only when sent, `null` included: it clears the stored signature back to
+     * the free prompt. Optional until two plugin releases after the first
+     * cloud deploy of slice 2 (2026-11-09), as the spec's release window says;
+     * older SPA builds never send it and keep the stored value. An invalid
+     * shape refuses the whole save with a 400 instead of dropping the key.
+     *
+     * @return array<string, mixed>|\WP_Error
      */
-    private function sanitize_visual_content($raw, bool $is_update = false): array
+    private function sanitize_visual_content($raw, bool $is_update = false)
     {
         if ( ! is_array($raw)) return [];
         $content = [
@@ -7253,7 +7303,153 @@ class Rest_Api
             $content['aiLabel'] = $ai_label;
         }
 
+        if (array_key_exists('signature', $raw)) {
+            $signature = $this->sanitize_signature($raw['signature']);
+            if (is_wp_error($signature)) {
+                return $signature;
+            }
+            $content['signature'] = $signature;
+        }
+
         return $content;
+    }
+
+    /**
+     * Wire-shape check for a visual `signature` (specs/visual-signatures.md
+     * §4), for preset saves and previews. `null` stays `null` (free prompt).
+     * A curated choice keeps its id and integer version; the cloud checks the
+     * id against its library. A custom one keeps its name, medium and four
+     * text fields, trimmed to the cloud's caps (80 and 1,000 characters,
+     * `functions/src/visualSignatures/choice.ts`); the cloud refuses an empty
+     * field, so this refuses it first.
+     *
+     * @param mixed $raw Whatever the SPA sent under `signature`.
+     * @return array<string, mixed>|null|\WP_Error
+     */
+    private function sanitize_signature($raw)
+    {
+        if ($raw === null) {
+            return null;
+        }
+        $invalid = new \WP_Error('invalid_signature', __('Invalid visual signature.', 'structura'), ['status' => 400]);
+        if ( ! is_array($raw)) {
+            return $invalid;
+        }
+        $kind = $raw['kind'] ?? null;
+
+        if ($kind === 'curated') {
+            $id      = $raw['id'] ?? null;
+            $version = $raw['version'] ?? null;
+            if (is_string($version) && ctype_digit($version)) {
+                $version = (int)$version;
+            }
+            if ( ! is_string($id) || ! preg_match('/^[a-z0-9-]{1,64}$/', $id) || ! is_int($version) || $version < 1) {
+                return $invalid;
+            }
+            return ['kind' => 'curated', 'id' => $id, 'version' => $version];
+        }
+
+        if ($kind === 'custom') {
+            $medium = $raw['medium'] ?? null;
+            if ( ! in_array($medium, self::VISUAL_MEDIA, true)) {
+                return $invalid;
+            }
+            $name = is_string($raw['name'] ?? null) ? mb_substr(sanitize_text_field($raw['name']), 0, 80) : '';
+            if ($name === '') {
+                return $invalid;
+            }
+            $signature = ['kind' => 'custom', 'name' => $name, 'medium' => $medium];
+            foreach (['technique', 'motifs', 'composition', 'avoid'] as $field) {
+                $value = is_string($raw[$field] ?? null) ? mb_substr(sanitize_textarea_field($raw[$field]), 0, 1000) : '';
+                if (trim($value) === '') {
+                    return $invalid;
+                }
+                $signature[$field] = $value;
+            }
+            return $signature;
+        }
+
+        return $invalid;
+    }
+
+    /**
+     * POST /structura/v1/visual-signature/suggest: the thin suggest pass
+     * (specs/visual-signatures.md §6). The cloud reads the homepage, picks a
+     * library signature for the brand with a one-line reason and the brand
+     * palette, stores the result on the activation and returns it. Body:
+     * `{ locale? }`, the language of the reason. Answered as the cloud
+     * answers: `{ suggestion | null, homepageRead, reason? }`, or the cloud's
+     * status and code on a refusal (429 `ai_rate_limited`).
+     */
+    public function suggest_visual_signature($request)
+    {
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
+        }
+        $params  = $request->get_json_params();
+        $payload = [];
+        $locale  = is_array($params) && is_string($params['locale'] ?? null) ? $params['locale'] : '';
+        if (preg_match('/^[a-z]{2,3}([_-][A-Za-z0-9]{2,8})*$/', $locale)) {
+            $payload['locale'] = $locale;
+        }
+        // 60s: a homepage screenshot plus one vision call, inside the cloud
+        // function's default 60s limit.
+        $response = Cloud_Client::post('/suggestVisualSignature', $payload, ['timeout' => 60]);
+        if (is_wp_error($response)) {
+            return new \WP_Error('cloud_unreachable', $response->get_error_message(), ['status' => 502]);
+        }
+        $body = is_array($response['body'] ?? null) ? $response['body'] : [];
+        $code = (int)($response['code'] ?? 0);
+        // The pass answers without a `success` flag, so it can't go through
+        // forward_cloud_response; a degraded pass is a 200 with
+        // `suggestion: null`.
+        if ($code < 200 || $code >= 300) {
+            return $this->cloud_error($body, $code, __('Could not read your site right now.', 'structura'));
+        }
+        return rest_ensure_response($body);
+    }
+
+    /**
+     * POST /structura/v1/visual-signature/preview: "Preview with my colours"
+     * (specs/visual-signatures.md §8). Renders one sample image of the unsaved
+     * choice in the palette and answers `{ success, imageUrl, concept }`.
+     * Body: `{ signature?, global_art_direction?, medium?, palette? }`, mapped
+     * to the cloud's camelCase. Paid plans only: the cloud answers 403
+     * `permission-denied` otherwise, forwarded with its status and code.
+     */
+    public function preview_visual_signature($request)
+    {
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
+        }
+        $params = $request->get_json_params();
+        if ( ! is_array($params)) {
+            $params = [];
+        }
+        $payload = [];
+        if (array_key_exists('signature', $params)) {
+            $signature = $this->sanitize_signature($params['signature']);
+            if (is_wp_error($signature)) {
+                return $signature;
+            }
+            $payload['signature'] = $signature;
+        }
+        $art_direction = $params['global_art_direction'] ?? ($params['globalArtDirection'] ?? null);
+        if (is_string($art_direction)) {
+            $payload['globalArtDirection'] = sanitize_textarea_field($art_direction);
+        }
+        if (in_array($params['medium'] ?? null, self::VISUAL_MEDIA, true)) {
+            $payload['medium'] = $params['medium'];
+        }
+        if (array_key_exists('palette', $params)) {
+            $payload['palette'] = $this->sanitize_palette($params['palette']);
+        }
+        // 120s: a render takes 15 to 40 s, and the cloud function's own limit
+        // is 120 s.
+        $response = Cloud_Client::post('/previewVisualSignature', $payload, ['timeout' => 120]);
+        return $this->forward_cloud_response($response, __('The preview did not render.', 'structura'));
     }
 
     /**

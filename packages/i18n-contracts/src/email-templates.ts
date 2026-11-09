@@ -36,6 +36,7 @@ export const LOCALIZED_EMAIL_TEMPLATE_IDS = [
   "headless-draft-ready",
   "video-ready",
   "workspace-member-update",
+  "bank-exhausted",
 ] as const;
 
 /** Union of every localized email template id. */

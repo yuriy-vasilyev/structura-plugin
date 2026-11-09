@@ -27,7 +27,8 @@ export const formFieldGroupVariants = cva(
         default: [
           "border-gray-300 dark:border-gray-700",
           "text-gray-900 dark:text-gray-100",
-          "placeholder:text-gray-400 dark:placeholder:text-gray-500",
+          // gray-400 placeholders were 2.6:1 on white, under AA (2026-11-08 contrast audit).
+          "placeholder:text-gray-500 dark:placeholder:text-gray-400",
           // Brand Focus — using ! to override potential WP generic input focus styles
           "focus-within:!border-brand-600 focus-within:!ring-4 focus-within:!ring-brand-600/10",
         ],
@@ -51,7 +52,8 @@ export const formFieldGroupVariants = cva(
  * adds heavy styling to 'input[type=text]', 'select', etc.
  */
 export const formFieldElementVariants = cva(
-  "w-full !bg-transparent !border-0 !shadow-none !outline-none !ring-0 leading-none focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-600 dark:text-white",
+  // Placeholder tones: gray-400 was 2.6:1 on white, under AA (2026-11-08 contrast audit).
+  "w-full !bg-transparent !border-0 !shadow-none !outline-none !ring-0 leading-none focus:outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400 dark:text-white",
   {
     variants: {
       size: {
@@ -164,13 +166,32 @@ export const formFieldLabelVariants = cva("block", {
 });
 
 /**
- * Description/Error Message Variants
+ * Row holding a label and its adornment (e.g. a "Drafted" badge). The row
+ * takes over the label's bottom margin, so the adornment centres on the
+ * label text rather than on its margin and the gap to the control survives
+ * wrapping. Margins match `formFieldLabelVariants`.
  */
-export const formFieldDescriptionVariants = cva("text-xs font-medium", {
+export const formFieldLabelRowVariants = cva("flex flex-wrap items-center gap-x-2 gap-y-1", {
+  variants: {
+    labelStyle: {
+      default: "mb-2",
+      prominent: "mb-1.5",
+    },
+  },
+  defaultVariants: {
+    labelStyle: "default",
+  },
+});
+
+/**
+ * Description/Error Message Variants. `default` is the help line under a
+ * field (regular weight); `error` is the validation message.
+ */
+export const formFieldDescriptionVariants = cva("text-xs", {
   variants: {
     intent: {
       default: "text-gray-500 dark:text-gray-400",
-      error: "text-red-600 dark:text-red-400",
+      error: "font-medium text-red-600 dark:text-red-400",
     },
     view: {
       default: "mt-2",

@@ -150,6 +150,15 @@ export const NOTICE_KEYS = {
       body: "notices.generation.failed.body",
       cta: "notices.generation.failed.cta",
     },
+    // Emitted by the stalled-run watchdog when a stock-served run died on
+    // our side before publishing and the entry + post slot were handed
+    // back (2026-11-04). One notice per run; the CTA opens the run.
+    // bodyParams: { campaignName: string }
+    stalled_refunded: {
+      title: "notices.generation.stalled_refunded.title",
+      body: "notices.generation.stalled_refunded.body",
+      cta: "notices.generation.stalled_refunded.cta",
+    },
   },
   // Spec: specs/seo-intelligence-plan.md §6. Workspace-scoped
   // notices for monthly refresh outcomes and budget transitions.

@@ -314,6 +314,40 @@ export const resolveCampaignLimit = (
 };
 
 /**
+ * Visual signatures (specs/visual-signatures.md §7). The library (any
+ * curated signature other than the house one) and the builder (a custom
+ * signature) come with paid plans; the house signature and the free-text
+ * prompt stay on every tier. Server-side enforcement lives in
+ * `functions/src/policy/tier-policy.ts::validateSignatureChoiceForTier`;
+ * the portal and wp-admin pickers read the same matrices to lock cards.
+ */
+export const VISUAL_SIGNATURE_LIBRARY_FOR_TIER: Record<LicenseTier, boolean> = {
+  none: false,
+  free: false,
+  byok: true,
+  cloud: true,
+} as const;
+
+export const VISUAL_SIGNATURE_BUILDER_FOR_TIER: Record<LicenseTier, boolean> = {
+  none: false,
+  free: false,
+  byok: true,
+  cloud: true,
+} as const;
+
+/** True when the tier may bind a curated signature other than the house one. Unknown tiers read as `none`. */
+export const canUseSignatureLibrary = (plan: LicenseTier | string | null | undefined): boolean =>
+  !!plan && (plan as LicenseTier) in VISUAL_SIGNATURE_LIBRARY_FOR_TIER
+    ? VISUAL_SIGNATURE_LIBRARY_FOR_TIER[plan as LicenseTier]
+    : VISUAL_SIGNATURE_LIBRARY_FOR_TIER.none;
+
+/** True when the tier may save a custom signature. Unknown tiers read as `none`. */
+export const canUseSignatureBuilder = (plan: LicenseTier | string | null | undefined): boolean =>
+  !!plan && (plan as LicenseTier) in VISUAL_SIGNATURE_BUILDER_FOR_TIER
+    ? VISUAL_SIGNATURE_BUILDER_FOR_TIER[plan as LicenseTier]
+    : VISUAL_SIGNATURE_BUILDER_FOR_TIER.none;
+
+/**
  * Maximum number of posts a single campaign may publish per week under
  * each tier. `null` means "no weekly cap" (the gate never trips).
  *

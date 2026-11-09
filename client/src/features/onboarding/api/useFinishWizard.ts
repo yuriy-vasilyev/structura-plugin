@@ -33,6 +33,7 @@ import {
   type VisualMedium,
 } from "@/features/settings/api/useVisualPresets";
 import { useUpdateSiteSeoSettingsMutation } from "@/features/site/api/useSiteAnalysis";
+import { sameSignature } from "@/features/settings/signatures/signatureModel";
 
 import { useSaveWizardPositioningMutation } from "./useWizardSeo";
 import {
@@ -147,6 +148,11 @@ export function useFinishWizard() {
           ...(drafts.step4.palette !== undefined
             ? { palette: drafts.step4.palette }
             : {}),
+          // The picked signature saves even with no prompt text: a curated or
+          // custom signature makes the art direction optional (spec §4).
+          // `null` (a bound free-prompt preset kept as is) and absent (a
+          // draft from before 2026-11-09) leave the stored one alone.
+          ...(drafts.step4.signature ? { signature: drafts.step4.signature } : {}),
         };
         const boundId = presetsData?.boundPresetId ?? null;
         const boundPreset = boundId
@@ -164,7 +170,11 @@ export function useFinishWizard() {
           boundPreset.aspectRatio === content.aspect_ratio &&
           boundPreset.format === content.format &&
           boundPreset.optimizeOnUpload === content.optimize_on_upload &&
-          boundPreset.medium === content.medium;
+          boundPreset.medium === content.medium &&
+          (drafts.step4.signature === undefined ||
+            drafts.step4.signature === null ||
+            sameSignature(boundPreset.signature, drafts.step4.signature)) &&
+          JSON.stringify(boundPreset.palette ?? []) === JSON.stringify(drafts.step4.palette ?? []);
         try {
           if (boundId) {
             if (!unchanged) await updatePreset({ preset_id: boundId, content });

@@ -92,7 +92,7 @@ const wpExternalsDevPlugin = () => {
           ];
           const wpElement = [...new Set([...react18, ...reactDom,
             "RawHTML", "Platform", "renderToString", "concatChildren",
-            "switchChildrenNodeName",
+            "switchChildrenNodeName", "createInterpolateElement",
           ])];
           const wpI18n = [
             "__", "_n", "_x", "_nx", "sprintf", "isRTL",
