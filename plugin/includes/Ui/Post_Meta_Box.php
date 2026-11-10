@@ -53,8 +53,8 @@ class Post_Meta_Box
      * block.
      *
      * `_structura_image_slot` carries `featured` / `body` /
-     * `body-N`; `_structura_image_topic` carries the AI-proposed
-     * neutral topic the editor pre-fills the regen prompt with.
+     * `body-N`; `_structura_image_topic` carries the scene the image
+     * shows, which the regen modal shows as the current scene.
      *
      * `auth_callback` requires `edit_post` on the attachment — the
      * post author or an editor — which matches the existing
@@ -1215,8 +1215,14 @@ class Post_Meta_Box
                     <?php
                     endif; ?>
 
+                    <?php
+                    // data-topic feeds the regen modal's "Current scene" line
+                    // (2026-11-10). Attachment meta only: no cloud call while
+                    // the editor renders.
+                    ?>
                     <button type="button" id="structura-regen-image" class="structura-mb__btn"
-                            data-slot="featured" data-attachment-id="<?php echo esc_attr((string) $thumb_id); ?>">
+                            data-slot="featured" data-attachment-id="<?php echo esc_attr((string) $thumb_id); ?>"
+                            data-topic="<?php echo esc_attr($thumb_id ? (string) get_post_meta((int) $thumb_id, '_structura_image_topic', true) : ''); ?>">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                              class="structura-mb__btn-icon">
@@ -1277,7 +1283,8 @@ class Post_Meta_Box
                             <button type="button"
                                     class="structura-mb__btn structura-mb__btn--body"
                                     data-slot="<?php echo esc_attr($body_slot); ?>"
-                                    data-attachment-id="<?php echo esc_attr((string) $body_attachment_id); ?>">
+                                    data-attachment-id="<?php echo esc_attr((string) $body_attachment_id); ?>"
+                                    data-topic="<?php echo esc_attr((string) get_post_meta((int) $body_attachment_id, '_structura_image_topic', true)); ?>">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                      class="structura-mb__btn-icon">
@@ -1363,10 +1370,26 @@ class Post_Meta_Box
                                 id="structura-modal-prompt"
                                 class="structura-modal__textarea"
                                 rows="2"
+                                aria-describedby="structura-modal-prompt-help"
                                 placeholder="<?php
-                                esc_attr_e('Leave blank to reuse the previous topic. Omit style guidelines — your global art direction is applied automatically.',
-                                        'structura'); ?>"
+                                esc_attr_e('e.g. a brass compass needle being polished on a hill', 'structura'); ?>"
                         ></textarea>
+                        <p id="structura-modal-prompt-help" class="description"><?php
+                            esc_html_e(
+                                "Leave the prompt empty and the writer suggests a new scene for this post, or describe one yourself. The site's visual style is applied automatically.",
+                                'structura'
+                            ); ?></p>
+                        <?php
+                        // post-meta-box.js fills the template with the trigger's
+                        // data-topic per slot, as text; hidden without a stored scene.
+                        ?>
+                        <p id="structura-modal-current-scene" class="description" hidden>
+                            <span id="structura-modal-current-scene-text" data-template="<?php
+                            /* translators: %s: the scene the current image shows. */
+                            echo esc_attr(__('Current scene: %s', 'structura')); ?>"></span>
+                            <button type="button" id="structura-modal-reuse" class="button button-small"><?php
+                                esc_html_e('Reuse', 'structura'); ?></button>
+                        </p>
                     </div>
 
                     <!-- Image model picker (2026-05-02) — populated
@@ -1491,34 +1514,32 @@ class Post_Meta_Box
         // campaign lookup through the cloud-auth flag below.
         $campaign_id = get_post_meta($post_id, '_structura_campaign_id', true);
 
-        // Topic resolution chain — in priority order:
-        //   1. User's custom prompt from the textarea (explicit override)
-        //   2. The CURRENT featured attachment's stored generation topic
+        // A typed prompt is the scene. An empty prompt (2026-11-10) asks the
+        // cloud's writer for a new scene for the post; the request carries
+        // the stored scene as the one to move away from, looked up in order:
+        //   1. The CURRENT featured attachment's stored generation topic
         //      (Phase B — most accurate; survives regens)
-        //   3. The run's original featured_image.topic from the text
+        //   2. The run's original featured_image.topic from the text
         //      blueprint (Phase A — works even for posts that pre-date
         //      Phase B, as long as the run's text gen still exists)
-        //   4. The post title (last-resort generic fallback)
         //
-        // 2026-04-30 cms.xerx.io regression: regen used the post title
-        // and produced a generic image. Phase A used the run's original
-        // topic. Phase B narrows further to per-attachment lookup so
-        // multiple consecutive regens each chain off the previous
-        // attempt's actual prompt rather than re-using the original.
+        // An empty prompt used to re-render that stored scene (the post
+        // title before 2026-04-30, cms.xerx.io). The stored scene of posts
+        // written before 2026-11-09 is mostly the laptop-on-a-desk cliché,
+        // so the regen gave the same picture again.
         $custom_prompt = isset($_POST['custom_prompt']) ? sanitize_textarea_field(wp_unslash($_POST['custom_prompt'])) : '';
-        if (! empty($custom_prompt)) {
-            $topic = $custom_prompt;
-        } else {
-            $topic = $this->resolve_attachment_image_topic($post_id, 'featured')
-                ?: ($this->resolve_original_image_topic($post_id, 'featured')
-                    ?: get_the_title($post_id));
-        }
 
         $image_data = [
-                'topic'     => $topic,
                 'alt'       => get_the_title($post_id),
                 'file_name' => sanitize_file_name(sanitize_title(get_the_title($post_id))) . '-preview',
         ];
+        if (! empty($custom_prompt)) {
+            $image_data['topic'] = $custom_prompt;
+        } else {
+            $stored_topic = $this->resolve_attachment_image_topic($post_id, 'featured')
+                ?: ($this->resolve_original_image_topic($post_id, 'featured') ?: '');
+            $image_data += self::new_scene_image_data($post_id, 'featured', $stored_topic);
+        }
 
         // 2026-05-01 v2 — cloud is the single source of truth.
         // 2026-05-02 — fall through to a stub-from-post-meta when
@@ -1622,11 +1643,16 @@ class Post_Meta_Box
             // reference. A future enhancement: route regen through
             // the cloud's executeCloudImageStep so it writes a fresh
             // generation doc per regen and we can stamp the id here.
-            update_post_meta(
-                $new_attachment_id,
-                '_structura_image_topic',
-                sanitize_text_field((string) $topic)
-            );
+            //
+            // An empty prompt's scene is the cloud's, which
+            // `generate_post_images` already stamped (2026-11-10).
+            if (! empty($custom_prompt)) {
+                update_post_meta(
+                    $new_attachment_id,
+                    '_structura_image_topic',
+                    sanitize_text_field((string) $custom_prompt)
+                );
+            }
             update_post_meta(
                 $new_attachment_id,
                 '_structura_image_slot',
@@ -1638,6 +1664,8 @@ class Post_Meta_Box
             wp_send_json_success([
                     'attachment_id' => $new_attachment_id,
                     'preview_url'   => $preview_url,
+                    // The new image's scene, for the modal's "Current scene" line once applied.
+                    'topic'         => (string) get_post_meta($new_attachment_id, '_structura_image_topic', true),
             ]);
         } catch (\Exception $e) {
             Log_Service::add('error', 'Image regeneration failed: ' . $e->getMessage(), $campaign_id, 'visuals');
@@ -1727,36 +1755,29 @@ class Post_Meta_Box
             }
         }
 
-        // Topic resolution chain — same shape as the featured handler:
-        //   1. User's custom prompt (explicit override).
-        //   2. The CURRENT attachment's stored topic (Phase B style —
-        //      lets repeated regens chain off the previous attempt's
-        //      prompt instead of resetting to the original). Skipped
-        //      in CREATE mode (no prior attachment to inherit from).
-        //   3. The post title (last-resort generic).
+        // Same as the featured handler: a typed prompt is the scene, and an
+        // empty one asks the cloud's writer for a new scene (2026-11-10)
+        // with the CURRENT attachment's stored topic as the scene to move
+        // away from. CREATE mode has no prior attachment, so nothing to
+        // avoid (it used to render the post title).
         $custom_prompt = isset($_POST['custom_prompt']) ? sanitize_textarea_field(wp_unslash($_POST['custom_prompt'])) : '';
-        if (! empty($custom_prompt)) {
-            $topic = $custom_prompt;
-        } elseif ($is_create_mode) {
-            $topic = get_the_title($post_id);
-        } else {
-            $topic = (string) get_post_meta($attachment_id, '_structura_image_topic', true);
-            if ($topic === '') {
-                $topic = get_the_title($post_id);
-            }
-        }
 
         // Reuse the existing alt / file_name conventions — same shape
         // the AS chain emits. file_name is suffixed `-regen` so the
         // media library lists the new attachment distinctly from the
         // original.
         $image_data = [
-            'topic'     => $topic,
             'alt'       => $is_create_mode
                 ? get_the_title($post_id)
                 : ((string) get_post_meta($attachment_id, '_wp_attachment_image_alt', true) ?: get_the_title($post_id)),
             'file_name' => sanitize_file_name(sanitize_title(get_the_title($post_id))) . '-' . $slot . '-regen',
         ];
+        if (! empty($custom_prompt)) {
+            $image_data['topic'] = $custom_prompt;
+        } else {
+            $stored_topic = $is_create_mode ? '' : (string) get_post_meta($attachment_id, '_structura_image_topic', true);
+            $image_data += self::new_scene_image_data($post_id, $slot, $stored_topic);
+        }
 
         // 2026-05-02 — same campaign-or-stub resolution as the
         // featured handler so ephemeral single-post runs can regen
@@ -1858,11 +1879,15 @@ class Post_Meta_Box
                 '_structura_image_slot',
                 sanitize_text_field((string) $slot)
             );
-            update_post_meta(
-                $new_attachment_id,
-                '_structura_image_topic',
-                sanitize_text_field((string) $topic)
-            );
+            // An empty prompt's scene is the cloud's, which
+            // `generate_post_images` already stamped (2026-11-10).
+            if (! empty($custom_prompt)) {
+                update_post_meta(
+                    $new_attachment_id,
+                    '_structura_image_topic',
+                    sanitize_text_field((string) $custom_prompt)
+                );
+            }
 
             $preview_url = wp_get_attachment_image_url($new_attachment_id, 'large');
             $full_url    = wp_get_attachment_image_url($new_attachment_id, 'full');
@@ -1873,6 +1898,8 @@ class Post_Meta_Box
                 'full_url'         => $full_url,
                 'old_attachment_id' => $attachment_id,
                 'slot'             => $slot,
+                // The new image's scene, for the modal's "Current scene" line once applied.
+                'topic'            => (string) get_post_meta($new_attachment_id, '_structura_image_topic', true),
             ]);
         } catch (\Exception $e) {
             Log_Service::add('error', 'Body image regeneration failed: ' . $e->getMessage(), $campaign_id, 'visuals');
@@ -2074,6 +2101,45 @@ class Post_Meta_Box
                 'message'   => __('Featured image updated.', 'structura'),
                 'thumb_url' => $thumb_url,
         ]);
+    }
+
+    /**
+     * The image-data fields of a regen with an empty prompt: the empty
+     * prompt, the slot, the post's title and excerpt for the cloud's
+     * writer, and the stored scene, when there is one, as the scene to
+     * move away from (2026-11-10).
+     *
+     * @param int    $post_id      Post the image is for.
+     * @param string $slot         `featured`, `body` or `body-N`.
+     * @param string $stored_topic The slot's current scene, '' when unknown.
+     * @return array<string, string>
+     */
+    private static function new_scene_image_data(int $post_id, string $slot, string $stored_topic): array
+    {
+        $data = [
+            'prompt'       => '',
+            'slot'         => $slot,
+            'post_title'   => trim(wp_strip_all_tags((string) get_post_field('post_title', $post_id))),
+            'post_excerpt' => self::scene_excerpt($post_id),
+        ];
+        if ($stored_topic !== '') {
+            $data['topic'] = $stored_topic;
+        }
+        return $data;
+    }
+
+    /** The post's excerpt, else its first paragraph, as plain text of at most 600 characters. */
+    private static function scene_excerpt(int $post_id): string
+    {
+        $post = get_post($post_id);
+        if ( ! $post) {
+            return '';
+        }
+        $text = (string) $post->post_excerpt;
+        if (trim($text) === '' && preg_match('#<p[^>]*>(.*?)</p>#is', (string) $post->post_content, $m)) {
+            $text = $m[1];
+        }
+        return trim(wp_html_excerpt(wp_strip_all_tags($text), 600));
     }
 
     /**

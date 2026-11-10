@@ -1157,7 +1157,7 @@ const GeneratePostPage = () => {
           {/* Reassurance note: everything SEO-critical is already on. */}
           <p className="m-0! mt-4 text-xs leading-relaxed text-neutral-400 dark:text-neutral-500">
             {__(
-              "Readability, keyphrase placement, SERP analysis, and meta fields are optimised automatically on every post.",
+              "Readability, keyphrase placement, SERP analysis, and meta fields are optimized automatically on every post.",
               "structura"
             )}
           </p>

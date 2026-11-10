@@ -394,10 +394,11 @@ class Task_Runner
             // lines 1614-1646; adding it here gives the AS-chain
             // path the same audit + regen surface.
             //
-            // _structura_image_topic stores the AI-proposed neutral
-            // topic; the editor pre-fills its regen prompt with it
-            // so subsequent regens don't double-stack the visual-
-            // style wrapper.
+            // _structura_image_topic stores the scene the image shows:
+            // the AI-proposed topic, a typed regen prompt, or the scene
+            // the cloud chose for an empty one (2026-11-10). The regen
+            // modal shows it as the current scene and sends it back as
+            // the scene to move away from.
             // _structura_image_slot identifies which post slot this
             // attachment fills ('featured' | 'body' | 'body-N').
             if (!empty($image_data['topic']) && is_string($image_data['topic'])) {
@@ -445,7 +446,7 @@ class Task_Runner
      */
     private function delegate_image_to_cloud(
         array $campaign,
-        array $image_data,
+        array &$image_data,
         array $license,
         ?string $slot = null,
         ?string $override_model = null,
@@ -502,16 +503,29 @@ class Task_Runner
         // path produced docs missing slot/topic/alt/fileName, which
         // broke the post-editor's "Regenerate Image" attachment-id
         // lookup and the cloud-side audit/replay tools.
+        // An explicit empty `prompt` (the meta box's regen with nothing typed,
+        // 2026-11-10) asks the cloud's writer for a new scene; `topic` then
+        // carries the stored scene to move away from. Every other caller
+        // sends the topic as the prompt, as before. Functions deploy before
+        // the plugin, so this never meets a cloud that renders an empty
+        // prompt as an empty concept.
         $payload = [
             'licenseKey'       => $license['license_key'],
             'domain'           => wp_parse_url(get_site_url(), PHP_URL_HOST),
             'model'            => $model,
-            'prompt'           => $image_data['topic'] ?? '',
+            'prompt'           => $image_data['prompt'] ?? ($image_data['topic'] ?? ''),
             'campaign'         => $campaign,
         ];
 
         if ($image_provider) {
             $payload['provider'] = $image_provider;
+        }
+
+        // The body regen passes `featured` as the image type so the new
+        // attachment is not injected into the content; its real slot rides
+        // in `$image_data['slot']` for the cloud's new-scene request.
+        if (isset($image_data['slot']) && is_string($image_data['slot']) && $image_data['slot'] !== '') {
+            $slot = $image_data['slot'];
         }
 
         // Audit metadata — optional on the cloud side for back-compat
@@ -531,6 +545,13 @@ class Task_Runner
         }
         if (isset($image_data['caption']) && is_string($image_data['caption']) && $image_data['caption'] !== '') {
             $payload['caption'] = $image_data['caption'];
+        }
+        // What the writer reads to suggest a new scene (empty prompt only).
+        if (isset($image_data['post_title']) && is_string($image_data['post_title']) && $image_data['post_title'] !== '') {
+            $payload['postTitle'] = $image_data['post_title'];
+        }
+        if (isset($image_data['post_excerpt']) && is_string($image_data['post_excerpt']) && $image_data['post_excerpt'] !== '') {
+            $payload['postExcerpt'] = $image_data['post_excerpt'];
         }
 
         if ($fallback_image_provider) {
@@ -595,6 +616,13 @@ class Task_Runner
             $this->log('error', "Cloud returned invalid image payload: $cloud_error", $campaign['id'], Log_Steps::CLOUD_DELEGATION,
                 ['response' => $body]);
             throw new \Exception(esc_html("Cloud returned invalid image payload: $cloud_error"));
+        }
+
+        // The scene the cloud chose for an empty prompt (2026-11-10):
+        // `generate_post_images` stamps it on the new attachment instead of
+        // the stored scene the request carried.
+        if (isset($body['topic']) && is_string($body['topic']) && $body['topic'] !== '') {
+            $image_data['topic'] = $body['topic'];
         }
 
         return $body['dataUri'];

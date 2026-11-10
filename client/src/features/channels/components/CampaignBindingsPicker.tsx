@@ -127,7 +127,7 @@ export const CampaignBindingsPicker = ({
         <div className="space-y-2">
           <p className="m-0! text-[11px] leading-relaxed text-neutral-500 dark:text-neutral-400">
             {__(
-              "Only publishes from the ticked campaigns will trigger this channel. Leaving all boxes empty silences the channel entirely.",
+              "Only publishes from the checked campaigns will trigger this channel. Leaving all boxes empty silences the channel entirely.",
               "structura",
             )}
           </p>

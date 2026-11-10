@@ -38,7 +38,7 @@ function renderPreview(props: Partial<SignaturePreviewProps> = {}) {
 }
 
 const runButton = () =>
-  screen.getByRole("button", { name: /Preview with my colours|Preview again|Try again|Rendering/ });
+  screen.getByRole("button", { name: /Preview with my colors|Preview again|Try again|Rendering/ });
 
 beforeEach(() => {
   apiFetchMock.mockReset();
@@ -48,7 +48,7 @@ describe("SignaturePreview", () => {
   it("is a row with the cost on the button until first used", () => {
     renderPreview();
     expect(screen.getByRole("heading", { name: "Preview" })).toBeInTheDocument();
-    expect(runButton()).toHaveTextContent("Preview with my colours· 1 image");
+    expect(runButton()).toHaveTextContent("Preview with my colors· 1 image");
     expect(screen.queryByRole("figure")).toBeNull();
   });
 
@@ -136,7 +136,7 @@ describe("SignaturePreview", () => {
 
   it("is locked on free with Paid plans and the upgrade link", () => {
     renderPreview({ locked: true });
-    expect(screen.getByRole("button", { name: /Preview with my colours/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Preview with my colors/ })).toBeDisabled();
     expect(screen.getByText("Paid plans")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Upgrade plan/ })).toHaveAttribute(
       "href",

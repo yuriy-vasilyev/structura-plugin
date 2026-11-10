@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.37.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.36.1...v2.37.0) (2026-11-10)
+
+
+### Features
+
+* **functions:** an empty Regenerate prompt asks the writer for a new scene ([5827baf](https://github.com/yuriy-vasilyev/structura-core/commit/5827baff07e1a0574eba375b438cf310f1edfe48))
+* **plugin:** regenerate with an empty prompt requests a new scene from the cloud ([4806443](https://github.com/yuriy-vasilyev/structura-core/commit/4806443faa01d3216ae930fdfd5c9f7a59d13821))
+* **web:** regenerate dialog starts empty and offers Reuse for the current scene ([d3c00aa](https://github.com/yuriy-vasilyev/structura-core/commit/d3c00aadb8900c5551a8608bcc3f772c1e5931b3))
+
+
+### Bug Fixes
+
+* **functions:** keep one site-check instance warm ([4664d26](https://github.com/yuriy-vasilyev/structura-core/commit/4664d2614b96462e1ae79bceee643a7b62effc18))
+* **functions:** keep the brand colours when the model writes notes into a palette entry ([5a7a3a3](https://github.com/yuriy-vasilyev/structura-core/commit/5a7a3a3c80088ef221d32aab051c76e51161ed40))
+* **web:** apply a site check answer that arrives after the timeout ([922ea92](https://github.com/yuriy-vasilyev/structura-core/commit/922ea923a515f4498224b07bc14f979c78a45d83))
+* **web:** ask for an AI key before a launch or one-off post can fail ([72f1132](https://github.com/yuriy-vasilyev/structura-core/commit/72f1132283e71b326001f91290dd5c9be1389a5d))
+
 ## [2.36.1](https://github.com/yuriy-vasilyev/structura-core/compare/v2.36.0...v2.36.1) (2026-11-09)
 
 

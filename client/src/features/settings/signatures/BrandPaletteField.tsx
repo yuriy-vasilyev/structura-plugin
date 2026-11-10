@@ -42,7 +42,7 @@ function SwatchEditor({
       <div className="flex items-end gap-3">
         <input
           type="color"
-          aria-label={__("Pick a colour", "structura")}
+          aria-label={__("Pick a color", "structura")}
           value={hex.toLowerCase()}
           onChange={(event) => {
             const next = normaliseHexInput(event.target.value);
@@ -62,7 +62,7 @@ function SwatchEditor({
             autoFocus
             spellCheck={false}
             inputClassName="font-mono"
-            error={invalid ? __("Use a hex colour like #2F6B4F.", "structura") : undefined}
+            error={invalid ? __("Use a hex color like #2F6B4F.", "structura") : undefined}
             onChange={(event) => {
               setText(event.target.value);
               const next = normaliseHexInput(event.target.value);
@@ -170,7 +170,7 @@ export function BrandPaletteField({
           </h3>
           <p className="m-0! max-w-[62ch] text-[13px] leading-relaxed text-neutral-500 dark:text-neutral-400">
             {__(
-              "Your colours are applied to the style you pick, in images and videos.",
+              "Your colors are applied to the style you pick, in images and videos.",
               "structura"
             )}
           </p>
@@ -190,7 +190,7 @@ export function BrandPaletteField({
           ))}
           <span className="inline-flex items-center gap-2 text-[13px] text-neutral-600 dark:text-neutral-400">
             <Spinner size="sm" />
-            {__("Reading your homepage for colours…", "structura")}
+            {__("Reading your homepage for colors…", "structura")}
           </span>
         </div>
       ) : palette.length === 0 ? (
@@ -198,13 +198,13 @@ export function BrandPaletteField({
           <PaletteSwatches
             colors={Object.values(NEUTRAL_PALETTE)}
             size={24}
-            label={__("No brand colours yet.", "structura")}
+            label={__("No brand colors yet.", "structura")}
             aria-hidden="true"
             className="opacity-50"
           />
           <p className="m-0! text-[13px] leading-relaxed text-neutral-700 dark:text-neutral-300">
             <strong className="font-semibold text-neutral-900 dark:text-white">
-              {__("No brand colours yet.", "structura")}
+              {__("No brand colors yet.", "structura")}
             </strong>{" "}
             {__("Until you add some, images use the neutral set above.", "structura")}
           </p>
@@ -214,14 +214,14 @@ export function BrandPaletteField({
               {__("Scan my site", "structura")}
             </Button>
             <Button variant="link" size="sm" onClick={add}>
-              {__("Add a colour", "structura")}
+              {__("Add a color", "structura")}
             </Button>
           </div>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
           <ul
-            aria-label={__("Brand colours", "structura")}
+            aria-label={__("Brand colors", "structura")}
             className="m-0! flex list-none flex-wrap gap-3 p-0!"
           >
             {palette.map((hex, index) => (
@@ -235,12 +235,12 @@ export function BrandPaletteField({
                       index === 0
                         ? sprintf(
                             /* translators: %s: a hex colour such as #2F6B4F */
-                            __("Edit colour %s, accent", "structura"),
+                            __("Edit color %s, accent", "structura"),
                             hex
                           )
                         : sprintf(
                             /* translators: %s: a hex colour such as #2F6B4F */
-                            __("Edit colour %s", "structura"),
+                            __("Edit color %s", "structura"),
                             hex
                           )
                     }
@@ -273,7 +273,7 @@ export function BrandPaletteField({
             <li className="m-0! flex w-16 flex-col items-center gap-1.5">
               <button
                 type="button"
-                aria-label={__("Add a colour", "structura")}
+                aria-label={__("Add a color", "structura")}
                 disabled={full}
                 onClick={add}
                 className="hover:border-brand-400 hover:text-brand-600 focus-visible:outline-brand-500 flex size-14 cursor-pointer items-center justify-center rounded-xl border-[1.5px] border-dashed border-neutral-300 bg-transparent text-neutral-500 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-400"
@@ -290,7 +290,7 @@ export function BrandPaletteField({
           </ul>
           {full && (
             <p className="m-0! text-xs text-neutral-500 dark:text-neutral-400">
-              {__("Up to six colours. Remove one to add another.", "structura")}
+              {__("Up to six colors. Remove one to add another.", "structura")}
             </p>
           )}
         </div>
@@ -315,7 +315,7 @@ export function BrandPaletteSummary({ palette, scanning, onScan }: BrandPaletteS
     <div className="flex flex-col gap-1.5">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[13px] font-bold text-neutral-900 dark:text-white">
-          {__("Your colours", "structura")}
+          {__("Your colors", "structura")}
         </span>
         {scanning ? (
           <span
@@ -323,11 +323,11 @@ export function BrandPaletteSummary({ palette, scanning, onScan }: BrandPaletteS
             className="inline-flex items-center gap-2 text-[13px] text-neutral-600 dark:text-neutral-400"
           >
             <Spinner size="sm" />
-            {__("Reading your homepage for colours…", "structura")}
+            {__("Reading your homepage for colors…", "structura")}
           </span>
         ) : (
           <ul
-            aria-label={__("Brand colours", "structura")}
+            aria-label={__("Brand colors", "structura")}
             className="m-0! flex list-none flex-wrap gap-1.5 p-0!"
           >
             {palette.map((hex, index) => (
@@ -356,7 +356,7 @@ export function BrandPaletteSummary({ palette, scanning, onScan }: BrandPaletteS
       </div>
       <p className="m-0! text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
         {__(
-          "Your colours are applied to the style you pick, in images and videos. Edit them later on the Visuals page.",
+          "Your colors are applied to the style you pick, in images and videos. Edit them later on the Visuals page.",
           "structura"
         )}
       </p>

@@ -87,7 +87,7 @@ export function SignaturePreview({
       ? __("Try again", "structura")
       : result
         ? __("Preview again", "structura")
-        : __("Preview with my colours", "structura");
+        : __("Preview with my colors", "structura");
 
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-4">
@@ -100,7 +100,7 @@ export function SignaturePreview({
         </h3>
         <p className="m-0! max-w-[62ch] text-[13px] leading-relaxed text-neutral-500 dark:text-neutral-400">
           {__(
-            "See one sample image in this style with your colours before you save. Each preview counts as one image.",
+            "See one sample image in this style with your colors before you save. Each preview counts as one image.",
             "structura"
           )}
         </p>
@@ -172,7 +172,7 @@ export function SignaturePreview({
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="secondary" disabled>
             <Lock aria-hidden="true" />
-            {__("Preview with my colours", "structura")}
+            {__("Preview with my colors", "structura")}
           </Button>
           <Badge intent="default" variant="outline" size="xs">
             {__("Paid plans", "structura")}

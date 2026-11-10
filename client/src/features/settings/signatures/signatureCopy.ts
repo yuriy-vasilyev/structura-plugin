@@ -25,7 +25,7 @@ const SIGNATURES: Record<SignatureId, { name: string; description: string }> = {
   },
   "ink-and-fill": {
     name: __("Ink and fill", "structura"),
-    description: __("Confident black linework with one flat colour.", "structura"),
+    description: __("Confident black linework with one flat color.", "structura"),
   },
   "miniature-world": {
     name: __("Miniature world", "structura"),
@@ -62,7 +62,7 @@ export const OWN_SAVED_DESCRIPTION: Record<VisualMedium, string> = {
 /** The help line under the builder's Medium control. */
 export const MEDIUM_HELP: Record<VisualMedium, string> = {
   photography: __("Real photographs of one subject.", "structura"),
-  illustration: __("Drawn images: line, shape and flat colour.", "structura"),
+  illustration: __("Drawn images: line, shape and flat color.", "structura"),
   "3d_render": __("Rendered objects and figures with real materials and light.", "structura"),
 };
 
@@ -75,7 +75,7 @@ export const FIELD_COPY: Record<
     label: __("Technique", "structura"),
     help: __("Materials, line and light: how the images are made.", "structura"),
     placeholder: __(
-      "For example: soft window light, shallow depth of field, muted colour",
+      "For example: soft window light, shallow depth of field, muted color",
       "structura"
     ),
   },
@@ -90,7 +90,7 @@ export const FIELD_COPY: Record<
   composition: {
     label: __("Composition", "structura"),
     help: __("Framing, background, angle and empty space.", "structura"),
-    placeholder: __("For example: one object centred on a plain background", "structura"),
+    placeholder: __("For example: one object centered on a plain background", "structura"),
   },
   avoid: {
     label: __("Avoid", "structura"),
@@ -105,7 +105,7 @@ export const BUILDER_CHIPS: Record<VisualMedium, Record<BuilderField, string[]>>
     technique: [
       __("Soft window light", "structura"),
       __("Shallow depth of field", "structura"),
-      __("Muted film colour", "structura"),
+      __("Muted film color", "structura"),
       __("Seamless backdrop", "structura"),
       __("Soft shadows", "structura"),
     ],
@@ -117,7 +117,7 @@ export const BUILDER_CHIPS: Record<VisualMedium, Record<BuilderField, string[]>>
       __("Outdoor places", "structura"),
     ],
     composition: [
-      __("One subject, centred", "structura"),
+      __("One subject, centered", "structura"),
       __("Plain background", "structura"),
       __("Eye level", "structura"),
       __("Lots of empty space", "structura"),
@@ -134,7 +134,7 @@ export const BUILDER_CHIPS: Record<VisualMedium, Record<BuilderField, string[]>>
   illustration: {
     technique: [
       __("Black ink linework", "structura"),
-      __("One flat fill colour", "structura"),
+      __("One flat fill color", "structura"),
       __("Visible paper grain", "structura"),
       __("Hand-drawn wobble", "structura"),
       __("No shading", "structura"),
@@ -147,8 +147,8 @@ export const BUILDER_CHIPS: Record<VisualMedium, Record<BuilderField, string[]>>
       __("Hands holding one object", "structura"),
     ],
     composition: [
-      __("One hero object, centred", "structura"),
-      __("Flat colour background", "structura"),
+      __("One hero object, centered", "structura"),
+      __("Flat color background", "structura"),
       __("Seen straight on", "structura"),
       __("Lots of empty space", "structura"),
       __("Seen from above", "structura"),
@@ -177,7 +177,7 @@ export const BUILDER_CHIPS: Record<VisualMedium, Record<BuilderField, string[]>>
       __("Stacked blocks", "structura"),
     ],
     composition: [
-      __("One hero object, centred", "structura"),
+      __("One hero object, centered", "structura"),
       __("Seamless background", "structura"),
       __("Eye level", "structura"),
       __("Lots of empty space", "structura"),

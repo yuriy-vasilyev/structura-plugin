@@ -172,6 +172,93 @@ class TaskRunnerTest extends TestCase
     }
 
     // ──────────────────────────────────────────────────────────────────────
+    //  NEW SCENE FOR AN EMPTY PROMPT (2026-11-10)
+    //
+    //  With an empty prompt the cloud's writer picks the scene and returns
+    //  it as `topic`. The new attachment carries that scene, not the stored
+    //  one the request sent as the scene to move away from, so the regen
+    //  modal shows the right current scene next time.
+    // ──────────────────────────────────────────────────────────────────────
+
+    /** @test */
+    public function the_new_attachment_carries_the_scene_the_cloud_chose(): void
+    {
+        $dir = sys_get_temp_dir() . '/structura-regen-' . uniqid();
+        mkdir($dir);
+        Functions\when('wp_parse_url')->justReturn('example.test');
+        Functions\when('get_site_url')->justReturn('https://example.test');
+        Functions\when('esc_html')->returnArg();
+        Functions\when('wp_upload_dir')->justReturn(['path' => $dir]);
+        Functions\when('wp_check_filetype')->justReturn(['ext' => 'png', 'type' => 'image/png']);
+        Functions\when('media_handle_sideload')->justReturn(555);
+        Functions\when('set_post_thumbnail')->justReturn(true);
+        Functions\when('wp_get_attachment_image_url')->justReturn('https://example.test/cake.png');
+        $stamped = [];
+        Functions\when('update_post_meta')->alias(function ($id, $key, $value) use (&$stamped) {
+            $stamped[$id][$key] = $value;
+            return true;
+        });
+        $this->stub_log_service();
+        Mockery::mock('alias:Structura\Core\License_Manager')
+            ->shouldReceive('get_license_data')
+            ->andReturn(['plan' => 'cloud', 'license_key' => 'lic']);
+        Mockery::mock('alias:Structura\Core\Image_Processor')
+            ->shouldReceive('process')
+            ->andReturnUsing(static function ($tmp) {
+                return $tmp;
+            });
+        $sent = null;
+        Mockery::mock('alias:Structura\Core\Cloud_Client')
+            ->shouldReceive('post')
+            ->andReturnUsing(function ($route, $payload) use (&$sent) {
+                $sent = $payload;
+                return ['code' => 200, 'body' => [
+                    'success' => true,
+                    'dataUri' => 'data:image/png;base64,' . base64_encode($this->tiny_png()),
+                    'topic'   => 'A tiered cake on a kitchen scale',
+                ]];
+            });
+
+        try {
+            (new Task_Runner())->generate_post_images(
+                42,
+                'featured',
+                [
+                    'prompt'       => '',
+                    'slot'         => 'featured',
+                    'post_title'   => 'How to price a wedding cake',
+                    'post_excerpt' => 'Costs, margins and what to charge.',
+                    'topic'        => 'A laptop on a desk',
+                    'alt'          => 'How to price a wedding cake',
+                ],
+                ['id' => 7, 'intelligence' => []]
+            );
+        } finally {
+            array_map('unlink', glob($dir . '/*') ?: []);
+            rmdir($dir);
+        }
+
+        $this->assertSame('', $sent['prompt']);
+        $this->assertSame('A laptop on a desk', $sent['topic']);
+        $this->assertSame('How to price a wedding cake', $sent['postTitle']);
+        $this->assertSame('Costs, margins and what to charge.', $sent['postExcerpt']);
+        $this->assertSame('A tiered cake on a kitchen scale', $stamped[555]['_structura_image_topic']);
+    }
+
+    /** A PNG header past the 100-byte floor `process_and_import_image` checks. */
+    private function tiny_png(): string
+    {
+        $chunk = static function (string $type, string $data): string {
+            return pack('N', strlen($data)) . $type . $data . pack('N', crc32($type . $data));
+        };
+        return "\x89PNG\r\n\x1a\n"
+            . $chunk('IHDR', pack('NNCCCCC', 1, 1, 8, 6, 0, 0, 0))
+            . $chunk('tEXt', "Comment\0" . str_repeat('x', 64))
+            . $chunk('IDAT', (string) gzcompress("\0\0\0\0\0"))
+            . $chunk('IEND', '');
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
     //  HOOK REGISTRATION — the 404 storm regression guard
     //
     //  `Rest_Api::run_task` enqueues `structura_run_campaign_step_jittered`

@@ -103,7 +103,7 @@ describe("SignatureBuilder", () => {
     expect(
       screen.queryByRole("button", { name: "Add “Soft window light” to Technique" })
     ).toBeNull();
-    expect(screen.getByText("Drawn images: line, shape and flat colour.")).toBeInTheDocument();
+    expect(screen.getByText("Drawn images: line, shape and flat color.")).toBeInTheDocument();
   });
 
   it("a chip adds its phrase, shows pressed, and removes it again", () => {

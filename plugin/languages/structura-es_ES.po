@@ -1305,6 +1305,28 @@ msgstr ""
 "Déjalo en blanco para reutilizar el tema anterior. Omite directrices de "
 "estilo: tu dirección artística global se aplica automáticamente."
 
+#: plugin/includes/Ui/Post_Meta_Box.php:1375
+msgid "e.g. a brass compass needle being polished on a hill"
+msgstr "p. ej., la aguja de latón de una brújula que alguien pule sobre una colina"
+
+#: plugin/includes/Ui/Post_Meta_Box.php:1378
+msgid ""
+"Leave the prompt empty and the writer suggests a new scene for this post, or "
+"describe one yourself. The site's visual style is applied automatically."
+msgstr ""
+"Deja la indicación vacía y el redactor sugerirá una escena nueva para esta "
+"entrada, o describe una tú mismo. El estilo visual del sitio se aplica "
+"automáticamente."
+
+#. translators: %s: the scene the current image shows.
+#: plugin/includes/Ui/Post_Meta_Box.php:1389
+msgid "Current scene: %s"
+msgstr "Escena actual: %s"
+
+#: plugin/includes/Ui/Post_Meta_Box.php:1391
+msgid "Reuse"
+msgstr "Reutilizar"
+
 #: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:943
 #: plugin/includes/Ui/Post_Meta_Box.php:1378
 msgid "Image model"
@@ -3571,7 +3593,7 @@ msgstr "Detenida"
 #: client/src/features/campaigns/components/CampaignRunsTab.tsx:241
 #: client/src/features/dashboard/components/RecentSinglePostRuns.tsx:188
 #: client/src/features/progress/routes/RunDetailPage.tsx:307
-msgid "Cancelled"
+msgid "Canceled"
 msgstr "Cancelada"
 
 #: client/src/features/campaigns/components/CampaignRunsTab.tsx:248
@@ -5772,7 +5794,7 @@ msgid "Delete Campaign?"
 msgstr "¿Eliminar campaña?"
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:476
-msgid "This action cannot be undone. All scheduled jobs will be cancelled."
+msgid "This action cannot be undone. All scheduled jobs will be canceled."
 msgstr ""
 "Esta acción no se puede deshacer. Todas las tareas programadas se cancelarán."
 
@@ -5817,7 +5839,7 @@ msgstr "¿Detener esta ejecución?"
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:516
 msgid ""
-"The current generation will be cancelled. Any work in progress will be "
+"The current generation will be canceled. Any work in progress will be "
 "discarded."
 msgstr ""
 "La generación actual se cancelará. Cualquier trabajo en curso se descartará."
@@ -6566,7 +6588,7 @@ msgstr "Enlaces salientes a autoridades"
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:1104
 msgid ""
 "Readability, keyphrase placement, SERP analysis, and meta fields are "
-"optimised automatically on every post."
+"optimized automatically on every post."
 msgstr ""
 "La legibilidad, la colocación de la frase clave, el análisis SERP y los "
 "campos meta se optimizan automáticamente en cada entrada."
@@ -6959,7 +6981,7 @@ msgstr ""
 
 #: client/src/features/channels/components/CampaignBindingsPicker.tsx:129
 msgid ""
-"Only publishes from the ticked campaigns will trigger this channel. Leaving "
+"Only publishes from the checked campaigns will trigger this channel. Leaving "
 "all boxes empty silences the channel entirely."
 msgstr ""
 "Solo las publicaciones de las campañas marcadas dispararán este canal. Si "
@@ -11528,7 +11550,7 @@ msgstr "Correo de resumen mensual"
 
 #: client/src/features/site/routes/tabs/SiteSettingsTab.tsx:64
 msgid ""
-"Once-a-month email summarising new keyword opportunities Structura found for "
+"Once-a-month email summarizing new keyword opportunities Structura found for "
 "your site. Off by default."
 msgstr ""
 "Correo mensual que resume las nuevas oportunidades de palabras clave que "
@@ -11853,7 +11875,7 @@ msgstr "Elegida para ti: la sugerencia mejor clasificada. Elige otra abajo o qu�
 msgid "Accent"
 msgstr "Acento"
 
-msgid "Add a colour"
+msgid "Add a color"
 msgstr "Añadir un color"
 
 msgid "Add “%1$s” to %2$s"
@@ -11871,7 +11893,7 @@ msgstr "Evitar"
 msgid "Black ink linework"
 msgstr "Trazo de tinta negra"
 
-msgid "Brand colours"
+msgid "Brand colors"
 msgstr "Colores de marca"
 
 msgid "Build from five fields"
@@ -11886,7 +11908,7 @@ msgstr "Composición"
 msgid "Concept"
 msgstr "Concepto"
 
-msgid "Confident black linework with one flat colour."
+msgid "Confident black linework with one flat color."
 msgstr "Trazo negro seguro con un solo color plano."
 
 msgid "Could not read your site right now."
@@ -11895,7 +11917,7 @@ msgstr "Ahora mismo no se pudo leer tu sitio."
 msgid "Couldn’t draft from your site right now. Try again, or fill the fields yourself."
 msgstr "Ahora mismo no se pudo redactar a partir de tu sitio. Vuelve a intentarlo o rellena los campos tú mismo."
 
-msgid "Couldn’t read your site’s colours right now. Try again in a moment."
+msgid "Couldn’t read your site’s colors right now. Try again in a moment."
 msgstr "Ahora mismo no se pudieron leer los colores de tu sitio. Inténtalo de nuevo en un momento."
 
 msgid "Custom"
@@ -11931,13 +11953,13 @@ msgstr "Redactando a partir de tu sitio"
 msgid "Drafting from your site."
 msgstr "Redactando a partir de tu sitio."
 
-msgid "Drawn images: line, shape and flat colour."
+msgid "Drawn images: line, shape and flat color."
 msgstr "Imágenes dibujadas: línea, forma y color plano."
 
-msgid "Edit colour %s"
+msgid "Edit color %s"
 msgstr "Editar el color %s"
 
-msgid "Edit colour %s, accent"
+msgid "Edit color %s, accent"
 msgstr "Editar el color %s, acento"
 
 msgid "Editorial reportage"
@@ -11955,7 +11977,7 @@ msgstr "Rellena este campo para guardar la firma."
 msgid "Five fields fix the look of every image. Draft them from your site, then change anything."
 msgstr "Cinco campos fijan el aspecto de cada imagen. Redáctalos a partir de tu sitio y luego cambia lo que quieras."
 
-msgid "Flat colour background"
+msgid "Flat color background"
 msgstr "Fondo de color plano"
 
 msgid "Floating shapes"
@@ -11967,13 +11989,13 @@ msgstr "Láminas flotantes de cristal y mate, vistas desde arriba."
 msgid "For example: Northfield sketchbook"
 msgstr "Por ejemplo: Cuaderno de Northfield"
 
-msgid "For example: one object centred on a plain background"
+msgid "For example: one object centered on a plain background"
 msgstr "Por ejemplo: un objeto centrado sobre un fondo liso"
 
 msgid "For example: one real garden tool, hands at work"
 msgstr "Por ejemplo: una herramienta de jardín real, manos trabajando"
 
-msgid "For example: soft window light, shallow depth of field, muted colour"
+msgid "For example: soft window light, shallow depth of field, muted color"
 msgstr "Por ejemplo: luz suave de ventana, poca profundidad de campo, color apagado"
 
 msgid "For example: text, desks and laptops, busy backgrounds"
@@ -12042,7 +12064,7 @@ msgstr "Mundo en miniatura"
 msgid "Motifs"
 msgstr "Motivos"
 
-msgid "Muted film colour"
+msgid "Muted film color"
 msgstr "Color de película apagado"
 
 msgid "Name this signature to save it."
@@ -12051,7 +12073,7 @@ msgstr "Ponle nombre a esta firma para guardarla."
 msgid "Natural light, real places, one clear subject."
 msgstr "Luz natural, lugares reales, un sujeto claro."
 
-msgid "No brand colours yet."
+msgid "No brand colors yet."
 msgstr "Aún no hay colores de marca."
 
 msgid "No images left this month. Your allowance resets on %s."
@@ -12063,10 +12085,10 @@ msgstr "Sin reflejos"
 msgid "No shading"
 msgstr "Sin sombreado"
 
-msgid "One flat fill colour"
+msgid "One flat fill color"
 msgstr "Un solo color de relleno"
 
-msgid "One hero object, centred"
+msgid "One hero object, centered"
 msgstr "Un objeto protagonista, centrado"
 
 msgid "One real object"
@@ -12075,13 +12097,13 @@ msgstr "Un objeto real"
 msgid "One real object on a seamless backdrop."
 msgstr "Un objeto real sobre un fondo continuo."
 
-msgid "One subject, centred"
+msgid "One subject, centered"
 msgstr "Un sujeto, centrado"
 
-msgid "Our pick for %1$s is <b>%2$s</b>, in your colours"
+msgid "Our pick for %1$s is <b>%2$s</b>, in your colors"
 msgstr "Nuestra elección para %1$s es <b>%2$s</b>, con tus colores"
 
-msgid "Our pick for %1$s is <b>%2$s</b>, which comes with paid plans. Until then, your images use <b>%3$s</b> in your colours"
+msgid "Our pick for %1$s is <b>%2$s</b>, which comes with paid plans. Until then, your images use <b>%3$s</b> in your colors"
 msgstr "Nuestra elección para %1$s es <b>%2$s</b>, que viene con los planes de pago. Hasta entonces, tus imágenes usan <b>%3$s</b> con tus colores"
 
 msgid "Our pick for your brand"
@@ -12099,10 +12121,10 @@ msgstr "Papel recortado"
 msgid "Photorealistic people"
 msgstr "Personas fotorrealistas"
 
-msgid "Pick a colour"
+msgid "Pick a color"
 msgstr "Elegir un color"
 
-msgid "Pick the look every image on this site shares. Examples are shown in neutral colours."
+msgid "Pick the look every image on this site shares. Examples are shown in neutral colors."
 msgstr "Elige el aspecto que comparten todas las imágenes de este sitio. Los ejemplos se muestran en colores neutros."
 
 msgid "Plain background"
@@ -12123,7 +12145,7 @@ msgstr "Nueva vista previa"
 msgid "Preview it below to see it"
 msgstr "Pruébala abajo con una vista previa"
 
-msgid "Preview with my colours"
+msgid "Preview with my colors"
 msgstr "Vista previa con mis colores"
 
 msgid "Re-scan"
@@ -12132,7 +12154,7 @@ msgstr "Volver a analizar"
 msgid "Re-scan site"
 msgstr "Volver a analizar el sitio"
 
-msgid "Reading your homepage for colours…"
+msgid "Reading your homepage for colors…"
 msgstr "Leyendo los colores de tu página de inicio…"
 
 msgid "Real photographs of one subject."
@@ -12156,7 +12178,7 @@ msgstr "Fondo continuo"
 msgid "Seamless background"
 msgstr "Fondo continuo"
 
-msgid "See one sample image in this style with your colours before you save. Each preview counts as one image."
+msgid "See one sample image in this style with your colors before you save. Each preview counts as one image."
 msgstr "Mira una imagen de muestra en este estilo con tus colores antes de guardar. Cada vista previa cuenta como una imagen."
 
 msgid "Seen from above"
@@ -12246,10 +12268,10 @@ msgstr "Herramientas sobre una mesa"
 msgid "Until you add some, images use the neutral set above."
 msgstr "Hasta que añadas alguno, las imágenes usan los colores neutros de arriba."
 
-msgid "Up to six colours. Remove one to add another."
+msgid "Up to six colors. Remove one to add another."
 msgstr "Hasta seis colores. Quita uno para añadir otro."
 
-msgid "Use a hex colour like #2F6B4F."
+msgid "Use a hex color like #2F6B4F."
 msgstr "Usa un color hexadecimal como #2F6B4F."
 
 msgid "Use as accent"
@@ -12264,13 +12286,13 @@ msgstr "Firma visual"
 msgid "Want a look of your own? Build it later on the Visuals page, or write a prompt there."
 msgstr "¿Quieres un aspecto propio? Créalo más tarde en la página Visuales o escribe allí un prompt."
 
-msgid "Your colours"
+msgid "Your colors"
 msgstr "Tus colores"
 
-msgid "Your colours are applied to the style you pick, in images and videos."
+msgid "Your colors are applied to the style you pick, in images and videos."
 msgstr "Tus colores se aplican al estilo que elijas, en imágenes y vídeos."
 
-msgid "Your colours are applied to the style you pick, in images and videos. Edit them later on the Visuals page."
+msgid "Your colors are applied to the style you pick, in images and videos. Edit them later on the Visuals page."
 msgstr "Tus colores se aplican al estilo que elijas, en imágenes y vídeos. Edítalos más tarde en la página Visuales."
 
 msgid "Your own"

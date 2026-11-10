@@ -474,7 +474,7 @@ const getDialogContent = (
       return {
         title: __("Delete Campaign?", "structura"),
         description: __(
-          "This action cannot be undone. All scheduled jobs will be cancelled.",
+          "This action cannot be undone. All scheduled jobs will be canceled.",
           "structura"
         ),
         variant: "danger" as const,
@@ -514,7 +514,7 @@ const getDialogContent = (
       return {
         title: __("Stop this run?", "structura"),
         description: __(
-          "The current generation will be cancelled. Any work in progress will be discarded.",
+          "The current generation will be canceled. Any work in progress will be discarded.",
           "structura"
         ),
         variant: "danger" as const,

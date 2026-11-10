@@ -21,6 +21,9 @@
     // is reset every modal open.
     var activeSlot = null;
     var activeAttachmentId = 0;
+    // The opened image's stored scene (the trigger's `data-topic`), shown
+    // as "Current scene" with a Reuse button (2026-11-10).
+    var activeTopic = '';
 
     // Move the modal to <body> so `position: fixed` escapes the
     // Gutenberg sidebar's stacking context. The modal's HTML is
@@ -44,6 +47,9 @@
     var $modelSection = $('#structura-modal-model-section');
     var $modelSelect  = $('#structura-modal-model');
     var $modelHint    = $('#structura-modal-model-hint');
+    var $currentScene     = $('#structura-modal-current-scene');
+    var $currentSceneText = $('#structura-modal-current-scene-text');
+    var $reuseBtn         = $('#structura-modal-reuse');
 
     // Preview state panels
     var $idle    = $('#structura-preview-idle');
@@ -54,14 +60,23 @@
     var $previewImg = $('#structura-preview-img');
 
     var pendingAttachmentId = null;
+    // Scene of the pending image, copied onto its trigger once applied.
+    var pendingTopic = '';
     var progressTimer = null;
 
     /* ── Modal open / close ────────────────────────────────────────────────── */
 
-    function openModal(slot, attachmentId) {
+    function openModal(slot, attachmentId, topic) {
         resetModal();
         activeSlot = slot || 'featured';
         activeAttachmentId = parseInt(attachmentId, 10) || 0;
+        activeTopic = $.trim(topic || '');
+        // The translated "Current scene: %s"; a replacer function so a `$` in
+        // the scene is not read as a replacement pattern.
+        $currentSceneText.text(String($currentSceneText.attr('data-template') || '%s').replace('%s', function () {
+            return activeTopic;
+        }));
+        $currentScene.prop('hidden', activeTopic === '');
 
         // Header copy reflects which slot we're regenerating —
         // "Generate Featured Image" vs "Generate Body Image". Same
@@ -73,15 +88,12 @@
                 : 'Generate Body Image';
         }
 
-        // 2026-05-07 — leave the textarea blank on open. Empty submit
-        // means "reuse the previous topic" — the server's
-        // `resolve_attachment_image_topic` reads `_structura_image_topic`
-        // off the current attachment and uses it as the topic, so
-        // pre-filling adds no information AND introduced a confusing
-        // failure mode where users assumed the prefilled string was
-        // being respected verbatim while the cloud wrapped it in its
-        // image prompt (`wrapImagePrompt`: medium lead, `Scene: …`,
-        // `Art direction: …`; specs/image-generation-quality.md §2).
+        // 2026-05-07 — leave the textarea blank on open. Since 2026-11-10
+        // an empty submit asks the cloud's writer for a new scene; the
+        // stored one shows as "Current scene" and Reuse copies it in.
+        // Pre-filling it misled users into thinking the string was used
+        // verbatim while the cloud wrapped it in its image prompt
+        // (`wrapImagePrompt`; specs/image-generation-quality.md §2).
         // Placeholder is set in the PHP template; nothing to do here.
         $prompt.val('');
 
@@ -118,6 +130,7 @@
 
     function resetModal() {
         pendingAttachmentId = null;
+        pendingTopic = '';
         $prompt.val('');
         showPanel('idle');
         $generateBtn.show().prop('disabled', false).removeClass('is-loading');
@@ -141,9 +154,18 @@
     // button's data-* attributes so the handler doesn't need to
     // know how many body rows there are.
     $(document).on('click', '#structura-regen-image, .structura-mb__btn--body', function () {
-        openModal(this.getAttribute('data-slot') || 'featured', this.getAttribute('data-attachment-id'));
+        openModal(
+            this.getAttribute('data-slot') || 'featured',
+            this.getAttribute('data-attachment-id'),
+            this.getAttribute('data-topic')
+        );
     });
     $closeBtn.on('click', closeModal);
+
+    // Reuse: render the current scene again, as an empty prompt did before 2026-11-10.
+    $reuseBtn.on('click', function () {
+        $prompt.val(activeTopic).trigger('focus');
+    });
 
     // Close on backdrop click (not modal body)
     $backdrop.on('click', function (e) {
@@ -339,6 +361,7 @@
 
             if (res.success) {
                 pendingAttachmentId = res.data.attachment_id;
+                pendingTopic = res.data.topic || '';
                 $previewImg.attr('src', res.data.preview_url + '?t=' + Date.now());
                 showPanel('result');
 
@@ -392,6 +415,9 @@
         .done(function (res) {
             if (res.success) {
                 if (activeSlot === 'featured') {
+                    // The next open shows the applied image's scene.
+                    $('#structura-regen-image').attr('data-topic', pendingTopic);
+
                     // Update the meta box thumbnail
                     var newSrc = res.data.thumb_url + '?t=' + Date.now();
                     var $wrap = $('#structura-thumb-wrap');
@@ -444,7 +470,9 @@
                         // Update the data-attachment-id so the next
                         // regen click on this row chains off the
                         // new attachment's topic.
-                        $row.find('.structura-mb__btn--body').attr('data-attachment-id', String(res.data.new_attachment_id));
+                        $row.find('.structura-mb__btn--body')
+                            .attr('data-attachment-id', String(res.data.new_attachment_id))
+                            .attr('data-topic', pendingTopic);
                     }
                 }
 

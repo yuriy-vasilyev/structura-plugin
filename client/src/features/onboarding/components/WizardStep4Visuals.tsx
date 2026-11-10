@@ -155,14 +155,14 @@ function PickSentence({
                 ? boldSentence(
                     /* translators: 1: site name, 2: the recommended style, 3: the style used until then. Keep the <b> tags around 2 and 3. */
                     __(
-                      "Our pick for %1$s is <b>%2$s</b>, which comes with paid plans. Until then, your images use <b>%3$s</b> in your colours",
+                      "Our pick for %1$s is <b>%2$s</b>, which comes with paid plans. Until then, your images use <b>%3$s</b> in your colors",
                       "structura"
                     ),
                     [siteName, signatureName(suggestion.pick), signatureName(HOUSE_SIGNATURE_ID)]
                   )
                 : boldSentence(
                     /* translators: 1: site name, 2: the recommended style. Keep the <b> tags around 2. */
-                    __("Our pick for %1$s is <b>%2$s</b>, in your colours", "structura"),
+                    __("Our pick for %1$s is <b>%2$s</b>, in your colors", "structura"),
                     [siteName, signatureName(suggestion.pick)]
                   )}
               {palette.length > 0 && (
@@ -170,7 +170,7 @@ function PickSentence({
                   colors={palette}
                   size={16}
                   max={6}
-                  label={__("Brand colours", "structura")}
+                  label={__("Brand colors", "structura")}
                   className="ml-1.5 inline-flex align-middle"
                 />
               )}

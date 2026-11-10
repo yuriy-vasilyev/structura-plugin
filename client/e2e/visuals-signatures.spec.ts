@@ -207,7 +207,7 @@ test.describe("Visuals — visual signatures", () => {
     const href = new URL((await upgrades.first().getAttribute("href")) ?? "");
     expect(href.hostname).toBe("www.structurawp.com");
     expect(href.searchParams.get("intent")).toBe("unlock_visuals");
-    await expect(page.getByRole("button", { name: /Preview with my colours/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: /Preview with my colors/ })).toBeDisabled();
 
     await shots(page, "free-desktop");
     await page.setViewportSize(PHONE);
@@ -274,15 +274,15 @@ test.describe("Visuals — visual signatures", () => {
     await openVisuals(page);
     await expectSpaMounted(page, crashes);
 
-    const list = page.getByRole("list", { name: "Brand colours" });
-    await expect(list.getByRole("button", { name: /^Edit colour/ })).toHaveCount(6);
-    await expect(page.getByRole("button", { name: "Add a colour" })).toBeDisabled();
-    await expect(page.getByText("Up to six colours. Remove one to add another.")).toBeVisible();
+    const list = page.getByRole("list", { name: "Brand colors" });
+    await expect(list.getByRole("button", { name: /^Edit color/ })).toHaveCount(6);
+    await expect(page.getByRole("button", { name: "Add a color" })).toBeDisabled();
+    await expect(page.getByText("Up to six colors. Remove one to add another.")).toBeVisible();
 
     // Removing one frees a slot.
-    await page.getByRole("button", { name: "Edit colour #123456" }).click();
+    await page.getByRole("button", { name: "Edit color #123456" }).click();
     await page.getByRole("button", { name: "Remove" }).click();
-    await expect(page.getByRole("button", { name: "Add a colour" })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Add a color" })).toBeEnabled();
     await expectSpaMounted(page, crashes);
     await page.unrouteAll({ behavior: "ignoreErrors" });
   });

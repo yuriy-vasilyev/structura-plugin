@@ -304,7 +304,7 @@ const RunStatusBadge = ({ status }: { status: RunStatusSerialized["status"] }) =
       Icon: AlertTriangle,
     },
     cancelled: {
-      label: __("Cancelled", "structura"),
+      label: __("Canceled", "structura"),
       intent: "default",
       Icon: Minus,
     },

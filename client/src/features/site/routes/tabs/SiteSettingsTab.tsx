@@ -62,7 +62,7 @@ const SettingsLive = () => {
         <Switch
           label={__("Monthly digest email", "structura")}
           description={__(
-            "Once-a-month email summarising new keyword opportunities Structura found for your site. Off by default.",
+            "Once-a-month email summarizing new keyword opportunities Structura found for your site. Off by default.",
             "structura",
           )}
           checked={digestOn}

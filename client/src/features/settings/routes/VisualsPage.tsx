@@ -508,7 +508,7 @@ export const VisualsPage = () => {
         updateDraft({ palette: result.palette });
       } else {
         toast.error(
-          __("Couldn’t read your site’s colours right now. Try again in a moment.", "structura")
+          __("Couldn’t read your site’s colors right now. Try again in a moment.", "structura")
         );
       }
     } catch (err) {
@@ -777,7 +777,7 @@ export const VisualsPage = () => {
                   </h3>
                   <p className="m-0! max-w-[62ch] text-[13px] leading-relaxed text-neutral-500 dark:text-neutral-400">
                     {__(
-                      "Pick the look every image on this site shares. Examples are shown in neutral colours.",
+                      "Pick the look every image on this site shares. Examples are shown in neutral colors.",
                       "structura"
                     )}
                   </p>

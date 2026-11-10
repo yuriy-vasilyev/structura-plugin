@@ -190,7 +190,7 @@ What is sent and when (all of it only after you opt in):
 * **Post publish event:** post ID, campaign ID, post URL, post title,
   publish state, edit URL, locale. Used by the Channels feature to
   fan out notifications to connected channels (Slack, Discord, etc.).
-* **Run acknowledgement and uploads:** generated post artefacts and
+* **Run acknowledgment and uploads:** generated post artifacts and
   per-step diagnostic metadata, so the post is associated with the
   cloud-side run history.
 * **Generated images:** downloaded from Structura Cloud's storage
@@ -294,7 +294,7 @@ Structura Cloud** screen in wp-admin (or enter a license key). If you
 would rather not, deactivate the plugin — at that point it has sent
 nothing.
 
-The plugin defaults to **telemetry off**. Plugin behaviour analytics
+The plugin defaults to **telemetry off**. Plugin behavior analytics
 (if any) only fire after explicit opt-in from the *Settings → Privacy*
 screen.
 
@@ -321,6 +321,14 @@ logs, and settings unless you explicitly turn the toggle on first.
    managed inside wp-admin.
 
 == Changelog ==
+
+= 2.37.0 =
+* New: "Regenerate" with an empty prompt now gives the post a new scene
+  in your style instead of re-rendering the old one. The current scene
+  is shown with a "Reuse" button, and a typed prompt renders as before.
+* Fixed: the brand color scan sometimes came back with no colors for a
+  site with a clear accent color.
+* Changed: every label and message uses American English spelling.
 
 = 2.36.1 =
 * Fixed: finishing the setup wizard before the colour scan had returned
@@ -557,9 +565,13 @@ repository:
 
 == Upgrade Notice ==
 
+= 2.37.0 =
+Regenerate with an empty prompt gives a post a new scene in your style.
+Safe upgrade — no database migrations.
+
 = 2.36.0 =
 Pick an image style from a library, or build your own, with your brand
-colours applied. Existing style texts keep working as before. Safe
+colors applied. Existing style texts keep working as before. Safe
 upgrade — no database migrations.
 
 = 2.24.0 =

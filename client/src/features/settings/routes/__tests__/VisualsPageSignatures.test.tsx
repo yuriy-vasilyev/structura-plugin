@@ -266,7 +266,7 @@ describe("Visuals page — picker", () => {
     // Five library cards, Your own, and the preview.
     expect(links).toHaveLength(7);
     for (const link of links) expect(link.getAttribute("href")).toContain("intent=unlock_visuals");
-    expect(screen.getByRole("button", { name: /Preview with my colours/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Preview with my colors/ })).toBeDisabled();
   });
 
   it("free plan with a library style saved before a downgrade keeps it selectable and saves it unchanged", async () => {
@@ -445,7 +445,7 @@ describe("Visuals page — palette", () => {
     renderPage();
     fireEvent.click(screen.getByRole("button", { name: /Scan my site/ }));
     expect(
-      await screen.findByText("Couldn’t read your site’s colours right now. Try again in a moment.")
+      await screen.findByText("Couldn’t read your site’s colors right now. Try again in a moment.")
     ).toBeInTheDocument();
   });
 });
@@ -505,7 +505,7 @@ describe("Visuals page — preview", () => {
     });
     renderPage();
     fireEvent.click(radio(/^Isometric glass/));
-    fireEvent.click(screen.getByRole("button", { name: /Preview with my colours/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Preview with my colors/ }));
     expect(
       await screen.findByRole("img", { name: "A seed packet on a potting bench" })
     ).toBeInTheDocument();
@@ -518,7 +518,7 @@ describe("Visuals page — preview", () => {
   it("previews the free prompt with its medium", async () => {
     bindPreset({ signature: undefined, medium: "illustration" });
     renderPage();
-    fireEvent.click(screen.getByRole("button", { name: /Preview with my colours/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Preview with my colors/ }));
     await waitFor(() => expect(previewCalls()).toHaveLength(1));
     expect(previewCalls()[0][0].data).toEqual({
       signature: null,
@@ -532,7 +532,7 @@ describe("Visuals page — preview", () => {
     renderPage();
     fireEvent.click(screen.getByRole("button", { name: /^Your own/ }));
     await screen.findByRole("heading", { name: "Your own signature" });
-    fireEvent.click(screen.getByRole("button", { name: /Preview with my colours/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Preview with my colors/ }));
     expect(await screen.findAllByText("Fill this in to save the signature.")).toHaveLength(4);
     expect(previewCalls()).toHaveLength(0);
   });
@@ -561,7 +561,7 @@ describe("Visuals page — preview", () => {
     expect(
       await screen.findByText(/No images left this month\. Your allowance resets on/)
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Preview with my colours/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Preview with my colors/ })).toBeDisabled();
   });
 });
 

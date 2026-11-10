@@ -189,7 +189,7 @@ describe("humanizeSuggestionError — no key connected", () => {
   it("asks for a key in wp-admin's own words instead of the cloud's English text", () => {
     const err = {
       code: "cloud_suggestion_error",
-      message: "No openai key configured for this workspace. Add one in app.structurawp.com → Workspace → AI providers, then re-run.",
+      message: "No openai key configured for this workspace. Add one in app.structurawp.com → Workspace → AI keys, then re-run.",
       data: { code: "credentials_missing", status: 502 },
     };
     const out = humanizeSuggestionError(err, { isManagedAiPlan: false });

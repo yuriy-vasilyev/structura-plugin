@@ -162,7 +162,7 @@ describe("RecentSinglePostRuns", () => {
     // into the same green badge so the dashboard reads at a glance).
     expect(screen.getAllByText("Done")).toHaveLength(2);
     expect(screen.getByText("Failed")).toBeInTheDocument();
-    expect(screen.getByText("Cancelled")).toBeInTheDocument();
+    expect(screen.getByText("Canceled")).toBeInTheDocument();
     expect(screen.getByText("Running")).toBeInTheDocument();
   });
 

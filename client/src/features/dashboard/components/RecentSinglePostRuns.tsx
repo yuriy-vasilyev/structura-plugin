@@ -185,7 +185,7 @@ export const RecentSinglePostRuns = () => {
                     </Badge>
                   ) : run.status === "cancelled" ? (
                     <Badge variant="solid" intent="secondary">
-                      {__("Cancelled", "structura")}
+                      {__("Canceled", "structura")}
                     </Badge>
                   ) : (
                     <Badge variant="solid" intent="info">

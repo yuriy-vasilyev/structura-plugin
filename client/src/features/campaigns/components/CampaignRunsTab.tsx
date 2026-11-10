@@ -238,7 +238,7 @@ const RunStatusChip = ({ status }: { status: RunStatusSerialized["status"] }) =>
       return (
         <Badge variant="solid" intent="default" className="shrink-0">
           <Minus size={11} className="mr-1" aria-hidden />
-          {__("Cancelled", "structura")}
+          {__("Canceled", "structura")}
         </Badge>
       );
     case "running":

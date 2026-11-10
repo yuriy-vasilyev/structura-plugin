@@ -131,15 +131,15 @@ describe("WizardStep4Visuals — the pick", () => {
 
     const sentence = screen.getByText(/Our pick for Northfield Garden/).closest("p")!;
     expect(sentence).toHaveTextContent(
-      "Our pick for Northfield Garden is Paper cut, in your colours"
+      "Our pick for Northfield Garden is Paper cut, in your colors"
     );
     expect(within(sentence).getByText("Paper cut").tagName).toBe("STRONG");
-    expect(within(sentence).getByRole("img", { name: "Brand colours" })).toBeInTheDocument();
+    expect(within(sentence).getByRole("img", { name: "Brand colors" })).toBeInTheDocument();
     expect(screen.getByText(SUGGESTION.reason)).toBeInTheDocument();
 
     expect(step4().signature).toEqual({ kind: "curated", id: "paper-cut", version: 1 });
     expect(step4().palette).toEqual(SUGGESTION.palette);
-    expect(screen.getByRole("list", { name: "Brand colours" })).toHaveTextContent("#2F6B4F");
+    expect(screen.getByRole("list", { name: "Brand colors" })).toHaveTextContent("#2F6B4F");
   });
 
   it("free: the pick goes first but locked; the house signature stays preselected and the sentence names both", async () => {
@@ -149,7 +149,7 @@ describe("WizardStep4Visuals — the pick", () => {
     expect(radio(/^Paper cut/)).toBeDisabled();
     expect(radio(/^Editorial reportage/)).toHaveAttribute("aria-checked", "true");
     expect(screen.getByText(/Our pick for Northfield Garden/).closest("p")).toHaveTextContent(
-      "Our pick for Northfield Garden is Paper cut, which comes with paid plans. Until then, your images use Editorial reportage in your colours"
+      "Our pick for Northfield Garden is Paper cut, which comes with paid plans. Until then, your images use Editorial reportage in your colors"
     );
     expect(step4().signature).toEqual({ kind: "curated", id: "editorial-reportage", version: 1 });
     // The palette is every plan's.
