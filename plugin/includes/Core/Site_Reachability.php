@@ -50,6 +50,15 @@ final class Site_Reachability {
 	public const OPTION = 'structura_cloud_reachability';
 
 	/**
+	 * `reason` returned by {@see probe_and_store()} when the cloud answered
+	 * without a verdict: a non-2xx status (its own 401, 403 or 5xx) or a body
+	 * without a boolean `success`.
+	 *
+	 * @var string
+	 */
+	public const REASON_CHECK_FAILED = 'cloud_check_failed';
+
+	/**
 	 * Run the live cloud → plugin handshake and cache the verdict.
 	 *
 	 * Best-effort and side-effecting: callers (daily cron, post-activation,
@@ -58,13 +67,18 @@ final class Site_Reachability {
 	 * cloud's message verbatim to the SPA toast.
 	 *
 	 * Failure-mode discipline:
-	 *   - `body.success === false` → the cloud could NOT reach our webhook.
-	 *     This is the condition we warn about; cache `ok = false`.
+	 *   - HTTP 2xx with `body.success === false` → the cloud could NOT reach
+	 *     our webhook. This is the condition we warn about; cache `ok = false`.
 	 *   - A `WP_Error` from `Cloud_Client::post` means WE couldn't reach
 	 *     the cloud (outbound). That's a different fault (often a transient
 	 *     blip on the site's own egress) and says nothing about whether the
 	 *     cloud can reach us, so we leave the last cached verdict untouched
 	 *     rather than flip the banner on every outbound hiccup.
+	 *   - Any other cloud answer (a non-2xx, or a body without a boolean
+	 *     `success`) is a failed check, not a verdict: leave the cache alone
+	 *     and return {@see REASON_CHECK_FAILED}. Until 2026-11-13 the cloud's
+	 *     own 401 cached `ok = false` too; the first AppSumo site showed the
+	 *     banner while the cloud was delivering to it.
 	 *   - No license yet → nothing to probe. Clear any stale verdict so a
 	 *     site that was unreachable, then disconnected, doesn't keep warning.
 	 *
@@ -108,13 +122,44 @@ final class Site_Reachability {
 			return [ 'ok' => true, 'reason' => 'cloud_unreachable_outbound' ];
 		}
 
+		$code = (int) ( $result['code'] ?? 0 );
 		$body = is_array( $result['body'] ?? null ) ? $result['body'] : [];
-		$ok   = ! empty( $body['success'] );
+		if ( $code < 200 || $code >= 300 || ! is_bool( $body['success'] ?? null ) ) {
+			// Failed check, not a verdict — see docblock.
+			return [ 'ok' => true, 'reason' => self::REASON_CHECK_FAILED ];
+		}
 
+		return self::store(
+			$body['success'],
+			isset( $body['message'] ) ? (string) $body['message'] : ''
+		);
+	}
+
+	/**
+	 * Clears a cached "unreachable" verdict; the webhook receiver calls it once
+	 * a request's signature has verified.
+	 *
+	 * Only the cloud holds the signing secret, so a verified request proves the
+	 * cloud reached this site, whatever the last probe said (2026-11-13: a post
+	 * landed while the banner still said the site was unreachable). Writes
+	 * only over `ok = false`, so a normal delivery costs one option read.
+	 */
+	public static function mark_reachable(): void {
+		if ( self::is_unreachable() ) {
+			self::store( true, '' );
+		}
+	}
+
+	/**
+	 * Caches a verdict and returns it.
+	 *
+	 * @return array{ok:bool,checked_at:int,message:string}
+	 */
+	private static function store( bool $ok, string $message ): array {
 		$state = [
 			'ok'         => $ok,
 			'checked_at' => time(),
-			'message'    => isset( $body['message'] ) ? (string) $body['message'] : '',
+			'message'    => $message,
 		];
 		update_option( self::OPTION, $state, false );
 

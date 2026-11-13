@@ -18,6 +18,8 @@ use Structura\Tests\Unit\TestCase;
  *   - A `body.success === true` verdict caches `ok = true`.
  *   - An outbound WP_Error (WE can't reach the cloud — a different fault)
  *     leaves the cached verdict UNTOUCHED rather than crying wolf.
+ *   - So does a cloud answer that is not a verdict: a non-2xx (the cloud's
+ *     own 401/403/5xx) or a body without a boolean `success` (2026-11-13).
  *   - No workspace → no probe, and any stale verdict is cleared.
  *   - An anonymous ("none") workspace (bearer, no license key) DOES
  *     probe — it receives delivered posts over the same webhook.
@@ -140,6 +142,51 @@ class SiteReachabilityTest extends TestCase
 
         $this->assertTrue($state['ok']);
         $this->assertSame('cloud_unreachable_outbound', $state['reason']);
+    }
+
+    /**
+     * Cloud answers that say nothing about whether the cloud can reach us.
+     * Each one used to cache `ok = false`: on 2026-11-13 the first AppSumo
+     * site showed "can't reach this site" while the cloud delivered to it.
+     *
+     * @return array<string, array{0: int, 1: mixed}>
+     */
+    public function cloud_answers_without_a_verdict(): array
+    {
+        return [
+            'cloud 401 from the bearer check'      => [401, ['success' => false, 'error' => 'Unauthorized.']],
+            'cloud 403 for a workspace-wide token' => [403, ['success' => false, 'error' => 'This endpoint requires an activation-bound token.']],
+            'cloud 500 with an HTML body'          => [500, null],
+            'cloud 200 with an HTML body'          => [200, null],
+            'cloud 200 without success'            => [200, ['message' => 'Pulse verified!']],
+            'cloud 200 with a non-boolean success' => [200, ['success' => 'false']],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider cloud_answers_without_a_verdict
+     *
+     * @param mixed $body Decoded cloud body (null when it was not JSON).
+     */
+    public function probe_leaves_cache_untouched_when_the_cloud_gives_no_verdict(int $code, $body): void
+    {
+        $lm = Mockery::mock('alias:Structura\Core\License_Manager');
+        $lm->shouldReceive('has_workspace')->andReturn(true);
+        $lm->shouldReceive('get_license_data')->andReturn(['license_key' => 'KEY-ABC']);
+
+        Mockery::mock('alias:Structura\Core\Cloud_Client')
+            ->shouldReceive('post')
+            ->once()
+            ->andReturn(['code' => $code, 'body' => $body, 'raw' => null]);
+
+        $this->expectFn('update_option')->never();
+        $this->expectFn('delete_option')->never();
+
+        $state = Site_Reachability::probe_and_store();
+
+        $this->assertTrue($state['ok']);
+        $this->assertSame(Site_Reachability::REASON_CHECK_FAILED, $state['reason']);
     }
 
     /** @test */

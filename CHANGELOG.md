@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.38.1](https://github.com/yuriy-vasilyev/structura-core/compare/v2.38.0...v2.38.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* **diagnostics:** record why a connection check failed ([fa3163b](https://github.com/yuriy-vasilyev/structura-core/commit/fa3163ba48cbed80785601b5ab33d90aadf2c48b))
+* **plugin:** stop the false "can't reach this site" warning and reject bad webhook signatures cleanly ([07bb848](https://github.com/yuriy-vasilyev/structura-core/commit/07bb848fe71eb158ae7cbab16b254f22cc2e3b08))
+
 ## [2.38.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.37.0...v2.38.0) (2026-11-13)
 
 

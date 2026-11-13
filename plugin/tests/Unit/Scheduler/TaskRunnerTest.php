@@ -4,6 +4,7 @@ namespace Structura\Tests\Unit\Scheduler;
 
 use Brain\Monkey\Functions;
 use Mockery;
+use Structura\Core\Site_Reachability;
 use Structura\Scheduler\Context_Builder;
 use Structura\Scheduler\Task_Runner;
 use Structura\Tests\Unit\TestCase;
@@ -23,6 +24,9 @@ use Structura\Tests\Unit\TestCase;
  *      "Generate Now" REST endpoint. Pins that AS args carry only a
  *      transient key, that the key is deleted before execute_single_post
  *      runs, and that missing/empty keys fail loudly rather than looping.
+ *
+ *   3. `receive_cloud_blueprint()` — a bad signature is a 401, and a
+ *      verified request clears a cached "unreachable" verdict (2026-11-13).
  *
  * The Phase-1.0h-retired AS image chain (`queue_image_tasks`,
  * `enqueue_image_task`, `handle_as_image_task`) had its own fixture-
@@ -961,5 +965,236 @@ class TaskRunnerTest extends TestCase
         );
         // Symbol-only input yields an empty key (callers skip it).
         $this->assertSame('', Task_Runner::normalize_term_key('!!!'));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    //  WEBHOOK RECEIVER (2026-11-13, first AppSumo site)
+    //
+    //  An unsigned POST to /webhook/receive-blueprint was a fatal 500: the
+    //  signature-mismatch throw passed the string 'webhook' as Exception's
+    //  `$previous`. A bad signature is now a plain 401.
+    //
+    //  The same site showed "Structura Cloud can't reach this site" while
+    //  the cloud was delivering to it. Only the cloud holds the signing
+    //  secret, so a request that verifies clears a cached "unreachable"
+    //  verdict, and writes nothing when there is none to clear.
+    // ──────────────────────────────────────────────────────────────────────
+
+    private const WEBHOOK_SECRET = 'whsec-receiver-test';
+
+    private const PULSE = ['message' => 'Pulse check initiated.', 'type' => 'pulse_check'];
+
+    /** A blueprint for a run whose post already exists (post 42). */
+    private const DELIVERY = [
+        'campaign_id'     => 'cmp-1',
+        'campaign_run_id' => 'run-1',
+        'ai_output'       => ['title' => 'A delivered post'],
+    ];
+
+    private const UNREACHABLE = ['ok' => false, 'checked_at' => 1, 'message' => 'Forbidden'];
+
+    /** @test */
+    public function an_unsigned_webhook_gets_a_401_and_leaves_the_verdict_alone(): void
+    {
+        $this->stage_webhook_receiver(self::UNREACHABLE);
+        $this->expectFn('update_option')->never();
+
+        $response = (new Task_Runner())->receive_cloud_blueprint($this->webhook_request(self::PULSE, null));
+
+        $this->assert_rejected_with_401($response);
+    }
+
+    /** @test */
+    public function a_wrongly_signed_webhook_gets_a_401_and_leaves_the_verdict_alone(): void
+    {
+        $this->stage_webhook_receiver(self::UNREACHABLE);
+        $this->expectFn('update_option')->never();
+
+        $response = (new Task_Runner())->receive_cloud_blueprint($this->webhook_request(
+            self::DELIVERY,
+            hash_hmac('sha256', (string) json_encode(self::DELIVERY), 'not-the-site-secret')
+        ));
+
+        $this->assert_rejected_with_401($response);
+    }
+
+    /**
+     * @return array<string, array{0: array<string, mixed>}>
+     */
+    public function verified_cloud_requests(): array
+    {
+        return [
+            'pulse check'        => [self::PULSE],
+            'blueprint delivery' => [self::DELIVERY],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider verified_cloud_requests
+     *
+     * @param array<string, mixed> $payload
+     */
+    public function a_verified_request_clears_a_cached_unreachable_verdict(array $payload): void
+    {
+        $this->stage_webhook_receiver(self::UNREACHABLE);
+        $writes = [];
+        $this->capture_option_writes($writes);
+
+        $response = (new Task_Runner())->receive_cloud_blueprint($this->signed_request($payload));
+
+        $this->assertTrue($response['success']);
+        $this->assertCount(1, $writes);
+        $this->assertSame(Site_Reachability::OPTION, $writes[0]['option']);
+        $this->assertTrue($writes[0]['value']['ok']);
+        $this->assertGreaterThan(self::UNREACHABLE['checked_at'], $writes[0]['value']['checked_at']);
+    }
+
+    /**
+     * @return array<string, array{0: array<string, mixed>, 1: mixed}>
+     */
+    public function verified_requests_with_nothing_to_clear(): array
+    {
+        $reachable = ['ok' => true, 'checked_at' => 1, 'message' => 'Pulse verified!'];
+
+        return [
+            'pulse check, cached reachable'        => [self::PULSE, $reachable],
+            'pulse check, never probed'            => [self::PULSE, false],
+            'blueprint delivery, cached reachable' => [self::DELIVERY, $reachable],
+            'blueprint delivery, never probed'     => [self::DELIVERY, false],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider verified_requests_with_nothing_to_clear
+     *
+     * @param array<string, mixed> $payload
+     * @param mixed                $cached_verdict `get_option` value; false when absent.
+     */
+    public function a_verified_request_writes_nothing_without_an_unreachable_verdict(array $payload, $cached_verdict): void
+    {
+        $this->stage_webhook_receiver($cached_verdict);
+        $this->expectFn('update_option')->never();
+
+        $response = (new Task_Runner())->receive_cloud_blueprint($this->signed_request($payload));
+
+        $this->assertTrue($response['success']);
+    }
+
+    /**
+     * Site secret, cached reachability verdict and the WP edges the receiver
+     * touches. Site_Reachability itself runs for real.
+     *
+     * @param mixed $cached_verdict `get_option` value for the verdict; false when absent.
+     */
+    private function stage_webhook_receiver($cached_verdict): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['secret' => self::WEBHOOK_SECRET]);
+        $this->stub_log_service();
+        Functions\when('rest_ensure_response')->returnArg();
+        Functions\when('get_option')->alias(function ($name, $default = false) use ($cached_verdict) {
+            return $name === Site_Reachability::OPTION ? $cached_verdict : $default;
+        });
+        if ( ! class_exists('WP_Query')) {
+            class_alias(Run_Already_Applied_Query::class, 'WP_Query');
+        }
+    }
+
+    /**
+     * Record every `update_option` call into `$writes`.
+     *
+     * @param array<int, array{option: string, value: mixed}> $writes
+     */
+    private function capture_option_writes(array &$writes): void
+    {
+        Functions\when('update_option')->alias(function ($option, $value) use (&$writes) {
+            $writes[] = ['option' => $option, 'value' => $value];
+            return true;
+        });
+    }
+
+    /**
+     * Returns a request carrying `$payload` signed with the site's secret.
+     *
+     * @param array<string, mixed> $payload
+     */
+    private function signed_request(array $payload): object
+    {
+        return $this->webhook_request(
+            $payload,
+            hash_hmac('sha256', (string) json_encode($payload), self::WEBHOOK_SECRET)
+        );
+    }
+
+    /**
+     * Returns a request shaped like the `WP_REST_Request` the receiver reads.
+     *
+     * @param array<string, mixed> $payload
+     */
+    private function webhook_request(array $payload, ?string $signature): object
+    {
+        // PHP 7.4-compatible: no constructor property promotion.
+        return new class((string) json_encode($payload), $signature) {
+            /** @var string */
+            private $body;
+
+            /** @var string|null */
+            private $signature;
+
+            public function __construct(string $body, ?string $signature)
+            {
+                $this->body      = $body;
+                $this->signature = $signature;
+            }
+
+            public function get_header(string $key): ?string
+            {
+                return $key === 'x-structura-signature' ? $this->signature : null;
+            }
+
+            public function get_body(): string
+            {
+                return $this->body;
+            }
+
+            public function get_json_params(): array
+            {
+                return json_decode($this->body, true);
+            }
+        };
+    }
+
+    /**
+     * @param mixed $response
+     */
+    private function assert_rejected_with_401($response): void
+    {
+        $this->assertInstanceOf(\WP_Error::class, $response);
+        $this->assertSame(['status' => 401], $response->get_error_data());
+    }
+}
+
+/**
+ * Stands in for `\WP_Query` in the receiver tests: every query finds post 42,
+ * so `apply_blueprint` takes its "run already applied" exit.
+ */
+class Run_Already_Applied_Query
+{
+    /** @var int[] */
+    public $posts = [42];
+
+    /**
+     * @param array<string, mixed> $args
+     */
+    public function __construct(array $args = [])
+    {
+    }
+
+    public function have_posts(): bool
+    {
+        return true;
     }
 }

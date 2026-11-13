@@ -1076,18 +1076,25 @@ class Rest_Api
         // the next page load without waiting for the daily cron.
         $state = \Structura\Core\Site_Reachability::probe_and_store();
 
-        // The probe returns `ok:true` with a `reason` for the two cases
-        // that aren't an authoritative cloud→site verdict (no license —
-        // already guarded above — or an outbound-to-cloud transport
-        // failure). Surface the latter as the WP_Error the SPA's global
-        // handler expects, so the toast says "couldn't reach the cloud"
-        // instead of a misleading green check.
+        // The probe returns `ok:true` with a `reason` for the cases that
+        // aren't an authoritative cloud→site verdict (no license — already
+        // guarded above — an outbound-to-cloud transport failure, or a cloud
+        // answer without a verdict). Surface the outbound one as the
+        // WP_Error the SPA's global handler expects, so the toast says
+        // "couldn't reach the cloud" instead of a misleading green check.
         if (($state['reason'] ?? '') === 'cloud_unreachable_outbound') {
             return new \WP_Error(
                 'cloud_unreachable',
                 __('Could not reach Structura Cloud. Check your server\'s outbound connection and try again.', 'structura'),
                 ['status' => 502]
             );
+        }
+
+        // The cloud's own 401/403/5xx (2026-11-13): the check did not run, so
+        // report a failure, as this button did before the probe stopped
+        // caching these.
+        if (($state['reason'] ?? '') === \Structura\Core\Site_Reachability::REASON_CHECK_FAILED) {
+            return rest_ensure_response(['success' => false, 'message' => '']);
         }
 
         return rest_ensure_response([

@@ -12,6 +12,7 @@ use Structura\Core\Log_Service;
 use Structura\Core\Log_Steps;
 use Structura\Core\Provider_Registry;
 use Structura\Core\Public_Site_Profile;
+use Structura\Core\Site_Reachability;
 use Structura\Generator\Block_Serializer;
 
 if ( ! defined('ABSPATH')) {
@@ -2141,8 +2142,17 @@ class Task_Runner
         $signature = $request->get_header('x-structura-signature') ?: $request->get_header('x_structura_signature');
 
         if ( ! $this->verify_webhook_signature($request->get_body(), $signature)) {
-            throw new \Exception("Webhook signature mismatch. Verification failed.", 0, 'webhook');
+            // A plain 401, as `/webhook/pulse-check` answers. Until 2026-11-13
+            // this threw an Exception with the string 'webhook' as its
+            // `$previous`, which PHP rejects: every unsigned or wrongly signed
+            // POST was a fatal 500 that the cloud retried three times.
+            return new \WP_Error('unauthorized', 'Webhook signature mismatch. Verification failed.', ['status' => 401]);
         }
+
+        // Only the cloud holds the signing secret, so this request proves the
+        // cloud reached the site (2026-11-13: a post landed while the banner
+        // still said the site was unreachable).
+        Site_Reachability::mark_reachable();
 
         $payload = $request->get_json_params();
 
