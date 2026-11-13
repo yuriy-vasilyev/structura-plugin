@@ -22,6 +22,12 @@ export interface WizardPositioning {
 
 interface PositioningResponse {
   positioning: WizardPositioning | null;
+  /**
+   * The site's stored pages, the homepage first, listed before any draft
+   * (specs/site-reading.md §11). Absent for a site that could not be read and
+   * from a cloud older than 2026-11-13.
+   */
+  pages?: PositioningPageRead[];
 }
 
 export type SuggestedKeywordRationale =
@@ -106,18 +112,30 @@ export function useSaveWizardPositioningMutation() {
       });
     },
     onSuccess: (result) => {
+      // The save answers with the positioning alone; the stored pages of the
+      // read stay listed.
       queryClient.setQueryData<PositioningResponse>(
         POSITIONING_QUERY_KEY,
-        result,
+        (previous) => ({ ...previous, positioning: result.positioning }),
       );
     },
   });
 }
 
+/** A page a positioning draft read (specs/site-reading.md §5a). */
+export interface PositioningPageRead {
+  url: string;
+  /** The page's link text or path; the host for the homepage. */
+  label: string;
+  role: "home" | "service" | "product" | "audience" | "pricing" | "about" | "other";
+}
+
 /**
- * AI-draft positioning answers from the homepage. The SPA puts the
- * suggestion into the editable textareas; user confirms / edits /
- * saves separately through `useSaveWizardPositioningMutation`.
+ * AI-draft positioning answers from the homepage and the site's offer
+ * pages. The SPA puts the suggestion into the editable textareas; user
+ * confirms / edits / saves separately through
+ * `useSaveWizardPositioningMutation`. `reselectPages` (a Re-draft) has the
+ * cloud select the pages again (specs/site-reading.md §11).
  */
 export function useSuggestWizardPositioningMutation() {
   return useMutation<
@@ -129,15 +147,17 @@ export function useSuggestWizardPositioningMutation() {
         rationale: string;
       } | null;
       reason?: "missing_domain" | "ai_unavailable";
+      /** The pages read; absent from a cloud older than 2026-11-13. */
+      pages?: PositioningPageRead[];
     },
     Error,
-    void
+    { reselectPages?: boolean } | void
   >({
-    mutationFn: async () => {
+    mutationFn: async (input) => {
       return apiFetch({
         path: "/structura/v1/wizard/positioning/suggest",
         method: "POST",
-        data: {},
+        data: input?.reselectPages ? { reselectPages: true } : {},
       });
     },
   });

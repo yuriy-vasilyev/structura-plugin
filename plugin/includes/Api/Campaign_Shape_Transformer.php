@@ -24,6 +24,30 @@ class Campaign_Shape_Transformer
     /** Target word count when a payload carries none. Mirrors DEFAULT_POST_LENGTH in @structura/types. */
     public const DEFAULT_POST_LENGTH = 1200;
 
+    /** Fewest words a post may target. Mirrors POST_LENGTH_MIN in @structura/types. */
+    public const POST_LENGTH_MIN = 300;
+
+    /**
+     * Most words a post may target. Mirrors POST_LENGTH_MAX in @structura/types,
+     * the paid ceiling; the cloud holds Free lower.
+     */
+    public const POST_LENGTH_MAX = 3000;
+
+    /**
+     * Returns the target word count rounded and clamped to
+     * POST_LENGTH_MIN..POST_LENGTH_MAX, or DEFAULT_POST_LENGTH when it is not a number.
+     *
+     * @param mixed $value Raw post_length from a request.
+     */
+    public static function clamp_post_length($value): int
+    {
+        if ( ! is_numeric($value)) {
+            return self::DEFAULT_POST_LENGTH;
+        }
+
+        return max(self::POST_LENGTH_MIN, min(self::POST_LENGTH_MAX, (int) round((float) $value)));
+    }
+
     /** Text providers the provider advice can be hidden for. */
     private const AI_ADVICE_PROVIDERS = ['openai', 'gemini', 'anthropic'];
 

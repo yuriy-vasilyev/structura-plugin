@@ -144,6 +144,28 @@ class GenerateSinglePostSeoTargetingTest extends TestCase
     }
 
     /**
+     * 2026-11-12: the one-off post took any length. It is clamped into the
+     * campaign range like a campaign save; the cloud holds Free to 500.
+     *
+     * @test
+     */
+    public function it_clamps_the_post_length_into_the_word_range(): void
+    {
+        $lengths = [];
+        foreach ([1000000, 50, 1500] as $sent) {
+            $campaign  = $this->run_and_capture_campaign([
+                'topic'         => 'A practical guide to headless WordPress',
+                'text_provider' => 'gemini',
+                'persona_id'    => 'p1',
+                'post_length'   => $sent,
+            ]);
+            $lengths[] = $campaign['intelligence']['postLength'] ?? null;
+        }
+
+        $this->assertSame([3000, 300, 1500], $lengths);
+    }
+
+    /**
      * Minimal `WP_REST_Request` stand-in exposing `get_json_params()`.
      * PHP 7.4-compatible (the CI matrix still parses 7.4).
      *

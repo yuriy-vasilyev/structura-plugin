@@ -43,7 +43,15 @@ import { useAiSettingsQuery } from "@/features/ai-engine";
 import { resolveDefaultTier, usesRecommendedModel } from "@/features/ai-engine/helpers";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
 import { getCampaignFormDataForLicense } from "@/features/campaigns/helpers";
-import { isManagedPlan, type PlanId } from "@structura/types";
+import {
+  clampPostLength,
+  FREE_POST_LENGTH_MAX,
+  isManagedPlan,
+  POST_LENGTH_MAX,
+  POST_LENGTH_MIN,
+  SINGLE_POST_TOPIC_MAX_LENGTH,
+  type PlanId,
+} from "@structura/types";
 
 /** Shortest topic that can be submitted or seed a keyphrase suggestion. */
 const MIN_TOPIC_LENGTH = 20;
@@ -269,6 +277,7 @@ const RESEARCH_ATTACHMENTS_LABELS: ResearchAttachmentsLabels = {
 const GeneratePostPage = () => {
   const navigate = useNavigate();
   const { isLicensed, isPaidLicense, plan } = useLicense();
+  const maxPostLength = isPaidLicense ? POST_LENGTH_MAX : FREE_POST_LENGTH_MAX;
   // When wp-content/uploads isn't writable, generated images can never
   // save (sideload fails). Rather than let the user turn images on only
   // to have them silently never appear, disable the toggles and explain
@@ -704,6 +713,8 @@ const GeneratePostPage = () => {
           onChange={(e) => update("identity", { objective: e.target.value })}
           onBlur={(e) => settleTopic(e.target.value)}
           rows={4}
+          // The cloud cuts a longer topic (2026-11-12 cost audit).
+          maxLength={SINGLE_POST_TOPIC_MAX_LENGTH}
         />
         {formData.identity.objective.length > 0 && !isValid && (
           <p className="m-0! text-xs text-amber-500">
@@ -871,31 +882,38 @@ const GeneratePostPage = () => {
 
           {/* Post Length */}
           {/*
-            Non-paid tiers (Free + anonymous None) have a 500-word
-            server-side clamp in `functions/src/ai/instruction-builder.ts`.
-            Surface the ceiling in the input so the user sees the cap
-            instead of typing 1700 and silently receiving ~500. Paid
-            tiers pick their own length and we don't constrain the
-            field. The explanatory help text lives in a
-            full-width block below the grid — the 4-col cell is too
-            narrow to render a translated sentence without wrapping
-            into an unreadable shape (German "Beitragslänge" copy
-            wraps into ~6 lines at lg).
+            The cloud clamps every plan's length (`clampPostLength`): Free +
+            anonymous None to 500, paid to 3000. Surface the ceiling in the
+            input so the user sees the cap instead of typing 1700 and
+            silently receiving ~500; the 300 floor applies on blur, since on
+            every keystroke it would make the field untypeable. The
+            explanatory help text lives in a full-width block below the
+            grid — the 4-col cell is too narrow to render a translated
+            sentence without wrapping into an unreadable shape (German
+            "Beitragslänge" copy wraps into ~6 lines at lg).
           */}
           <InputField
             label={__("Post Length", "structura")}
             type="number"
             value={formData.intelligence.postLength}
-            max={!isPaidLicense ? 500 : undefined}
+            min={POST_LENGTH_MIN}
+            max={maxPostLength}
             onChange={(e) => {
               const parsed = parseInt(e.target.value);
               const next = Number.isFinite(parsed) ? parsed : 0;
               update("intelligence", {
                 // Mirror the server clamp client-side so the displayed
                 // value never exceeds what the post will actually be.
-                postLength: !isPaidLicense ? Math.min(next, 500) : next,
+                postLength: Math.min(next, maxPostLength),
               });
             }}
+            onBlur={() =>
+              update("intelligence", {
+                postLength: clampPostLength(formData.intelligence.postLength, {
+                  paid: isPaidLicense,
+                }),
+              })
+            }
             // Same height as the Persona / Language / Post status triggers
             // (owner review 2026-10-06): a number input's line box is the
             // font's height, not `leading-none`, so `py-2.5` made this field

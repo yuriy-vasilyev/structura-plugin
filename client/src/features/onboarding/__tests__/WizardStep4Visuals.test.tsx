@@ -4,14 +4,15 @@
  *
  * Pins:
  *   1. The thin pass runs once when the step opens with no known answer; the
- *      pick sentence says it is still reading the site, with the house
- *      signature preselected, until it answers.
+ *      loader replaces the step and the step is not valid (Continue waits)
+ *      until it answers or fails.
  *   2. Paid: the pick goes first and is preselected; free: it goes first but
  *      locked, and the house signature stays preselected. The pick sentence
  *      names the style(s) with the palette and the reason.
  *   3. A user's own pick, a persisted answer and a bound preset's saved choice
  *      are never overridden. A bound free prompt keeps its text.
- *   4. Continue is always enabled; no "Your own", no "Free prompt", no In use.
+ *   4. Continue is enabled once the pass settled; no "Your own", no "Free
+ *      prompt", no In use.
  *   5. The video row is unchanged, and its art direction is still drafted from
  *      the homepage on eligible plans.
  *
@@ -104,23 +105,21 @@ beforeEach(() => {
 });
 
 describe("WizardStep4Visuals — the pick", () => {
-  it("runs the pass once on open; until it answers the house signature is preselected and the sentence says so", async () => {
+  it("runs the pass once on open; until it answers the loader holds the step and Continue waits", async () => {
     let answer!: (value: unknown) => void;
     apiFetchMock.mockReturnValue(new Promise((resolve) => (answer = resolve)));
     renderStep();
 
-    const reading = await screen.findByText(/Still reading Northfield Garden to pick a style\./);
-    expect(reading).toHaveTextContent(
-      "Still reading Northfield Garden to pick a style. Editorial reportage is selected until then."
-    );
-    await waitFor(() =>
-      expect(radio(/^Editorial reportage/)).toHaveAttribute("aria-checked", "true")
-    );
-    expect(passCalls()).toHaveLength(1);
+    expect(await screen.findByText("Reading your brand")).toBeInTheDocument();
+    await waitFor(() => expect(passCalls()).toHaveLength(1));
+    expect(screen.queryByRole("radiogroup")).toBeNull();
+    expect(useWizardStore.getState().stepValidity[4]).toBe(false);
 
     await act(async () => answer({ suggestion: SUGGESTION, homepageRead: true }));
 
     await waitFor(() => expect(radio(/^Paper cut/)).toHaveAttribute("aria-checked", "true"));
+    expect(screen.queryByText("Reading your brand")).toBeNull();
+    expect(useWizardStore.getState().stepValidity[4]).toBe(true);
     expect(passCalls()).toHaveLength(1);
   });
 
@@ -156,14 +155,18 @@ describe("WizardStep4Visuals — the pick", () => {
     expect(step4().palette).toEqual(SUGGESTION.palette);
   });
 
-  it("a card the user picked survives a later answer", async () => {
-    let answer!: (value: unknown) => void;
-    apiFetchMock.mockReturnValue(new Promise((resolve) => (answer = resolve)));
+  it("a card the user picked on an earlier visit survives a later answer", async () => {
+    // The persisted draft of a user who picked a card; the answer is not on it.
+    useWizardStore.getState().setStep4Draft({
+      globalArtDirection: "",
+      aspectRatio: "16:9",
+      format: "webp",
+      optimizeOnUpload: true,
+      medium: "photography",
+      signature: { kind: "curated", id: "isometric-glass", version: 1 },
+      signatureTouched: true,
+    });
     renderStep();
-    await waitFor(() => expect(radio(/^Isometric glass/)).toBeEnabled());
-    fireEvent.click(radio(/^Isometric glass/));
-
-    await act(async () => answer({ suggestion: SUGGESTION, homepageRead: true }));
 
     await waitFor(() => expect(step4().suggestion?.pick).toBe("paper-cut"));
     expect(radio(/^Isometric glass/)).toHaveAttribute("aria-checked", "true");
@@ -198,7 +201,7 @@ describe("WizardStep4Visuals — the pick", () => {
     expect(passCalls()).toHaveLength(0);
   });
 
-  it("a failed pass hides the sentence and keeps the house signature", async () => {
+  it("a failed pass shows the step without the sentence and keeps the house signature", async () => {
     apiFetchMock.mockRejectedValue({
       code: "cloud_error",
       message: "x",
@@ -206,7 +209,8 @@ describe("WizardStep4Visuals — the pick", () => {
     });
     renderStep();
     await waitFor(() => expect(step4().suggestion).toBeNull());
-    expect(screen.queryByText(/Still reading/)).toBeNull();
+    expect(screen.queryByText("Reading your brand")).toBeNull();
+    expect(useWizardStore.getState().stepValidity[4]).toBe(true);
     expect(screen.queryByText(/Our pick for Northfield Garden/)).toBeNull();
     expect(radio(/^Editorial reportage/)).toHaveAttribute("aria-checked", "true");
   });
@@ -301,7 +305,7 @@ describe("WizardStep4Visuals — a site with a saved preset", () => {
 });
 
 describe("WizardStep4Visuals — the step", () => {
-  it("Continue is always enabled", async () => {
+  it("Continue is enabled once the pass answered", async () => {
     renderStep();
     await waitFor(() => expect(useWizardStore.getState().stepValidity[4]).toBe(true));
   });

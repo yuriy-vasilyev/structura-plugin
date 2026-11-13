@@ -1,5 +1,59 @@
 # Changelog
 
+## [2.38.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.37.0...v2.38.0) (2026-11-13)
+
+
+### Features
+
+* **billing:** include 200 images a month on the Cloud 100-post option ([0e7edfa](https://github.com/yuriy-vasilyev/structura-core/commit/0e7edfaca852c4e57c15e1a7038ce4a98942064a))
+* **billing:** limit generations that are prepared or started but never delivered ([4e3defc](https://github.com/yuriy-vasilyev/structura-core/commit/4e3defc8142888188b3e527e08b82752f112d2aa))
+* **campaigns:** recommend a publishing pace of 1-2 posts a week per language ([6187a38](https://github.com/yuriy-vasilyev/structura-core/commit/6187a38414427e0cb6a6846df34045c8be3a822e))
+* **discovery:** find reader questions when the keyword index is thin ([2e68551](https://github.com/yuriy-vasilyev/structura-core/commit/2e68551dc15ed13e89abd12fae5873b1006241ff))
+* **discovery:** keep People Also Ask questions on audience and help thin regional topics one by one ([d1bf382](https://github.com/yuriy-vasilyev/structura-core/commit/d1bf38240ac0bd98554e6083fe66ec5108c72976))
+* **discovery:** one keyword bank row per reader question ([8799fd3](https://github.com/yuriy-vasilyev/structura-core/commit/8799fd3b87ac3c8b88385d898ac44ee575bcd117))
+* **discovery:** seed every keyword research run from the campaign objective ([b0b72d9](https://github.com/yuriy-vasilyev/structura-core/commit/b0b72d95506a2b043495afa2d2dbcbb99a1e79f5))
+* **infra:** public status page at status.structurawp.com as a Cloudflare Worker ([9ea4b8c](https://github.com/yuriy-vasilyev/structura-core/commit/9ea4b8caa22249880899a99d3c6eca8fdee77bd4))
+* **plugin:** list the pages a site's positioning was drafted from ([50be9e3](https://github.com/yuriy-vasilyev/structura-core/commit/50be9e36365cac3093a729f8e6e3bdbf4e02c051))
+* **portal:** list the pages read on the site profile, and ask before replacing only your own text ([47195c5](https://github.com/yuriy-vasilyev/structura-core/commit/47195c5b1e42a0557e0e2111f810b04738842d26))
+* **portal:** offer a larger plan or a conversation when posts are running out ([889fc9b](https://github.com/yuriy-vasilyev/structura-core/commit/889fc9baace6677e58b82acffa86ab1f6856ed62))
+* **portal:** show a notice with Try again when keyword research was incomplete ([e8fb256](https://github.com/yuriy-vasilyev/structura-core/commit/e8fb25635cb5ff1babb7146d492bcf035e0d661f))
+* **portal:** show a WordPress site waiting for its plugin only what it can do ([bc032fb](https://github.com/yuriy-vasilyev/structura-core/commit/bc032fb5d5c7bea82ed1e6b3b76078a7c9b7d2cc))
+* **portal:** show the pages a site's positioning was drafted from ([2fcefac](https://github.com/yuriy-vasilyev/structura-core/commit/2fcefacdd3021f4ebbe2e5b725990cb2f5459c79))
+* **site-reading:** read offers on a subdomain, and list the pages read in wp-admin before a draft ([7f037f4](https://github.com/yuriy-vasilyev/structura-core/commit/7f037f4dd1d8f99e2fc1b820fbe11bbd384a62c9))
+* **sites:** read a site's service pages, not only its homepage ([66971e4](https://github.com/yuriy-vasilyev/structura-core/commit/66971e4bb67a325dc27ea033d19b8229956e6d9d))
+* **stock:** re-render waiting stock images when a site's look changes ([4809220](https://github.com/yuriy-vasilyev/structura-core/commit/48092203f088028bb6d4cb29e2c2b27ec6d0c465))
+* **wizard:** hold the Visuals step behind the loader until the site scan settles ([186541f](https://github.com/yuriy-vasilyev/structura-core/commit/186541ffa734d48fee030500a3a26acd73c47f38))
+* **www:** add the ProgrammerNeeds badge to the footer rotator ([941ad9f](https://github.com/yuriy-vasilyev/structura-core/commit/941ad9f21643d1f2613b37bf5ef6a9753c716d80))
+* **www:** add the SuperbCrew interview to the Organization sameAs list ([ff4899a](https://github.com/yuriy-vasilyev/structura-core/commit/ff4899a5479e9941f87a99753912a7c97a5f1f4a))
+* **www:** link the status page from the footer and show the logo mark on it ([1933a41](https://github.com/yuriy-vasilyev/structura-core/commit/1933a417840b0273accb596c6e2b715674d5d4af))
+
+
+### Bug Fixes
+
+* **billing:** count only failures on the customer's side, and keep prepared posts when regenerating is refused ([b56f91d](https://github.com/yuriy-vasilyev/structura-core/commit/b56f91dc0a0ff62f17c9b794b22e76d81ea65453))
+* **campaigns:** accept only client-settable fields when a campaign is saved ([4d25652](https://github.com/yuriy-vasilyev/structura-core/commit/4d256522071b3d178c04492377182bdd7ee5a737))
+* **campaigns:** keep post length between 300 and 3,000 words ([3e174bc](https://github.com/yuriy-vasilyev/structura-core/commit/3e174bcd28da30dc3d3d360f301fd650e56026ed))
+* **campaigns:** limit the length of briefs, post topics and Cloud persona prompts ([2359d39](https://github.com/yuriy-vasilyev/structura-core/commit/2359d39fa84f4ab4139c09090e1cba62ee53fb14))
+* **campaigns:** save Pending review as a draft on WordPress sites ([8f468de](https://github.com/yuriy-vasilyev/structura-core/commit/8f468de707e4f7405bba13525913e58895a4c95c))
+* **discovery:** drop keywords that only repeat a seed, and study questions from People Also Ask ([2c701ff](https://github.com/yuriy-vasilyev/structura-core/commit/2c701ffc6570677dc239b49bef11727c20890b79))
+* **discovery:** give keyword research enough memory to finish ([8034a47](https://github.com/yuriy-vasilyev/structura-core/commit/8034a476ae4e07c4ed46ecbe6def3ab89f512fbb))
+* **discovery:** keep search volume when one phrase has a comma or other rejected character ([fce7093](https://github.com/yuriy-vasilyev/structura-core/commit/fce70933d9ef513d739d6257221729d88dd12c1c))
+* **discovery:** localize interview topics as bare topics, not buyer queries ([82b82ed](https://github.com/yuriy-vasilyev/structura-core/commit/82b82eda16a1a163a3b9a19f860ec72c81430bd7))
+* **discovery:** read all People Also Ask result pages at once ([efa9564](https://github.com/yuriy-vasilyev/structura-core/commit/efa95642d885e4467c00e3fe30cd22b22047616c))
+* **functions:** generate and import nothing for a WordPress site waiting for its plugin ([73993f1](https://github.com/yuriy-vasilyev/structura-core/commit/73993f1c299bf242c724cb72bf1d7aa8315e66da))
+* **images:** count regenerated images and style previews against the image allowance ([e405409](https://github.com/yuriy-vasilyev/structura-core/commit/e4054095cbbc492862e7f52168c6aafbd6271a9b))
+* **images:** forbid swatch legends and color codes in rendered images ([622e9bd](https://github.com/yuriy-vasilyev/structura-core/commit/622e9bda31726a489754d47ad07ef49d82d66be2))
+* **images:** reset the image allowance on the first of the month, as the portal says ([2c7be42](https://github.com/yuriy-vasilyev/structura-core/commit/2c7be42f00d81051c86ef7f7e56919ac20662cf0))
+* **plugin:** start scheduled posts at the time you set ([330e157](https://github.com/yuriy-vasilyev/structura-core/commit/330e157be2f63bace55376e2f8bb51b63b20ca55))
+* **portal:** close the last live actions on a WordPress site waiting for its plugin ([f04fd13](https://github.com/yuriy-vasilyev/structura-core/commit/f04fd1331bedd466bc2bf9660de4f7f6ecd3b21a))
+* **portal:** count a site with a bound voice as done on the Persona step ([71f002d](https://github.com/yuriy-vasilyev/structura-core/commit/71f002d3c57fe94443661e6f1703bb97e98b2515))
+* **portal:** keep a campaign's own keywords when it re-discovers ([57c7b56](https://github.com/yuriy-vasilyev/structura-core/commit/57c7b56f7de9a996bc922ee04f5ce4aa66f14593))
+* **portal:** line up the links in the list of pages read ([628900b](https://github.com/yuriy-vasilyev/structura-core/commit/628900bbb9d878ba6c6f595bc221a29a4a2a3100))
+* **portal:** name the missing plugin when a pending WordPress site is run ([4dd7169](https://github.com/yuriy-vasilyev/structura-core/commit/4dd71695fa10e003398546af5b14436b8c0a1c83))
+* **portal:** open docs links in the portal language ([d78d0c6](https://github.com/yuriy-vasilyev/structura-core/commit/d78d0c6d5135e7535a2aaabb4b2536dc68dc6e24))
+* **portal:** show campaign times in your time zone and drop Pending review on WordPress sites ([08ebabc](https://github.com/yuriy-vasilyev/structura-core/commit/08ebabcbb189a26e6c2495221f624328e078636c))
+* **portal:** stop a deploy from leaving recently visited pages blank ([79b0ece](https://github.com/yuriy-vasilyev/structura-core/commit/79b0ece7836eb922db8b74375c2a363730bbc927))
+
 ## [2.37.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.36.1...v2.37.0) (2026-11-10)
 
 

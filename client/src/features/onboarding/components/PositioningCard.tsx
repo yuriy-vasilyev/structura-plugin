@@ -11,9 +11,14 @@
  *
  * Self-contained (owns its query + save) so the Site feature doesn't
  * reach into onboarding internals — same pattern as RestartWizardCard.
+ *
+ * The AI draft reads the homepage and the site's offer pages again, lists
+ * the pages it read, and asks before replacing text the operator wrote
+ * (specs/site-reading.md §5a, §11), as the customer portal does. Before any
+ * draft the card lists the site's stored pages.
  */
 
-import { useEffect, useState } from "@wordpress/element";
+import { useEffect, useRef, useState } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
 import { Button, Card, Skeleton, TextArea, useToast } from "@structura/ui";
 import { Loader2, Save, Sparkles, Target } from "lucide-react";
@@ -22,13 +27,17 @@ import {
   useSaveWizardPositioningMutation,
   useSuggestWizardPositioningMutation,
   useWizardPositioningQuery,
+  type PositioningPageRead,
 } from "../api/useWizardSeo";
+import {
+  positioningDiffers,
+  redraftNeedsConfirm,
+  type PositioningText,
+} from "../utils/positioningRedraft";
+import { PositioningPagesRead } from "./PositioningPagesRead";
+import { RedraftConfirmDialog } from "./RedraftConfirmDialog";
 
-interface Draft {
-  what: string;
-  who: string;
-  problem: string;
-}
+type Draft = PositioningText;
 
 const EMPTY: Draft = { what: "", who: "", problem: "" };
 
@@ -39,6 +48,11 @@ export const PositioningCard = () => {
   const { successToast, errorToast } = useToast();
 
   const [draft, setDraft] = useState<Draft | null>(null);
+  // The last AI draft of this visit, and the pages it read (null until a
+  // draft sends them; the stored pages are listed until then).
+  const sessionDraftRef = useRef<Draft | null>(null);
+  const [pagesRead, setPagesRead] = useState<PositioningPageRead[] | null>(null);
+  const [confirmRedraft, setConfirmRedraft] = useState(false);
 
   // Seed once from the saved record (or empty if never set).
   useEffect(() => {
@@ -53,26 +67,32 @@ export const PositioningCard = () => {
 
   const handleSave = async () => {
     if (!draft) return;
-    await save.mutateAsync({ ...draft, source: "edited" });
+    // An AI draft saved as it came stays an AI draft, so the next draft
+    // replaces it without asking.
+    const source =
+      sessionDraftRef.current && !positioningDiffers(draft, sessionDraftRef.current)
+        ? "ai_draft"
+        : "edited";
+    await save.mutateAsync({ ...draft, source });
     successToast(__("Positioning saved.", "structura"));
   };
 
-  // Re-run the magic: DFS reads the homepage, AI drafts the three
-  // answers. Same call the wizard's "Draft from my homepage" uses, so
-  // the analysis stays identical across surfaces. Fills the editable
-  // fields — the user still has to Save (lets them tweak first).
-  const handleAiDraft = async () => {
+  // Re-run the magic: the cloud selects and reads the site's pages again
+  // (`reselectPages`), then AI drafts the three answers. Fills the
+  // editable fields — the user still has to Save (lets them tweak first).
+  const runAiDraft = async () => {
     try {
-      const res = await suggest.mutateAsync();
+      const res = await suggest.mutateAsync({ reselectPages: true });
       if (res.suggestion) {
-        setDraft({
+        const drafted = {
           what: res.suggestion.what,
           who: res.suggestion.who,
           problem: res.suggestion.problem,
-        });
-        successToast(
-          __("Drafted from your homepage — review and Save.", "structura"),
-        );
+        };
+        setDraft(drafted);
+        sessionDraftRef.current = drafted;
+        if (res.pages) setPagesRead(res.pages);
+        successToast(__("Drafted from your site's pages. Review and save.", "structura"));
         return;
       }
       errorToast(
@@ -91,6 +111,14 @@ export const PositioningCard = () => {
         __("Something went wrong drafting from your homepage.", "structura"),
       );
     }
+  };
+
+  const handleAiDraft = () => {
+    if (redraftNeedsConfirm(draft ?? EMPTY, data?.positioning, sessionDraftRef.current)) {
+      setConfirmRedraft(true);
+      return;
+    }
+    void runAiDraft();
   };
 
   // The record loads async; until `draft` is seeded the textareas would
@@ -137,7 +165,7 @@ export const PositioningCard = () => {
             ) : (
               <Sparkles size={14} className="mr-1.5" />
             )}
-            {__("Draft from my homepage", "structura")}
+            {__("AI draft", "structura")}
           </Button>
           <Button
             variant="primary"
@@ -200,6 +228,16 @@ export const PositioningCard = () => {
           </>
         )}
       </div>
+      <PositioningPagesRead pages={pagesRead ?? data?.pages ?? []} drafted={pagesRead !== null} />
+
+      <RedraftConfirmDialog
+        isOpen={confirmRedraft}
+        onClose={() => setConfirmRedraft(false)}
+        onConfirm={() => {
+          setConfirmRedraft(false);
+          void runAiDraft();
+        }}
+      />
     </Card>
   );
 };

@@ -1,5 +1,11 @@
 import { __ } from "@wordpress/i18n";
 import { FileStack, Image as ImageIcon, Layout, Rocket, Scale } from "lucide-react";
+import {
+  clampPostLength,
+  FREE_POST_LENGTH_MAX,
+  POST_LENGTH_MAX,
+  POST_LENGTH_MIN,
+} from "@structura/types";
 import { useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { useLicense } from "@/features/settings/api/useLicense";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
@@ -22,6 +28,7 @@ export const StepArchitecture = () => {
   const uploadsUnwritable = !!window.structuraConfig?.uploads_unwritable;
 
   const { intelligence, structure } = formData;
+  const maxPostLength = isPaidLicense ? POST_LENGTH_MAX : FREE_POST_LENGTH_MAX;
 
   // Referral-links section: lets the FTC nudge scroll back to the disclosure
   // card above (same step). Labels shared with the site + onboarding surfaces.
@@ -58,25 +65,29 @@ export const StepArchitecture = () => {
             </h4>
           </div>
           {/*
-            Non-paid tiers (Free + anonymous None) have a 500-word
-            server-side clamp in `functions/src/ai/instruction-builder.ts`.
-            Surface the ceiling in the input so the user sees the cap
-            instead of typing 2700 and silently receiving ~500. Paid
-            tiers pick their own length, with no upper limit.
+            The cloud clamps every plan's length (`clampPostLength`): Free +
+            anonymous None to 500, paid to 3000. Surface the ceiling in the
+            input so the user sees the cap instead of typing 2700 and
+            silently receiving ~500. The 300 floor applies on blur; on every
+            keystroke it would make the field untypeable.
           */}
           <InputField
             label={__("Target Word Count", "structura")}
             hiddenLabel
             type="number"
             value={intelligence.postLength}
-            max={!isPaidLicense ? 500 : undefined}
+            min={POST_LENGTH_MIN}
+            max={maxPostLength}
             onChange={(e) => {
               const parsed = parseInt(e.target.value);
               const next = Number.isFinite(parsed) ? parsed : 0;
-              updateForm("intelligence", {
-                postLength: !isPaidLicense ? Math.min(next, 500) : next,
-              });
+              updateForm("intelligence", { postLength: Math.min(next, maxPostLength) });
             }}
+            onBlur={() =>
+              updateForm("intelligence", {
+                postLength: clampPostLength(intelligence.postLength, { paid: isPaidLicense }),
+              })
+            }
             rightAdornment={
               <span className="text-[10px] font-bold text-neutral-400 uppercase">
                 {__("Words", "structura")}

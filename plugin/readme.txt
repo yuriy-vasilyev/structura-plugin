@@ -322,6 +322,11 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Changelog ==
 
+= 2.38.0 =
+* Changed: the setup wizard's Visual signature step now waits for the
+  scan of your site before it appears, so the recommended style and your
+  brand colors are in place before you continue.
+
 = 2.37.0 =
 * New: "Regenerate" with an empty prompt now gives the post a new scene
   in your style instead of re-rendering the old one. The current scene
@@ -564,6 +569,10 @@ repository:
 [github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md](https://github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md)
 
 == Upgrade Notice ==
+
+= 2.38.0 =
+The setup wizard waits for your brand colors before the Visual signature
+step appears. Safe upgrade — no database migrations.
 
 = 2.37.0 =
 Regenerate with an empty prompt gives a post a new scene in your style.

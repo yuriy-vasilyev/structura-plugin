@@ -197,6 +197,33 @@ class CampaignValidatorTest extends TestCase
         $this->assertSame(300, $result['post_length'], 'Post length below 300 should be clamped to 300');
     }
 
+    /**
+     * 2026-11-12: a paid campaign took any length, so a Cloud site could save
+     * 1,000,000 words and run every generation to the output-token cap. The
+     * plugin clamps (the cloud holds Free to 500), never refuses.
+     *
+     * @test
+     */
+    public function it_caps_post_length_at_the_maximum(): void
+    {
+        foreach ([5000, '1000000', 3000.4] as $sent) {
+            $result = Campaign_Validator::validate($this->validPayload(['post_length' => $sent]));
+
+            $this->assertIsArray($result);
+            $this->assertSame(3000, $result['post_length']);
+        }
+    }
+
+    /** @test */
+    public function it_keeps_an_in_range_post_length_and_defaults_a_non_numeric_one(): void
+    {
+        $in_range = Campaign_Validator::validate($this->validPayload(['post_length' => '1800']));
+        $junk     = Campaign_Validator::validate($this->validPayload(['post_length' => 'long']));
+
+        $this->assertSame(1800, $in_range['post_length']);
+        $this->assertSame(1200, $junk['post_length']);
+    }
+
     /** @test */
     public function it_handles_random_persona_id(): void
     {

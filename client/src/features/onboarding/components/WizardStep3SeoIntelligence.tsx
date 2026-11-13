@@ -3,9 +3,10 @@
  *
  * Single screen with two sub-sections:
  *
- *   3a. Positioning — three textareas. AI-draft button (paid only)
- *       drafts answers from the homepage. Saves to
- *       `workspace.positioning`.
+ *   3a. Positioning — three textareas. The AI-draft button selects and
+ *       reads the site's pages again and drafts the answers, asking first
+ *       with the Site → Info card's rule (specs/site-reading.md §11).
+ *       Saves to `workspace.positioning`.
  *
  *   3b. Competitors — current saved list + add/remove. Auto-detected
  *       suggestions from `useSiteAnalysisQuery().suggestedCompetitors`
@@ -52,15 +53,15 @@ import {
   useSuggestWizardPositioningMutation,
   useWizardAiCompetitorsQuery,
   useWizardPositioningQuery,
+  type PositioningPageRead,
 } from "../api/useWizardSeo";
-import { useWizardStore } from "../state/wizardStore";
+import { useWizardStore, type SeoStepDraft } from "../state/wizardStore";
+import { redraftNeedsConfirm, type PositioningText } from "../utils/positioningRedraft";
+import { PositioningPagesRead } from "./PositioningPagesRead";
+import { RedraftConfirmDialog } from "./RedraftConfirmDialog";
 import { WizardMagicLoader } from "./WizardMagicLoader";
 
-interface PositioningDraft {
-  what: string;
-  who: string;
-  problem: string;
-}
+type PositioningDraft = PositioningText;
 
 const EMPTY_POSITIONING: PositioningDraft = { what: "", who: "", problem: "" };
 
@@ -84,11 +85,18 @@ export const WizardStep3SeoIntelligence = () => {
   // The store draft is the source of truth. Seed it once from any
   // server-saved settings (returning user who saved before) so the
   // wizard reflects prior work; thereafter the draft owns everything.
+  // `loadedPositioningRef` keeps what the step opened with and who wrote it:
+  // an AI draft replaces an unchanged AI draft without asking
+  // (specs/site-reading.md §11).
   const seededRef = useRef(false);
+  const loadedPositioningRef = useRef<
+    (PositioningDraft & { source: SeoStepDraft["positioningSource"] }) | null
+  >(null);
   useEffect(() => {
     if (seededRef.current) return;
     if (step3) {
       seededRef.current = true;
+      loadedPositioningRef.current = { ...step3.positioning, source: step3.positioningSource };
       return;
     }
     // Wait for the saved-positioning read before seeding, so a returning
@@ -100,11 +108,23 @@ export const WizardStep3SeoIntelligence = () => {
     // Priority: saved workspace positioning → prewarmed AI draft → empty.
     const saved = savedPositioning.positioning;
     const hasSaved = !!(saved && (saved.what || saved.who || saved.problem));
+    const positioning = hasSaved
+      ? { what: saved!.what ?? "", who: saved!.who ?? "", problem: saved!.problem ?? "" }
+      : prewarmedPositioning ?? EMPTY_POSITIONING;
+    // The saved source, not "user": every saved positioning used to come back
+    // as the operator's own, so a draft asked even over an untouched saved AI
+    // draft and Finish wrote it back as "user" (2026-11-13).
+    const savedSource =
+      saved?.source === "ai_draft" || saved?.source === "edited" ? saved.source : "user";
+    const positioningSource: SeoStepDraft["positioningSource"] = hasSaved
+      ? savedSource
+      : prewarmedPositioning
+        ? "ai_draft"
+        : "user";
+    loadedPositioningRef.current = { ...positioning, source: positioningSource };
     setStep3Draft({
-      positioning: hasSaved
-        ? { what: saved!.what ?? "", who: saved!.who ?? "", problem: saved!.problem ?? "" }
-        : prewarmedPositioning ?? EMPTY_POSITIONING,
-      positioningSource: hasSaved ? "user" : prewarmedPositioning ? "ai_draft" : "user",
+      positioning,
+      positioningSource,
       competitorUrls: siteAnalysis?.seoIntelSettings?.competitorUrls ?? [],
       referralLinks: siteAnalysis?.seoIntelSettings?.referralLinks ?? [],
     });
@@ -138,22 +158,27 @@ export const WizardStep3SeoIntelligence = () => {
   const suggestPositioning = useSuggestWizardPositioningMutation();
   const setPositioning = (next: PositioningDraft) =>
     patch({ positioning: next, positioningSource: positioningSource === "ai_draft" ? "edited" : positioningSource });
+  // The pages the last AI draft in this visit read (specs/site-reading.md §5a).
+  const [pagesRead, setPagesRead] = useState<PositioningPageRead[]>([]);
+  // The last AI draft in this visit, automatic or from the button.
+  const sessionDraftRef = useRef<PositioningDraft | null>(null);
+  const [confirmRedraft, setConfirmRedraft] = useState(false);
 
-  const handleAiDraftPositioning = async () => {
+  // The button selects and reads the site's pages again (`reselectPages`),
+  // as the Site → Info card does (specs/site-reading.md §11).
+  const runAiDraft = async () => {
     try {
-      const res = await suggestPositioning.mutateAsync();
+      const res = await suggestPositioning.mutateAsync({ reselectPages: true });
       if (res.suggestion) {
-        patch({
-          positioning: {
-            what: res.suggestion.what,
-            who: res.suggestion.who,
-            problem: res.suggestion.problem,
-          },
-          positioningSource: "ai_draft",
-        });
-        successToast(
-          __("Drafted from your homepage — edit anything below.", "structura"),
-        );
+        const drafted: PositioningDraft = {
+          what: res.suggestion.what,
+          who: res.suggestion.who,
+          problem: res.suggestion.problem,
+        };
+        sessionDraftRef.current = drafted;
+        if (res.pages) setPagesRead(res.pages);
+        patch({ positioning: drafted, positioningSource: "ai_draft" });
+        successToast(__("Drafted from your site's pages. Edit anything below.", "structura"));
         return;
       }
       // No suggestion came back. Tell the user why and what to do.
@@ -176,6 +201,14 @@ export const WizardStep3SeoIntelligence = () => {
         ),
       );
     }
+  };
+
+  const handleAiDraftPositioning = () => {
+    if (redraftNeedsConfirm(positioning, loadedPositioningRef.current, sessionDraftRef.current)) {
+      setConfirmRedraft(true);
+      return;
+    }
+    void runAiDraft();
   };
 
   /* ─── 3b. Competitors (instant, local) ────────────────────────── */
@@ -318,6 +351,10 @@ export const WizardStep3SeoIntelligence = () => {
           who: p.who,
           problem: p.problem,
         };
+        if (res.pages) setPagesRead(res.pages);
+        // This visit's draft: the button replaces it without asking until
+        // it is edited.
+        sessionDraftRef.current = next;
         patch({ positioning: next, positioningSource: "ai_draft" });
         // Competitors are NOT awaited here: patching the positioning
         // flips the cached query's `enabled` gate and it fetches on its
@@ -412,7 +449,7 @@ export const WizardStep3SeoIntelligence = () => {
               ) : (
                 <Sparkles size={14} className="mr-1.5" />
               )}
-              {__("Draft from my homepage", "structura")}
+              {__("AI draft", "structura")}
             </Button>
           }
         />
@@ -456,6 +493,7 @@ export const WizardStep3SeoIntelligence = () => {
           )}
           maxLength={280}
         />
+        <PositioningPagesRead pages={pagesRead} drafted />
 
         {positioningSource === "ai_draft" ? (
           <p className="m-0! flex! items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
@@ -468,6 +506,15 @@ export const WizardStep3SeoIntelligence = () => {
             </span>
           </p>
         ) : null}
+
+        <RedraftConfirmDialog
+          isOpen={confirmRedraft}
+          onClose={() => setConfirmRedraft(false)}
+          onConfirm={() => {
+            setConfirmRedraft(false);
+            void runAiDraft();
+          }}
+        />
       </Card>
 
       {/* 3b. COMPETITORS */}

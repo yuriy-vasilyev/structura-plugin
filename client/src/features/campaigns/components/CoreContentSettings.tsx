@@ -20,6 +20,12 @@ import { useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { FileStack, Loader2, Send, UserCheck } from "lucide-react";
 import { InputField, Select } from "@structura/ui";
+import {
+  clampPostLength,
+  FREE_POST_LENGTH_MAX,
+  POST_LENGTH_MAX,
+  POST_LENGTH_MIN,
+} from "@structura/types";
 import { useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { useSitePersonasQuery } from "@/features/personas";
 import { useLicense } from "@/features/settings";
@@ -45,6 +51,7 @@ export const CoreContentSettings = ({ showLanguage = true }: CoreContentSettings
   const { formData, updateForm } = useCampaignForm();
   const { isPaidLicense } = useLicense();
   const { intelligence, structure } = formData;
+  const maxPostLength = isPaidLicense ? POST_LENGTH_MAX : FREE_POST_LENGTH_MAX;
   // Site-scoped: the whole workspace library here listed every sibling
   // site's voice on a multi-site workspace (2026-09-22).
   const { data: personas, isLoading: loadingPersonas } = useSitePersonasQuery(
@@ -85,27 +92,32 @@ export const CoreContentSettings = ({ showLanguage = true }: CoreContentSettings
           {__("Post Length", "structura")}
         </span>
         {/*
-          Non-paid tiers (Free + anonymous None) have a 500-word
-          server-side clamp in `functions/src/ai/instruction-builder.ts`.
-          Mirror the cap on the input so the user sees the ceiling
-          instead of typing 2700 and silently receiving ~500. The
-          explanatory help text lives in a full-width block below the
-          grid — the 4-col cell is too narrow to render a translated
-          sentence without wrapping into an unreadable shape.
+          The cloud clamps every plan's length (`clampPostLength`): Free +
+          anonymous None to 500, paid to 3000. Mirror the cap on the input
+          so the user sees the ceiling instead of typing 2700 and silently
+          receiving ~500; the 300 floor applies on blur, since on every
+          keystroke it would make the field untypeable. The explanatory
+          help text lives in a full-width block below the grid — the 4-col
+          cell is too narrow to render a translated sentence without
+          wrapping into an unreadable shape.
         */}
         <InputField
           label={__("Words", "structura")}
           hiddenLabel
           type="number"
           value={intelligence.postLength}
-          max={!isPaidLicense ? 500 : undefined}
+          min={POST_LENGTH_MIN}
+          max={maxPostLength}
           onChange={(e) => {
             const parsed = parseInt(e.target.value);
             const next = Number.isFinite(parsed) ? parsed : 0;
-            updateForm("intelligence", {
-              postLength: !isPaidLicense ? Math.min(next, 500) : next,
-            });
+            updateForm("intelligence", { postLength: Math.min(next, maxPostLength) });
           }}
+          onBlur={() =>
+            updateForm("intelligence", {
+              postLength: clampPostLength(intelligence.postLength, { paid: isPaidLicense }),
+            })
+          }
           rightAdornment={
             <span className="text-[10px] font-bold text-neutral-400 uppercase">
               {__("Words", "structura")}

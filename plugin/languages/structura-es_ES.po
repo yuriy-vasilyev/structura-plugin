@@ -12220,8 +12220,14 @@ msgstr "Bloques apilados"
 msgid "Still life studio"
 msgstr "Bodegón de estudio"
 
-msgid "Still reading %1$s to pick a style. <b>%2$s</b> is selected until then."
-msgstr "Aún estamos leyendo %1$s para elegir un estilo. Hasta entonces está seleccionado <b>%2$s</b>."
+msgid "Reading your brand"
+msgstr "Leyendo tu marca"
+
+msgid "Picking out your colors…"
+msgstr "Extrayendo tus colores…"
+
+msgid "Matching a style to your brand…"
+msgstr "Eligiendo un estilo para tu marca…"
 
 msgid "Technique"
 msgstr "Técnica"
@@ -12315,3 +12321,27 @@ msgstr "Tu prompt"
 
 msgid "· 1 image"
 msgstr "· 1 imagen"
+
+msgid "Drafted from these pages"
+msgstr "Redactado a partir de estas páginas"
+
+msgid "Homepage"
+msgstr "Página de inicio"
+
+msgid "Service"
+msgstr "Servicio"
+
+msgid "Product"
+msgstr "Producto"
+
+msgid "We'll read your site's pages again and rewrite your positioning. Your edits will be replaced."
+msgstr "Volveremos a leer las páginas de tu sitio y reescribiremos tu posicionamiento. Tus cambios se reemplazarán."
+
+msgid "Pages we read from your site"
+msgstr "Páginas que leemos de tu sitio"
+
+msgid "Drafted from your site's pages. Review and save."
+msgstr "Redactado a partir de las páginas de tu sitio. Revísalo y guárdalo."
+
+msgid "Drafted from your site's pages. Edit anything below."
+msgstr "Redactado a partir de las páginas de tu sitio. Edita lo que quieras abajo."

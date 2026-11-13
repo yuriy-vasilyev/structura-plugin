@@ -472,8 +472,6 @@ export const useCampaignMutations = () => {
       campaign_name?: string;
       language: string;
       provider: string;
-      /** Interview topics as explicit discovery seeds; absent → objective-derived seeds. */
-      topic_seeds?: string[];
     }) =>
       apiFetch<{
         success: boolean;

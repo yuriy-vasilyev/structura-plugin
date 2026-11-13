@@ -55,6 +55,14 @@ export const CONTENT_BLOCKS = [
 export const DEFAULT_CAMPAIGN_CRON = "0 9 * * 2,4";
 
 /**
+ * The most posts a week we recommend publishing in one language on one
+ * site. Advice, not a limit: the setup draft suggests it and the Rhythm
+ * step says so when a schedule goes past it. Reasoning for customers is in
+ * docs `using/campaigns/publishing-pace`.
+ */
+export const RECOMMENDED_MAX_POSTS_PER_WEEK = 2;
+
+/**
  * A campaign cadence as the schedule builders edit it: the parsed form of
  * the only cron shape the product writes, "minute hour * * dayList".
  */

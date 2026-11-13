@@ -88,7 +88,7 @@ class SuggestCampaignLanguageTest extends TestCase
     public function it_keeps_regional_variants_verbatim(): void
     {
         $payload = $this->run_suggest([
-            'mode'     => 'topic_chips',
+            'mode'     => 'campaign',
             'provider' => 'gemini',
             'context'  => [],
             'language' => 'de_CH',

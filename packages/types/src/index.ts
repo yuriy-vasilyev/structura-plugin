@@ -501,6 +501,77 @@ export const isCadenceAllowedForTier = (
  */
 export const DEFAULT_POST_LENGTH = 1200;
 
+/**
+ * Fewest words a post may target, on every plan. Mirrored by
+ * `Campaign_Shape_Transformer::POST_LENGTH_MIN` in the plugin.
+ */
+export const POST_LENGTH_MIN = 300;
+
+/**
+ * Most words a post may target on a paid plan. Until 2026-11-12 only the
+ * single-post path and MCP capped it: a campaign saved from the portal or
+ * wp-admin took any number, so on Cloud, where Structura pays for the
+ * tokens, a 1,000,000-word target would run every generation to the
+ * output-token cap. Mirrored by `Campaign_Shape_Transformer::POST_LENGTH_MAX`.
+ */
+export const POST_LENGTH_MAX = 3000;
+
+/**
+ * Most words a post may target on the free plan or with no license, and the
+ * length such a post gets when none is set.
+ */
+export const FREE_POST_LENGTH_MAX = 500;
+
+/** Returns `value` rounded into the plan's word range; a non-finite value gets the plan default. */
+export const clampPostLength = (value: unknown, { paid }: { paid: boolean }): number => {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return paid ? DEFAULT_POST_LENGTH : FREE_POST_LENGTH_MAX;
+  }
+  const max = paid ? POST_LENGTH_MAX : FREE_POST_LENGTH_MAX;
+  return Math.min(max, Math.max(POST_LENGTH_MIN, Math.round(value)));
+};
+
+/**
+ * Most characters a campaign objective (the brief) may hold, on every plan.
+ * The brief goes into every writer prompt and into keyword discovery, and
+ * until the 2026-11-12 cost audit only MCP bounded it, so on Cloud, where
+ * Structura pays for the tokens, a 200,000-character brief was billed on
+ * every generation. No known exploitation; the longest stored brief was
+ * 3,466 characters (measured 2026-11-13).
+ */
+export const CAMPAIGN_OBJECTIVE_MAX_LENGTH = 4000;
+
+/**
+ * Most characters a one-off post's topic may hold, on every plan. The topic
+ * is that post's brief and, without a focus keyphrase, its focus keyword.
+ * Only MCP bounded it before the 2026-11-12 cost audit (no known exploitation).
+ */
+export const SINGLE_POST_TOPIC_MAX_LENGTH = 1000;
+
+/**
+ * Most characters a persona's system prompt may hold on managed AI (Cloud),
+ * where Structura pays for every prompt token. Own-key plans (BYOK, Free) pay
+ * their own provider and stay unbounded. Unbounded everywhere until the
+ * 2026-11-12 cost audit (no known exploitation); on 2026-11-13, 66 of 68
+ * stored prompts were under 1,300 characters and the two longest (39,483 and
+ * 59,044) belong to one own-key workspace.
+ */
+export const MANAGED_PERSONA_PROMPT_MAX_LENGTH = 8000;
+
+/**
+ * Returns `value` unchanged when it fits in `max` UTF-16 code units (what
+ * `String.length` and `maxLength` count), else trimmed and cut to `max`
+ * without splitting a surrogate pair.
+ */
+export const clampTextLength = (value: string, max: number): string => {
+  if (value.length <= max) return value;
+  const trimmed = value.trim();
+  if (trimmed.length <= max) return trimmed;
+  const cut = trimmed.slice(0, max);
+  const last = cut.charCodeAt(cut.length - 1);
+  return last >= 0xd800 && last <= 0xdbff ? cut.slice(0, -1) : cut;
+};
+
 export type LicenseStatus = "active" | "expired" | "past_due" | "canceled" | "refunded";
 
 /**

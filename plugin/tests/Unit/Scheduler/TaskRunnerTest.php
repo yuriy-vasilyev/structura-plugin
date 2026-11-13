@@ -4,6 +4,7 @@ namespace Structura\Tests\Unit\Scheduler;
 
 use Brain\Monkey\Functions;
 use Mockery;
+use Structura\Scheduler\Context_Builder;
 use Structura\Scheduler\Task_Runner;
 use Structura\Tests\Unit\TestCase;
 
@@ -305,6 +306,261 @@ class TaskRunnerTest extends TestCase
             . 'a /getCampaignRun 404 storm because the cloud mints its own '
             . 'UUID when campaign_run_id is missing from the POST body.'
         );
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    //  THE PULSE GENERATES ON TIME (2026-11-13)
+    //
+    //  The pulse used to schedule the generation 0 to 90 minutes later at
+    //  random. Customers who set 17:00 saw nothing at 17:00 and wrote in,
+    //  so the pulse now generates in the same call. The
+    //  `_jittered` hook stays registered: manual "Generate Now" runs enqueue
+    //  it, and an older plugin may have left one queued before an update.
+    //
+    //  Each test fires the hook the way Action Scheduler does and runs the
+    //  real Campaign_Cloud_Reader; only the HTTP edge (Cloud_Client), the
+    //  stored license and the log table are faked.
+    // ──────────────────────────────────────────────────────────────────────
+
+    /** @test */
+    public function a_pulse_generates_in_the_same_call_and_schedules_nothing(): void
+    {
+        $posted = [];
+        $this->fake_cloud($posted, $this->cloud_campaign());
+        $this->stub_log_service();
+        // Nothing an older plugin queued is pending.
+        Functions\when('as_get_scheduled_actions')->justReturn([]);
+        $this->expectFn('as_schedule_single_action')->never();
+        $this->expectFn('as_enqueue_async_action')->never();
+
+        $this->fire_hook('structura_run_campaign_step', ['campaign_id' => 'camp-17']);
+
+        $generation = $this->posts_to($posted, '/executeCloudCampaignStep');
+        $this->assertCount(1, $generation, 'The pulse must start the generation itself, not schedule it.');
+        $this->assertSame('camp-17', $generation[0]['campaignId']);
+        // No run id, so the cloud mints one and records the run as autonomous.
+        $this->assertArrayNotHasKey('campaign_run_id', $generation[0]);
+        $this->assertCount(1, $this->posts_to($posted, '/getCampaign'), 'One campaign read per pulse.');
+    }
+
+    /** @test */
+    public function a_pulse_for_a_paused_campaign_does_not_generate(): void
+    {
+        $posted = [];
+        $this->fake_cloud($posted, $this->cloud_campaign(['status' => 'paused']));
+        $this->stub_log_service();
+        $this->expectFn('as_schedule_single_action')->never();
+
+        $this->fire_hook('structura_run_campaign_step', ['campaign_id' => 'camp-17']);
+
+        $this->assertSame([], $this->posts_to($posted, '/executeCloudCampaignStep'));
+    }
+
+    /** @test */
+    public function a_pulse_for_a_deleted_campaign_does_not_generate(): void
+    {
+        $posted = [];
+        $this->fake_cloud($posted, null);
+        $this->stub_log_service();
+        $this->expectFn('as_schedule_single_action')->never();
+
+        $this->fire_hook('structura_run_campaign_step', ['campaign_id' => 'camp-17']);
+
+        $this->assertCount(1, $this->posts_to($posted, '/getCampaign'));
+        $this->assertSame([], $this->posts_to($posted, '/executeCloudCampaignStep'));
+    }
+
+    /** @test */
+    public function a_pulse_for_a_campaign_at_its_quota_completes_it_instead_of_generating(): void
+    {
+        $posted = [];
+        $this->fake_cloud($posted, $this->cloud_campaign([
+            'endMode'        => 'quota',
+            'endValue'       => 3,
+            'postsPublished' => 3,
+        ]));
+        $this->stub_log_service();
+        $unscheduled = [];
+        Functions\when('as_unschedule_all_actions')->alias(function ($hook) use (&$unscheduled) {
+            $unscheduled[] = $hook;
+        });
+
+        $this->fire_hook('structura_run_campaign_step', ['campaign_id' => 'camp-17']);
+
+        $this->assertSame([], $this->posts_to($posted, '/executeCloudCampaignStep'));
+        $this->assertSame(
+            [['status' => 'completed']],
+            array_column($this->posts_to($posted, '/patchCampaign'), 'campaign')
+        );
+        $this->assertContains('structura_run_campaign_step', $unscheduled);
+    }
+
+    /** @test */
+    public function a_failed_generation_does_not_fail_the_recurring_pulse(): void
+    {
+        $posted = [];
+        $this->fake_cloud($posted, $this->cloud_campaign(), new \RuntimeException('socket closed'));
+        $logs = [];
+        $this->capture_logs($logs);
+
+        // A throw would mark the recurring action failed, and Action
+        // Scheduler stops rescheduling a recurring action that keeps failing.
+        $this->fire_hook('structura_run_campaign_step', ['campaign_id' => 'camp-17']);
+
+        $this->assertCount(1, $this->posts_to($posted, '/executeCloudCampaignStep'));
+        $this->assertContains(['error', 'socket closed'], $logs);
+    }
+
+    /** @test */
+    public function a_delayed_step_queued_by_an_older_plugin_still_generates(): void
+    {
+        $posted = [];
+        $this->fake_cloud($posted, $this->cloud_campaign());
+        $this->stub_log_service();
+
+        // Plugins before 2026-11-13 queued it with the campaign id alone.
+        $this->fire_hook('structura_run_campaign_step_jittered', ['campaign_id' => 'camp-17']);
+
+        $generation = $this->posts_to($posted, '/executeCloudCampaignStep');
+        $this->assertCount(1, $generation);
+        $this->assertSame('camp-17', $generation[0]['campaignId']);
+        $this->assertArrayNotHasKey('campaign_run_id', $generation[0]);
+    }
+
+    /** @test */
+    public function a_manual_run_forwards_its_run_id_to_the_cloud(): void
+    {
+        $posted = [];
+        $this->fake_cloud($posted, $this->cloud_campaign());
+        $this->stub_log_service();
+
+        // The args Rest_Api::run_task enqueues (RunTaskTest pins that side).
+        $this->fire_hook('structura_run_campaign_step_jittered', [
+            'campaign_id'     => 'camp-17',
+            'campaign_run_id' => 'run-uuid',
+        ]);
+
+        $generation = $this->posts_to($posted, '/executeCloudCampaignStep');
+        $this->assertCount(1, $generation);
+        $this->assertSame('run-uuid', $generation[0]['campaign_run_id']);
+    }
+
+    /** @test */
+    public function a_failed_manual_run_still_fails_its_action(): void
+    {
+        $posted = [];
+        $this->fake_cloud($posted, $this->cloud_campaign(), new \RuntimeException('socket closed'));
+        $this->stub_log_service();
+
+        $this->expectException(\RuntimeException::class);
+
+        $this->fire_hook('structura_run_campaign_step_jittered', [
+            'campaign_id'     => 'camp-17',
+            'campaign_run_id' => 'run-uuid',
+        ]);
+    }
+
+    /**
+     * Register the runner's hooks through `init()`, then fire `$hook` the way
+     * Action Scheduler does: arg values spread positionally, cut to the
+     * registered `$accepted_args`.
+     *
+     * @param array<string, mixed> $args Action Scheduler action args.
+     */
+    private function fire_hook(string $hook, array $args): void
+    {
+        $registered = [];
+        Functions\when('add_action')->alias(
+            function ($name, $callback, $priority = 10, $accepted_args = 1) use (&$registered) {
+                $registered[$name] = [$callback, $accepted_args];
+                return true;
+            }
+        );
+        Functions\when('rest_url')->justReturn('https://example.test/wp-json/structura/v1/webhook/receive-blueprint');
+
+        $context_builder = Mockery::mock(Context_Builder::class);
+        $context_builder->shouldReceive('build_cloud_context')->andReturn([]);
+        (new Task_Runner($context_builder))->init();
+
+        [$callback, $accepted_args] = $registered[$hook];
+        call_user_func_array($callback, array_slice(array_values($args), 0, $accepted_args));
+    }
+
+    /**
+     * Fake the cloud behind `Cloud_Client::post`: `/getCampaign` answers with
+     * `$campaign` (null for a deleted campaign), `/executeCloudCampaignStep`
+     * throws `$generation_error` when given, every other call succeeds.
+     * Each call is appended to `$posted` as `['route' => …, 'payload' => …]`.
+     *
+     * @param array<int, array<string, mixed>> $posted
+     * @param array<string, mixed>|null        $campaign
+     */
+    private function fake_cloud(array &$posted, ?array $campaign, ?\Throwable $generation_error = null): void
+    {
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['key' => 'lic', 'secret' => 'sek']);
+        Mockery::mock('alias:Structura\Core\License_Manager')
+            ->shouldReceive('get_license_data')
+            ->andReturn(['plan' => 'cloud', 'license_key' => 'lic']);
+        Mockery::mock('alias:Structura\Core\Cloud_Client')
+            ->shouldReceive('post')
+            ->andReturnUsing(function ($route, $payload) use (&$posted, $campaign, $generation_error) {
+                $posted[] = ['route' => $route, 'payload' => $payload];
+                if ($route === '/getCampaign') {
+                    return ['code' => 200, 'body' => ['campaign' => $campaign]];
+                }
+                if ($route === '/executeCloudCampaignStep' && $generation_error !== null) {
+                    throw $generation_error;
+                }
+                return ['code' => 200, 'body' => ['success' => true]];
+            });
+    }
+
+    /**
+     * An active cloud campaign doc as `/getCampaign` returns it.
+     *
+     * @param array<string, mixed> $overrides
+     */
+    private function cloud_campaign(array $overrides = []): array
+    {
+        return array_merge([
+            'campaignId'   => 'camp-17',
+            'status'       => 'active',
+            'textProvider' => 'gemini',
+            'language'     => 'en',
+            'cronSchedule' => '0 17 * * *',
+        ], $overrides);
+    }
+
+    /**
+     * Payloads posted to `$route`, in order.
+     *
+     * @param array<int, array<string, mixed>> $posted
+     */
+    private function posts_to(array $posted, string $route): array
+    {
+        $payloads = [];
+        foreach ($posted as $call) {
+            if ($call['route'] === $route) {
+                $payloads[] = $call['payload'];
+            }
+        }
+        return $payloads;
+    }
+
+    /**
+     * Record `Log_Service::add` calls in `$logs` as `[level, message]` pairs.
+     *
+     * @param array<int, array{0: string, 1: string}> $logs
+     */
+    private function capture_logs(array &$logs): void
+    {
+        Mockery::mock('alias:Structura\Core\Log_Service')
+            ->shouldReceive('add')
+            ->andReturnUsing(function ($level, $message) use (&$logs) {
+                $logs[] = [$level, $message];
+            });
     }
 
     // The AS-image-chain regression guards (queue_image_tasks's tiny-

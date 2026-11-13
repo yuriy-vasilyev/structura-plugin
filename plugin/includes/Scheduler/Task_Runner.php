@@ -42,12 +42,6 @@ class Task_Runner
     }
 
     /**
-     * Maximum jitter delay in seconds (90 minutes).
-     * The actual delay is randomized between 0 and this value.
-     */
-    private const MAX_JITTER_SECONDS = 5400;
-
-    /**
      * Plans whose image model comes from the cloud's managed image binding.
      *
      * 2026-10-06 (specs/managed-ai-lineup.md §2.4): the plugin used to fill in
@@ -753,83 +747,30 @@ class Task_Runner
     /**
      * Entry point for the Pulse (Action Scheduler).
      *
-     * Instead of executing immediately, this schedules a one-shot jittered
-     * action with a random delay (0–90 min). This creates a natural,
-     * human-like publishing rhythm where posts don't always land at the
-     * exact same minute every cycle.
-     *
-     * The cron heartbeat keeps its regular cadence — only the actual
-     * generation is offset by a random amount each time.
+     * Generates in the same call. Until 2026-11-13 this scheduled the
+     * generation 0 to 90 minutes later at random so posts would not land at
+     * the same minute every cycle. Customers who set 17:00 saw nothing at
+     * 17:00 and wrote in, so the owner dropped the delay.
      */
     public function execute_campaign_step($campaign_id): void
     {
-        // Phase 1.0c §4 — `$campaign_id` is `int|string`. WP-authoritative
-        // sites pass int post IDs; cloud-authoritative sites pass nanoid
-        // strings (via Cloud_Cadence_Sync's AS schedules). The fetch helper
-        // below picks the right source based on the flag.
-        $campaign = $this->fetch_campaign_for_run($campaign_id);
-        if ($campaign === null) {
-            // Campaign no longer exists in the authoritative store — could
-            // be a recently-deleted campaign whose AS pulse hasn't been
-            // swept yet, or a legacy int-keyed pulse on a cloud-authoritative
-            // site (the int ids stop resolving after migration). Either way,
-            // skip silently. Cloud_Cadence_Sync's next tick wipes the stale
-            // pulse so this branch self-heals over a 15-minute window.
-            $this->log(
-                'info',
-                'Pulse skipped: campaign not found in authoritative store.',
-                is_int($campaign_id) ? $campaign_id : 0,
-                Log_Steps::LIFECYCLE
-            );
-            return;
+        try {
+            $this->execute_campaign_step_jittered($campaign_id);
+        } catch (\Throwable $e) {
+            // execute_campaign_step_jittered logged it. Not rethrown: this is
+            // a recurring action, Action Scheduler stops rescheduling one that
+            // keeps failing, and Cloud_Cadence_Sync only re-issues a pulse when
+            // the cadence changes, so the campaign would stop for good. Before
+            // 2026-11-13 the failure landed on the delayed one-shot instead.
         }
-
-        if ($campaign['status'] !== 'active') {
-            $this->log('warning', "Pulse skipped: Campaign is inactive.", $campaign_id, Log_Steps::LIFECYCLE);
-
-            return;
-        }
-
-        if ($this->is_lifecycle_complete($campaign)) {
-            $this->finalize_campaign($campaign_id, 'completed');
-
-            return;
-        }
-
-        // Avoid duplicate jittered actions for the same cycle
-        $pending = as_get_scheduled_actions([
-            'hook'     => 'structura_run_campaign_step_jittered',
-            'args'     => ['campaign_id' => $campaign_id],
-            'status'   => \ActionScheduler_Store::STATUS_PENDING,
-            'per_page' => 1,
-        ]);
-
-        if ( ! empty($pending)) {
-            $this->log('info', "Jittered step already pending — skipping duplicate.", $campaign_id, Log_Steps::LIFECYCLE);
-
-            return;
-        }
-
-        $jitter_seconds = wp_rand(0, self::MAX_JITTER_SECONDS);
-
-        as_schedule_single_action(
-            time() + $jitter_seconds,
-            'structura_run_campaign_step_jittered',
-            ['campaign_id' => $campaign_id],
-            STRUCTURA_AS_GROUP,
-        );
-
-        $this->log('info', sprintf(
-            "Pulse received. Generation jittered by %d min %d sec.",
-            intdiv($jitter_seconds, 60),
-            $jitter_seconds % 60
-        ), $campaign_id, Log_Steps::LIFECYCLE);
     }
 
     /**
-     * Jittered execution — performs the actual content generation.
-     * Fired by the one-shot action scheduled in execute_campaign_step() or
-     * by the manual `Rest_Api::run_task` enqueue.
+     * Generation step — performs the actual content generation.
+     * Called by execute_campaign_step() on every pulse and fired by the
+     * manual `Rest_Api::run_task` enqueue. The hook keeps its `_jittered`
+     * name from the random delay pulses had until 2026-11-13, so a step an
+     * older plugin queued still runs after an update.
      *
      * `$campaign_run_id` is the progress-stream correlation id. Present only
      * for manual "Generate Now" runs (the plugin mints it in `run_task` so
@@ -846,34 +787,41 @@ class Task_Runner
      */
     public function execute_campaign_step_jittered($campaign_id, string $campaign_run_id = ''): void
     {
-        // Same fetch branching as execute_campaign_step — see that method's
-        // comments for why $campaign_id is `int|string` post-Phase-1.0c.
+        // Phase 1.0c §4 — `$campaign_id` is `int|string`. WP-authoritative
+        // sites pass int post IDs; cloud-authoritative sites pass nanoid
+        // strings (via Cloud_Cadence_Sync's AS schedules).
         $campaign = $this->fetch_campaign_for_run($campaign_id);
         if ($campaign === null) {
+            // Campaign no longer exists in the authoritative store — could
+            // be a recently-deleted campaign whose AS pulse hasn't been
+            // swept yet, or a legacy int-keyed pulse on a cloud-authoritative
+            // site (the int ids stop resolving after migration). Either way,
+            // skip silently. Cloud_Cadence_Sync's next tick wipes the stale
+            // pulse so this branch self-heals over a 15-minute window.
             $this->log(
                 'info',
-                'Jittered step skipped: campaign not found in authoritative store.',
+                'Generation skipped: campaign not found in authoritative store.',
                 is_int($campaign_id) ? $campaign_id : 0,
                 Log_Steps::LIFECYCLE
             );
             return;
         }
 
-        // Re-check status — campaign may have been paused during the jitter window
+        // Check status — campaign may have been paused after this step was queued
         if ($campaign['status'] !== 'active') {
-            $this->log('warning', "Jittered step skipped: Campaign is no longer active.", $campaign_id, Log_Steps::LIFECYCLE);
+            $this->log('warning', "Generation skipped: Campaign is inactive.", $campaign_id, Log_Steps::LIFECYCLE);
 
             return;
         }
 
-        // Re-check lifecycle — quota may have been reached by a manual run
+        // Check lifecycle — quota may have been reached by a manual run
         if ($this->is_lifecycle_complete($campaign)) {
             $this->finalize_campaign($campaign_id, 'completed');
 
             return;
         }
 
-        $this->log('info', "Starting generation cycle (jittered).", $campaign_id, Log_Steps::LIFECYCLE);
+        $this->log('info', "Starting generation cycle.", $campaign_id, Log_Steps::LIFECYCLE);
 
         try {
             $license_data = License_Manager::get_license_data();

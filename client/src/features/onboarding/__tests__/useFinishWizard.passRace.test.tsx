@@ -15,7 +15,7 @@
  * site profile, the video row and the other steps' saves are stubbed.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
+import { act, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastProvider } from "@structura/ui";
 import type { ReactNode } from "react";
@@ -163,12 +163,17 @@ async function renderFinish() {
   return view;
 }
 
-/** Opens the step, waits for its pass to start and picks a card while the pass reads the site. */
-async function pickWhileReading(name: RegExp) {
+/**
+ * Opens the step on a draft whose card the user picked on an earlier visit
+ * and waits for its pass to start. Since 2026-11-11 the loader holds the
+ * step while the pass reads the site, so no card can be picked meanwhile;
+ * the user can still leave the step.
+ */
+async function openWhileReading() {
+  seedStep4({ signature: ISOMETRIC_GLASS, signatureTouched: true });
   const view = render(<WizardStep4Visuals />, { wrapper });
   await waitFor(() => expect(passCalls()).toHaveLength(1));
-  await waitFor(() => expect(radio(name)).toBeEnabled());
-  fireEvent.click(radio(name));
+  await screen.findByText("Reading your brand");
   return view;
 }
 
@@ -189,7 +194,7 @@ afterEach(() => {
 
 describe("the thin pass answering after the Visuals step unmounted (2026-11-09)", () => {
   it("still lands its palette and pick in the draft, keeping the card the user picked", async () => {
-    const step = await pickWhileReading(/^Isometric glass/);
+    const step = await openWhileReading();
     step.unmount();
 
     await act(async () => answerPasses());
@@ -204,7 +209,7 @@ describe("the thin pass answering after the Visuals step unmounted (2026-11-09)"
     first.unmount();
 
     render(<WizardStep4Visuals />, { wrapper });
-    await screen.findByText(/Still reading Northfield Garden/);
+    await screen.findByText("Reading your brand");
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 50));
     });
@@ -219,7 +224,7 @@ describe("the thin pass answering after the Visuals step unmounted (2026-11-09)"
 
 describe("Finish with the pass still reading the site", () => {
   it("waits for the pass and saves its palette with the picked card", async () => {
-    const step = await pickWhileReading(/^Isometric glass/);
+    const step = await openWhileReading();
     step.unmount();
 
     const { result } = await renderFinish();

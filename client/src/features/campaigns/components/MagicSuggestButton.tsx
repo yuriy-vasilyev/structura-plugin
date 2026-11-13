@@ -10,7 +10,7 @@ import { MagicSuggestProgress } from "./MagicSuggestProgress";
 
 /**
  * Compact "magic suggest" trigger — replaces the legacy
- * `SuggestStrategySection` repeater for campaign / topic_chips contexts
+ * `SuggestStrategySection` repeater for campaign contexts
  * where the cloud now auto-detects everything it needs.
  *
  * The pre-2026-04-28 design forced users to paste reference URLs

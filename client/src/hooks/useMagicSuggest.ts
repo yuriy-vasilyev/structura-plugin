@@ -7,7 +7,7 @@ import { useLicense } from "@/features/settings";
 import { isManagedPlan, type PlanId } from "@structura/types";
 import { humanizeSuggestionError } from "@/hooks/humanizeSuggestionError";
 
-export type SuggestionMode = "persona" | "campaign" | "visual" | "topic_chips";
+export type SuggestionMode = "persona" | "campaign" | "visual";
 
 interface SuggestionOptions {
   provider: AIProvider;
@@ -15,7 +15,7 @@ interface SuggestionOptions {
   /** Visual mode only: the picked rendering medium for the cloud blueprint. */
   medium?: "photography" | "illustration" | "3d_render";
   /**
-   * Campaign / topic_chips modes: the campaign's content language (WP code,
+   * Campaign mode: the campaign's content language (WP code,
    * `"default"` = site language). Without it the cloud drafts in the WP site
    * language even when the campaign targets another one (2026-09-22).
    */

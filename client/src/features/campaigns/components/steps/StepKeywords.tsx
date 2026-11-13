@@ -71,13 +71,6 @@ export interface KeywordDiscoveryHandle {
 interface StepKeywordsProps {
   /** Campaign topic / objective — used as the search seed for discovery. */
   topic?: string;
-  /**
-   * Interview topics, passed as explicit keyword-discovery seeds. When
-   * present the cloud expands these directly instead of re-deriving seeds
-   * from the objective prose; empty (interview skipped / edit flow) →
-   * objective-derived seeds.
-   */
-  topicSeeds?: string[];
   /** Campaign name — used for logging. */
   campaignName?: string;
   /** Required in detached mode. */
@@ -124,7 +117,6 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
   (
     {
       topic,
-      topicSeeds,
       campaignName,
       language,
       provider,
@@ -198,9 +190,6 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
           campaign_name: campaignName ?? "",
           language: language ?? "default",
           provider: provider ?? "gemini",
-          // Interview topics seed discovery directly; absent → cloud derives
-          // seeds from the objective (keyphrase).
-          ...(topicSeeds?.length ? { topic_seeds: topicSeeds } : {}),
         });
 
         clearTimeout(phaseTimer1);
@@ -271,7 +260,7 @@ export const StepKeywords = forwardRef<KeywordDiscoveryHandle, StepKeywordsProps
         );
         setPhase("complete");
       }
-    }, [topic, topicSeeds, campaignName, language, provider, discoverKeywordsDetached]);
+    }, [topic, campaignName, language, provider, discoverKeywordsDetached]);
 
     // Auto-start on mount if paid and no existing keywords
     useEffect(() => {

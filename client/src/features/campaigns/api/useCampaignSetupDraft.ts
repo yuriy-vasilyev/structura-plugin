@@ -21,7 +21,7 @@ import { humanizeSuggestionError } from "@/hooks/humanizeSuggestionError";
 
 import type { CampaignMode, SetupRationale } from "@/features/campaigns/types";
 
-/** Which pass produced the draft's name / objective / topics. */
+/** Which pass produced the draft's name and objective. */
 export type SetupDraftStage = "deterministic" | "ai";
 
 /** An active campaign already running on this site in the same language. */
@@ -48,8 +48,6 @@ export interface CampaignSetupDraft {
   name: string;
   objective: string;
   audience?: string;
-  /** Discovery seeds — the slot the retired Interview step's topics filled. */
-  topics: string[];
   campaignMode: CampaignMode;
   discoveryMode: "winnable" | "balanced" | "authority";
   suggestedPostsPerWeek: number;

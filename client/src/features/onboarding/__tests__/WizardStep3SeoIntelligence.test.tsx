@@ -12,9 +12,14 @@
  *      fan-out off the warmed positioning.
  *   3. Returning user with existing content → NO auto-run, prior work
  *      untouched.
+ *   4. The manual "AI draft" button (specs/site-reading.md §11, wp-admin
+ *      positioning round two, 2026-11-13): it selects the site's pages
+ *      again and asks before replacing text with the card's rule. The step
+ *      used to seed every saved positioning as the operator's own, so even
+ *      an untouched saved AI draft would have asked.
  */
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { ToastProvider } from "@structura/ui";
 
 vi.mock("@wordpress/i18n", () => ({
@@ -166,6 +171,34 @@ describe("WizardStep3SeoIntelligence — auto-suggest orchestration", () => {
     expect(await screen.findByText("koala.ai")).toBeInTheDocument();
   });
 
+  // specs/site-reading.md §5a (2026-11-13): wp-admin lists the pages the
+  // draft read, as the customer portal does.
+  it("lists the pages the auto-draft read, read-only", async () => {
+    positioningSuggestMock.mockResolvedValue({
+      suggestion: {
+        what: "We automate blogs",
+        who: "Site owners",
+        problem: "No time to write",
+        rationale: "",
+      },
+      pages: [
+        { url: "https://blog.test", label: "blog.test", role: "home" },
+        { url: "https://blog.test/pricing", label: "Pricing plans", role: "pricing" },
+      ],
+    });
+
+    renderStep();
+
+    const list = await screen.findByRole("list", { name: "Drafted from these pages" });
+    const links = list.querySelectorAll("a");
+    expect([...links].map((link) => link.getAttribute("href"))).toEqual([
+      "https://blog.test",
+      "https://blog.test/pricing",
+    ]);
+    expect(list).toHaveTextContent("Pricing plans");
+    expect(list.querySelectorAll("button, input, textarea")).toHaveLength(0);
+  });
+
   it("consumes step 1's pre-warmed positioning — pre-filled with NO blocking pass", async () => {
     useWizardStore.getState().setPrewarmedPositioning({
       what: "We automate blogs",
@@ -211,5 +244,112 @@ describe("WizardStep3SeoIntelligence — auto-suggest orchestration", () => {
     expect(useWizardStore.getState().drafts.step3?.positioning.what).toBe(
       "We sell shoes",
     );
+  });
+});
+
+describe("WizardStep3SeoIntelligence — the manual AI draft", () => {
+  const SAVED = {
+    what: "We sell shoes",
+    who: "Runners",
+    problem: "Blisters",
+    capturedAt: "2026-11-01T00:00:00.000Z",
+  };
+  const REDRAFT = {
+    suggestion: {
+      what: "Trail running shoes",
+      who: "Ultra runners",
+      problem: "Rocky trails",
+      rationale: "",
+    },
+    pages: [
+      { url: "https://shoes.test", label: "shoes.test", role: "home" },
+      { url: "https://shoes.test/trail", label: "Trail range", role: "product" },
+    ],
+  };
+  const WHAT = "In one sentence, what does your business do?";
+  const field = (label: string) => screen.getByLabelText(label) as HTMLTextAreaElement;
+  const draftButton = () => screen.getByRole("button", { name: "AI draft" });
+  const confirmTitle = () => screen.queryByText("Replace your edits?");
+
+  it("re-drafts an untouched saved AI draft without asking, and selects the pages again", async () => {
+    positioningQueryMock.current = { data: { positioning: { ...SAVED, source: "ai_draft" } } };
+    positioningSuggestMock.mockResolvedValue(REDRAFT);
+    renderStep();
+    await waitFor(() => expect(field(WHAT).value).toBe("We sell shoes"));
+    // The saved source carries into the draft Finish writes back.
+    expect(useWizardStore.getState().drafts.step3?.positioningSource).toBe("ai_draft");
+
+    fireEvent.click(draftButton());
+
+    expect(confirmTitle()).toBeNull();
+    await waitFor(() => expect(field(WHAT).value).toBe("Trail running shoes"));
+    expect(positioningSuggestMock).toHaveBeenCalledTimes(1);
+    expect(positioningSuggestMock).toHaveBeenCalledWith({ reselectPages: true });
+    expect(await screen.findByText("Drafted from your site's pages. Edit anything below.")).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "Drafted from these pages" })).toHaveTextContent("Trail range");
+  });
+
+  it("asks before replacing a positioning the operator wrote; Keep mine keeps it, Replace drafts", async () => {
+    positioningQueryMock.current = { data: { positioning: { ...SAVED, source: "user" } } };
+    positioningSuggestMock.mockResolvedValue(REDRAFT);
+    renderStep();
+    await waitFor(() => expect(field(WHAT).value).toBe("We sell shoes"));
+
+    fireEvent.click(draftButton());
+    expect(confirmTitle()).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Keep mine" }));
+    expect(positioningSuggestMock).not.toHaveBeenCalled();
+    expect(field(WHAT).value).toBe("We sell shoes");
+
+    fireEvent.click(draftButton());
+    fireEvent.click(screen.getByRole("button", { name: "Replace" }));
+    await waitFor(() => expect(field(WHAT).value).toBe("Trail running shoes"));
+    expect(positioningSuggestMock).toHaveBeenCalledWith({ reselectPages: true });
+  });
+
+  it("asks before replacing a saved AI draft edited since", async () => {
+    positioningQueryMock.current = { data: { positioning: { ...SAVED, source: "ai_draft" } } };
+    renderStep();
+    await waitFor(() => expect(field(WHAT).value).toBe("We sell shoes"));
+
+    fireEvent.change(field(WHAT), { target: { value: "We sell trail shoes" } });
+    fireEvent.click(draftButton());
+
+    expect(confirmTitle()).toBeInTheDocument();
+    expect(positioningSuggestMock).not.toHaveBeenCalled();
+  });
+
+  it("re-drafts the automatic first draft without asking until it is edited by hand", async () => {
+    positioningSuggestMock
+      .mockResolvedValueOnce({
+        suggestion: { what: "We automate blogs", who: "Site owners", problem: "No time to write", rationale: "" },
+      })
+      .mockResolvedValue(REDRAFT);
+    renderStep();
+    await waitFor(() => expect(field(WHAT).value).toBe("We automate blogs"));
+
+    fireEvent.click(draftButton());
+    expect(confirmTitle()).toBeNull();
+    await waitFor(() => expect(field(WHAT).value).toBe("Trail running shoes"));
+    expect(positioningSuggestMock).toHaveBeenLastCalledWith({ reselectPages: true });
+
+    fireEvent.change(field(WHAT), { target: { value: "Our own words" } });
+    fireEvent.click(draftButton());
+    expect(confirmTitle()).toBeInTheDocument();
+    expect(positioningSuggestMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("drafts right away on an empty step", async () => {
+    // Not paid: no automatic first draft, so the fields stay empty.
+    licenseMock.current = { plan: "free", isPaidLicense: false };
+    positioningSuggestMock.mockResolvedValue(REDRAFT);
+    renderStep();
+    await waitFor(() => expect(useWizardStore.getState().drafts.step3).toBeDefined());
+
+    fireEvent.click(draftButton());
+
+    expect(confirmTitle()).toBeNull();
+    await waitFor(() => expect(field(WHAT).value).toBe("Trail running shoes"));
+    expect(positioningSuggestMock).toHaveBeenCalledWith({ reselectPages: true });
   });
 });

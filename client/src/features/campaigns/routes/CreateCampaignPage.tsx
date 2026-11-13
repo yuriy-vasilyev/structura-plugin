@@ -44,6 +44,7 @@ import {
   TextArea,
   Tooltip,
 } from "@structura/ui";
+import { CAMPAIGN_OBJECTIVE_MAX_LENGTH } from "@structura/types";
 import { PageTitle } from "@/components/Layout/PageTitle";
 import { PageDescription } from "@/components/Layout/PageSubtitle";
 import { PageContainer } from "@/components/Layout/PageContainer";
@@ -272,12 +273,6 @@ const CreateCampaignInner = () => {
   // continue button into the explicit "write from the objective" choice.
   const [keywordCount, setKeywordCount] = useState(0);
 
-  // Setup-draft topics → explicit keyword-discovery seeds (the slot the
-  // retired Interview step's chips filled). Transient, like the phase
-  // trackers above: the objective persists in the draft and is the fallback
-  // seed source, so a resumed draft simply re-derives seeds from it.
-  const [draftTopics, setDraftTopics] = useState<string[]>([]);
-
   // Steps the user has actually been on. The completed/skipped flags only
   // land when a step is left FORWARD, so the step someone was standing on
   // when they clicked back up the strip became unreachable — they had to
@@ -410,7 +405,6 @@ const CreateCampaignInner = () => {
           : { campaignMode: draft.campaignMode, campaignModeSource: "inferred" as const }),
         setupRationale: draft.rationale,
       });
-      setDraftTopics(draft.topics);
     },
     [updateForm]
   );
@@ -568,7 +562,6 @@ const CreateCampaignInner = () => {
             <StepKeywords
               ref={keywordsRef}
               topic={formData.identity.objective}
-              topicSeeds={draftTopics}
               campaignName={formData.identity.name}
               language={formData.intelligence.language}
               provider={formData.intelligence.textProvider}
@@ -1427,6 +1420,8 @@ const SetupSection = ({
             value={objective}
             onChange={(e) => updateForm("identity", { objective: e.target.value })}
             rows={4}
+            // The cloud cuts a longer brief (2026-11-12 cost audit).
+            maxLength={CAMPAIGN_OBJECTIVE_MAX_LENGTH}
             placeholder={__("What should this campaign achieve, and for whom?", "structura")}
           />
         )}

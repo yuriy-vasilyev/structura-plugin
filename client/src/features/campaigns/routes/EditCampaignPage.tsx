@@ -25,6 +25,7 @@ import {
   Target,
 } from "lucide-react";
 import { Badge, Button, cn, InputField, PageLoader, Switch, TextArea, Tooltip, } from "@structura/ui";
+import { CAMPAIGN_OBJECTIVE_MAX_LENGTH } from "@structura/types";
 
 import { PageTitle } from "@/components/Layout/PageTitle";
 import { PageDescription } from "@/components/Layout/PageSubtitle";
@@ -346,6 +347,8 @@ const StrategyEditSection = () => {
         value={formData.identity.objective}
         onChange={(e) => updateForm("identity", { objective: e.target.value })}
         rows={5}
+        // The cloud cuts a longer brief (2026-11-12 cost audit).
+        maxLength={CAMPAIGN_OBJECTIVE_MAX_LENGTH}
         placeholder={__("Your campaign strategy…", "structura")}
       />
 

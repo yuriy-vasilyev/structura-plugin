@@ -1910,7 +1910,8 @@ class Rest_Api
 
         $campaign_run_id = $has_cloud ? wp_generate_uuid4() : '';
 
-        // Fire the jittered hook directly — manual runs skip the delay.
+        // Fire the generation hook directly. Its `_jittered` name is from the
+        // random delay scheduled runs had until 2026-11-13.
         // Args are spread *positionally* by Action Scheduler when the hook
         // fires, so the order of keys here matches the callback signature
         // `execute_campaign_step_jittered(int $campaign_id, string $campaign_run_id = '')`.
@@ -2273,7 +2274,7 @@ class Rest_Api
                 'language'              => sanitize_text_field($params['language'] ?? 'default'),
                 'replaceLongDashes'     => filter_var($params['replace_long_dashes'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'disableEmojis'         => filter_var($params['disable_emojis'] ?? false, FILTER_VALIDATE_BOOLEAN),
-                'postLength'            => (int)($params['post_length'] ?? Campaign_Shape_Transformer::DEFAULT_POST_LENGTH),
+                'postLength'            => Campaign_Shape_Transformer::clamp_post_length($params['post_length'] ?? null),
                 'seoRules'              => (array)($params['seo_optimization_rules'] ?? []),
             ],
             'structure'    => [
@@ -2867,21 +2868,8 @@ class Rest_Api
                 ],
             ];
 
-            // Interview topics, forwarded as explicit keyword-discovery seeds.
-            // When present the cloud expands these directly instead of
-            // re-deriving seeds from the objective prose; absent (interview
-            // skipped) → objective-derived seeds.
-            if (isset($params['topic_seeds']) && is_array($params['topic_seeds'])) {
-                $topic_seeds = array_values(array_filter(array_map(
-                    function ($s) {
-                        return is_string($s) ? sanitize_text_field($s) : '';
-                    },
-                    $params['topic_seeds'],
-                )));
-                if (! empty($topic_seeds)) {
-                    $payload['topic_seeds'] = $topic_seeds;
-                }
-            }
+            // No `topic_seeds` since 2026-11-13: discovery seeds from the
+            // objective (spec question-first-discovery.md §15).
 
             // BYOK keys live in the workspace credentials store; cloud
             // resolves on its own. Phase 3 of `cloud-only-generation.md`.
@@ -3323,6 +3311,10 @@ class Rest_Api
     /**
      * POST /structura/v1/wizard/positioning — read the workspace's
      * saved positioning answers (or null when none saved yet).
+     *
+     * The response's optional `pages` (the site's stored pages, the homepage
+     * first, listed before any draft; specs/site-reading.md §11, 2026-11-13)
+     * is sanitized here like a draft's.
      */
     public function get_wizard_positioning($request)
     {
@@ -3336,7 +3328,7 @@ class Rest_Api
         if (is_wp_error($result)) {
             return $result;
         }
-        return rest_ensure_response($result['body']);
+        return rest_ensure_response(self::with_sanitized_pages_read($result['body']));
     }
 
     /**
@@ -3367,9 +3359,16 @@ class Rest_Api
 
     /**
      * POST /structura/v1/wizard/positioning/suggest — AI-draft from
-     * the homepage. Body: no fields (uses workspace context).
-     * Long timeout — DFS OnPage + Gemini call together typically lands
-     * in the 4–10s range.
+     * the homepage and the site's offer pages (specs/site-reading.md §5).
+     * Body: `{ reselectPages?: true }`, sent by the positioning card's
+     * Re-draft: the cloud selects the pages again and gets longer for it,
+     * so that call waits 60 s instead of 30 s (§11, 2026-11-13).
+     *
+     * The response's optional `pages` (the pages read) is sanitized here
+     * and capped at {@see self::PAGES_READ_MAX}.
+     *
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response|\WP_Error|mixed
      */
     public function suggest_wizard_positioning($request)
     {
@@ -3377,13 +3376,79 @@ class Rest_Api
         if ($denied) {
             return $denied;
         }
-        $license = License_Manager::get_license_data();
-        $payload = ['licenseKey' => $license['license_key']];
-        $result  = Cloud_Client::post('/suggestWizardPositioning', $payload, ['timeout' => 30]);
+        $params   = $request->get_json_params();
+        $reselect = is_array($params) && isset($params['reselectPages']) && true === $params['reselectPages'];
+        $license  = License_Manager::get_license_data();
+        $payload  = ['licenseKey' => $license['license_key']];
+        if ($reselect) {
+            $payload['reselectPages'] = true;
+        }
+        $result = Cloud_Client::post('/suggestWizardPositioning', $payload, ['timeout' => $reselect ? 60 : 30]);
         if (is_wp_error($result)) {
             return $result;
         }
-        return rest_ensure_response($result['body']);
+        return rest_ensure_response(self::with_sanitized_pages_read($result['body']));
+    }
+
+    /**
+     * Returns a positioning response with its optional `pages` sanitized,
+     * or without the key when it is not a list.
+     *
+     * @param mixed $body The cloud response body.
+     * @return mixed
+     */
+    private static function with_sanitized_pages_read($body)
+    {
+        if (is_array($body) && array_key_exists('pages', $body)) {
+            $pages = self::sanitize_pages_read($body['pages']);
+            if (null === $pages) {
+                unset($body['pages']);
+            } else {
+                $body['pages'] = $pages;
+            }
+        }
+        return $body;
+    }
+
+    /** Most pages a positioning draft lists: the homepage and six offer pages. */
+    private const PAGES_READ_MAX = 7;
+
+    /** Roles a page read can carry (specs/site-reading.md §4). */
+    private const PAGES_READ_ROLES = ['home', 'service', 'product', 'audience', 'pricing', 'about', 'other'];
+
+    /**
+     * Returns the pages read for the positioning: web addresses only,
+     * labels and roles as plain text, at most seven; null when not a list.
+     *
+     * @param mixed $pages The cloud response's `pages`.
+     * @return array<int, array{url: string, label: string, role: string}>|null
+     */
+    private static function sanitize_pages_read($pages): ?array
+    {
+        if ( ! is_array($pages)) {
+            return null;
+        }
+        $clean = [];
+        foreach ($pages as $page) {
+            if (count($clean) >= self::PAGES_READ_MAX) {
+                break;
+            }
+            if ( ! is_array($page) || ! is_string($page['url'] ?? null) || ! is_string($page['label'] ?? null)) {
+                continue;
+            }
+            $url   = esc_url_raw($page['url'], ['http', 'https']);
+            $label = sanitize_text_field($page['label']);
+            $role  = is_string($page['role'] ?? null) ? sanitize_text_field($page['role']) : '';
+            if ('' === $url || '' === $label) {
+                continue;
+            }
+            $clean[] = [
+                'url'   => $url,
+                'label' => $label,
+                'role'  => in_array($role, self::PAGES_READ_ROLES, true) ? $role : 'other',
+            ];
+        }
+        return $clean;
     }
 
     /**
@@ -3611,7 +3676,9 @@ class Rest_Api
     {
         $mode = sanitize_text_field($request['mode']);
 
-        if ( ! in_array($mode, ['visual', 'persona', 'campaign', 'topic_chips'], true)) {
+        // `topic_chips` left with the campaign interview (deleted 2026-09-24);
+        // this route only serves the SPA shipped with the same release.
+        if ( ! in_array($mode, ['visual', 'persona', 'campaign'], true)) {
             $this->log('error', 'Invalid suggestion mode: ' . $mode, 0, 'suggestion_handler');
             throw new \Exception(esc_html__('Invalid suggestion mode.', 'structura'));
         }
@@ -3629,7 +3696,7 @@ class Rest_Api
             $medium = '';
         }
 
-        // Campaign / topic_chips modes: the CAMPAIGN's content language.
+        // Campaign mode: the CAMPAIGN's content language.
         // `site_identity.language` below is always the WP site language,
         // so without this an English campaign on a German site had its
         // objective drafted in German (2026-09-22). "default" and empty
@@ -3639,8 +3706,8 @@ class Rest_Api
             $language = '';
         }
 
-        // Cloud-tier users: utility suggestions (topic chips, campaign strategy,
-        // persona, visual style) use our preferred provider silently — the user's
+        // Cloud-tier users: utility suggestions (campaign strategy, persona,
+        // visual style) use our preferred provider silently — the user's
         // chosen default only matters for actual post/image generation.
         // 'cloud_pro': retired 2026-10-12, accepted for one release window (see License_Manager::get_plan()).
         $is_managed = in_array($plan, ['cloud', 'cloud_pro'], true);

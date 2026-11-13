@@ -5,7 +5,8 @@ import { Button, Dialog, InputField, Select, TextArea, toast } from "@structura/
 import { READING_LEVEL_OPTIONS, TONE_OPTIONS } from "../data/personaTemplates";
 import { Persona, ReadingLevelOption, ToneOption, WpUser } from "../types";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
-import { useDefaultProviders } from "@/features/settings";
+import { useDefaultProviders, useLicense } from "@/features/settings";
+import { isManagedPlan, MANAGED_PERSONA_PROMPT_MAX_LENGTH, type PlanId } from "@structura/types";
 import { AIProvider } from "@/features/campaigns/types";
 import { ProviderPill } from "@/features/campaigns/components/ProviderPill";
 import { MagicSuggestProgress } from "@/features/campaigns/components/MagicSuggestProgress";
@@ -28,6 +29,10 @@ export const PersonaEditor = ({ persona, users, onClose, onSave }: PersonaEditor
   });
   const [isSaving, setIsSaving] = useState(false);
   const { suggest, isSuggesting } = useMagicSuggest();
+  // Bounded on managed AI only, where Structura pays for the prompt tokens;
+  // the cloud cuts a longer one there (2026-11-12 cost audit).
+  const { plan } = useLicense();
+  const promptMaxLength = isManagedPlan(plan as PlanId) ? MANAGED_PERSONA_PROMPT_MAX_LENGTH : undefined;
   // Magic suggest works on every plan since 2026-10-06 (specs/open-providers.md
   // §8); from 2026-07-09 it was a disabled "Pro" hint on none/free.
 
@@ -140,6 +145,7 @@ export const PersonaEditor = ({ persona, users, onClose, onSave }: PersonaEditor
               className="font-mono text-xs leading-relaxed"
               value={current.system_prompt}
               onChange={(e) => setCurrent({ ...current, system_prompt: e.target.value })}
+              maxLength={promptMaxLength}
               placeholder={__("You are a rigorous academic...", "structura")}
             />
 

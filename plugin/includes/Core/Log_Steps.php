@@ -99,7 +99,7 @@ class Log_Steps {
 	// steps.ts — having a step that only fires on one side is
 	// legitimate and expected.
 
-	/** Pulse/lifecycle scheduler transitions (activate/deactivate/jitter). */
+	/** Pulse/lifecycle scheduler transitions (activate/deactivate). */
 	public const LIFECYCLE = 'lifecycle';
 
 	/** WordPress post-insert + content-to-post conversion. */

@@ -151,6 +151,58 @@ class DiscoverKeywordsDetachedTest extends TestCase
     }
 
     /**
+     * Spec question-first-discovery.md §15 (2026-11-13): the setup draft's
+     * topics no longer seed discovery. The cloud ignores `topic_seeds`, so an
+     * older wp-admin bundle that still posts them gets nothing forwarded.
+     *
+     * @test
+     */
+    public function it_forwards_no_topic_seeds_to_the_cloud(): void
+    {
+        Mockery::mock('alias:Structura\Core\License_Manager')
+            ->shouldReceive('get_license_data')
+            ->andReturn(['license_key' => 'ST-TEST-KEY']);
+        Mockery::mock('alias:Structura\Core\Key_Manager')
+            ->shouldReceive('get_license_payload')
+            ->andReturn(['license_key' => 'ST-TEST-KEY']);
+        Mockery::mock('alias:Structura\Core\Log_Service')
+            ->shouldReceive('add')
+            ->andReturnNull();
+        Mockery::mock('alias:Structura\Core\Cloud_Client')
+            ->shouldReceive('post')
+            ->once()
+            ->with(
+                '/executeKeywordDiscovery',
+                Mockery::on(function ($payload) {
+                    return is_array($payload)
+                        && ! array_key_exists('topic_seeds', $payload)
+                        && ($payload['keyphrase'] ?? null) === 'balcony gardens for renters';
+                }),
+                Mockery::any()
+            )
+            ->andReturn([
+                'code' => 200,
+                'body' => ['success' => true, 'keywords' => [], 'meta' => ['path' => 'provider']],
+                'raw'  => null,
+            ]);
+        Functions\when('sanitize_text_field')->returnArg(1);
+        Functions\when('get_bloginfo')->justReturn('Site');
+        Functions\when('home_url')->justReturn('https://site.test');
+        Functions\when('wp_parse_url')->justReturn('site.test');
+        Functions\when('rest_ensure_response')->returnArg(1);
+
+        $rest   = new Rest_Api();
+        $result = $rest->discover_keywords_detached($this->make_request([
+            'keyphrase'     => 'balcony gardens for renters',
+            'language'      => 'en',
+            'text_provider' => 'gemini',
+            'topic_seeds'   => ['balkongarten', 'kräuter im topf'],
+        ]));
+
+        $this->assertTrue($result['success']);
+    }
+
+    /**
      * Minimal `WP_REST_Request` stand-in exposing `get_json_params()`.
      *
      * @param array<string, mixed> $params

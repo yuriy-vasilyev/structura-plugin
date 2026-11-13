@@ -1,4 +1,5 @@
 import { toContentLanguageOption, WP_LOCALE_CATALOG } from "@structura/i18n-contracts";
+import { FREE_POST_LENGTH_MAX } from "@structura/types";
 import { CampaignFormData, CampaignPostStatus } from "@/features/campaigns/types";
 import { DEFAULT_CAMPAIGN_FORM_DATA } from "@/features/campaigns/constants";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
@@ -84,7 +85,7 @@ export const getCampaignFormDataForLicense = ({
       intelligence: {
         ...DEFAULT_CAMPAIGN_FORM_DATA.intelligence,
         seoRules: NO_SEO_RULES,
-        postLength: 500,
+        postLength: FREE_POST_LENGTH_MAX,
       },
       schedule: {
         ...DEFAULT_CAMPAIGN_FORM_DATA.schedule,
@@ -125,7 +126,7 @@ export const getCampaignFormDataForLicense = ({
     intelligence: {
       ...DEFAULT_CAMPAIGN_FORM_DATA.intelligence,
       seoRules: NO_SEO_RULES,
-      postLength: 500,
+      postLength: FREE_POST_LENGTH_MAX,
     },
   };
 };

@@ -14,9 +14,13 @@
  * The pick (2026-11-09, replacing the visual-style auto-suggest): the thin
  * pass reads the homepage, picks a library signature and the brand palette.
  * Paid plans get the pick preselected and first; free plans see it first but
- * locked, with the house signature preselected. Until the pass answers, the
- * pick sentence says so and the house signature stays preselected. Continue
- * is always enabled: a signature is always preselected.
+ * locked, with the house signature preselected.
+ *
+ * The loader (2026-11-11): until the pass answers, the step is the
+ * `WizardMagicLoader` and is not valid, so Continue waits. With the step
+ * drawn and Continue live, owners clicked through before the colours
+ * arrived. Once it answers, or fails, a signature is always preselected and
+ * Continue is enabled. Re-scan runs in place.
  */
 
 import { useEffect, useRef, useState } from "@wordpress/element";
@@ -28,7 +32,6 @@ import {
   Card,
   PaletteSwatches,
   Select,
-  Spinner,
   Switch,
   VideoChannelGlyph,
   type CaptionPlacement,
@@ -36,7 +39,7 @@ import {
 } from "@structura/ui";
 import { canUseSignatureLibrary } from "@structura/types";
 import { HOUSE_SIGNATURE_ID, type SignatureId } from "@structura/visual-signatures";
-import { BadgeCheck, ChevronDown, ChevronUp, PenLine, Sparkles } from "lucide-react";
+import { BadgeCheck, ChevronDown, ChevronUp, Image as ImageIcon, PenLine, Sparkles } from "lucide-react";
 
 import {
   useDefaultProviders,
@@ -74,6 +77,13 @@ import {
 } from "@/features/settings/components/VideoPresetSection";
 
 import { useWizardStore, type VisualDraft } from "../state/wizardStore";
+import { WizardMagicLoader } from "./WizardMagicLoader";
+
+const READING_STAGES = [
+  __("Reading your homepage…", "structura"),
+  __("Picking out your colors…", "structura"),
+  __("Matching a style to your brand…", "structura"),
+];
 
 const ASPECT_RATIOS = [
   { value: "16:9", label: __("16:9 — Hero / wide", "structura") },
@@ -118,67 +128,46 @@ function boldSentence(template: string, values: string[]) {
 function PickSentence({
   siteName,
   suggestion,
-  pending,
   locked,
   palette,
 }: {
   siteName: string;
   suggestion: VisualSignatureSuggestion | null;
-  pending: boolean;
   locked: boolean;
   palette: string[];
 }) {
-  if (!pending && !suggestion) return null;
+  if (!suggestion) return null;
   return (
     <div className="border-rec-line bg-rec-soft flex gap-2.5 rounded-xl border px-4 py-3.5">
-      {pending ? (
-        <Spinner size="sm" className="mt-0.5 shrink-0" />
-      ) : (
-        <BadgeCheck size={18} className="text-rec-ink mt-0.5 shrink-0" aria-hidden="true" />
-      )}
+      <BadgeCheck size={18} className="text-rec-ink mt-0.5 shrink-0" aria-hidden="true" />
       <div className="flex min-w-0 flex-col gap-1">
-        {pending || !suggestion ? (
-          <p role="status" className="m-0! text-sm text-neutral-900 dark:text-white">
-            {boldSentence(
-              /* translators: 1: site name, 2: the style selected meanwhile. Keep the <b> tags around 2. */
-              __(
-                "Still reading %1$s to pick a style. <b>%2$s</b> is selected until then.",
-                "structura",
-              ),
-              [siteName, signatureName(HOUSE_SIGNATURE_ID)],
-            )}
-          </p>
-        ) : (
-          <>
-            <p className="m-0! text-sm leading-relaxed text-neutral-900 dark:text-white">
-              {locked
-                ? boldSentence(
-                    /* translators: 1: site name, 2: the recommended style, 3: the style used until then. Keep the <b> tags around 2 and 3. */
-                    __(
-                      "Our pick for %1$s is <b>%2$s</b>, which comes with paid plans. Until then, your images use <b>%3$s</b> in your colors",
-                      "structura"
-                    ),
-                    [siteName, signatureName(suggestion.pick), signatureName(HOUSE_SIGNATURE_ID)]
-                  )
-                : boldSentence(
-                    /* translators: 1: site name, 2: the recommended style. Keep the <b> tags around 2. */
-                    __("Our pick for %1$s is <b>%2$s</b>, in your colors", "structura"),
-                    [siteName, signatureName(suggestion.pick)]
-                  )}
-              {palette.length > 0 && (
-                <PaletteSwatches
-                  colors={palette}
-                  size={16}
-                  max={6}
-                  label={__("Brand colors", "structura")}
-                  className="ml-1.5 inline-flex align-middle"
-                />
+        <p className="m-0! text-sm leading-relaxed text-neutral-900 dark:text-white">
+          {locked
+            ? boldSentence(
+                /* translators: 1: site name, 2: the recommended style, 3: the style used until then. Keep the <b> tags around 2 and 3. */
+                __(
+                  "Our pick for %1$s is <b>%2$s</b>, which comes with paid plans. Until then, your images use <b>%3$s</b> in your colors",
+                  "structura"
+                ),
+                [siteName, signatureName(suggestion.pick), signatureName(HOUSE_SIGNATURE_ID)]
+              )
+            : boldSentence(
+                /* translators: 1: site name, 2: the recommended style. Keep the <b> tags around 2. */
+                __("Our pick for %1$s is <b>%2$s</b>, in your colors", "structura"),
+                [siteName, signatureName(suggestion.pick)]
               )}
-            </p>
-            {suggestion.reason && (
-              <p className="text-rec-ink m-0! text-[13px] leading-relaxed">{suggestion.reason}</p>
-            )}
-          </>
+          {palette.length > 0 && (
+            <PaletteSwatches
+              colors={palette}
+              size={16}
+              max={6}
+              label={__("Brand colors", "structura")}
+              className="ml-1.5 inline-flex align-middle"
+            />
+          )}
+        </p>
+        {suggestion.reason && (
+          <p className="text-rec-ink m-0! text-[13px] leading-relaxed">{suggestion.reason}</p>
         )}
       </div>
     </div>
@@ -277,10 +266,13 @@ export const WizardStep4Visuals = () => {
     setStep4Draft({ ...current, ...p });
   };
 
-  // Continue is always enabled: a signature is always preselected (handoff §3.8).
+  // Valid once the first pass has answered or failed: from then on a
+  // signature is always preselected (handoff §3.8). Until then the step is
+  // the loader and Continue waits.
+  const passSettled = step4?.suggestion !== undefined;
   useEffect(() => {
-    setStepValid(4, true);
-  }, [setStepValid]);
+    setStepValid(4, passSettled);
+  }, [setStepValid, passSettled]);
 
   /* ─── The thin pass: pick + palette ───────────────────────────── */
   const hasBoundPreset = Boolean(presetsData?.boundPresetId);
@@ -339,7 +331,6 @@ export const WizardStep4Visuals = () => {
   };
 
   const suggestion = draft.suggestion ?? null;
-  const pending = draft.suggestion === undefined;
   const selection: SignatureSelection = selectionFromChoice(draft.signature);
   const pickId: SignatureId | null = suggestion?.pick ?? null;
   const keepsOwnChoice = draft.signature !== undefined && selection.kind !== "curated";
@@ -400,6 +391,26 @@ export const WizardStep4Visuals = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoEligibility, step4, presetsData, defaultTextProvider]);
 
+  if (!passSettled) {
+    return (
+      <div className="flex flex-col gap-8">
+        <header className="flex flex-col gap-3 text-center">
+          <h1 className="m-0! text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">
+            {__("Visual signature", "structura")}
+          </h1>
+        </header>
+        <Card className="p-8">
+          <WizardMagicLoader
+            icon={ImageIcon}
+            title={__("Reading your brand", "structura")}
+            stages={READING_STAGES}
+            cadenceMs={3000}
+          />
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-3 text-center">
@@ -418,7 +429,6 @@ export const WizardStep4Visuals = () => {
         <PickSentence
           siteName={profile?.name || publicUrl || ""}
           suggestion={suggestion}
-          pending={pending}
           locked={!libraryOpen && pickId !== null && pickId !== HOUSE_SIGNATURE_ID}
           palette={draft.palette ?? []}
         />

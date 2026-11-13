@@ -168,6 +168,11 @@ export const ERROR_KEYS = {
     // surfaces when key resolution or rate-limiting blocks a run.
     credentialsMissing: "workspaces.credentialsMissing",
     tierQuotaExceeded: "workspaces.tierQuotaExceeded",
+    // A Cloud site has used this month's budget for generations that were
+    // never billed (stock thrown away, hand-started runs refunded): a
+    // hand-started run is refused before any spend (2026-11-13,
+    // specs/managed-ai-lineup.md §4.1, functions/src/billing/postQuotaGate.ts).
+    unbilledBudgetReached: "workspaces.unbilledBudgetReached",
     // 2026-10-02: per-workspace burst and daily limit on AI calls that run
     // on Structura's keys without counting against a quota (suggestions,
     // onboarding). functions/src/ai/aiCallLimit.ts.
@@ -227,6 +232,15 @@ export const ERROR_KEYS = {
     // (`expectedUpdatedAt`) found a newer version stored, so it was refused
     // rather than overwriting someone else's edit.
     postChangedSinceRead: "sites.postChangedSinceRead",
+    // A WordPress site set up in the portal generates nothing until its plugin
+    // connects (specs/portal-site-onboarding.md §4.3). Run now and one-off
+    // generation name the missing step instead of a generic failure.
+    awaitsWordPressPlugin: "sites.awaitsWordPressPlugin",
+    // A managed site has used its monthly image quota (2026-11-12): the
+    // portal's Regenerate and the visual signature preview are refused
+    // before any provider call (functions/src/licenses/helpers.ts). Carries
+    // the UTC-month reset since 2026-11-13.
+    imageQuotaExhausted: "sites.imageQuotaExhausted",
   },
   campaigns: {
     // Portal campaign-create gates — parity with the plugin REST path's
@@ -325,6 +339,13 @@ export interface ErrorParams {
   "sites.slotCommitted": { maxSites: number };
   "campaigns.limitReached": { limit: number };
   "campaigns.cadenceLimit": { maxPerWeek: number };
+  /**
+   * `resetsAt`: wall-clock ms of the next UTC month, when the site's images
+   * reset. Added 2026-11-13; optional on read (older functions omit it).
+   */
+  "sites.imageQuotaExhausted": { resetsAt: number };
+  /** `resetsAt`: wall-clock ms of the next UTC month, when hand-started runs open again. */
+  "workspaces.unbilledBudgetReached": { resetsAt: number };
   "subscriptions.appsumoRateLimited": { retryAfterSeconds: number };
   "apiTokens.nameTooLong": { maxLength: number };
   "apiTokens.limitReached": { limit: number };

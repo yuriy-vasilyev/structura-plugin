@@ -12324,8 +12324,14 @@ msgstr "Blocs empilés"
 msgid "Still life studio"
 msgstr "Nature morte en studio"
 
-msgid "Still reading %1$s to pick a style. <b>%2$s</b> is selected until then."
-msgstr "Nous lisons encore %1$s pour choisir un style. D'ici là, <b>%2$s</b> est sélectionné."
+msgid "Reading your brand"
+msgstr "Nous lisons votre marque"
+
+msgid "Picking out your colors…"
+msgstr "Relevé de vos couleurs…"
+
+msgid "Matching a style to your brand…"
+msgstr "Choix d'un style pour votre marque…"
 
 msgid "Technique"
 msgstr "Technique"
@@ -12419,3 +12425,27 @@ msgstr "Votre prompt"
 
 msgid "· 1 image"
 msgstr "· 1 image"
+
+msgid "Drafted from these pages"
+msgstr "Rédigé à partir de ces pages"
+
+msgid "Homepage"
+msgstr "Page d'accueil"
+
+msgid "Service"
+msgstr "Service"
+
+msgid "Product"
+msgstr "Produit"
+
+msgid "We'll read your site's pages again and rewrite your positioning. Your edits will be replaced."
+msgstr "Nous allons relire les pages de votre site et réécrire votre positionnement. Vos modifications seront remplacées."
+
+msgid "Pages we read from your site"
+msgstr "Pages que nous lisons sur votre site"
+
+msgid "Drafted from your site's pages. Review and save."
+msgstr "Rédigé à partir des pages de votre site. Vérifiez et enregistrez."
+
+msgid "Drafted from your site's pages. Edit anything below."
+msgstr "Rédigé à partir des pages de votre site. Modifiez tout ci-dessous."

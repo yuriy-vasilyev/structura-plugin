@@ -468,3 +468,29 @@ describe("New campaign — provider advice under the inline provider block (2026
     expect(screen.queryByText(LEAD)).toBeNull();
   });
 });
+
+// Spec question-first-discovery.md §15 (2026-11-13): the setup draft's topics
+// stopped seeding keyword research (the cloud ignores `topic_seeds`), and the
+// wizard no longer sends them.
+describe("New campaign — keyword research after Magic suggest", () => {
+  const DISCOVER_PATH = "/structura/v1/scheduler/discover-keywords";
+  const discoverCalls = () =>
+    apiFetchMock.mock.calls
+      .map(([opts]) => opts as { path?: string; data?: Record<string, unknown> })
+      .filter((opts) => opts?.path === DISCOVER_PATH);
+
+  it("researches from the objective and sends no topic seeds", async () => {
+    // Moving between steps scrolls to the top; jsdom has no scrolling.
+    window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
+    h.license = { isPaidLicense: true, isLicensed: true, plan: "byok" };
+    renderWizard();
+    fireEvent.click(await screen.findByRole("button", { name: /Magic suggest/ }));
+    expect(await screen.findByText("Drafted for you")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue to Keywords" }));
+
+    await waitFor(() => expect(discoverCalls()).toHaveLength(1));
+    expect(discoverCalls()[0].data).toMatchObject({ keyphrase: aiDraft().objective });
+    expect(discoverCalls()[0].data).not.toHaveProperty("topic_seeds");
+  });
+});
