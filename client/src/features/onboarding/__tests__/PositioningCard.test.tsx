@@ -17,6 +17,12 @@ import { ToastProvider } from "@structura/ui";
 
 vi.mock("@wordpress/i18n", () => ({
   __: (text: string) => text,
+  sprintf: (format: string, ...args: unknown[]) => {
+    let i = 0;
+    return format.replace(/%(\d+)\$[sd]|%[sd]/g, (_match, n?: string) =>
+      String(n ? args[Number(n) - 1] : args[i++]),
+    );
+  },
 }));
 
 const h = vi.hoisted(() => ({
@@ -214,6 +220,21 @@ describe("PositioningCard — asking before an AI draft replaces text", () => {
 
     expect(confirmTitle()).toBeNull();
     await waitFor(() => expect(field(WHAT).value).toBe("Knife sharpening service."));
+  });
+});
+
+// Customer report 2026-11-13: positioning was cut at a limit no field showed
+// (280 here, 1,000 in the customer portal). Each answer now takes up to the
+// shared 3,000 characters and shows its count.
+describe("PositioningCard — the 3,000-character bound", () => {
+  it("holds each answer to 3,000 characters and shows its count", () => {
+    renderCard("edited");
+    for (const label of [WHAT, WHO, "What problem do you solve for them?"]) {
+      expect(field(label).maxLength).toBe(3000);
+    }
+    expect(field(WHAT)).toHaveAccessibleDescription("27 of 3000");
+    fireEvent.change(field(WHO), { target: { value: "Home cooks and chefs." } });
+    expect(field(WHO)).toHaveAccessibleDescription("21 of 3000");
   });
 });
 

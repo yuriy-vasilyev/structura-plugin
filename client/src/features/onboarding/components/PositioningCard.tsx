@@ -20,7 +20,7 @@
 
 import { useEffect, useRef, useState } from "@wordpress/element";
 import { __ } from "@wordpress/i18n";
-import { Button, Card, Skeleton, TextArea, useToast } from "@structura/ui";
+import { Button, Card, Skeleton, useToast } from "@structura/ui";
 import { Loader2, Save, Sparkles, Target } from "lucide-react";
 
 import {
@@ -35,6 +35,7 @@ import {
   type PositioningText,
 } from "../utils/positioningRedraft";
 import { PositioningPagesRead } from "./PositioningPagesRead";
+import { PositioningTextArea } from "./PositioningTextArea";
 import { RedraftConfirmDialog } from "./RedraftConfirmDialog";
 
 type Draft = PositioningText;
@@ -192,34 +193,31 @@ export const PositioningCard = () => {
           </>
         ) : (
           <>
-            <TextArea
+            <PositioningTextArea
               label={__("What does your business do?", "structura")}
               value={value.what}
               onChange={(e) => update({ what: e.target.value })}
               rows={2}
-              maxLength={280}
               placeholder={__(
                 "We help remote design teams ship Figma faster…",
                 "structura",
               )}
             />
-            <TextArea
+            <PositioningTextArea
               label={__("Who's your typical customer?", "structura")}
               value={value.who}
               onChange={(e) => update({ who: e.target.value })}
               rows={2}
-              maxLength={280}
               placeholder={__(
                 "Senior designers at 20–200-person companies…",
                 "structura",
               )}
             />
-            <TextArea
+            <PositioningTextArea
               label={__("What problem do you solve for them?", "structura")}
               value={value.problem}
               onChange={(e) => update({ problem: e.target.value })}
               rows={2}
-              maxLength={280}
               placeholder={__(
                 "Async handoff between designers and engineers breaks down…",
                 "structura",

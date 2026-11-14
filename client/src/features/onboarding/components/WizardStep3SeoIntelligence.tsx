@@ -38,7 +38,6 @@ import {
   Card,
   DiscoverableChipList,
   ReferralLinksEditor,
-  TextArea,
   useToast,
   type DiscoverableChipItem,
 } from "@structura/ui";
@@ -58,6 +57,7 @@ import {
 import { useWizardStore, type SeoStepDraft } from "../state/wizardStore";
 import { redraftNeedsConfirm, type PositioningText } from "../utils/positioningRedraft";
 import { PositioningPagesRead } from "./PositioningPagesRead";
+import { PositioningTextArea } from "./PositioningTextArea";
 import { RedraftConfirmDialog } from "./RedraftConfirmDialog";
 import { WizardMagicLoader } from "./WizardMagicLoader";
 
@@ -454,7 +454,7 @@ export const WizardStep3SeoIntelligence = () => {
           }
         />
 
-        <TextArea
+        <PositioningTextArea
           label={__("In one sentence, what does your business do?", "structura")}
           value={positioning.what}
           onChange={(e) =>
@@ -465,9 +465,8 @@ export const WizardStep3SeoIntelligence = () => {
             "We help remote design teams ship Figma faster…",
             "structura",
           )}
-          maxLength={280}
         />
-        <TextArea
+        <PositioningTextArea
           label={__("Who's your typical customer?", "structura")}
           value={positioning.who}
           onChange={(e) =>
@@ -478,9 +477,8 @@ export const WizardStep3SeoIntelligence = () => {
             "Senior designers at 20–200-person companies…",
             "structura",
           )}
-          maxLength={280}
         />
-        <TextArea
+        <PositioningTextArea
           label={__("What problem do you solve for them?", "structura")}
           value={positioning.problem}
           onChange={(e) =>
@@ -491,7 +489,6 @@ export const WizardStep3SeoIntelligence = () => {
             "Async handoff between designers and engineers breaks down…",
             "structura",
           )}
-          maxLength={280}
         />
         <PositioningPagesRead pages={pagesRead} drafted />
 

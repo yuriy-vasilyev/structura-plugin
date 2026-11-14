@@ -50,6 +50,56 @@ describe("TextArea description", () => {
   });
 });
 
+/**
+ * TextArea `counter` (customer report 2026-11-13): positioning answers were
+ * cut at a limit no field showed. A bounded field now shows a live count
+ * under its right edge, in the error tone once over the bound.
+ */
+describe("TextArea counter", () => {
+  it("renders the count under the control and describes the control with it", () => {
+    render(<TextArea label="What you do" counter={{ text: "12 / 3,000" }} />);
+    const control = screen.getByRole("textbox", { name: "What you do" });
+    const counter = screen.getByText("12 / 3,000");
+    expect(control).toHaveAccessibleDescription("12 / 3,000");
+    expect(control.compareDocumentPosition(counter) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(counter).toHaveClass(...tokens(formFieldDescriptionVariants({ intent: "default" })));
+    expect(counter).toHaveClass("tabular-nums");
+  });
+
+  it("is quiet: not an alert, not a live region", () => {
+    render(<TextArea label="What you do" counter={{ text: "12 / 3,000" }} />);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByText("12 / 3,000")).not.toHaveAttribute("aria-live");
+  });
+
+  it("turns to the error tone over the bound", () => {
+    render(<TextArea label="What you do" counter={{ text: "3,001 / 3,000", over: true }} />);
+    expect(screen.getByText("3,001 / 3,000")).toHaveClass(
+      ...tokens(formFieldDescriptionVariants({ intent: "error" }))
+    );
+  });
+
+  it("sits beside the error and the help line, all three describing the control", () => {
+    render(
+      <TextArea
+        label="What you do"
+        description={HELP}
+        error="Keep this to 3,000 characters or fewer."
+        counter={{ text: "3,001 / 3,000", over: true }}
+      />
+    );
+    const control = screen.getByRole("textbox", { name: "What you do" });
+    const counter = screen.getByText("3,001 / 3,000");
+    const ids = control.getAttribute("aria-describedby")?.split(" ") ?? [];
+    expect(ids).toHaveLength(3);
+    expect(ids).toEqual(
+      expect.arrayContaining([screen.getByText(HELP).id, screen.getByRole("alert").id, counter.id])
+    );
+    // One row: the messages on the left, the count on the right.
+    expect(counter.parentElement).toBe(screen.getByRole("alert").parentElement?.parentElement);
+  });
+});
+
 describe("TextArea labelAdornment", () => {
   it("renders the adornment after the label text, outside the label", () => {
     render(

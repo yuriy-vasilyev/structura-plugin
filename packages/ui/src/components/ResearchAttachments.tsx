@@ -6,14 +6,11 @@ import {
   useState,
   type DragEvent,
   type KeyboardEvent,
-  type ReactNode,
 } from "react";
 import {
   AlertCircle,
-  Check,
   CheckCheck,
   FileDown,
-  Info,
   Paperclip,
   Plus,
   RefreshCw,
@@ -23,7 +20,13 @@ import {
 } from "lucide-react";
 import { cn } from "../utils";
 import { Card } from "./Card";
-import { ProgressBar } from "./ProgressBar";
+import {
+  AttachmentIconButton,
+  AttachmentReadyDisc,
+  AttachmentRetryButton,
+  AttachmentRow,
+  AttachmentTile,
+} from "./AttachmentRow";
 import { formatBytes, matchesAccept } from "./FileUpload";
 
 /**
@@ -139,12 +142,15 @@ export interface ResearchAttachmentsProps {
 /**
  * Accepted research formats. `.htm` is accepted and normalized to the
  * `html` tile so users with legacy exports aren't rejected on a
- * spelling technicality.
+ * spelling technicality. The persona voice sources take the same files.
  */
-const ACCEPT = ".pdf,.docx,.txt,.md,.html,.htm";
+export const ATTACHMENT_ACCEPT = ".pdf,.docx,.txt,.md,.html,.htm";
+const ACCEPT = ATTACHMENT_ACCEPT;
 
 const DEFAULT_MAX_FILES = 5;
-const DEFAULT_MAX_SIZE_BYTES = 10 * 1024 * 1024;
+/** Largest file the attachment upload takes (`functions/src/attachments`). */
+export const ATTACHMENT_MAX_SIZE_BYTES = 10 * 1024 * 1024;
+const DEFAULT_MAX_SIZE_BYTES = ATTACHMENT_MAX_SIZE_BYTES;
 
 /**
  * Row-exit animation length. Mirrors `--duration-fast` (150ms) from
@@ -154,7 +160,7 @@ const DEFAULT_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const EXIT_MS = 150;
 
 /** Lowercased extension from a file name; `.htm` normalizes to `html`. */
-function extFromFileName(name: string): string {
+export function extFromFileName(name: string): string {
   const dot = name.lastIndexOf(".");
   const ext = dot === -1 ? "" : name.slice(dot + 1).toLowerCase();
   return ext === "htm" ? "html" : ext;
@@ -180,51 +186,7 @@ function prefersReducedMotion(): boolean {
 
 /** File-type tile — mono extension label, not per-type icons (handoff §row anatomy). */
 function ExtTile({ ext, failed }: { ext: string; failed?: boolean }) {
-  return (
-    <span
-      className={cn(
-        "flex h-9 w-10 shrink-0 items-center justify-center rounded-lg font-mono text-[9px] font-bold uppercase tracking-wide",
-        failed
-          ? "bg-red-50 text-red-600 ring-1 ring-inset ring-red-100 dark:bg-red-500/10 dark:text-red-300 dark:ring-red-500/20"
-          : "bg-neutral-100 text-neutral-500 ring-1 ring-inset ring-neutral-200 dark:bg-white/[.06] dark:text-neutral-400 dark:ring-white/[.08]",
-      )}
-      aria-hidden="true"
-    >
-      {ext.toUpperCase()}
-    </span>
-  );
-}
-
-function IconButton({
-  label,
-  onClick,
-  danger,
-  disabled,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  danger?: boolean;
-  disabled?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        "flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-neutral-400 transition-colors disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500",
-        danger
-          ? "hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-          : "hover:bg-neutral-100 hover:text-neutral-600 dark:hover:bg-white/10 dark:hover:text-neutral-300",
-      )}
-    >
-      {children}
-    </button>
-  );
+  return <AttachmentTile failed={failed}>{ext.toUpperCase()}</AttachmentTile>;
 }
 
 /**
@@ -546,82 +508,65 @@ export const ResearchAttachments = forwardRef<HTMLDivElement, ResearchAttachment
                     <div className="overflow-hidden">
                       <div className="animate-slide-in-bottom motion-reduce:animate-none">
                         {row.status === "busy" ? (
-                          <div className="flex items-center gap-3 px-3.5 py-3">
-                            <ExtTile ext={row.ext} />
-                            <div className="min-w-0 flex-1">
-                              <p
-                                className="m-0! truncate text-[13px] font-semibold text-neutral-800 dark:text-neutral-100"
-                                title={row.name}
-                              >
-                                {row.name}
-                              </p>
-                              <ProgressBar
-                                className="mt-1.5 h-1 max-w-[240px] bg-neutral-200 dark:bg-white/10"
-                                fillClassName="bg-brand-500 dark:bg-brand-400"
-                              />
-                              <p className="m-0! mt-1 text-[11.5px] text-neutral-500 dark:text-neutral-400">
+                          <AttachmentRow
+                            state="busy"
+                            tile={<ExtTile ext={row.ext} />}
+                            title={row.name}
+                            titleTooltip={row.name}
+                            meta={
+                              <>
                                 {labels.busy}{" "}
                                 <span className="text-neutral-400 dark:text-neutral-600">
                                   · {formatBytes(row.sizeBytes)}
                                 </span>
-                              </p>
-                            </div>
-                            <IconButton
-                              label={`${labels.cancel} — ${row.name}`}
-                              onClick={() => cancelRow(row)}
-                              disabled={disabled}
-                            >
-                              <X size={15} aria-hidden="true" />
-                            </IconButton>
-                          </div>
+                              </>
+                            }
+                            actions={
+                              <AttachmentIconButton
+                                label={`${labels.cancel} — ${row.name}`}
+                                onClick={() => cancelRow(row)}
+                                disabled={disabled}
+                              >
+                                <X size={15} aria-hidden="true" />
+                              </AttachmentIconButton>
+                            }
+                          />
                         ) : row.status === "failed" ? (
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 bg-red-50/60 px-3.5 py-3 dark:bg-red-500/[.06]">
-                            <ExtTile ext={row.ext} failed />
-                            {/* basis-40 lets the actions wrap below ~380px
-                                instead of crushing the failure note. */}
-                            <div className="min-w-0 flex-1 basis-40">
-                              <p
-                                className="m-0! truncate text-[13px] font-semibold text-neutral-800 dark:text-neutral-100"
-                                title={row.name}
-                              >
-                                {row.name}
-                              </p>
-                              <p className="m-0! mt-0.5 text-[11.5px] font-medium leading-snug text-red-600 dark:text-red-400">
-                                {row.errorMessage || labels.failedNote}
-                              </p>
-                            </div>
-                            <div className="ml-auto flex shrink-0 items-center gap-1.5">
-                              <button
-                                type="button"
-                                aria-label={`${labels.retry} — ${row.name}`}
-                                onClick={() => retryRow(row)}
-                                disabled={disabled}
-                                className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-neutral-700 shadow-sm transition-colors hover:bg-neutral-50 hover:text-neutral-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
-                              >
-                                <RefreshCw size={12} aria-hidden="true" />
-                                {labels.retry}
-                              </button>
-                              <IconButton
-                                label={labels.remove(row.name)}
-                                onClick={() => removeRow(row)}
-                                danger
-                                disabled={disabled}
-                              >
-                                <Trash2 size={15} aria-hidden="true" />
-                              </IconButton>
-                            </div>
-                          </div>
+                          <AttachmentRow
+                            state="failed"
+                            tile={<ExtTile ext={row.ext} failed />}
+                            title={row.name}
+                            titleTooltip={row.name}
+                            meta={row.errorMessage || labels.failedNote}
+                            actions={
+                              <>
+                                <AttachmentRetryButton
+                                  label={`${labels.retry} — ${row.name}`}
+                                  onClick={() => retryRow(row)}
+                                  disabled={disabled}
+                                >
+                                  <RefreshCw size={12} aria-hidden="true" />
+                                  {labels.retry}
+                                </AttachmentRetryButton>
+                                <AttachmentIconButton
+                                  label={labels.remove(row.name)}
+                                  onClick={() => removeRow(row)}
+                                  danger
+                                  disabled={disabled}
+                                >
+                                  <Trash2 size={15} aria-hidden="true" />
+                                </AttachmentIconButton>
+                              </>
+                            }
+                          />
                         ) : (
-                          <div className="flex items-center gap-3 px-3.5 py-3">
-                            <ExtTile ext={row.ext} />
-                            <div className="min-w-0 flex-1">
-                              <p
-                                className="m-0! truncate text-[13px] font-semibold text-neutral-800 dark:text-neutral-100"
-                                title={row.name}
-                              >
-                                {row.name}
-                              </p>
-                              <p className="m-0! mt-0.5 text-[11.5px] text-neutral-500 dark:text-neutral-400">
+                          <AttachmentRow
+                            state="ready"
+                            tile={<ExtTile ext={row.ext} />}
+                            title={row.name}
+                            titleTooltip={row.name}
+                            meta={
+                              <>
                                 {formatBytes(row.sizeBytes)}
                                 {row.extracted
                                   ? ` · ${
@@ -630,38 +575,29 @@ export const ResearchAttachments = forwardRef<HTMLDivElement, ResearchAttachment
                                         : labels.readWords(row.extracted.used)
                                     }`
                                   : ""}
-                              </p>
-                              {row.extracted?.truncated ? (
-                                // Informational, deliberately NOT amber —
-                                // partial use is a fact, not a warning.
-                                <p className="m-0! mt-1 flex items-start gap-1.5 text-[11.5px] leading-snug text-neutral-500 dark:text-neutral-400">
-                                  <Info
-                                    size={12}
-                                    className="mt-0.5 shrink-0 text-neutral-400 dark:text-neutral-500"
-                                    aria-hidden="true"
-                                  />
-                                  <span>
-                                    {labels.partialNote(
-                                      row.extracted.used,
-                                      row.extracted.unit,
-                                    )}
-                                  </span>
-                                </p>
-                              ) : null}
-                            </div>
-                            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400">
-                              <Check size={13} aria-hidden="true" />
-                              <span className="sr-only">{labels.srReady}</span>
-                            </span>
-                            <IconButton
-                              label={labels.remove(row.name)}
-                              onClick={() => removeRow(row)}
-                              danger
-                              disabled={disabled}
-                            >
-                              <Trash2 size={15} aria-hidden="true" />
-                            </IconButton>
-                          </div>
+                              </>
+                            }
+                            // Informational, deliberately NOT amber — partial
+                            // use is a fact, not a warning.
+                            note={
+                              row.extracted?.truncated
+                                ? labels.partialNote(row.extracted.used, row.extracted.unit)
+                                : undefined
+                            }
+                            actions={
+                              <>
+                                <AttachmentReadyDisc label={labels.srReady} />
+                                <AttachmentIconButton
+                                  label={labels.remove(row.name)}
+                                  onClick={() => removeRow(row)}
+                                  danger
+                                  disabled={disabled}
+                                >
+                                  <Trash2 size={15} aria-hidden="true" />
+                                </AttachmentIconButton>
+                              </>
+                            }
+                          />
                         )}
                       </div>
                     </div>

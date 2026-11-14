@@ -34,6 +34,13 @@ export interface TextAreaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaE
    * `<label>`, not in it, so the field's accessible name stays `label`.
    */
   labelAdornment?: ReactNode;
+  /**
+   * Live length readout under the control's right edge, e.g. "1,234 / 3,000".
+   * The caller formats `text` in the page's language; `over` shows it in the
+   * error tone. A Headless UI `Description`, so it joins the error and the
+   * help line in the control's `aria-describedby`.
+   */
+  counter?: { text: string; over?: boolean };
 }
 
 export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
@@ -52,6 +59,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       labelStyle = "default",
       description,
       labelAdornment,
+      counter,
       ...rest
     },
     ref
@@ -66,6 +74,26 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       >
         {required ? `${label} *` : label}
       </Label>
+    );
+
+    const messages = (
+      <>
+        {/* Same error treatment as InputField: shared variant, dark tone, announced.
+         *  The old text-sm red-600 had no dark tone, 3.96:1 on dark cards
+         *  (2026-11-08 contrast audit). */}
+        {error && (
+          <Description role="alert" className={formFieldDescriptionVariants({ intent: "error" })}>
+            {error}
+          </Description>
+        )}
+        {/* A div, not Headless UI's default <p>: wp-admin's common.css gives
+         *  every p its own margin and font size. */}
+        {description && (
+          <Description as="div" className={formFieldDescriptionVariants({ intent: "default" })}>
+            {description}
+          </Description>
+        )}
+      </>
     );
 
     return (
@@ -127,20 +155,22 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
           )}
         </div>
 
-        {/* Same error treatment as InputField: shared variant, dark tone, announced.
-         *  The old text-sm red-600 had no dark tone, 3.96:1 on dark cards
-         *  (2026-11-08 contrast audit). */}
-        {error && (
-          <Description role="alert" className={formFieldDescriptionVariants({ intent: "error" })}>
-            {error}
-          </Description>
-        )}
-        {/* A div, not Headless UI's default <p>: wp-admin's common.css gives
-         *  every p its own margin and font size. */}
-        {description && (
-          <Description as="div" className={formFieldDescriptionVariants({ intent: "default" })}>
-            {description}
-          </Description>
+        {counter ? (
+          // The count shares the messages' row, at the control's right edge.
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">{messages}</div>
+            <Description
+              as="div"
+              className={cn(
+                formFieldDescriptionVariants({ intent: counter.over ? "error" : "default" }),
+                "shrink-0 tabular-nums"
+              )}
+            >
+              {counter.text}
+            </Description>
+          </div>
+        ) : (
+          messages
         )}
       </Field>
     );

@@ -14,6 +14,12 @@ export interface EmptyStateProps extends HTMLAttributes<HTMLDivElement> {
   description?: ReactNode;
   /** Optional CTA(s) — typically a `<Button>`. */
   action?: ReactNode;
+  /**
+   * Tile behind the icon. `brand` (default) for an inviting empty list;
+   * `neutral` for a state that is not dangerous but not an invitation
+   * either, such as a draft that failed.
+   */
+  iconTone?: "brand" | "neutral";
 }
 
 /**
@@ -27,7 +33,7 @@ export interface EmptyStateProps extends HTMLAttributes<HTMLDivElement> {
  * internal strings — all copy comes from props so each consumer translates it.
  */
 export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
-  ({ icon, title, description, action, className, ...props }, ref) => {
+  ({ icon, title, description, action, iconTone = "brand", className, ...props }, ref) => {
     return (
       <div
         ref={ref}
@@ -38,7 +44,14 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         {...props}
       >
         {icon ? (
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-brand-600 dark:bg-brand-950/40 dark:text-brand-400">
+          <div
+            className={cn(
+              "flex h-14 w-14 items-center justify-center rounded-full",
+              iconTone === "neutral"
+                ? "bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
+                : "bg-brand-50 text-brand-600 dark:bg-brand-950/40 dark:text-brand-400",
+            )}
+          >
             {icon}
           </div>
         ) : null}

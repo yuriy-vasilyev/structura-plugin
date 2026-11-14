@@ -88,7 +88,8 @@ export function useWizardPositioningQuery(opts: { enabled?: boolean } = {}) {
 }
 
 /**
- * Save positioning. The cloud caps each field at 280 chars + stamps
+ * Save positioning. The cloud cuts each answer at
+ * `POSITIONING_FIELD_MAX_LENGTH` (the fields stop there first) and stamps
  * `capturedAt`. We update the React Query cache with the server's
  * canonical response.
  */

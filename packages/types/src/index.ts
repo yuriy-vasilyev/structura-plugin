@@ -559,6 +559,16 @@ export const SINGLE_POST_TOPIC_MAX_LENGTH = 1000;
 export const MANAGED_PERSONA_PROMPT_MAX_LENGTH = 8000;
 
 /**
+ * Most characters each positioning answer (what the site does, who it
+ * serves, the problem it solves) may hold, on every plan. The three go into
+ * every writer prompt and into keyword discovery. Until 2026-11-13 the portal
+ * cut each answer at 1,000 characters and wp-admin at 280, and neither said
+ * so: a customer's detailed answers were stored cut mid-word. The fields now
+ * show this bound with a live count.
+ */
+export const POSITIONING_FIELD_MAX_LENGTH = 3000;
+
+/**
  * Returns `value` unchanged when it fits in `max` UTF-16 code units (what
  * `String.length` and `maxLength` count), else trimmed and cut to `max`
  * without splitting a surrogate pair.
@@ -571,6 +581,171 @@ export const clampTextLength = (value: string, max: number): string => {
   const last = cut.charCodeAt(cut.length - 1);
   return last >= 0xd800 && last <= 0xdbff ? cut.slice(0, -1) : cut;
 };
+
+// ─── Persona voice from the author's own writing ─────────────────────────────
+//
+// Spec: specs/persona-from-existing-writing.md §4 to §6. Hand-copied to
+// functions/src/types/shared.ts; keep the two identical. The persona fields
+// are optional: older plugin and portal builds never send them, and a save
+// without them leaves them as they are.
+
+/** Links a customer may add to one draft. */
+export const VOICE_LINKS_MAX = 5;
+/** Files a customer may add to one draft. */
+export const VOICE_FILES_MAX = 3;
+/** Shortest pasted text a draft reads, in characters. */
+export const VOICE_TEXT_MIN_LENGTH = 300;
+/** Longest pasted text a draft reads, in characters. */
+export const VOICE_TEXT_MAX_LENGTH = 20_000;
+/** Found articles fill what a draft reads up to this many pieces; the customer's own pieces are all read. */
+export const VOICE_PIECES_TARGET = 5;
+/** Characters of body text below which a linked page or a found article is too short to read. */
+export const VOICE_ARTICLE_MIN_LENGTH = 1_200;
+/** Style excerpts a persona keeps. */
+export const VOICE_SAMPLES_MAX = 3;
+/** Longest style excerpt, in characters. */
+export const VOICE_SAMPLE_MAX_LENGTH = 1_200;
+/** Days a voice upload, the file and its extracted text, is kept. */
+export const VOICE_FILE_RETENTION_DAYS = 90;
+
+/** File types a voice upload may have (the research attachment extractor's). */
+export type VoiceFileExt = "pdf" | "docx" | "txt" | "md" | "html";
+
+/**
+ * One piece of writing a persona draft read: an article found on the site, a
+ * page the customer linked, an upload (`expiresAt`, ISO 8601, is when the file
+ * and its text are deleted) or pasted text (not kept).
+ */
+export type VoiceSourceRef =
+  | { kind: "article" | "link"; url: string; title: string; words?: number }
+  | {
+      kind: "file";
+      name: string;
+      ext: VoiceFileExt;
+      pages?: number;
+      words?: number;
+      attachmentId: string;
+      expiresAt: string;
+    }
+  | { kind: "text"; words: number };
+
+/** A verbatim excerpt of the author's writing, at most {@link VOICE_SAMPLE_MAX_LENGTH} characters, and the piece it came from. */
+export interface VoiceSample {
+  text: string;
+  source: VoiceSourceRef;
+}
+
+/** What a voice was drafted from: the customer's writing, the homepage, or the business details alone. */
+export type VoiceDraftBasis = "writing" | "homepage" | "profile";
+
+/** A persona's last voice draft as callables return it (`at` as ISO 8601). */
+export interface VoiceDraftView {
+  at: string;
+  basis: VoiceDraftBasis;
+  /** The host looked at, without `www.`. */
+  domain: string;
+  /** {@link voiceDraftKey} of the drafted prompt, tone and reading level. */
+  key: string;
+}
+
+/** The voice fields a persona create or update may send; each is optional and left as stored when absent. */
+export interface PersonaVoiceFieldsInput {
+  voiceSamples?: VoiceSample[];
+  voiceSources?: VoiceSourceRef[];
+  /** `null` removes the draft record (Undo of a first draft). */
+  voiceDraft?: VoiceDraftView | null;
+  /** Found articles the customer removed; later lookups for this persona skip them. */
+  voiceExcludedUrls?: string[];
+}
+
+/**
+ * Returns the key over a persona's voice description, tone and reading level
+ * that `voiceDraft.key` records: a persona whose key differs from it was
+ * edited by hand since the draft. Whitespace is ignored. The excerpts are not
+ * part of it, so removing one is not a hand edit.
+ */
+export const voiceDraftKey = (persona: { systemPrompt?: string; tone?: string; readingLevel?: string }): string => {
+  const prompt = typeof persona.systemPrompt === "string" ? persona.systemPrompt.replace(/\s+/g, " ").trim() : "";
+  return JSON.stringify([prompt, persona.tone ?? "", persona.readingLevel ?? ""]);
+};
+
+/** Outcome of a site's article lookup. */
+export type VoiceArticlesStatus = "found" | "none" | "unreachable";
+
+/** One article the lookup found, or one page the customer linked, read and ready for a draft. */
+export interface VoiceArticle {
+  /** Key of the read text in the cloud's 24-hour cache; a draft names pieces by it. */
+  id: string;
+  url: string;
+  title: string;
+  words: number;
+}
+
+/** `findVoiceArticlesPortal` request. `personaId` skips that persona's `voiceExcludedUrls`. */
+export interface FindVoiceArticlesRequest {
+  workspaceId: string;
+  activationId: string;
+  personaId?: string;
+}
+
+/** `findVoiceArticlesPortal` response. */
+export interface FindVoiceArticlesResponse {
+  status: VoiceArticlesStatus;
+  /** The host looked at, without `www.`. */
+  domain: string;
+  articles: VoiceArticle[];
+}
+
+/** `readVoiceLinkPortal` request. */
+export interface ReadVoiceLinkRequest {
+  workspaceId: string;
+  url: string;
+}
+
+/** Why a link cannot be read: not an https address, not a public host, no readable page, or under {@link VOICE_ARTICLE_MIN_LENGTH}. */
+export type VoiceLinkError = "invalid" | "notPublic" | "unreadable" | "tooShort";
+
+/** `readVoiceLinkPortal` response. */
+export type ReadVoiceLinkResponse = VoiceArticle | { error: VoiceLinkError };
+
+/** The pieces a draft reads, chosen in the portal. */
+export interface PersonaVoiceSources {
+  /** Found articles, by `VoiceArticle.id`. */
+  articleIds?: string[];
+  /** Read links, by `VoiceArticle.id`. */
+  linkIds?: string[];
+  /** Voice uploads (`purpose: "voice"`). */
+  attachmentIds?: string[];
+  /** Pasted text, {@link VOICE_TEXT_MIN_LENGTH} to {@link VOICE_TEXT_MAX_LENGTH} characters. */
+  text?: string;
+}
+
+/** `suggestPersonaPortal` request. Without `sources` the draft runs the article lookup itself. */
+export interface SuggestPersonaRequest {
+  workspaceId: string;
+  activationId: string;
+  /** Redraft of this persona: its name is kept and its `voiceExcludedUrls` are skipped. */
+  personaId?: string;
+  sources?: PersonaVoiceSources;
+}
+
+/** A drafted persona, ready to hand to the create or update callables as it is. */
+export interface SuggestedPersona {
+  name: string;
+  systemPrompt: string;
+  tone: string;
+  readingLevel: string;
+  voiceSamples: VoiceSample[];
+  voiceSources: VoiceSourceRef[];
+  voiceDraft: VoiceDraftView;
+}
+
+/** `suggestPersonaPortal` response. */
+export interface SuggestPersonaResponse {
+  persona: SuggestedPersona | null;
+  homepageRead: boolean;
+  reason?: "ai_unavailable" | "plan_gated" | "error";
+}
 
 export type LicenseStatus = "active" | "expired" | "past_due" | "canceled" | "refunded";
 

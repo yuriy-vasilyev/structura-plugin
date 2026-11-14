@@ -26,7 +26,9 @@ vi.mock("@wordpress/i18n", () => ({
   __: (text: string) => text,
   sprintf: (format: string, ...args: unknown[]) => {
     let i = 0;
-    return format.replace(/%[sd]/g, () => String(args[i++]));
+    return format.replace(/%(\d+)\$[sd]|%[sd]/g, (_match, n?: string) =>
+      String(n ? args[Number(n) - 1] : args[i++]),
+    );
   },
 }));
 
@@ -244,6 +246,28 @@ describe("WizardStep3SeoIntelligence — auto-suggest orchestration", () => {
     expect(useWizardStore.getState().drafts.step3?.positioning.what).toBe(
       "We sell shoes",
     );
+  });
+});
+
+// Customer report 2026-11-13: positioning was cut at a limit no field showed.
+// Each answer now takes up to the shared 3,000 characters (280 before) and
+// shows its count, as the customer portal does.
+describe("WizardStep3SeoIntelligence — the 3,000-character bound", () => {
+  it("holds each answer to 3,000 characters and shows its count", () => {
+    useWizardStore.getState().setStep3Draft({
+      positioning: { what: "We sell shoes", who: "Runners", problem: "Blisters" },
+      positioningSource: "user",
+      competitorUrls: [],
+    });
+
+    renderStep();
+
+    const what = screen.getByLabelText("In one sentence, what does your business do?") as HTMLTextAreaElement;
+    const who = screen.getByLabelText("Who's your typical customer?") as HTMLTextAreaElement;
+    const problem = screen.getByLabelText("What problem do you solve for them?") as HTMLTextAreaElement;
+    for (const field of [what, who, problem]) expect(field.maxLength).toBe(3000);
+    expect(what).toHaveAccessibleDescription("13 of 3000");
+    expect(who).toHaveAccessibleDescription("7 of 3000");
   });
 });
 

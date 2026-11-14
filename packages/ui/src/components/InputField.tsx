@@ -62,6 +62,12 @@ export interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputEleme
    * `<label>`, not in it, so the field's accessible name stays `label`.
    */
   labelAdornment?: ReactNode;
+  /**
+   * Marks the control `aria-invalid` when its error is shown outside the
+   * field (the voice link row puts it beside a counter). Headless UI's
+   * `Input` owns that attribute, so it cannot be passed as `aria-invalid`.
+   */
+  invalid?: boolean;
 }
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(

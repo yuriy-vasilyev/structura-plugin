@@ -1,5 +1,31 @@
 # Changelog
 
+## [2.39.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.38.1...v2.39.0) (2026-11-14)
+
+
+### Features
+
+* **personas:** learn a persona's voice from the customer's own articles ([f119bba](https://github.com/yuriy-vasilyev/structura-core/commit/f119bba857b4afaefd6aa10230055c7c4198d863))
+* **portal:** show what a persona's voice is based on and add your own writing ([216db2f](https://github.com/yuriy-vasilyev/structura-core/commit/216db2fe97383aa2b85eadfe1efcc9a93e1938d9))
+
+
+### Bug Fixes
+
+* **billing:** keep one monthly allowance when a site is removed and added again ([38a2f33](https://github.com/yuriy-vasilyev/structura-core/commit/38a2f33c85736bfb3e5eebcaa5a6baca28d02f78))
+* **campaigns:** skip a keyword that rewords one the site already published ([b6b7a22](https://github.com/yuriy-vasilyev/structura-core/commit/b6b7a222a04e46504362447452a79efb22757d91))
+* **plugin:** show the Positioning limit and keep long answers whole ([f665a5b](https://github.com/yuriy-vasilyev/structura-core/commit/f665a5b8e1dcc0395509a0b5fc2c6ddc5cda99a4))
+
+
+### Performance Improvements
+
+* **discovery:** one fewer metric lookup per run, and read People Also Ask alongside the SERP checks ([f8e9b78](https://github.com/yuriy-vasilyev/structura-core/commit/f8e9b78df5a047839c0267964fb3b14a712988c9))
+* **discovery:** shorten keyword discovery by about half a minute ([2a8bc6e](https://github.com/yuriy-vasilyev/structura-core/commit/2a8bc6eda37c5f3ea5c90a9263967c4fa05ee741))
+
+
+### Reverts
+
+* **discovery:** keep keyword discovery on the stronger model ([55ccc29](https://github.com/yuriy-vasilyev/structura-core/commit/55ccc29645ebdec86910b2eeb70c7264abe9b1bb))
+
 ## [2.38.1](https://github.com/yuriy-vasilyev/structura-core/compare/v2.38.0...v2.38.1) (2026-11-13)
 
 
