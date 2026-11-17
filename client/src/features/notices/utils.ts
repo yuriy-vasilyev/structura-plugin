@@ -15,6 +15,7 @@
  */
 
 import { __, _n, sprintf } from "@wordpress/i18n";
+import { PORTAL_BASE_URL } from "@/utils/portalLinks";
 import type { Notice, NoticeCtaHref, NoticeSeverity } from "./types";
 
 /**
@@ -250,7 +251,7 @@ export function resolveCta(cta: Notice["cta"]): { href: string; external: boolea
     case "both":
       return { href: hashFromWpAdminRoute(href.wpAdmin), external: false };
     case "portal":
-      return { href: `https://app.structurawp.com${href.route}`, external: true };
+      return { href: `${PORTAL_BASE_URL}${href.route}`, external: true };
     case "external":
       return { href: href.url, external: true };
   }

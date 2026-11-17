@@ -7,17 +7,1377 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-13T16:01:00+00:00\n"
+"POT-Creation-Date: 2026-11-16T21:06:50+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: structura\n"
 
+#: .tmp-wporg/structura/includes/Api/Campaign_Shape_Transformer.php:132
+#: .tmp-wporg/structura/includes/Api/Campaign_Shape_Transformer.php:141
 #: plugin/includes/Api/Campaign_Shape_Transformer.php:196
 #: plugin/includes/Api/Campaign_Shape_Transformer.php:205
 msgid "Not Scheduled"
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:1070 plugin/includes/Api/Rest_Api.php:1176
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:821
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1806
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1947
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2102
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4709
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4798
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4899
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4971
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5009
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5063
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5128
+#: plugin/includes/Api/Rest_Api.php:1198
+msgid "Active license required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:867
+#: plugin/includes/Api/Rest_Api.php:1140
+msgid "Active Pro or Cloud license required to access analytics."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1423
+#: plugin/includes/Api/Rest_Api.php:1828
+msgid "Unknown error"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1501
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4894
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4966
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5058
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5123
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5231
+#: plugin/includes/Api/Rest_Api.php:1906 plugin/includes/Api/Rest_Api.php:6651
+#: plugin/includes/Api/Rest_Api.php:6740 plugin/includes/Api/Rest_Api.php:6788
+#: plugin/includes/Api/Rest_Api.php:6943 plugin/includes/Api/Rest_Api.php:7009
+#: plugin/includes/Api/Rest_Api.php:7115
+msgid "Campaign ID is required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1529
+#: plugin/includes/Api/Rest_Api.php:1935
+msgid "Manual execution initiated in background."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1575
+#: plugin/includes/Api/Rest_Api.php:1981
+msgid "Unable to delete task."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1601
+#: plugin/includes/Api/Rest_Api.php:2130
+msgid "A post objective is required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1615
+#: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:50
+#: plugin/includes/Api/Rest_Api.php:2173
+#: plugin/includes/Scheduler/Campaign_Validator.php:51
+msgid "A text provider is required."
+msgstr ""
+
+#. translators: %s: provider slug (e.g. "anthropic")
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1629
+#: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:65
+#: plugin/includes/Api/Rest_Api.php:2187
+#: plugin/includes/Scheduler/Campaign_Validator.php:66
+msgid "Provider \"%s\" does not support image generation."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1647
+#: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:98
+#: plugin/includes/Api/Rest_Api.php:2205
+#: plugin/includes/Scheduler/Campaign_Validator.php:117
+msgid "The fallback text provider must be different from the primary."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1658
+#: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:110
+#: plugin/includes/Api/Rest_Api.php:2216
+#: plugin/includes/Scheduler/Campaign_Validator.php:129
+msgid "The fallback image provider must be different from the primary."
+msgstr ""
+
+#. translators: %s: provider slug (e.g. "anthropic")
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1668
+#: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:119
+#: plugin/includes/Api/Rest_Api.php:2226
+#: plugin/includes/Scheduler/Campaign_Validator.php:138
+msgid "Fallback provider \"%s\" does not support image generation."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1762
+#: plugin/includes/Api/Rest_Api.php:2401
+msgid ""
+"Could not cache the post request for background processing. Please try again."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1782
+#: plugin/includes/Api/Rest_Api.php:2421
+msgid ""
+"Could not queue this post for background processing. Open Tools → Site "
+"Health and resolve any Structura-flagged issues (usually MySQL "
+"max_allowed_packet) before retrying."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1791
+#: plugin/includes/Api/Rest_Api.php:2430
+msgid "Your post is being generated in the background."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1811
+#: plugin/includes/Api/Rest_Api.php:2451
+msgid "Campaign not found."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1819
+#: plugin/includes/Api/Rest_Api.php:2459
+msgid "Campaign must have an objective."
+msgstr ""
+
+#. translators: %s: campaign identity name or keyphrase.
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1826
+#: plugin/includes/Api/Rest_Api.php:2466
+msgid "Authority discovery started for \"%s\"…"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1844
+#: plugin/includes/Api/Rest_Api.php:2484
+msgid ""
+"Campaign is missing a text provider. Please re-save the campaign settings."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1875
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2014
+#: plugin/includes/Api/Rest_Api.php:2525 plugin/includes/Api/Rest_Api.php:2678
+msgid "Unknown error from discovery service."
+msgstr ""
+
+#. translators: 1: number of domains saved locally, 2: campaign id.
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1896
+#: plugin/includes/Api/Rest_Api.php:2546
+msgid ""
+"Authority discovery saved %1$d domains but cloud persist failed for campaign "
+"%2$s."
+msgstr ""
+
+#. translators: 1: number of authority domains found, 2: number of queries the discovery service ran, 3: total wall-clock duration in milliseconds.
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1904
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2022
+#: plugin/includes/Api/Rest_Api.php:2554 plugin/includes/Api/Rest_Api.php:2686
+msgid ""
+"Authority discovery complete: %1$d domains found (%2$d queries, %3$dms)."
+msgstr ""
+
+#. translators: %s: error message from the authority-discovery service.
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1921
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2039
+#: plugin/includes/Api/Rest_Api.php:2570 plugin/includes/Api/Rest_Api.php:2702
+msgid "Authority discovery failed: %s"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1967
+#: plugin/includes/Api/Rest_Api.php:2617
+msgid "A keyphrase is required for discovery."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1974
+#: plugin/includes/Api/Rest_Api.php:2624
+msgid "A text provider is required for authority discovery."
+msgstr ""
+
+#. translators: %s: campaign label (campaign name or first 60 chars of keyphrase).
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:1983
+#: plugin/includes/Api/Rest_Api.php:2633
+msgid "Authority discovery started for \"%s\" (pre-creation)…"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2063
+#: plugin/includes/Api/Rest_Api.php:2726
+msgid "Domains must be an array."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2075
+#: plugin/includes/Api/Rest_Api.php:2738
+msgid "Authority list could not be saved. Please try again."
+msgstr ""
+
+#. translators: %d: number of authority domains the user saved.
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2082
+#: plugin/includes/Api/Rest_Api.php:2745
+msgid "Authority domains updated manually (%d domains)."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2088
+#: plugin/includes/Api/Rest_Api.php:2751
+msgid "Authority domains saved."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2119
+#: plugin/includes/Api/Rest_Api.php:2843
+msgid "A keyphrase is required for keyword discovery."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2126
+#: plugin/includes/Api/Rest_Api.php:2850
+msgid "A text provider is required for keyword discovery."
+msgstr ""
+
+#. translators: %s: campaign label (campaign name or first 60 chars of keyphrase).
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2135
+#: plugin/includes/Api/Rest_Api.php:2859
+msgid "Keyword discovery started for \"%s\" (pre-creation)…"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2166
+#: plugin/includes/Api/Rest_Api.php:2893
+msgid "Unknown error from keyword discovery service."
+msgstr ""
+
+#. translators: 1: number of keywords found, 2: number of queries the discovery service ran, 3: total wall-clock duration in milliseconds.
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2175
+#: plugin/includes/Api/Rest_Api.php:2902
+msgid "Keyword discovery complete: %1$d keywords found (%2$d queries, %3$dms)."
+msgstr ""
+
+#. translators: %s: error message from the keyword-discovery service.
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2191
+#: plugin/includes/Api/Rest_Api.php:2928
+msgid "Keyword discovery failed: %s"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2219
+#: plugin/includes/Api/Rest_Api.php:3567
+msgid "Keywords must be an array."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2258
+#: plugin/includes/Api/Rest_Api.php:3613
+msgid "Keyword bank could not be saved. Please try again."
+msgstr ""
+
+#. translators: %d: number of keywords the user saved to the bank.
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2265
+#: plugin/includes/Api/Rest_Api.php:3620
+msgid "Keyword bank updated (%d keywords)."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2271
+#: plugin/includes/Api/Rest_Api.php:3626
+msgid "Keyword bank saved."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2282
+#: plugin/includes/Api/Rest_Api.php:3637
+msgid "Action Scheduler not available."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2320
+#: plugin/includes/Api/Rest_Api.php:3675
+msgid "Handshake verified. Your server is reachable."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2333
+#: plugin/includes/Api/Rest_Api.php:3690
+msgid "Invalid suggestion mode."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2351
+#: plugin/includes/Api/Rest_Api.php:3728
+msgid "Intelligence source not specified."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2458
+#: plugin/includes/Api/Rest_Api.php:3835
+msgid "AI provider is required for cloud suggestions."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2495
+#: plugin/includes/Api/Rest_Api.php:3885
+msgid "The AI service returned an unexpected error. Please try again."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2567
+#: plugin/includes/Api/Rest_Api.php:3959
+msgid "Failed to disconnect provider in the cloud."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2680
+#: plugin/includes/Api/Rest_Api.php:4072
+msgid "Cannot delete the default persona."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2688
+#: plugin/includes/Api/Rest_Api.php:4080
+msgid "Failed to delete persona."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2960
+msgid "This provider is not available on your current plan."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:2987
+#: plugin/includes/Api/Rest_Api.php:4381
+msgid "Failed to save the provider key in the cloud."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3237
+#: plugin/includes/Api/Rest_Api.php:4683
+msgid "Request body must be a JSON object."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3262
+#: plugin/includes/Api/Rest_Api.php:4708
+msgid "Public website URL must start with https://"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3344
+#: plugin/includes/Api/Rest_Api.php:4790
+msgid "Provide a valid https:// URL before running Quick setup."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3356
+#: plugin/includes/Api/Rest_Api.php:4802
+msgid "Connect your license before running Quick setup."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3372
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3478
+#: plugin/includes/Api/Rest_Api.php:4818 plugin/includes/Api/Rest_Api.php:4924
+msgid "Could not reach the Structura cloud. Try again in a moment."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3388
+#: plugin/includes/Api/Rest_Api.php:4834
+msgid "Quick setup failed."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3446
+#: plugin/includes/Api/Rest_Api.php:4892
+msgid "Missing connection id."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3455
+#: plugin/includes/Api/Rest_Api.php:4901
+msgid "Connect your license before verifying IndexNow."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3491
+#: plugin/includes/Api/Rest_Api.php:4937
+msgid "Verification failed."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3556
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3600
+#: plugin/includes/Api/Rest_Api.php:5017 plugin/includes/Api/Rest_Api.php:5061
+msgid "noticeId is required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3620
+#: plugin/includes/Api/Rest_Api.php:5081
+msgid "Please enter a license key."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3629
+#: plugin/includes/Api/Rest_Api.php:5090
+msgid "License activated successfully!"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3635
+#: plugin/includes/Api/Rest_Api.php:5096
+msgid "Activation failed. Please check your key and try again."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3650
+#: plugin/includes/Api/Rest_Api.php:5118
+msgid "License deactivated."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3655
+#: plugin/includes/Api/Rest_Api.php:5123
+msgid "Could not deactivate license."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3678
+#: plugin/includes/Api/Rest_Api.php:5146
+msgid "Please enter your license key to confirm."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3688
+#: .tmp-wporg/structura/includes/Core/License_Manager.php:567
+#: plugin/includes/Api/Rest_Api.php:5156
+#: plugin/includes/Core/License_Manager.php:652
+msgid "Site removed from your activations."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3692
+#: plugin/includes/Api/Rest_Api.php:5160
+msgid "Could not remove this site. Please try again."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3711
+#: plugin/includes/Api/Rest_Api.php:5179
+msgid "License plan synchronized with cloud."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3738
+#: plugin/includes/Api/Rest_Api.php:5206
+msgid "No license bound to this site."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3769
+#: .tmp-wporg/structura/includes/Core/License_Manager.php:80
+#: plugin/includes/Api/Rest_Api.php:5237
+#: plugin/includes/Core/License_Manager.php:98
+msgid "Invalid server response format."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3784
+#: plugin/includes/Api/Rest_Api.php:5265
+msgid "Cloud heartbeat rejected."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3868
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3887
+#: plugin/includes/Api/Rest_Api.php:5359 plugin/includes/Api/Rest_Api.php:5378
+msgid "Unknown"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:3991
+#: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:97
+#: plugin/includes/Api/Rest_Api.php:5537
+#: plugin/includes/Channels/Channels_Connections_Service.php:100
+msgid "Integration id and webhook URL are required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4028
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4154
+#: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:155
+#: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:233
+#: plugin/includes/Api/Rest_Api.php:5574 plugin/includes/Api/Rest_Api.php:5828
+#: plugin/includes/Channels/Channels_Connections_Service.php:165
+#: plugin/includes/Channels/Channels_Connections_Service.php:358
+msgid "Connection id is required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4118
+#: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:198
+#: plugin/includes/Api/Rest_Api.php:5790
+#: plugin/includes/Channels/Channels_Connections_Service.php:313
+msgid "Integration id is required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4235
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4498
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4545
+#: .tmp-wporg/structura/includes/Progress/Runs_Service.php:57
+#: .tmp-wporg/structura/includes/Progress/Runs_Service.php:104
+#: .tmp-wporg/structura/includes/Progress/Runs_Service.php:224
+#: .tmp-wporg/structura/includes/Progress/Runs_Service.php:254
+#: plugin/includes/Api/Rest_Api.php:5909 plugin/includes/Api/Rest_Api.php:6193
+#: plugin/includes/Api/Rest_Api.php:6240
+#: plugin/includes/Progress/Runs_Service.php:57
+#: plugin/includes/Progress/Runs_Service.php:116
+#: plugin/includes/Progress/Runs_Service.php:236
+#: plugin/includes/Progress/Runs_Service.php:266
+msgid "run_id is required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4389
+#: .tmp-wporg/structura/includes/Progress/Runs_Service.php:144
+#: .tmp-wporg/structura/includes/Progress/Runs_Service.php:151
+#: plugin/includes/Api/Rest_Api.php:6069
+#: plugin/includes/Progress/Runs_Service.php:156
+#: plugin/includes/Progress/Runs_Service.php:163
+msgid "campaign_id is required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4512
+#: plugin/includes/Api/Rest_Api.php:6207
+msgid "Active admin session required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4580
+#: plugin/includes/Api/Rest_Api.php:6275
+msgid "run_id and cancelled_by are required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4588
+#: .tmp-wporg/structura/includes/Progress/Runs_Service.php:262
+#: plugin/includes/Api/Rest_Api.php:6283
+#: plugin/includes/Progress/Runs_Service.php:274
+msgid "cancelled_by must be \"user\" or \"system\"."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4639
+#: plugin/includes/Api/Rest_Api.php:6334
+msgid "integration_id is required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4840
+#: plugin/includes/Api/Rest_Api.php:6532
+msgid "Campaign limit reached for your current plan."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4855
+msgid "Cloud rejected the campaign create."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4861
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4927
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5189
+#: plugin/includes/Api/Rest_Api.php:6618 plugin/includes/Api/Rest_Api.php:6701
+#: plugin/includes/Api/Rest_Api.php:7073
+msgid "Cloud did not return campaign document."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4875
+#: plugin/includes/Api/Rest_Api.php:6632
+msgid "New campaign deployed successfully."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4938
+#: plugin/includes/Api/Rest_Api.php:6712
+msgid "Campaign architecture updated."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:4991
+msgid "Failed to fetch stock summary."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5028
+msgid "Failed to enable pre-generation."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5048
+#: plugin/includes/Api/Rest_Api.php:6933
+msgid "Not authenticated."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5087
+#: plugin/includes/Api/Rest_Api.php:6973
+msgid "Campaign cleared."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5153
+#: plugin/includes/Api/Rest_Api.php:7040
+msgid "Source campaign payload was empty."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5172
+#: plugin/includes/Api/Rest_Api.php:7056
+msgid "(Copy)"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5201
+#: plugin/includes/Api/Rest_Api.php:7085
+msgid "Campaign cloned successfully."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5239
+#: plugin/includes/Api/Rest_Api.php:7123
+msgid "Campaign not found in cloud."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5248
+#: plugin/includes/Api/Rest_Api.php:7132
+msgid "Failed to update campaign status."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5259
+#: plugin/includes/Api/Rest_Api.php:7143
+msgid "Campaign resumed."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5260
+#: plugin/includes/Api/Rest_Api.php:7144
+msgid "Campaign paused."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5292
+#: plugin/includes/Api/Rest_Api.php:7193
+msgid "Failed to list visual presets."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5304
+#: plugin/includes/Api/Rest_Api.php:7209
+msgid "Failed to create visual preset."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5320
+#: plugin/includes/Api/Rest_Api.php:7229
+msgid "Failed to update visual preset."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5338
+#: plugin/includes/Api/Rest_Api.php:7247
+msgid "Failed to fork visual preset."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5351
+#: plugin/includes/Api/Rest_Api.php:7260
+msgid "Failed to delete visual preset."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5362
+#: plugin/includes/Api/Rest_Api.php:7271
+msgid "Failed to bind visual preset."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5407
+#: plugin/includes/Api/Rest_Api.php:7567
+msgid "Failed to fork persona."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5418
+#: plugin/includes/Api/Rest_Api.php:7578
+msgid "Failed to set default persona."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5428
+#: plugin/includes/Api/Rest_Api.php:7609
+msgid "Failed to list workspace keys."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5439
+#: plugin/includes/Api/Rest_Api.php:7620
+msgid "Credential id and provider are required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Api/Rest_Api.php:5442
+#: plugin/includes/Api/Rest_Api.php:7623
+msgid "Failed to bind workspace key."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:264
+#: plugin/includes/Channels/Channels_Connections_Service.php:389
+msgid "Integration id and redirect URI are required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:306
+#: .tmp-wporg/structura/includes/Channels/Channels_Events_Service.php:80
+#: .tmp-wporg/structura/includes/Progress/Runs_Service.php:310
+#: .tmp-wporg/structura/includes/Progress/Runs_Service.php:319
+#: plugin/includes/Channels/Channels_Connections_Service.php:438
+#: plugin/includes/Channels/Channels_Events_Service.php:106
+#: plugin/includes/Progress/Runs_Service.php:322
+#: plugin/includes/Progress/Runs_Service.php:331
+msgid "License or activation is not set up."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:368
+#: .tmp-wporg/structura/includes/Channels/Channels_Events_Service.php:133
+#: .tmp-wporg/structura/includes/Progress/Runs_Service.php:378
+#: plugin/includes/Channels/Channels_Connections_Service.php:500
+#: plugin/includes/Channels/Channels_Events_Service.php:159
+#: plugin/includes/Progress/Runs_Service.php:390
+msgid "Cloud request failed."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Cloud_Client.php:322
+#: plugin/includes/Core/Cloud_Client.php:448
+msgid "Structura Update Required:"
+msgstr ""
+
+#. translators: 1: currently-installed plugin version, 2: minimum version the cloud requires.
+#: .tmp-wporg/structura/includes/Core/Cloud_Client.php:325
+#: plugin/includes/Core/Cloud_Client.php:451
+msgid ""
+"Your Structura plugin (v%1$s) is below the minimum supported version "
+"(v%2$s). Please update to continue using cloud features."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Data_Structure.php:21
+#: plugin/includes/Core/Data_Structure.php:21
+msgid "Personas"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Data_Structure.php:22
+#: plugin/includes/Core/Data_Structure.php:22
+msgid "Persona"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/License_Manager.php:550
+#: plugin/includes/Core/License_Manager.php:634
+msgid "Unknown error from server."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/License_Manager.php:675
+#: plugin/includes/Core/License_Manager.php:775
+msgid "House voice"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/License_Manager.php:676
+#: plugin/includes/Core/License_Manager.php:776
+msgid ""
+"Write clearly and naturally for this site's audience. Adapt tone to the "
+"topic and keep guidance practical."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:50
+#: plugin/includes/Core/SEO_Rules_Registry.php:50
+msgid "Include FAQ section"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:51
+#: plugin/includes/Core/SEO_Rules_Registry.php:51
+msgid ""
+"Append a FAQ section with FAQPage schema markup for Google rich results."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:55
+#: plugin/includes/Core/SEO_Rules_Registry.php:55
+msgid "Include action steps"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:56
+#: plugin/includes/Core/SEO_Rules_Registry.php:56
+msgid ""
+"Add a numbered Action Steps section with HowTo schema markup for Google rich "
+"results."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:60
+#: plugin/includes/Core/SEO_Rules_Registry.php:60
+msgid "Include statistics"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:61
+#: plugin/includes/Core/SEO_Rules_Registry.php:61
+msgid "Integrate relevant statistics to support the content."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:65
+msgid "Include a number in the title"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:66
+msgid "Add a number to the meta title to increase click-through rates."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:75
+#: plugin/includes/Core/SEO_Rules_Registry.php:70
+msgid "Internal link optimization"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:76
+#: plugin/includes/Core/SEO_Rules_Registry.php:71
+msgid "Incorporate relevant internal links based on site context."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:80
+#: plugin/includes/Core/SEO_Rules_Registry.php:75
+msgid "Outbound link authority"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:81
+#: plugin/includes/Core/SEO_Rules_Registry.php:76
+msgid "Add outbound links to high-authority external sources."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:84
+#: plugin/includes/Core/Site_Health.php:84
+msgid "Structura: MySQL packet size is sufficient for background tasks"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:89
+#: plugin/includes/Core/Site_Health.php:89
+msgid "Structura: WordPress cron is enabled"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:94
+#: plugin/includes/Core/Site_Health.php:94
+msgid "Structura: WordPress uploads directory is writable"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:121
+#: plugin/includes/Core/Site_Health.php:121
+msgid "Structura could not read the MySQL packet size limit"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:122
+#: plugin/includes/Core/Site_Health.php:122
+msgid ""
+"We could not query <code>max_allowed_packet</code> on your database. This "
+"usually means the database user lacks <code>SHOW VARIABLES</code> "
+"permissions — it is not a bug, but Structura cannot confirm background tasks "
+"will enqueue successfully."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:123
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:138
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:176
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:211
+#: plugin/includes/Core/Site_Health.php:123
+#: plugin/includes/Core/Site_Health.php:138
+#: plugin/includes/Core/Site_Health.php:176
+#: plugin/includes/Core/Site_Health.php:211
+msgid "Read the troubleshooting guide"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:131
+#: plugin/includes/Core/Site_Health.php:131
+msgid "MySQL packet size is too small for reliable background tasks"
+msgstr ""
+
+#. translators: 1: current packet size (e.g. "1 MB"), 2: recommended floor (e.g. "4 MB")
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:134
+#: plugin/includes/Core/Site_Health.php:134
+msgid ""
+"Your MySQL server reports <code>max_allowed_packet = %1$s</code>. Structura "
+"queues background tasks (image generation, campaign steps) in the "
+"<code>wp_actionscheduler_actions</code> table, and rows can exceed this "
+"limit on a busy site. When that happens the task is silently dropped and you "
+"see no featured image and no error. We recommend at least <strong>%2$s</"
+"strong>. Most shared hosts will raise this on request."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:145
+#: plugin/includes/Core/Site_Health.php:145
+msgid "MySQL packet size is sufficient for background tasks"
+msgstr ""
+
+#. translators: %s: current packet size
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:148
+#: plugin/includes/Core/Site_Health.php:148
+msgid ""
+"Your MySQL server reports <code>max_allowed_packet = %s</code>, which is "
+"large enough for Structura's background task queue."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:174
+#: plugin/includes/Core/Site_Health.php:174
+msgid "WordPress cron is disabled — verify your system cron is configured"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:175
+#: plugin/includes/Core/Site_Health.php:175
+msgid ""
+"Your <code>wp-config.php</code> sets <code>DISABLE_WP_CRON</code> to true. "
+"Structura's background tasks (image generation, scheduled campaigns) rely on "
+"Action Scheduler, which requires <strong>either</strong> WP-Cron <strong>or</"
+"strong> a system cron job hitting <code>wp-cron.php</code>. If you don't "
+"have a system cron set up, queued image tasks will never run."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:183
+#: plugin/includes/Core/Site_Health.php:183
+msgid "WordPress cron is enabled"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:184
+#: plugin/includes/Core/Site_Health.php:184
+msgid "Structura's background tasks can be dispatched via WP-Cron."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:205
+#: plugin/includes/Core/Site_Health.php:205
+msgid "WordPress uploads directory is not writable"
+msgstr ""
+
+#. translators: %s: error message from wp_upload_dir()
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:208
+#: plugin/includes/Core/Site_Health.php:208
+msgid ""
+"WordPress reports: <code>%s</code>. Structura saves generated images to the "
+"uploads directory via <code>media_handle_sideload</code> — if WordPress "
+"can't write there, image generation will fail every time."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:218
+#: plugin/includes/Core/Site_Health.php:218
+msgid "WordPress uploads directory is writable"
+msgstr ""
+
+#. translators: %s: absolute path to the uploads directory
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:221
+#: plugin/includes/Core/Site_Health.php:221
+msgid "Generated images will be saved to <code>%s</code>."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:286
+#: plugin/includes/Core/Site_Health.php:286
+msgid "Structura"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Core/Site_Health.php:298
+#: plugin/includes/Core/Site_Health.php:298
+msgid "(opens in a new tab)"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Progress/Runs_Service.php:111
+#: plugin/includes/Progress/Runs_Service.php:123
+msgid "user_id is required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:19
+#: plugin/includes/Scheduler/Campaign_Validator.php:20
+msgid "Name is required."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:22
+#: plugin/includes/Scheduler/Campaign_Validator.php:23
+msgid "Objective too short."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:170
+#: plugin/includes/Scheduler/Campaign_Validator.php:199
+msgid "Invalid deployment pulse format."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:180
+#: plugin/includes/Scheduler/Campaign_Validator.php:209
+msgid "Quota must be positive."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:199
+#: plugin/includes/Scheduler/Campaign_Validator.php:243
+msgid "Configuration errors."
+msgstr ""
+
+#. translators: %d is the number of failed campaign runs.
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:307
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:370
+#: plugin/includes/Ui/Attention_Admin_Notice.php:344
+#: plugin/includes/Ui/Dashboard_Widget.php:203
+msgid "%d campaign run failed"
+msgid_plural "%d campaign runs failed"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d is the number of campaign runs that finished with warnings.
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:318
+#: plugin/includes/Ui/Attention_Admin_Notice.php:355
+msgid "%d campaign run finished with warnings"
+msgid_plural "%d campaign runs finished with warnings"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: count of failed runs, 2: count of runs that finished with warnings.
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:329
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:400
+#: plugin/includes/Ui/Attention_Admin_Notice.php:366
+#: plugin/includes/Ui/Dashboard_Widget.php:233
+msgid "%1$d failed, %2$d finished with warnings"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:335
+#: plugin/includes/Ui/Attention_Admin_Notice.php:372
+msgid "Open a run to see what happened and decide what to do next."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:564
+#: plugin/includes/Ui/Attention_Admin_Notice.php:399
+msgid "Dismiss Structura attention notice"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:592
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:430
+#: plugin/includes/Ui/Attention_Admin_Notice.php:427
+#: plugin/includes/Ui/Dashboard_Widget.php:263
+msgid "Untitled campaign"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:597
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:436
+#: plugin/includes/Ui/Attention_Admin_Notice.php:432
+#: plugin/includes/Ui/Dashboard_Widget.php:269
+msgid "Warnings"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:598
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:437
+#: plugin/includes/Ui/Attention_Admin_Notice.php:433
+#: plugin/includes/Ui/Dashboard_Widget.php:270
+msgid "Failed"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:601
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:441
+#: plugin/includes/Ui/Attention_Admin_Notice.php:436
+#: plugin/includes/Ui/Dashboard_Widget.php:274
+msgid "See run details"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:634
+#: plugin/includes/Ui/Attention_Admin_Notice.php:469
+msgid "Open Structura Overview"
+msgstr ""
+
+#. translators: %d is the number of additional runs needing attention beyond what fits in the list.
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:644
+#: plugin/includes/Ui/Attention_Admin_Notice.php:479
+msgid "+%d more needing attention"
+msgid_plural "+%d more needing attention"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d is the number of minutes since the run finished.
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:722
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:532
+#: plugin/includes/Ui/Attention_Admin_Notice.php:524
+#: plugin/includes/Ui/Dashboard_Widget.php:365
+msgid "%d min ago"
+msgid_plural "%d mins ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d is the number of hours since the run finished.
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:730
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:540
+#: plugin/includes/Ui/Attention_Admin_Notice.php:532
+#: plugin/includes/Ui/Dashboard_Widget.php:373
+msgid "%d hr ago"
+msgid_plural "%d hrs ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d is the number of days since the run finished.
+#: .tmp-wporg/structura/includes/Ui/Attention_Admin_Notice.php:738
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:548
+#: plugin/includes/Ui/Attention_Admin_Notice.php:540
+#: plugin/includes/Ui/Dashboard_Widget.php:381
+msgid "%d day ago"
+msgid_plural "%d days ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:66
+#: plugin/includes/Ui/Dashboard_Widget.php:84
+msgid "Structura status"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:303
+#: plugin/includes/Ui/Dashboard_Widget.php:136
+msgid "No failed or warning runs right now. We'll surface any problems here."
+msgstr ""
+
+#. translators: %d is the number of additional runs needing attention beyond what fits in the widget.
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:327
+#: plugin/includes/Ui/Dashboard_Widget.php:160
+msgid "+%d more needs attention"
+msgid_plural "+%d more need attention"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:342
+#: plugin/includes/Ui/Dashboard_Widget.php:175
+msgid "Open Structura"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:362
+#: plugin/includes/Ui/Dashboard_Widget.php:195
+msgid "All campaigns running cleanly"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:363
+#: plugin/includes/Ui/Dashboard_Widget.php:196
+msgid "Nothing needs your attention."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:378
+#: plugin/includes/Ui/Dashboard_Widget.php:211
+msgid "Open Structura to see what stopped and decide what to do next."
+msgstr ""
+
+#. translators: %d is the number of campaign runs that finished with warnings.
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:385
+#: plugin/includes/Ui/Dashboard_Widget.php:218
+msgid "%d run finished with warnings"
+msgid_plural "%d runs finished with warnings"
+msgstr[0] ""
+msgstr[1] ""
+
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:393
+#: plugin/includes/Ui/Dashboard_Widget.php:226
+msgid "Runs completed, but something wasn't quite right."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Dashboard_Widget.php:404
+#: plugin/includes/Ui/Dashboard_Widget.php:237
+msgid "Open Structura to triage the list."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Headless_Onboarding_Notice.php:98
+#: plugin/includes/Ui/Headless_Onboarding_Notice.php:100
+msgid "Is this a headless WordPress install?"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Headless_Onboarding_Notice.php:99
+#: plugin/includes/Ui/Headless_Onboarding_Notice.php:101
+msgid ""
+"Your site lives at a \"cms.\" subdomain — if your readers visit a different "
+"website (e.g. xerx.io) and this WordPress install only stores content, set "
+"up the public website URL so Structura's suggestions, internal links, and "
+"channel shares point to the right place."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Headless_Onboarding_Notice.php:104
+#: plugin/includes/Ui/Headless_Onboarding_Notice.php:106
+msgid "Set up public website"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Headless_Onboarding_Notice.php:108
+#: plugin/includes/Ui/Headless_Onboarding_Notice.php:110
+msgid "Read the guide"
+msgstr ""
+
+#. translators: %s: comma-separated list of page-builder display names, e.g. "Divi" or "Divi and WPBakery".
+#: .tmp-wporg/structura/includes/Ui/Page_Builder_Notice.php:125
+#: plugin/includes/Ui/Page_Builder_Notice.php:127
+msgid "Structura detected %s on this site."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Page_Builder_Notice.php:129
+#: plugin/includes/Ui/Page_Builder_Notice.php:131
+msgid ""
+"Structura-generated posts already include an opt-out flag so the builder "
+"does not hijack their rendering. If a post still renders blank on the front "
+"end, check your theme builder template."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Page_Builder_Notice.php:139
+#: plugin/includes/Ui/Page_Builder_Notice.php:141
+msgid "Read the compatibility guide"
+msgstr ""
+
+#. translators: 1/2: page-builder display names, joined as "A and B".
+#: .tmp-wporg/structura/includes/Ui/Page_Builder_Notice.php:292
+#: plugin/includes/Ui/Page_Builder_Notice.php:274
+msgid "%1$s and %2$s"
+msgstr ""
+
+#. translators: 1: comma-separated list, 2: last item — "A, B, and C".
+#: .tmp-wporg/structura/includes/Ui/Page_Builder_Notice.php:304
+#: plugin/includes/Ui/Page_Builder_Notice.php:286
+msgid "%1$s, and %2$s"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:665
+#: plugin/includes/Ui/Post_Meta_Box.php:1071
+msgid "View generation run"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:682
+#: plugin/includes/Ui/Post_Meta_Box.php:1088
+msgid "Keyword"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:692
+#: plugin/includes/Ui/Post_Meta_Box.php:1098
+msgid "Keyphrase"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:732
+#: plugin/includes/Ui/Post_Meta_Box.php:1138
+msgid "tokens used"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:793
+#: plugin/includes/Ui/Post_Meta_Box.php:1234
+msgid "Regenerate Featured Image"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:831
+#: plugin/includes/Ui/Post_Meta_Box.php:1272
+msgid "Body images"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:853
+#: plugin/includes/Ui/Post_Meta_Box.php:1295
+msgid "Regenerate"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:878
+#: plugin/includes/Ui/Post_Meta_Box.php:1320
+msgid "Body image (missing)"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:881
+#: plugin/includes/Ui/Post_Meta_Box.php:1323
+msgid ""
+"A body image was scheduled here but never delivered. Generate one now to "
+"fill the placeholder."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:894
+#: plugin/includes/Ui/Post_Meta_Box.php:1336
+msgid "Generate body image"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:907
+#: plugin/includes/Ui/Post_Meta_Box.php:1349
+msgid "Generate Featured Image"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:909
+#: plugin/includes/Ui/Post_Meta_Box.php:1351
+msgid "Close"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:923
+#: plugin/includes/Ui/Post_Meta_Box.php:1365
+msgid "Describe the image"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:925
+#: plugin/includes/Ui/Post_Meta_Box.php:1367
+msgid "(optional)"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:932
+msgid ""
+"Leave blank to reuse the previous topic. Omit style guidelines — your global "
+"art direction is applied automatically."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:943
+#: plugin/includes/Ui/Post_Meta_Box.php:1401
+msgid "Image model"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:959
+#: plugin/includes/Ui/Post_Meta_Box.php:1417
+msgid "Click \"Generate\" to create a new image"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:964
+#: plugin/includes/Ui/Post_Meta_Box.php:1422
+msgid "Generating your image…"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:995
+#: plugin/includes/Ui/Post_Meta_Box.php:1453
+msgid "Generate"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1005
+#: plugin/includes/Ui/Post_Meta_Box.php:1463
+msgid "Use this image"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1023
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1234
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1457
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1595
+#: plugin/includes/Ui/Post_Meta_Box.php:734
+#: plugin/includes/Ui/Post_Meta_Box.php:1481
+#: plugin/includes/Ui/Post_Meta_Box.php:1706
+#: plugin/includes/Ui/Post_Meta_Box.php:1937
+#: plugin/includes/Ui/Post_Meta_Box.php:2075
+msgid "Permission denied."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1041
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1246
+#: plugin/includes/Ui/Post_Meta_Box.php:1499
+#: plugin/includes/Ui/Post_Meta_Box.php:1718
+msgid "Invalid post."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1049
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1261
+#: plugin/includes/Ui/Post_Meta_Box.php:1507
+#: plugin/includes/Ui/Post_Meta_Box.php:1733
+msgid "This post was not generated by Structura."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1099
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1322
+#: plugin/includes/Ui/Post_Meta_Box.php:1555
+#: plugin/includes/Ui/Post_Meta_Box.php:1787
+msgid "Cannot resolve image generation settings for this post."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1164
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1395
+#: plugin/includes/Ui/Post_Meta_Box.php:1629
+#: plugin/includes/Ui/Post_Meta_Box.php:1869
+msgid "Image was generated but could not be found."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1202
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1428
+#: plugin/includes/Ui/Post_Meta_Box.php:1674
+#: plugin/includes/Ui/Post_Meta_Box.php:1908
+msgid "Image generation failed. Check the Structura log for details."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1257
+#: plugin/includes/Ui/Post_Meta_Box.php:1729
+msgid "Invalid attachment."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1282
+#: plugin/includes/Ui/Post_Meta_Box.php:1754
+msgid "This image is not a body image."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1465
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1522
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1602
+#: plugin/includes/Ui/Post_Meta_Box.php:740
+#: plugin/includes/Ui/Post_Meta_Box.php:1945
+#: plugin/includes/Ui/Post_Meta_Box.php:2002
+#: plugin/includes/Ui/Post_Meta_Box.php:2082
+msgid "Invalid request."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1470
+#: plugin/includes/Ui/Post_Meta_Box.php:1950
+msgid "Post not found."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1492
+#: plugin/includes/Ui/Post_Meta_Box.php:1972
+msgid "Could not locate the placeholder in the post content."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1558
+#: plugin/includes/Ui/Post_Meta_Box.php:2038
+msgid "Could not locate the body image in the post content."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Post_Meta_Box.php:1621
+#: plugin/includes/Ui/Post_Meta_Box.php:2101
+msgid "Featured image updated."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Wp_Cron_Disabled_Notice.php:99
+#: plugin/includes/Ui/Wp_Cron_Disabled_Notice.php:101
+msgid "Structura: WordPress cron is disabled"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Wp_Cron_Disabled_Notice.php:102
+#: plugin/includes/Ui/Wp_Cron_Disabled_Notice.php:104
+msgid ""
+"Your site sets DISABLE_WP_CRON in wp-config.php. Structura's campaigns, "
+"image generation, and scheduled tasks all rely on Action Scheduler, which "
+"needs either WP-Cron or a system cron hitting wp-cron.php. Without one, "
+"queued tasks will never run — your scheduled posts will stall silently."
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Wp_Cron_Disabled_Notice.php:109
+#: plugin/includes/Ui/Wp_Cron_Disabled_Notice.php:111
+msgid "View Structura settings"
+msgstr ""
+
+#: .tmp-wporg/structura/includes/Ui/Wp_Cron_Disabled_Notice.php:117
+#: plugin/includes/Ui/Wp_Cron_Disabled_Notice.php:120
+msgid "I have a system cron configured"
+msgstr ""
+
+#. translators: %s is the currently-installed PHP version string.
+#: .tmp-wporg/structura/structura.php:37 plugin/structura.php:36
+msgid ""
+"Structura requires PHP 7.4 or higher. Your site is running PHP %s. Please "
+"update PHP to use this plugin."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:1070 plugin/includes/Api/Rest_Api.php:1183
 msgid "Connect to Structura Cloud first."
 msgstr ""
 
@@ -27,675 +1387,115 @@ msgid ""
 "try again."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:1133
-msgid "Active Pro or Cloud license required to access analytics."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:1191
-msgid "Active license required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:1821
-msgid "Unknown error"
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:1899 plugin/includes/Api/Rest_Api.php:6643
-#: plugin/includes/Api/Rest_Api.php:6732 plugin/includes/Api/Rest_Api.php:6780
-#: plugin/includes/Api/Rest_Api.php:6935 plugin/includes/Api/Rest_Api.php:7001
-#: plugin/includes/Api/Rest_Api.php:7107
-msgid "Campaign ID is required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:1927
-msgid "Manual execution initiated in background."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:1973
-msgid "Unable to delete task."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2016
+#: plugin/includes/Api/Rest_Api.php:2024
 msgid "No file was uploaded."
 msgstr ""
 
 #. translators: the supported research attachment formats.
-#: plugin/includes/Api/Rest_Api.php:2025
+#: plugin/includes/Api/Rest_Api.php:2033
 msgid "This file type isn't supported — use PDF, DOCX, TXT, MD or HTML."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2034
+#: plugin/includes/Api/Rest_Api.php:2042
 msgid "This file is too large — files can be up to 10 MB."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2040 plugin/includes/Api/Rest_Api.php:2068
-#: plugin/includes/Api/Rest_Api.php:2073 plugin/includes/Api/Rest_Api.php:2089
-#: plugin/includes/Api/Rest_Api.php:2098
+#: plugin/includes/Api/Rest_Api.php:2048 plugin/includes/Api/Rest_Api.php:2076
+#: plugin/includes/Api/Rest_Api.php:2081 plugin/includes/Api/Rest_Api.php:2097
+#: plugin/includes/Api/Rest_Api.php:2106
 msgid "The upload failed — please try again."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2122
-msgid "A post objective is required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2148
+#: plugin/includes/Api/Rest_Api.php:2156
 msgid "Create at least one persona before generating a post."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2165
-#: plugin/includes/Scheduler/Campaign_Validator.php:51
-msgid "A text provider is required."
-msgstr ""
-
-#. translators: %s: provider slug (e.g. "anthropic")
-#: plugin/includes/Api/Rest_Api.php:2179
-#: plugin/includes/Scheduler/Campaign_Validator.php:66
-msgid "Provider \"%s\" does not support image generation."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2197
-#: plugin/includes/Scheduler/Campaign_Validator.php:117
-msgid "The fallback text provider must be different from the primary."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2208
-#: plugin/includes/Scheduler/Campaign_Validator.php:129
-msgid "The fallback image provider must be different from the primary."
-msgstr ""
-
-#. translators: %s: provider slug (e.g. "anthropic")
-#: plugin/includes/Api/Rest_Api.php:2218
-#: plugin/includes/Scheduler/Campaign_Validator.php:138
-msgid "Fallback provider \"%s\" does not support image generation."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2393
-msgid ""
-"Could not cache the post request for background processing. Please try again."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2413
-msgid ""
-"Could not queue this post for background processing. Open Tools → Site "
-"Health and resolve any Structura-flagged issues (usually MySQL "
-"max_allowed_packet) before retrying."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2422
-msgid "Your post is being generated in the background."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2443
-msgid "Campaign not found."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2451
-msgid "Campaign must have an objective."
-msgstr ""
-
-#. translators: %s: campaign identity name or keyphrase.
-#: plugin/includes/Api/Rest_Api.php:2458
-msgid "Authority discovery started for \"%s\"…"
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2476
-msgid ""
-"Campaign is missing a text provider. Please re-save the campaign settings."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2517 plugin/includes/Api/Rest_Api.php:2670
-msgid "Unknown error from discovery service."
-msgstr ""
-
-#. translators: 1: number of domains saved locally, 2: campaign id.
-#: plugin/includes/Api/Rest_Api.php:2538
-msgid ""
-"Authority discovery saved %1$d domains but cloud persist failed for campaign "
-"%2$s."
-msgstr ""
-
-#. translators: 1: number of authority domains found, 2: number of queries the discovery service ran, 3: total wall-clock duration in milliseconds.
-#: plugin/includes/Api/Rest_Api.php:2546 plugin/includes/Api/Rest_Api.php:2678
-msgid ""
-"Authority discovery complete: %1$d domains found (%2$d queries, %3$dms)."
-msgstr ""
-
-#. translators: %s: error message from the authority-discovery service.
-#: plugin/includes/Api/Rest_Api.php:2562 plugin/includes/Api/Rest_Api.php:2694
-msgid "Authority discovery failed: %s"
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2609
-msgid "A keyphrase is required for discovery."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2616
-msgid "A text provider is required for authority discovery."
-msgstr ""
-
-#. translators: %s: campaign label (campaign name or first 60 chars of keyphrase).
-#: plugin/includes/Api/Rest_Api.php:2625
-msgid "Authority discovery started for \"%s\" (pre-creation)…"
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2718
-msgid "Domains must be an array."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2730
-msgid "Authority list could not be saved. Please try again."
-msgstr ""
-
-#. translators: %d: number of authority domains the user saved.
-#: plugin/includes/Api/Rest_Api.php:2737
-msgid "Authority domains updated manually (%d domains)."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2743
-msgid "Authority domains saved."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2804
+#: plugin/includes/Api/Rest_Api.php:2812
 msgid "Could not draft the campaign."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2835
-msgid "A keyphrase is required for keyword discovery."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2842
-msgid "A text provider is required for keyword discovery."
-msgstr ""
-
-#. translators: %s: campaign label (campaign name or first 60 chars of keyphrase).
-#: plugin/includes/Api/Rest_Api.php:2851
-msgid "Keyword discovery started for \"%s\" (pre-creation)…"
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:2885
-msgid "Unknown error from keyword discovery service."
-msgstr ""
-
-#. translators: 1: number of keywords found, 2: number of queries the discovery service ran, 3: total wall-clock duration in milliseconds.
-#: plugin/includes/Api/Rest_Api.php:2894
-msgid "Keyword discovery complete: %1$d keywords found (%2$d queries, %3$dms)."
-msgstr ""
-
-#. translators: %s: error message from the keyword-discovery service.
-#: plugin/includes/Api/Rest_Api.php:2920
-msgid "Keyword discovery failed: %s"
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:3185 plugin/includes/Api/Rest_Api.php:3214
+#: plugin/includes/Api/Rest_Api.php:3193 plugin/includes/Api/Rest_Api.php:3222
 msgid "Invalid step id."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:3266
+#: plugin/includes/Api/Rest_Api.php:3274
 msgid "provider + model required."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:3559
-msgid "Keywords must be an array."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:3605
-msgid "Keyword bank could not be saved. Please try again."
-msgstr ""
-
-#. translators: %d: number of keywords the user saved to the bank.
-#: plugin/includes/Api/Rest_Api.php:3612
-msgid "Keyword bank updated (%d keywords)."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:3618
-msgid "Keyword bank saved."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:3629
-msgid "Action Scheduler not available."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:3667
-msgid "Handshake verified. Your server is reachable."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:3682
-msgid "Invalid suggestion mode."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:3720
-msgid "Intelligence source not specified."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:3827
-msgid "AI provider is required for cloud suggestions."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:3877
-msgid "The AI service returned an unexpected error. Please try again."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:3951
-msgid "Failed to disconnect provider in the cloud."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4064
-msgid "Cannot delete the default persona."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4072
-msgid "Failed to delete persona."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4346
+#: plugin/includes/Api/Rest_Api.php:4354
 msgid "This AI provider is not available."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:4373
-msgid "Failed to save the provider key in the cloud."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4675
-msgid "Request body must be a JSON object."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4700
-msgid "Public website URL must start with https://"
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4782
-msgid "Provide a valid https:// URL before running Quick setup."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4794
-msgid "Connect your license before running Quick setup."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4810 plugin/includes/Api/Rest_Api.php:4916
-msgid "Could not reach the Structura cloud. Try again in a moment."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4826
-msgid "Quick setup failed."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4884
-msgid "Missing connection id."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4893
-msgid "Connect your license before verifying IndexNow."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:4929
-msgid "Verification failed."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5009 plugin/includes/Api/Rest_Api.php:5053
-msgid "noticeId is required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5073
-msgid "Please enter a license key."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5082
-msgid "License activated successfully!"
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5088
-msgid "Activation failed. Please check your key and try again."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5109
+#: plugin/includes/Api/Rest_Api.php:5117
 msgid "Site removed."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:5110
-msgid "License deactivated."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5115
-msgid "Could not deactivate license."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5138
-msgid "Please enter your license key to confirm."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5148
-#: plugin/includes/Core/License_Manager.php:652
-msgid "Site removed from your activations."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5152
-msgid "Could not remove this site. Please try again."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5171
-msgid "License plan synchronized with cloud."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5198
-msgid "No license bound to this site."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5229
-#: plugin/includes/Core/License_Manager.php:98
-msgid "Invalid server response format."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5257
-msgid "Cloud heartbeat rejected."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5351 plugin/includes/Api/Rest_Api.php:5370
-msgid "Unknown"
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5529
-#: plugin/includes/Channels/Channels_Connections_Service.php:100
-msgid "Integration id and webhook URL are required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5566 plugin/includes/Api/Rest_Api.php:5820
-#: plugin/includes/Channels/Channels_Connections_Service.php:165
-#: plugin/includes/Channels/Channels_Connections_Service.php:358
-msgid "Connection id is required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5726
+#: plugin/includes/Api/Rest_Api.php:5734
 #: plugin/includes/Channels/Channels_Events_Service.php:68
 msgid "Video job id is required."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:5782
-#: plugin/includes/Channels/Channels_Connections_Service.php:313
-msgid "Integration id is required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:5901 plugin/includes/Api/Rest_Api.php:6185
-#: plugin/includes/Api/Rest_Api.php:6232
-#: plugin/includes/Progress/Runs_Service.php:57
-#: plugin/includes/Progress/Runs_Service.php:116
-#: plugin/includes/Progress/Runs_Service.php:236
-#: plugin/includes/Progress/Runs_Service.php:266
-msgid "run_id is required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:6061
-#: plugin/includes/Progress/Runs_Service.php:156
-#: plugin/includes/Progress/Runs_Service.php:163
-msgid "campaign_id is required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:6199
-msgid "Active admin session required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:6267
-msgid "run_id and cancelled_by are required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:6275
-#: plugin/includes/Progress/Runs_Service.php:274
-msgid "cancelled_by must be \"user\" or \"system\"."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:6326
-msgid "integration_id is required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:6524
-msgid "Campaign limit reached for your current plan."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:6537
+#: plugin/includes/Api/Rest_Api.php:6545
 msgid ""
 "This publishing schedule is more frequent than your current plan allows."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6549
+#: plugin/includes/Api/Rest_Api.php:6557
 msgid "Cloud rejected the campaign request."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6610 plugin/includes/Api/Rest_Api.php:6693
-#: plugin/includes/Api/Rest_Api.php:7065
-msgid "Cloud did not return campaign document."
+#: plugin/includes/Api/Rest_Api.php:6766
+msgid "Failed to fetch the summary of prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6624
-msgid "New campaign deployed successfully."
+#: plugin/includes/Api/Rest_Api.php:6833
+msgid "Failed to fetch prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6704
-msgid "Campaign architecture updated."
+#: plugin/includes/Api/Rest_Api.php:6849
+msgid "Failed to discard the prepared post."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6758
-msgid "Failed to fetch stock summary."
+#: plugin/includes/Api/Rest_Api.php:6864
+msgid "Failed to discard all prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6825
-msgid "Failed to fetch stock."
+#: plugin/includes/Api/Rest_Api.php:6879
+msgid "Failed to replace all prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6841
-msgid "Failed to delete the stock entry."
+#: plugin/includes/Api/Rest_Api.php:6913
+msgid "Failed to turn on preparing ahead."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6856
-msgid "Failed to empty the stock."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:6871
-msgid "Failed to regenerate the stock."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:6905
-msgid "Failed to enable pre-generation."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:6925
-msgid "Not authenticated."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:6965
-msgid "Campaign cleared."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7032
-msgid "Source campaign payload was empty."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7048
-msgid "(Copy)"
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7077
-msgid "Campaign cloned successfully."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7115
-msgid "Campaign not found in cloud."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7124
-msgid "Failed to update campaign status."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7135
-msgid "Campaign resumed."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7136
-msgid "Campaign paused."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7185
-msgid "Failed to list visual presets."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7201
-msgid "Failed to create visual preset."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7221
-msgid "Failed to update visual preset."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7239
-msgid "Failed to fork visual preset."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7252
-msgid "Failed to delete visual preset."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7263
-msgid "Failed to bind visual preset."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7400
+#: plugin/includes/Api/Rest_Api.php:7408
 msgid "Invalid visual signature."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7474
+#: plugin/includes/Api/Rest_Api.php:7482
 msgid "Could not read your site right now."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7518
+#: plugin/includes/Api/Rest_Api.php:7526
 msgid "The preview did not render."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7559
-msgid "Failed to fork persona."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7570
-msgid "Failed to set default persona."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7582
+#: plugin/includes/Api/Rest_Api.php:7590
 msgid "Failed to add persona to this site."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7591
+#: plugin/includes/Api/Rest_Api.php:7599
 msgid "Failed to remove persona from this site."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7601
-msgid "Failed to list workspace keys."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7612
-msgid "Credential id and provider are required."
-msgstr ""
-
-#: plugin/includes/Api/Rest_Api.php:7615
-msgid "Failed to bind workspace key."
 msgstr ""
 
 #: plugin/includes/Channels/Channels_Connections_Service.php:250
 msgid "Post URL is required."
 msgstr ""
 
-#: plugin/includes/Channels/Channels_Connections_Service.php:389
-msgid "Integration id and redirect URI are required."
-msgstr ""
-
-#: plugin/includes/Channels/Channels_Connections_Service.php:438
-#: plugin/includes/Channels/Channels_Events_Service.php:106
-#: plugin/includes/Progress/Runs_Service.php:322
-#: plugin/includes/Progress/Runs_Service.php:331
-msgid "License or activation is not set up."
-msgstr ""
-
-#: plugin/includes/Channels/Channels_Connections_Service.php:500
-#: plugin/includes/Channels/Channels_Events_Service.php:159
-#: plugin/includes/Progress/Runs_Service.php:390
-msgid "Cloud request failed."
-msgstr ""
-
 #: plugin/includes/Core/Cloud_Client.php:64
 msgid ""
 "Structura Cloud is not connected yet. Open Structura in wp-admin and choose "
 "\"Connect to Structura Cloud\" first."
-msgstr ""
-
-#: plugin/includes/Core/Cloud_Client.php:448
-msgid "Structura Update Required:"
-msgstr ""
-
-#. translators: 1: currently-installed plugin version, 2: minimum version the cloud requires.
-#: plugin/includes/Core/Cloud_Client.php:451
-msgid ""
-"Your Structura plugin (v%1$s) is below the minimum supported version "
-"(v%2$s). Please update to continue using cloud features."
-msgstr ""
-
-#: plugin/includes/Core/Data_Structure.php:21
-msgid "Personas"
-msgstr ""
-
-#: plugin/includes/Core/Data_Structure.php:22
-msgid "Persona"
-msgstr ""
-
-#: plugin/includes/Core/License_Manager.php:634
-msgid "Unknown error from server."
-msgstr ""
-
-#: plugin/includes/Core/License_Manager.php:775
-msgid "House voice"
-msgstr ""
-
-#: plugin/includes/Core/License_Manager.php:776
-msgid ""
-"Write clearly and naturally for this site's audience. Adapt tone to the "
-"topic and keep guidance practical."
-msgstr ""
-
-#: plugin/includes/Core/SEO_Rules_Registry.php:50
-msgid "Include FAQ section"
-msgstr ""
-
-#: plugin/includes/Core/SEO_Rules_Registry.php:51
-msgid ""
-"Append a FAQ section with FAQPage schema markup for Google rich results."
-msgstr ""
-
-#: plugin/includes/Core/SEO_Rules_Registry.php:55
-msgid "Include action steps"
-msgstr ""
-
-#: plugin/includes/Core/SEO_Rules_Registry.php:56
-msgid ""
-"Add a numbered Action Steps section with HowTo schema markup for Google rich "
-"results."
-msgstr ""
-
-#: plugin/includes/Core/SEO_Rules_Registry.php:60
-msgid "Include statistics"
-msgstr ""
-
-#: plugin/includes/Core/SEO_Rules_Registry.php:61
-msgid "Integrate relevant statistics to support the content."
-msgstr ""
-
-#: plugin/includes/Core/SEO_Rules_Registry.php:70
-msgid "Internal link optimization"
-msgstr ""
-
-#: plugin/includes/Core/SEO_Rules_Registry.php:71
-msgid "Incorporate relevant internal links based on site context."
-msgstr ""
-
-#: plugin/includes/Core/SEO_Rules_Registry.php:75
-msgid "Outbound link authority"
-msgstr ""
-
-#: plugin/includes/Core/SEO_Rules_Registry.php:76
-msgid "Add outbound links to high-authority external sources."
 msgstr ""
 
 #: plugin/includes/Core/SEO_Rules_Registry.php:87
@@ -717,113 +1517,6 @@ msgstr ""
 msgid ""
 "Cover the key concepts and sub-topics that top-ranking pages cover, based on "
 "live search research."
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:84
-msgid "Structura: MySQL packet size is sufficient for background tasks"
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:89
-msgid "Structura: WordPress cron is enabled"
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:94
-msgid "Structura: WordPress uploads directory is writable"
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:121
-msgid "Structura could not read the MySQL packet size limit"
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:122
-msgid ""
-"We could not query <code>max_allowed_packet</code> on your database. This "
-"usually means the database user lacks <code>SHOW VARIABLES</code> "
-"permissions — it is not a bug, but Structura cannot confirm background tasks "
-"will enqueue successfully."
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:123
-#: plugin/includes/Core/Site_Health.php:138
-#: plugin/includes/Core/Site_Health.php:176
-#: plugin/includes/Core/Site_Health.php:211
-msgid "Read the troubleshooting guide"
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:131
-msgid "MySQL packet size is too small for reliable background tasks"
-msgstr ""
-
-#. translators: 1: current packet size (e.g. "1 MB"), 2: recommended floor (e.g. "4 MB")
-#: plugin/includes/Core/Site_Health.php:134
-msgid ""
-"Your MySQL server reports <code>max_allowed_packet = %1$s</code>. Structura "
-"queues background tasks (image generation, campaign steps) in the "
-"<code>wp_actionscheduler_actions</code> table, and rows can exceed this "
-"limit on a busy site. When that happens the task is silently dropped and you "
-"see no featured image and no error. We recommend at least <strong>%2$s</"
-"strong>. Most shared hosts will raise this on request."
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:145
-msgid "MySQL packet size is sufficient for background tasks"
-msgstr ""
-
-#. translators: %s: current packet size
-#: plugin/includes/Core/Site_Health.php:148
-msgid ""
-"Your MySQL server reports <code>max_allowed_packet = %s</code>, which is "
-"large enough for Structura's background task queue."
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:174
-msgid "WordPress cron is disabled — verify your system cron is configured"
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:175
-msgid ""
-"Your <code>wp-config.php</code> sets <code>DISABLE_WP_CRON</code> to true. "
-"Structura's background tasks (image generation, scheduled campaigns) rely on "
-"Action Scheduler, which requires <strong>either</strong> WP-Cron <strong>or</"
-"strong> a system cron job hitting <code>wp-cron.php</code>. If you don't "
-"have a system cron set up, queued image tasks will never run."
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:183
-msgid "WordPress cron is enabled"
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:184
-msgid "Structura's background tasks can be dispatched via WP-Cron."
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:205
-msgid "WordPress uploads directory is not writable"
-msgstr ""
-
-#. translators: %s: error message from wp_upload_dir()
-#: plugin/includes/Core/Site_Health.php:208
-msgid ""
-"WordPress reports: <code>%s</code>. Structura saves generated images to the "
-"uploads directory via <code>media_handle_sideload</code> — if WordPress "
-"can't write there, image generation will fail every time."
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:218
-msgid "WordPress uploads directory is writable"
-msgstr ""
-
-#. translators: %s: absolute path to the uploads directory
-#: plugin/includes/Core/Site_Health.php:221
-msgid "Generated images will be saved to <code>%s</code>."
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:286
-msgid "Structura"
-msgstr ""
-
-#: plugin/includes/Core/Site_Health.php:298
-msgid "(opens in a new tab)"
 msgstr ""
 
 #: plugin/includes/Core/Source_Check.php:168
@@ -858,32 +1551,8 @@ msgstr ""
 msgid "Post body"
 msgstr ""
 
-#: plugin/includes/Generator/Schema_Injector.php:257
+#: plugin/includes/Generator/Schema_Injector.php:263
 msgid "Home"
-msgstr ""
-
-#: plugin/includes/Progress/Runs_Service.php:123
-msgid "user_id is required."
-msgstr ""
-
-#: plugin/includes/Scheduler/Campaign_Validator.php:20
-msgid "Name is required."
-msgstr ""
-
-#: plugin/includes/Scheduler/Campaign_Validator.php:23
-msgid "Objective too short."
-msgstr ""
-
-#: plugin/includes/Scheduler/Campaign_Validator.php:199
-msgid "Invalid deployment pulse format."
-msgstr ""
-
-#: plugin/includes/Scheduler/Campaign_Validator.php:209
-msgid "Quota must be positive."
-msgstr ""
-
-#: plugin/includes/Scheduler/Campaign_Validator.php:243
-msgid "Configuration errors."
 msgstr ""
 
 #: plugin/includes/Ui/Admin_Dashboard.php:63
@@ -906,156 +1575,6 @@ msgstr ""
 msgid "Account"
 msgstr ""
 
-#. translators: %d is the number of failed campaign runs.
-#: plugin/includes/Ui/Attention_Admin_Notice.php:344
-#: plugin/includes/Ui/Dashboard_Widget.php:203
-msgid "%d campaign run failed"
-msgid_plural "%d campaign runs failed"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %d is the number of campaign runs that finished with warnings.
-#: plugin/includes/Ui/Attention_Admin_Notice.php:355
-msgid "%d campaign run finished with warnings"
-msgid_plural "%d campaign runs finished with warnings"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: 1: count of failed runs, 2: count of runs that finished with warnings.
-#: plugin/includes/Ui/Attention_Admin_Notice.php:366
-#: plugin/includes/Ui/Dashboard_Widget.php:233
-msgid "%1$d failed, %2$d finished with warnings"
-msgstr ""
-
-#: plugin/includes/Ui/Attention_Admin_Notice.php:372
-msgid "Open a run to see what happened and decide what to do next."
-msgstr ""
-
-#: plugin/includes/Ui/Attention_Admin_Notice.php:399
-msgid "Dismiss Structura attention notice"
-msgstr ""
-
-#: plugin/includes/Ui/Attention_Admin_Notice.php:427
-#: plugin/includes/Ui/Dashboard_Widget.php:263
-msgid "Untitled campaign"
-msgstr ""
-
-#: plugin/includes/Ui/Attention_Admin_Notice.php:432
-#: plugin/includes/Ui/Dashboard_Widget.php:269
-msgid "Warnings"
-msgstr ""
-
-#: plugin/includes/Ui/Attention_Admin_Notice.php:433
-#: plugin/includes/Ui/Dashboard_Widget.php:270
-msgid "Failed"
-msgstr ""
-
-#: plugin/includes/Ui/Attention_Admin_Notice.php:436
-#: plugin/includes/Ui/Dashboard_Widget.php:274
-msgid "See run details"
-msgstr ""
-
-#: plugin/includes/Ui/Attention_Admin_Notice.php:469
-msgid "Open Structura Overview"
-msgstr ""
-
-#. translators: %d is the number of additional runs needing attention beyond what fits in the list.
-#: plugin/includes/Ui/Attention_Admin_Notice.php:479
-msgid "+%d more needing attention"
-msgid_plural "+%d more needing attention"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %d is the number of minutes since the run finished.
-#: plugin/includes/Ui/Attention_Admin_Notice.php:524
-#: plugin/includes/Ui/Dashboard_Widget.php:365
-msgid "%d min ago"
-msgid_plural "%d mins ago"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %d is the number of hours since the run finished.
-#: plugin/includes/Ui/Attention_Admin_Notice.php:532
-#: plugin/includes/Ui/Dashboard_Widget.php:373
-msgid "%d hr ago"
-msgid_plural "%d hrs ago"
-msgstr[0] ""
-msgstr[1] ""
-
-#. translators: %d is the number of days since the run finished.
-#: plugin/includes/Ui/Attention_Admin_Notice.php:540
-#: plugin/includes/Ui/Dashboard_Widget.php:381
-msgid "%d day ago"
-msgid_plural "%d days ago"
-msgstr[0] ""
-msgstr[1] ""
-
-#: plugin/includes/Ui/Dashboard_Widget.php:84
-msgid "Structura status"
-msgstr ""
-
-#: plugin/includes/Ui/Dashboard_Widget.php:136
-msgid "No failed or warning runs right now. We'll surface any problems here."
-msgstr ""
-
-#. translators: %d is the number of additional runs needing attention beyond what fits in the widget.
-#: plugin/includes/Ui/Dashboard_Widget.php:160
-msgid "+%d more needs attention"
-msgid_plural "+%d more need attention"
-msgstr[0] ""
-msgstr[1] ""
-
-#: plugin/includes/Ui/Dashboard_Widget.php:175
-msgid "Open Structura"
-msgstr ""
-
-#: plugin/includes/Ui/Dashboard_Widget.php:195
-msgid "All campaigns running cleanly"
-msgstr ""
-
-#: plugin/includes/Ui/Dashboard_Widget.php:196
-msgid "Nothing needs your attention."
-msgstr ""
-
-#: plugin/includes/Ui/Dashboard_Widget.php:211
-msgid "Open Structura to see what stopped and decide what to do next."
-msgstr ""
-
-#. translators: %d is the number of campaign runs that finished with warnings.
-#: plugin/includes/Ui/Dashboard_Widget.php:218
-msgid "%d run finished with warnings"
-msgid_plural "%d runs finished with warnings"
-msgstr[0] ""
-msgstr[1] ""
-
-#: plugin/includes/Ui/Dashboard_Widget.php:226
-msgid "Runs completed, but something wasn't quite right."
-msgstr ""
-
-#: plugin/includes/Ui/Dashboard_Widget.php:237
-msgid "Open Structura to triage the list."
-msgstr ""
-
-#: plugin/includes/Ui/Headless_Onboarding_Notice.php:100
-msgid "Is this a headless WordPress install?"
-msgstr ""
-
-#: plugin/includes/Ui/Headless_Onboarding_Notice.php:101
-msgid ""
-"Your site lives at a \"cms.\" subdomain — if your readers visit a different "
-"website (e.g. xerx.io) and this WordPress install only stores content, set "
-"up the public website URL so Structura's suggestions, internal links, and "
-"channel shares point to the right place."
-msgstr ""
-
-#: plugin/includes/Ui/Headless_Onboarding_Notice.php:106
-msgid "Set up public website"
-msgstr ""
-
-#: plugin/includes/Ui/Headless_Onboarding_Notice.php:110
-msgid "Read the guide"
-msgstr ""
-
 #: plugin/includes/Ui/Image_Uploads_Unwritable_Notice.php:102
 msgid "Structura: generated images can't be saved"
 msgstr ""
@@ -1075,32 +1594,6 @@ msgstr ""
 #: plugin/includes/Ui/Image_Uploads_Unwritable_Notice.php:121
 #: plugin/includes/Ui/Site_Unreachable_Notice.php:120
 msgid "Dismiss for now"
-msgstr ""
-
-#. translators: %s: comma-separated list of page-builder display names, e.g. "Divi" or "Divi and WPBakery".
-#: plugin/includes/Ui/Page_Builder_Notice.php:127
-msgid "Structura detected %s on this site."
-msgstr ""
-
-#: plugin/includes/Ui/Page_Builder_Notice.php:131
-msgid ""
-"Structura-generated posts already include an opt-out flag so the builder "
-"does not hijack their rendering. If a post still renders blank on the front "
-"end, check your theme builder template."
-msgstr ""
-
-#: plugin/includes/Ui/Page_Builder_Notice.php:141
-msgid "Read the compatibility guide"
-msgstr ""
-
-#. translators: 1/2: page-builder display names, joined as "A and B".
-#: plugin/includes/Ui/Page_Builder_Notice.php:274
-msgid "%1$s and %2$s"
-msgstr ""
-
-#. translators: 1: comma-separated list, 2: last item — "A, B, and C".
-#: plugin/includes/Ui/Page_Builder_Notice.php:286
-msgid "%1$s, and %2$s"
 msgstr ""
 
 #. translators: %d: number of notes still to review
@@ -1150,21 +1643,6 @@ msgstr ""
 
 #: plugin/includes/Ui/Post_Meta_Box.php:692
 msgid "Could not apply the suggestion here. Edit the text by hand."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:734
-#: plugin/includes/Ui/Post_Meta_Box.php:1481
-#: plugin/includes/Ui/Post_Meta_Box.php:1706
-#: plugin/includes/Ui/Post_Meta_Box.php:1937
-#: plugin/includes/Ui/Post_Meta_Box.php:2075
-msgid "Permission denied."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:740
-#: plugin/includes/Ui/Post_Meta_Box.php:1945
-#: plugin/includes/Ui/Post_Meta_Box.php:2002
-#: plugin/includes/Ui/Post_Meta_Box.php:2082
-msgid "Invalid request."
 msgstr ""
 
 #: plugin/includes/Ui/Post_Meta_Box.php:745
@@ -1255,22 +1733,6 @@ msgstr ""
 msgid "Undo"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:1071
-msgid "View generation run"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1088
-msgid "Keyword"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1098
-msgid "Keyphrase"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1138
-msgid "tokens used"
-msgstr ""
-
 #: plugin/includes/Ui/Post_Meta_Box.php:1182
 msgid ""
 "Structura varies wording and titles so your content reads human, so an "
@@ -1279,48 +1741,6 @@ msgstr ""
 
 #: plugin/includes/Ui/Post_Meta_Box.php:1187
 msgid "Why?"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1234
-msgid "Regenerate Featured Image"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1272
-msgid "Body images"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1295
-msgid "Regenerate"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1320
-msgid "Body image (missing)"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1323
-msgid ""
-"A body image was scheduled here but never delivered. Generate one now to "
-"fill the placeholder."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1336
-msgid "Generate body image"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1349
-msgid "Generate Featured Image"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1351
-msgid "Close"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1365
-msgid "Describe the image"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1367
-msgid "(optional)"
 msgstr ""
 
 #: plugin/includes/Ui/Post_Meta_Box.php:1375
@@ -1342,75 +1762,6 @@ msgstr ""
 msgid "Reuse"
 msgstr ""
 
-#: plugin/includes/Ui/Post_Meta_Box.php:1401
-msgid "Image model"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1417
-msgid "Click \"Generate\" to create a new image"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1422
-msgid "Generating your image…"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1453
-msgid "Generate"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1463
-msgid "Use this image"
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1499
-#: plugin/includes/Ui/Post_Meta_Box.php:1718
-msgid "Invalid post."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1507
-#: plugin/includes/Ui/Post_Meta_Box.php:1733
-msgid "This post was not generated by Structura."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1555
-#: plugin/includes/Ui/Post_Meta_Box.php:1787
-msgid "Cannot resolve image generation settings for this post."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1629
-#: plugin/includes/Ui/Post_Meta_Box.php:1869
-msgid "Image was generated but could not be found."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1674
-#: plugin/includes/Ui/Post_Meta_Box.php:1908
-msgid "Image generation failed. Check the Structura log for details."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1729
-msgid "Invalid attachment."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1754
-msgid "This image is not a body image."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1950
-msgid "Post not found."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:1972
-msgid "Could not locate the placeholder in the post content."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:2038
-msgid "Could not locate the body image in the post content."
-msgstr ""
-
-#: plugin/includes/Ui/Post_Meta_Box.php:2101
-msgid "Featured image updated."
-msgstr ""
-
 #: plugin/includes/Ui/Site_Unreachable_Notice.php:96
 msgid "Structura: the cloud can't reach this site"
 msgstr ""
@@ -1429,33 +1780,7 @@ msgstr ""
 msgid "Run a connection check"
 msgstr ""
 
-#: plugin/includes/Ui/Wp_Cron_Disabled_Notice.php:101
-msgid "Structura: WordPress cron is disabled"
-msgstr ""
-
-#: plugin/includes/Ui/Wp_Cron_Disabled_Notice.php:104
-msgid ""
-"Your site sets DISABLE_WP_CRON in wp-config.php. Structura's campaigns, "
-"image generation, and scheduled tasks all rely on Action Scheduler, which "
-"needs either WP-Cron or a system cron hitting wp-cron.php. Without one, "
-"queued tasks will never run — your scheduled posts will stall silently."
-msgstr ""
-
-#: plugin/includes/Ui/Wp_Cron_Disabled_Notice.php:111
-msgid "View Structura settings"
-msgstr ""
-
-#: plugin/includes/Ui/Wp_Cron_Disabled_Notice.php:120
-msgid "I have a system cron configured"
-msgstr ""
-
-#. translators: %s is the currently-installed PHP version string.
-#: plugin/structura.php:36
-msgid ""
-"Structura requires PHP 7.4 or higher. Your site is running PHP %s. Please "
-"update PHP to use this plugin."
-msgstr ""
-
+#: .tmp-wporg/structura/assets-static/block-extensions.js:128
 #: plugin/assets-static/block-extensions.js:128
 msgid "Regenerate with Structura"
 msgstr ""
@@ -2473,7 +2798,7 @@ msgid "Overview"
 msgstr ""
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:72
-#: client/src/features/notices/utils.ts:229
+#: client/src/features/notices/utils.ts:230
 msgid "Connection"
 msgstr ""
 
@@ -2821,25 +3146,24 @@ msgid "Pulse Failed: Cloud unreachable."
 msgstr ""
 
 #: client/src/features/campaigns/api/useStockMutations.ts:38
-msgid "Stock post discarded."
+msgid "Prepared post discarded."
 msgstr ""
 
 #: client/src/features/campaigns/api/useStockMutations.ts:50
-msgid "Stock emptied."
+msgid "All prepared posts discarded."
 msgstr ""
 
 #: client/src/features/campaigns/api/useStockMutations.ts:65
-msgid "Regenerating stock — fresh posts are on the way."
+msgid "Replacing all prepared posts. New ones are on the way."
 msgstr ""
 
 #: client/src/features/campaigns/api/useStockMutations.ts:68
 msgid ""
-"Stock regeneration is paused for today — this campaign hit its daily refill "
-"limit."
+"Preparing ahead is paused for today. This campaign reached its daily limit."
 msgstr ""
 
 #: client/src/features/campaigns/api/useStockMutations.ts:74
-msgid "Could not start the regeneration. Please try again later."
+msgid "Could not start preparing new posts. Please try again later."
 msgstr ""
 
 #: client/src/features/campaigns/components/AiLabelReminder.tsx:45
@@ -2859,8 +3183,8 @@ msgstr ""
 #: client/src/features/campaigns/components/AiLabelReminder.tsx:63
 #: client/src/features/campaigns/components/steps/AuthorityDiscovery.tsx:381
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:422
-#: client/src/features/notices/utils.ts:185
-#: client/src/features/notices/utils.ts:191
+#: client/src/features/notices/utils.ts:186
+#: client/src/features/notices/utils.ts:192
 #: client/src/features/settings/routes/VisualsPage.tsx:1030
 msgid "Learn more"
 msgstr ""
@@ -2997,8 +3321,8 @@ msgid "Discard draft"
 msgstr ""
 
 #: client/src/features/campaigns/components/CampaignDraftBanner.tsx:76
-#: client/src/features/campaigns/components/StockTab.tsx:303
-#: client/src/features/campaigns/components/StockTab.tsx:506
+#: client/src/features/campaigns/components/StockTab.tsx:328
+#: client/src/features/campaigns/components/StockTab.tsx:542
 msgid "Discard"
 msgstr ""
 
@@ -3764,7 +4088,7 @@ msgid ""
 msgstr ""
 
 #: client/src/features/campaigns/components/SeoTargetingSection.tsx:400
-#: client/src/features/campaigns/components/StockTab.tsx:294
+#: client/src/features/campaigns/components/StockTab.tsx:298
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:247
 #: client/src/features/channels/components/SearchPerformanceSection.tsx:111
 msgid "Retry"
@@ -3816,156 +4140,160 @@ msgid "%d ready"
 msgstr ""
 
 #: client/src/features/campaigns/components/StockSummaryChip.tsx:80
-msgid "Pre-generating"
+#: client/src/features/campaigns/components/StockTab.tsx:59
+msgid "Preparing"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:55
+#: client/src/features/campaigns/components/StockTab.tsx:57
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:272
 #: client/src/features/channels/components/VideoEventRow.tsx:131
 msgid "Ready"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:57
-#: client/src/features/campaigns/labels.ts:83
-msgid "Generating"
-msgstr ""
-
-#: client/src/features/campaigns/components/StockTab.tsx:67
+#: client/src/features/campaigns/components/StockTab.tsx:69
 msgid "%d min"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:68
+#: client/src/features/campaigns/components/StockTab.tsx:70
 msgid "%s h"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:107
-msgid "Pre-generation is off for this campaign"
+#: client/src/features/campaigns/components/StockTab.tsx:109
+msgid "Preparing ahead is off for this campaign"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:110
+#: client/src/features/campaigns/components/StockTab.tsx:112
 msgid ""
-"Stock is a buffer of posts written ahead of your schedule using your AI "
+"Preparing ahead writes posts before their scheduled run, on your AI "
 "provider's discounted batch tier. With it on, scheduled posts cost up to 50% "
-"less and publish in under a second — without it, every run generates fresh "
-"at full price. We highly recommend enabling it."
+"less and publish in under a second. Without it, every run writes a fresh "
+"post at full price. We highly recommend turning it on."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:121
-msgid "Enable pre-generation"
+#: client/src/features/campaigns/components/StockTab.tsx:123
+msgid "Turn on preparing ahead"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:135
-msgid "What is stock?"
+#: client/src/features/campaigns/components/StockTab.tsx:137
+msgid "What are prepared posts?"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:138
+#: client/src/features/campaigns/components/StockTab.tsx:140
 msgid ""
-"Stock is a small buffer of posts written ahead of your schedule on the AI "
-"provider's discounted batch tier. When a scheduled run fires, it publishes a "
-"stocked post instantly and a replacement is generated in the background. "
-"These are drafts held in the cloud — they only become real posts on your "
-"site when their scheduled run consumes them. Editing the campaign discards "
-"outdated stock automatically."
+"Prepared posts are written ahead of your schedule on the AI provider's "
+"discounted batch tier. The campaign keeps a few ready. When a scheduled run "
+"starts, it publishes one instantly and a replacement is prepared in the "
+"background. Prepared posts are drafts held in the cloud and only become real "
+"posts on your site when their scheduled run uses them. You can read and edit "
+"them in the customer portal before then. Editing the campaign discards "
+"outdated prepared posts automatically but keeps edited ones, unless you "
+"change the language."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:142
-msgid "Pre-generation is always on for managed plans."
+#: client/src/features/campaigns/components/StockTab.tsx:144
+msgid "Preparing ahead is always on for managed plans."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:196
-msgid "Generating %d post(s)…"
+#: client/src/features/campaigns/components/StockTab.tsx:198
+msgid "Preparing %d post(s)…"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:203
+#: client/src/features/campaigns/components/StockTab.tsx:205
 msgid "(started %s ago)"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:210
+#: client/src/features/campaigns/components/StockTab.tsx:212
 msgid ""
-"This is taking longer than usual — the provider's batch queue may be slow. "
-"You can cancel and start over."
+"This is taking longer than usual: the provider's batch queue may be slow. To "
+"cancel and start over, use Replace all."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:224
-msgid "Cancel & regenerate"
+#: client/src/features/campaigns/components/StockTab.tsx:226
+#: client/src/features/campaigns/components/StockTab.tsx:451
+msgid "Replace all"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:258
+#: client/src/features/campaigns/components/StockTab.tsx:262
 #: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:632
 msgid "Generation failed"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:259
+#: client/src/features/campaigns/components/StockTab.tsx:263
 msgid "Writing this post…"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:355
-msgid "Pre-generation paused — provider errors"
+#: client/src/features/campaigns/components/StockTab.tsx:309
+#: client/src/features/campaigns/components/StockTab.tsx:317
+msgid "Preview in customer portal"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:360
+#: client/src/features/campaigns/components/StockTab.tsx:314
+msgid "Preview “%s” in the customer portal"
+msgstr ""
+
+#: client/src/features/campaigns/components/StockTab.tsx:386
+msgid "Preparing ahead is paused"
+msgstr ""
+
+#: client/src/features/campaigns/components/StockTab.tsx:391
 msgid ""
-"We hit %d failed generation attempts today, so new pre-generated posts are "
-"paused to avoid wasting your AI credits. Your scheduled posts still publish "
-"normally — they just generate fresh at run time until stock recovers."
+"%d attempts failed today, so we stopped preparing posts ahead to save your "
+"credits. Scheduled posts still go out: they're written when the run starts."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:370
-msgid "It resumes automatically around %s."
+#: client/src/features/campaigns/components/StockTab.tsx:401
+msgid "It starts again around %s."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:378
+#: client/src/features/campaigns/components/StockTab.tsx:409
 msgid ""
 "If this keeps happening, try switching this campaign's AI provider in AI "
 "Engine settings."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:403
-msgid "%d ready in stock"
-msgstr ""
-
-#: client/src/features/campaigns/components/StockTab.tsx:413
-msgid "Discard everything and generate fresh posts"
-msgstr ""
-
-#: client/src/features/campaigns/components/StockTab.tsx:429
-#: client/src/features/campaigns/components/StockTab.tsx:506
-msgid "Empty stock"
-msgstr ""
-
-#: client/src/features/campaigns/components/StockTab.tsx:436
-msgid "Loading stock…"
+#: client/src/features/campaigns/components/StockTab.tsx:434
+msgid "%d prepared"
 msgstr ""
 
 #: client/src/features/campaigns/components/StockTab.tsx:444
+msgid "Discard all prepared posts and prepare new ones"
+msgstr ""
+
+#: client/src/features/campaigns/components/StockTab.tsx:460
+#: client/src/features/campaigns/components/StockTab.tsx:542
+msgid "Discard all"
+msgstr ""
+
+#: client/src/features/campaigns/components/StockTab.tsx:467
+msgid "Loading prepared posts…"
+msgstr ""
+
+#: client/src/features/campaigns/components/StockTab.tsx:475
 msgid ""
-"Stock is empty — posts are pre-generated automatically ahead of your "
-"schedule."
+"No prepared posts yet. The next ones appear here as soon as they're ready."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:461
-msgid "Generate now"
+#: client/src/features/campaigns/components/StockTab.tsx:492
+msgid "Prepare now"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:490
-msgid "Empty the stock?"
+#: client/src/features/campaigns/components/StockTab.tsx:526
+msgid "Discard all prepared posts?"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:491
+#: client/src/features/campaigns/components/StockTab.tsx:527
 msgid "Discard this post?"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:495
+#: client/src/features/campaigns/components/StockTab.tsx:531
 msgid ""
-"All pre-generated posts for this campaign will be discarded, including any "
-"still generating. While pre-generation stays on, fresh posts are written "
+"Every prepared post for this campaign is discarded, including any still "
+"being prepared. While preparing ahead stays on, new ones are prepared "
 "automatically."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:499
-msgid ""
-"This pre-generated post will be discarded. A replacement is written "
-"automatically while pre-generation stays on."
+#: client/src/features/campaigns/components/StockTab.tsx:535
+msgid "Another post is prepared to take its place."
 msgstr ""
 
 #: client/src/features/campaigns/components/SuggestStrategySection.tsx:158
@@ -4586,33 +4914,39 @@ msgid ""
 "uploads folder. Posts will still publish without images."
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepArchitecture.tsx:203
+#: client/src/features/campaigns/components/steps/StepArchitecture.tsx:193
+msgid ""
+"Posts will arrive without images. You add your own photos in the WordPress "
+"editor."
+msgstr ""
+
+#: client/src/features/campaigns/components/steps/StepArchitecture.tsx:211
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1057
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:697
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:1071
 msgid "Content Blocks"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepArchitecture.tsx:232
+#: client/src/features/campaigns/components/steps/StepArchitecture.tsx:240
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1161
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:817
 msgid "AI Transparency Signal"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepArchitecture.tsx:236
+#: client/src/features/campaigns/components/steps/StepArchitecture.tsx:244
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:716
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:724
 msgid "Enabled"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepArchitecture.tsx:246
+#: client/src/features/campaigns/components/steps/StepArchitecture.tsx:254
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1184
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:848
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:1048
 msgid "Disclosure Notice"
 msgstr ""
 
-#: client/src/features/campaigns/components/steps/StepArchitecture.tsx:276
+#: client/src/features/campaigns/components/steps/StepArchitecture.tsx:284
 msgid ""
 "Referral links are a paid feature. Upgrade to Pro to weave your tracking "
 "links into relevant posts."
@@ -4975,6 +5309,10 @@ msgstr ""
 msgid "Pending"
 msgstr ""
 
+#: client/src/features/campaigns/labels.ts:83
+msgid "Generating"
+msgstr ""
+
 #: client/src/features/campaigns/labels.ts:100
 msgid "Auto"
 msgstr ""
@@ -5007,6 +5345,7 @@ msgstr ""
 #: client/src/features/campaigns/labels.ts:150
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:268
 #: client/src/features/channels/components/ConfigureConnectionModal.tsx:946
+#: client/src/features/onboarding/components/PositioningTextArea.tsx:23
 msgid "%1$d of %2$d"
 msgstr ""
 
@@ -5081,7 +5420,7 @@ msgid "Posts"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:100
-msgid "Stock"
+msgid "Prepared"
 msgstr ""
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:126
@@ -6993,7 +7332,7 @@ msgstr ""
 
 #: client/src/features/channels/components/SearchPerformanceSection.tsx:212
 #: client/src/features/dashboard/components/GscSummaryCard.tsx:252
-#: client/src/features/notices/utils.ts:98
+#: client/src/features/notices/utils.ts:99
 msgid "Reconnect"
 msgstr ""
 
@@ -7626,204 +7965,204 @@ msgstr ""
 msgid "Last seen %1$s · %2$d occurrences"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:40
+#: client/src/features/notices/utils.ts:41
 msgid "Add a {{provider}} API key"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:41
+#: client/src/features/notices/utils.ts:42
 msgid ""
 "Structura tried to generate content for you but no {{provider}} API key is "
 "connected to this workspace. Add a key in AI Settings and we'll pick up "
 "where we left off on the next run."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:45
+#: client/src/features/notices/utils.ts:46
 msgid "Open AI Settings"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:46
+#: client/src/features/notices/utils.ts:47
 msgid "Your {{provider}} key was rejected"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:47
+#: client/src/features/notices/utils.ts:48
 msgid ""
 "Your {{provider}} API key was refused by the provider. The key may have been "
 "revoked, rotated, or its billing is suspended. Update or replace it to "
 "resume generation."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:51
+#: client/src/features/notices/utils.ts:52
 msgid "Update key"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:53
+#: client/src/features/notices/utils.ts:54
 msgid ""
 "In our tests, posts written with Gemini contained more invented details. "
 "Each campaign shows how to switch in its AI engine section."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:57
+#: client/src/features/notices/utils.ts:58
 msgid "Review campaigns"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:58
+#: client/src/features/notices/utils.ts:59
 msgid "You've reached your generation quota"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:59
+#: client/src/features/notices/utils.ts:60
 msgid ""
 "This site has used all of the included posts and images for this billing "
 "cycle. The quota refills at the start of the next cycle, or you can upgrade "
 "for a larger allowance now."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:63
+#: client/src/features/notices/utils.ts:64
 msgid "Manage plan"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:64
+#: client/src/features/notices/utils.ts:65
 msgid "Weekly post limit reached"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:65
+#: client/src/features/notices/utils.ts:66
 msgid ""
 "This site has used all {{cap}} of its one-off generated posts for this week. "
 "The allowance resets on Monday (UTC) — or upgrade your plan to generate more."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:69
+#: client/src/features/notices/utils.ts:70
 msgid "See upgrade options"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:70
+#: client/src/features/notices/utils.ts:71
 msgid "Test notification delivered"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:71
+#: client/src/features/notices/utils.ts:72
 msgid ""
 "This is the test notice you asked for from Bridge Diagnostics — your site's "
 "error-notification pipeline works end to end. You can dismiss it."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:75
+#: client/src/features/notices/utils.ts:76
 msgid "Your last payment failed"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:76
+#: client/src/features/notices/utils.ts:77
 msgid ""
 "Stripe couldn't charge your card for the most recent invoice. We'll retry "
 "automatically, but you can avoid an interruption by updating your payment "
 "method now."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:80
-#: client/src/features/notices/utils.ts:86
+#: client/src/features/notices/utils.ts:81
+#: client/src/features/notices/utils.ts:87
 msgid "Update payment method"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:81
+#: client/src/features/notices/utils.ts:82
 msgid "Your subscription is past due"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:82
+#: client/src/features/notices/utils.ts:83
 msgid ""
 "After several failed payment attempts your subscription has been marked past "
 "due. Service may be downgraded soon. Update your payment method to restore "
 "your plan."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:87
+#: client/src/features/notices/utils.ts:88
 msgid "We couldn't activate your license"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:88
+#: client/src/features/notices/utils.ts:89
 msgid ""
 "Structura tried to activate this site against your license but the cloud "
 "refused. This usually means the license expired, the seat limit was reached, "
 "or the payment status changed."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:92
+#: client/src/features/notices/utils.ts:93
 msgid "Open account"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:93
+#: client/src/features/notices/utils.ts:94
 msgid "{{integrationId}} disconnected"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:94
+#: client/src/features/notices/utils.ts:95
 msgid ""
 "Structura's connection to {{integrationId}} stopped working — the access "
 "token couldn't be refreshed. Reconnect this channel to resume publishing."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:99
+#: client/src/features/notices/utils.ts:100
 msgid "{{integrationId}} webhook unreachable"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:100
+#: client/src/features/notices/utils.ts:101
 msgid ""
 "We couldn't reach the webhook URL configured for {{integrationId}}. The "
 "endpoint may be offline, the URL may have changed, or your firewall may be "
 "blocking us."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:104
+#: client/src/features/notices/utils.ts:105
 msgid "Open channel settings"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:105
+#: client/src/features/notices/utils.ts:106
 msgid "A post couldn't be generated"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:106
+#: client/src/features/notices/utils.ts:107
 msgid ""
 "Structura hit an error while generating content for this site. We'll "
 "automatically try again on the next scheduled run — open your campaigns to "
 "review the failed run or start a new one."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:110
+#: client/src/features/notices/utils.ts:111
 msgid "View campaigns"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:111
+#: client/src/features/notices/utils.ts:112
 msgid "A run stopped on our side"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:112
+#: client/src/features/notices/utils.ts:113
 msgid ""
 "A run of {{campaignName}} stopped before anything was published. The failure "
 "was on our infrastructure, not your site. The post was returned to your "
 "allowance and the prepared article will go out on the next run."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:116
+#: client/src/features/notices/utils.ts:117
 msgid "View run"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:117
+#: client/src/features/notices/utils.ts:118
 msgid "Plugin compatibility check failed"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:118
+#: client/src/features/notices/utils.ts:119
 msgid ""
 "Diagnostics on this site detected a compatibility issue with another plugin "
 "or theme that may affect Structura. Review the diagnostics report and apply "
 "the suggested fix."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:122
-#: client/src/features/notices/utils.ts:128
-#: client/src/features/notices/utils.ts:134
+#: client/src/features/notices/utils.ts:123
+#: client/src/features/notices/utils.ts:129
+#: client/src/features/notices/utils.ts:135
 msgid "Open diagnostics"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:123
+#: client/src/features/notices/utils.ts:124
 msgid "Structura Cloud can't reach your site"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:124
+#: client/src/features/notices/utils.ts:125
 msgid ""
 "Posts are generated in the cloud and delivered back over a webhook. The last "
 "connection check couldn't reach your site, so generated posts have nowhere "
@@ -7832,93 +8171,93 @@ msgid ""
 "details and a fix."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:129
+#: client/src/features/notices/utils.ts:130
 msgid "Scheduler isn't running on time"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:130
+#: client/src/features/notices/utils.ts:131
 msgid ""
 "WordPress cron hasn't fired the scheduler heartbeat recently. Posts and "
 "images may be delayed. Diagnostics has the details and a fix."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:135
+#: client/src/features/notices/utils.ts:136
 msgid "Update Structura"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:136
+#: client/src/features/notices/utils.ts:137
 msgid ""
 "This site is running an older Structura version that's missing fixes the "
 "cloud relies on. Update the plugin to keep everything working smoothly."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:140
+#: client/src/features/notices/utils.ts:141
 msgid "Open Plugins"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:141
+#: client/src/features/notices/utils.ts:142
 msgid "Fresh keyword opportunities found"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:142
+#: client/src/features/notices/utils.ts:143
 msgid ""
 "The monthly keyword refresh for {{campaignName}} surfaced {{newCount}} new "
 "opportunities. They've been added to the campaign's keyword bank and will "
 "feed upcoming posts."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:146
+#: client/src/features/notices/utils.ts:147
 msgid "View campaign"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:147
+#: client/src/features/notices/utils.ts:148
 msgid "This campaign is writing from its objective"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:148
+#: client/src/features/notices/utils.ts:149
 msgid ""
 "{{campaignName}} has no keywords, so each post picks a new topic from the "
 "campaign objective and skips topics this site already covers. Keywords are "
 "optional. Add some if you want to choose what each post targets."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:152
-#: client/src/features/notices/utils.ts:161
-#: client/src/features/notices/utils.ts:179
+#: client/src/features/notices/utils.ts:153
+#: client/src/features/notices/utils.ts:162
+#: client/src/features/notices/utils.ts:180
 msgid "Add keywords"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:153
+#: client/src/features/notices/utils.ts:154
 msgid "Campaign has covered every keyword"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:157
+#: client/src/features/notices/utils.ts:158
 msgid ""
 "{{campaignName}} has already published a post for every keyword in its bank, "
 "so scheduled posts are paused rather than repeating a topic. Add or re-"
 "discover keywords to start it up again."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:162
+#: client/src/features/notices/utils.ts:163
 msgid "We added new keywords to your campaign"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:166
+#: client/src/features/notices/utils.ts:167
 msgid ""
 "{{campaignName}} was running low on fresh topics, so we researched its niche "
 "and added {{newCount}} new keywords to its keyword bank. Upcoming posts will "
 "use them."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:170
+#: client/src/features/notices/utils.ts:171
 msgid "Review keywords"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:171
+#: client/src/features/notices/utils.ts:172
 msgid "We skipped a duplicate post"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:175
+#: client/src/features/notices/utils.ts:176
 msgid ""
 "A scheduled post for {{campaignName}} would have used the web address "
 "“{{slug}}”, which you already publish under — so we stopped it instead of "
@@ -7926,74 +8265,74 @@ msgid ""
 "so the next post covers something new."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:180
+#: client/src/features/notices/utils.ts:181
 msgid "Search data budget almost used up"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:181
+#: client/src/features/notices/utils.ts:182
 msgid ""
 "This workspace has used 80% of its monthly search-data allowance. Keyword "
 "refreshes keep running until the cap is reached, then pause until next month."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:186
+#: client/src/features/notices/utils.ts:187
 msgid "Search data paused until next month"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:187
+#: client/src/features/notices/utils.ts:188
 msgid ""
 "This workspace has used its full monthly search-data allowance. Keyword "
 "refreshes continue with AI-only discovery, and enriched search data resumes "
 "at the start of next month."
 msgstr ""
 
-#: client/src/features/notices/utils.ts:227
+#: client/src/features/notices/utils.ts:228
 msgid "Billing"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:228
+#: client/src/features/notices/utils.ts:229
 msgid "License"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:230
+#: client/src/features/notices/utils.ts:231
 msgid "Quota"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:231
+#: client/src/features/notices/utils.ts:232
 msgid "AI key"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:232
+#: client/src/features/notices/utils.ts:233
 msgid "Generation"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:233
+#: client/src/features/notices/utils.ts:234
 msgid "Plugin health"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:234
+#: client/src/features/notices/utils.ts:235
 #: client/src/features/onboarding/components/WizardShell.tsx:87
 #: client/src/features/onboarding/routes/OnboardingPage.tsx:299
 msgid "SEO intelligence"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:269
+#: client/src/features/notices/utils.ts:270
 msgid "just now"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:270
+#: client/src/features/notices/utils.ts:271
 msgid "%dm ago"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:272
+#: client/src/features/notices/utils.ts:273
 msgid "%dh ago"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:274
+#: client/src/features/notices/utils.ts:275
 msgid "%dd ago"
 msgstr ""
 
-#: client/src/features/notices/utils.ts:210
+#: client/src/features/notices/utils.ts:211
 msgid "{{count}} campaign on {{site}} writes with Gemini"
 msgid_plural "{{count}} campaigns on {{site}} write with Gemini"
 msgstr[0] ""
@@ -8121,54 +8460,54 @@ msgid ""
 "this step here or in the matching tab once it ships."
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:77
+#: client/src/features/onboarding/components/PositioningCard.tsx:78
 msgid "Positioning saved."
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:95
+#: client/src/features/onboarding/components/PositioningCard.tsx:96
 msgid "Drafted from your site's pages. Review and save."
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:100
+#: client/src/features/onboarding/components/PositioningCard.tsx:101
 msgid ""
 "We couldn't find a public homepage to read. Set the public website on the "
 "Info card, or write the answers in yourself."
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:104
+#: client/src/features/onboarding/components/PositioningCard.tsx:105
 msgid ""
 "AI couldn't draft this right now. Try again in a moment, or write the "
 "answers in yourself."
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:111
+#: client/src/features/onboarding/components/PositioningCard.tsx:112
 msgid "Something went wrong drafting from your homepage."
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:147
+#: client/src/features/onboarding/components/PositioningCard.tsx:148
 msgid "Positioning"
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:150
+#: client/src/features/onboarding/components/PositioningCard.tsx:151
 msgid ""
 "What you do, who you serve, and the problem you solve. Steers every campaign "
 "Structura writes."
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:168
+#: client/src/features/onboarding/components/PositioningCard.tsx:169
 #: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:452
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:500
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:497
 msgid "AI draft"
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:181
+#: client/src/features/onboarding/components/PositioningCard.tsx:182
 #: client/src/features/settings/components/PublicSiteCard.tsx:269
 #: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:292
 #: client/src/features/site/routes/tabs/SiteReferralsTab.tsx:60
 msgid "Save"
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:196
+#: client/src/features/onboarding/components/PositioningCard.tsx:197
 msgid "What does your business do?"
 msgstr ""
 
@@ -8178,22 +8517,22 @@ msgid "We help remote design teams ship Figma faster…"
 msgstr ""
 
 #: client/src/features/onboarding/components/PositioningCard.tsx:207
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:471
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:470
 msgid "Who's your typical customer?"
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:212
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:477
+#: client/src/features/onboarding/components/PositioningCard.tsx:211
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:476
 msgid "Senior designers at 20–200-person companies…"
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:218
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:484
+#: client/src/features/onboarding/components/PositioningCard.tsx:217
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:482
 msgid "What problem do you solve for them?"
 msgstr ""
 
-#: client/src/features/onboarding/components/PositioningCard.tsx:223
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:490
+#: client/src/features/onboarding/components/PositioningCard.tsx:221
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:488
 msgid "Async handoff between designers and engineers breaks down…"
 msgstr ""
 
@@ -8515,34 +8854,34 @@ msgstr ""
 msgid "In one sentence, what does your business do?"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:502
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:499
 msgid ""
 "Edit anything that doesn't feel right — your changes overwrite the draft."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:525
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:522
 msgid "Sites you compete with"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:531
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:528
 #: client/src/features/site/components/SiteSubNav.tsx:67
 msgid "Competitors"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:545
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:542
 msgid "Suggest competitors"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:549
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:546
 #: client/src/features/site/routes/tabs/SiteCompetitorsTab.tsx:332
 msgid "Auto-detected from your site"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:550
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:547
 msgid "AI-suggested — tap to add"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:556
+#: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:553
 msgid "Looking for likely competitors…"
 msgstr ""
 

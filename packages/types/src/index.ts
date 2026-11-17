@@ -702,7 +702,7 @@ export interface ReadVoiceLinkRequest {
   url: string;
 }
 
-/** Why a link cannot be read: not an https address, not a public host, no readable page, or under {@link VOICE_ARTICLE_MIN_LENGTH}. */
+/** Why a link cannot be read: not an https address, not a public host, no readable page, or under {@link VOICE_TEXT_MIN_LENGTH}. */
 export type VoiceLinkError = "invalid" | "notPublic" | "unreadable" | "tooShort";
 
 /** `readVoiceLinkPortal` response. */

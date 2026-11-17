@@ -322,6 +322,15 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Changelog ==
 
+= 2.40.0 =
+* New: the campaign's Stock tab is now called Prepared. Each prepared
+  post has a "Preview in customer portal" link, where you can read the
+  post, edit it and send it early, before its scheduled run.
+* Changed: prepared posts you edited are kept when you change the
+  campaign. Changing the campaign's language still replaces all of them.
+* Fixed: step and FAQ text that contains characters such as & or < now
+  appears as plain text in the HowTo and FAQ structured data.
+
 = 2.38.0 =
 * Changed: the setup wizard's Visual signature step now waits for the
   scan of your site before it appears, so the recommended style and your
@@ -569,6 +578,11 @@ repository:
 [github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md](https://github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md)
 
 == Upgrade Notice ==
+
+= 2.40.0 =
+The Stock tab is now Prepared, with a link to read and edit each
+prepared post in the customer portal. Safe upgrade. No database
+migrations.
 
 = 2.38.0 =
 The setup wizard waits for your brand colors before the Visual signature

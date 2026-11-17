@@ -561,13 +561,13 @@ msgstr "Arquitectura de la campaña actualizada."
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4991
 #: plugin/includes/Api/Rest_Api.php:6622
-msgid "Failed to fetch stock summary."
-msgstr "No se pudo obtener el resumen de stock."
+msgid "Failed to fetch the summary of prepared posts."
+msgstr "No se pudo obtener el resumen de las entradas preparadas."
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5028
 #: plugin/includes/Api/Rest_Api.php:6769
-msgid "Failed to enable pre-generation."
-msgstr "No se pudo activar la pregeneración."
+msgid "Failed to turn on preparing ahead."
+msgstr "No se pudo activar la preparación anticipada."
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5048
 #: plugin/includes/Api/Rest_Api.php:6789
@@ -1555,20 +1555,20 @@ msgid "Cloud rejected the campaign request."
 msgstr "La nube ha rechazado la solicitud de la campaña."
 
 #: plugin/includes/Api/Rest_Api.php:6689
-msgid "Failed to fetch stock."
-msgstr "No se ha podido obtener el stock."
+msgid "Failed to fetch prepared posts."
+msgstr "No se han podido obtener las entradas preparadas."
 
 #: plugin/includes/Api/Rest_Api.php:6705
-msgid "Failed to delete the stock entry."
-msgstr "No se ha podido eliminar la entrada del stock."
+msgid "Failed to discard the prepared post."
+msgstr "No se ha podido descartar la entrada preparada."
 
 #: plugin/includes/Api/Rest_Api.php:6720
-msgid "Failed to empty the stock."
-msgstr "No se ha podido vaciar el stock."
+msgid "Failed to discard all prepared posts."
+msgstr "No se han podido descartar las entradas preparadas."
 
 #: plugin/includes/Api/Rest_Api.php:6735
-msgid "Failed to regenerate the stock."
-msgstr "No se ha podido regenerar el stock."
+msgid "Failed to replace all prepared posts."
+msgstr "No se han podido reemplazar las entradas preparadas."
 
 #: plugin/includes/Api/Rest_Api.php:7266
 msgid "Failed to add persona to this site."
@@ -3312,28 +3312,30 @@ msgid "Pulse Failed: Cloud unreachable."
 msgstr "Pulso fallido: nube inaccesible."
 
 #: client/src/features/campaigns/api/useStockMutations.ts:38
-msgid "Stock post discarded."
-msgstr "Entrada de stock descartada."
+msgid "Prepared post discarded."
+msgstr "Entrada preparada descartada."
 
 #: client/src/features/campaigns/api/useStockMutations.ts:50
-msgid "Stock emptied."
-msgstr "Stock vaciado."
+msgid "All prepared posts discarded."
+msgstr "Se han descartado todas las entradas preparadas."
 
 #: client/src/features/campaigns/api/useStockMutations.ts:65
-msgid "Regenerating stock — fresh posts are on the way."
-msgstr "Regenerando el stock: las nuevas entradas están en camino."
+msgid "Replacing all prepared posts. New ones are on the way."
+msgstr ""
+"Reemplazando todas las entradas preparadas. Las nuevas están en camino."
 
 #: client/src/features/campaigns/api/useStockMutations.ts:68
 msgid ""
-"Stock regeneration is paused for today — this campaign hit its daily refill "
-"limit."
+"Preparing ahead is paused for today. This campaign reached its daily limit."
 msgstr ""
-"La regeneración del stock está pausada por hoy: esta campaña ha alcanzado su "
-"límite diario de reposición."
+"La preparación anticipada está en pausa por hoy. Esta campaña ha alcanzado "
+"su límite diario."
 
 #: client/src/features/campaigns/api/useStockMutations.ts:74
-msgid "Could not start the regeneration. Please try again later."
-msgstr "No se ha podido iniciar la regeneración. Inténtalo de nuevo más tarde."
+msgid "Could not start preparing new posts. Please try again later."
+msgstr ""
+"No se ha podido empezar a preparar entradas nuevas. Inténtalo de nuevo más "
+"tarde."
 
 #: client/src/features/campaigns/components/AiLabelReminder.tsx:43
 msgid "Photo-style images may need an AI label"
@@ -4368,8 +4370,9 @@ msgid "%d ready"
 msgstr "%d listos"
 
 #: client/src/features/campaigns/components/StockSummaryChip.tsx:80
-msgid "Pre-generating"
-msgstr "Pregenerando"
+#: client/src/features/campaigns/components/StockTab.tsx:57
+msgid "Preparing"
+msgstr "Preparando"
 
 #: client/src/features/campaigns/components/StockTab.tsx:55
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:261
@@ -4377,7 +4380,6 @@ msgstr "Pregenerando"
 msgid "Ready"
 msgstr "Listo"
 
-#: client/src/features/campaigns/components/StockTab.tsx:57
 #: client/src/features/campaigns/labels.ts:83
 msgid "Generating"
 msgstr "Generando"
@@ -4391,54 +4393,59 @@ msgid "%s h"
 msgstr "%s h"
 
 #: client/src/features/campaigns/components/StockTab.tsx:107
-msgid "Pre-generation is off for this campaign"
-msgstr "La pregeneración está desactivada para esta campaña"
+msgid "Preparing ahead is off for this campaign"
+msgstr "La preparación anticipada está desactivada para esta campaña"
 
 #: client/src/features/campaigns/components/StockTab.tsx:110
 msgid ""
-"Stock is a buffer of posts written ahead of your schedule using your AI "
+"Preparing ahead writes posts before their scheduled run, on your AI "
 "provider's discounted batch tier. With it on, scheduled posts cost up to 50% "
-"less and publish in under a second — without it, every run generates fresh "
-"at full price. We highly recommend enabling it."
+"less and publish in under a second. Without it, every run writes a fresh "
+"post at full price. We highly recommend turning it on."
 msgstr ""
-"El stock es un búfer de entradas escritas con antelación según tu "
-"programación usando el nivel por lotes con descuento de tu proveedor de IA. "
-"Con él activado, las entradas programadas cuestan hasta un 50 % menos y se "
-"publican en menos de un segundo; sin él, cada ejecución genera contenido "
-"nuevo a precio completo. Recomendamos encarecidamente activarlo."
+"La preparación anticipada escribe las entradas antes de su ejecución "
+"programada, en el nivel por lotes con descuento de tu proveedor de IA. Con "
+"ella activada, las entradas programadas cuestan hasta un 50 % menos y se "
+"publican en menos de un segundo. Sin ella, cada ejecución escribe una "
+"entrada nueva a precio completo. Recomendamos encarecidamente activarla."
 
 #: client/src/features/campaigns/components/StockTab.tsx:121
-msgid "Enable pre-generation"
-msgstr "Activar pregeneración"
+msgid "Turn on preparing ahead"
+msgstr "Activar la preparación anticipada"
 
 #: client/src/features/campaigns/components/StockTab.tsx:135
-msgid "What is stock?"
-msgstr "¿Qué es el stock?"
+msgid "What are prepared posts?"
+msgstr "¿Qué son las entradas preparadas?"
 
 #: client/src/features/campaigns/components/StockTab.tsx:138
 msgid ""
-"Stock is a small buffer of posts written ahead of your schedule on the AI "
-"provider's discounted batch tier. When a scheduled run fires, it publishes a "
-"stocked post instantly and a replacement is generated in the background. "
-"These are drafts held in the cloud — they only become real posts on your "
-"site when their scheduled run consumes them. Editing the campaign discards "
-"outdated stock automatically."
+"Prepared posts are written ahead of your schedule on the AI provider's "
+"discounted batch tier. The campaign keeps a few ready. When a scheduled run "
+"starts, it publishes one instantly and a replacement is prepared in the "
+"background. Prepared posts are drafts held in the cloud and only become real "
+"posts on your site when their scheduled run uses them. You can read and edit "
+"them in the customer portal before then. Editing the campaign discards "
+"outdated prepared posts automatically but keeps edited ones, unless you "
+"change the language."
 msgstr ""
-"El stock es un pequeño búfer de entradas escritas con antelación según tu "
-"programación en el nivel por lotes con descuento del proveedor de IA. Cuando "
-"se ejecuta una publicación programada, publica una entrada del stock al "
-"instante y se genera un reemplazo en segundo plano. Son borradores "
-"almacenados en la nube: solo se convierten en entradas reales en tu sitio "
-"cuando su ejecución programada los consume. Al editar la campaña se descarta "
-"automáticamente el stock obsoleto."
+"Las entradas preparadas se escriben con antelación según tu programación en "
+"el nivel por lotes con descuento del proveedor de IA. La campaña mantiene "
+"unas cuantas listas. Cuando empieza una ejecución programada, publica una al "
+"instante y se prepara un reemplazo en segundo plano. Las entradas preparadas "
+"son borradores guardados en la nube y solo se convierten en entradas reales "
+"en tu sitio cuando su ejecución programada las usa. Hasta entonces, puedes "
+"leerlas y editarlas en el portal de cliente. Al editar la campaña se "
+"descartan automáticamente las entradas preparadas obsoletas, pero se "
+"conservan las editadas, salvo que cambies el idioma."
 
 #: client/src/features/campaigns/components/StockTab.tsx:142
-msgid "Pre-generation is always on for managed plans."
-msgstr "La pregeneración está siempre activada en los planes gestionados."
+msgid "Preparing ahead is always on for managed plans."
+msgstr ""
+"La preparación anticipada está siempre activada en los planes gestionados."
 
 #: client/src/features/campaigns/components/StockTab.tsx:196
-msgid "Generating %d post(s)…"
-msgstr "Generando %d entrada(s)…"
+msgid "Preparing %d post(s)…"
+msgstr "Preparando %d entrada(s)…"
 
 #: client/src/features/campaigns/components/StockTab.tsx:203
 msgid "(started %s ago)"
@@ -4446,15 +4453,16 @@ msgstr "(iniciado hace %s)"
 
 #: client/src/features/campaigns/components/StockTab.tsx:210
 msgid ""
-"This is taking longer than usual — the provider's batch queue may be slow. "
-"You can cancel and start over."
+"This is taking longer than usual: the provider's batch queue may be slow. To "
+"cancel and start over, use Replace all."
 msgstr ""
 "Esto está tardando más de lo habitual: la cola por lotes del proveedor puede "
-"ir lenta. Puedes cancelar y empezar de nuevo."
+"ir lenta. Para cancelar y empezar de nuevo, usa «Reemplazar todo»."
 
 #: client/src/features/campaigns/components/StockTab.tsx:224
-msgid "Cancel & regenerate"
-msgstr "Cancelar y regenerar"
+#: client/src/features/campaigns/components/StockTab.tsx:420
+msgid "Replace all"
+msgstr "Reemplazar todo"
 
 #: client/src/features/campaigns/components/StockTab.tsx:258
 #: client/src/features/campaigns/routes/SinglePostRunDetailPage.tsx:632
@@ -4466,23 +4474,21 @@ msgid "Writing this post…"
 msgstr "Escribiendo esta entrada…"
 
 #: client/src/features/campaigns/components/StockTab.tsx:355
-msgid "Pre-generation paused — provider errors"
-msgstr "Pregeneración pausada: errores del proveedor"
+msgid "Preparing ahead is paused"
+msgstr "La preparación anticipada está en pausa"
 
 #: client/src/features/campaigns/components/StockTab.tsx:360
 msgid ""
-"We hit %d failed generation attempts today, so new pre-generated posts are "
-"paused to avoid wasting your AI credits. Your scheduled posts still publish "
-"normally — they just generate fresh at run time until stock recovers."
+"%d attempts failed today, so we stopped preparing posts ahead to save your "
+"credits. Scheduled posts still go out: they're written when the run starts."
 msgstr ""
-"Hemos alcanzado %d intentos de generación fallidos hoy, así que se pausan "
-"las nuevas entradas pregeneradas para no malgastar tus créditos de IA. Tus "
-"entradas programadas se siguen publicando con normalidad: simplemente se "
-"generan nuevas en el momento de la ejecución hasta que el stock se recupere."
+"Hoy han fallado %d intentos, así que hemos dejado de preparar entradas con "
+"antelación para ahorrar tus créditos. Las entradas programadas se siguen "
+"publicando: se escriben cuando empieza la ejecución."
 
 #: client/src/features/campaigns/components/StockTab.tsx:370
-msgid "It resumes automatically around %s."
-msgstr "Se reanuda automáticamente en torno a las %s."
+msgid "It starts again around %s."
+msgstr "Vuelve a empezar hacia el %s."
 
 #: client/src/features/campaigns/components/StockTab.tsx:378
 msgid ""
@@ -4493,37 +4499,36 @@ msgstr ""
 "campaña en los ajustes del Motor de IA."
 
 #: client/src/features/campaigns/components/StockTab.tsx:403
-msgid "%d ready in stock"
-msgstr "%d listas en stock"
+msgid "%d prepared"
+msgstr "%d preparada(s)"
 
 #: client/src/features/campaigns/components/StockTab.tsx:413
-msgid "Discard everything and generate fresh posts"
-msgstr "Descartar todo y generar entradas nuevas"
+msgid "Discard all prepared posts and prepare new ones"
+msgstr "Descartar todas las entradas preparadas y preparar otras nuevas"
 
 #: client/src/features/campaigns/components/StockTab.tsx:429
 #: client/src/features/campaigns/components/StockTab.tsx:506
-msgid "Empty stock"
-msgstr "Vaciar stock"
+msgid "Discard all"
+msgstr "Descartar todo"
 
 #: client/src/features/campaigns/components/StockTab.tsx:436
-msgid "Loading stock…"
-msgstr "Cargando stock…"
+msgid "Loading prepared posts…"
+msgstr "Cargando entradas preparadas…"
 
 #: client/src/features/campaigns/components/StockTab.tsx:444
 msgid ""
-"Stock is empty — posts are pre-generated automatically ahead of your "
-"schedule."
+"No prepared posts yet. The next ones appear here as soon as they're ready."
 msgstr ""
-"El stock está vacío: las entradas se pregeneran automáticamente con "
-"antelación según tu programación."
+"Aún no hay entradas preparadas. Las siguientes aparecerán aquí en cuanto "
+"estén listas."
 
 #: client/src/features/campaigns/components/StockTab.tsx:461
-msgid "Generate now"
-msgstr "Generar ahora"
+msgid "Prepare now"
+msgstr "Preparar ahora"
 
 #: client/src/features/campaigns/components/StockTab.tsx:490
-msgid "Empty the stock?"
-msgstr "¿Vaciar el stock?"
+msgid "Discard all prepared posts?"
+msgstr "¿Descartar todas las entradas preparadas?"
 
 #: client/src/features/campaigns/components/StockTab.tsx:491
 msgid "Discard this post?"
@@ -4531,21 +4536,17 @@ msgstr "¿Descartar esta entrada?"
 
 #: client/src/features/campaigns/components/StockTab.tsx:495
 msgid ""
-"All pre-generated posts for this campaign will be discarded, including any "
-"still generating. While pre-generation stays on, fresh posts are written "
+"Every prepared post for this campaign is discarded, including any still "
+"being prepared. While preparing ahead stays on, new ones are prepared "
 "automatically."
 msgstr ""
-"Se descartarán todas las entradas pregeneradas de esta campaña, incluidas "
-"las que aún se estén generando. Mientras la pregeneración siga activada, se "
-"escribirán entradas nuevas automáticamente."
+"Se descartan todas las entradas preparadas de esta campaña, incluidas las "
+"que aún se están preparando. Mientras la preparación anticipada siga "
+"activada, se preparan otras nuevas automáticamente."
 
 #: client/src/features/campaigns/components/StockTab.tsx:499
-msgid ""
-"This pre-generated post will be discarded. A replacement is written "
-"automatically while pre-generation stays on."
-msgstr ""
-"Esta entrada pregenerada se descartará. Se escribirá un reemplazo "
-"automáticamente mientras la pregeneración siga activada."
+msgid "Another post is prepared to take its place."
+msgstr "Se prepara otra entrada para ocupar su lugar."
 
 #: client/src/features/campaigns/components/SuggestStrategySection.tsx:158
 msgid "Name"
@@ -5177,6 +5178,10 @@ msgstr "Generar imagen destacada"
 msgid "Create a relevant featured image for the post."
 msgstr "Crea una imagen destacada relevante para la entrada."
 
+#: client/src/features/campaigns/components/steps/StepArchitecture.tsx
+msgid "Posts will arrive without images. You add your own photos in the WordPress editor."
+msgstr "Las entradas llegarán sin imágenes. Añade tus propias fotos en el editor de WordPress."
+
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:155
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1024
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:667
@@ -5744,8 +5749,8 @@ msgid "Posts"
 msgstr "Entradas"
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:100
-msgid "Stock"
-msgstr "Stock"
+msgid "Prepared"
+msgstr "Preparadas"
 
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:126
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:65
@@ -12345,3 +12350,9 @@ msgstr "Redactado a partir de las páginas de tu sitio. Revísalo y guárdalo."
 
 msgid "Drafted from your site's pages. Edit anything below."
 msgstr "Redactado a partir de las páginas de tu sitio. Edita lo que quieras abajo."
+
+msgid "Preview in customer portal"
+msgstr "Vista previa en el portal de cliente"
+
+msgid "Preview “%s” in the customer portal"
+msgstr "Vista previa de «%s» en el portal de cliente"

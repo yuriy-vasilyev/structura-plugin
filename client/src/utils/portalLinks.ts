@@ -124,7 +124,7 @@ export interface PortalSignupLinkArgs {
   workspaceId?: string;
 }
 
-const PORTAL_BASE_URL = "https://app.structurawp.com";
+export const PORTAL_BASE_URL = "https://app.structurawp.com";
 
 /**
  * Build a portal URL with intent + context query args. Returns the
@@ -146,6 +146,16 @@ export function buildPortalSignupUrl(args: PortalSignupLinkArgs): string {
   if (args.returnTo) params.set("returnTo", args.returnTo);
   if (args.workspaceId) params.set("workspaceId", args.workspaceId);
   return `${PORTAL_BASE_URL}/?${params.toString()}`;
+}
+
+/** Returns the portal's preview URL for one prepared post (specs/stock-preview-and-edit.md §3). */
+export function buildPortalStockPreviewUrl(
+  activationId: string,
+  campaignId: string,
+  stockId: string,
+): string {
+  const [site, campaign, stock] = [activationId, campaignId, stockId].map(encodeURIComponent);
+  return `${PORTAL_BASE_URL}/sites/${site}/campaigns/${campaign}/stock/${stock}`;
 }
 
 // ─── Marketing-site pricing URLs ─────────────────────────────────────────

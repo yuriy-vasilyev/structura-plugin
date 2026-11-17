@@ -343,4 +343,18 @@ describe("AiLabelReminder · new-schedule modal (StepArchitecture)", () => {
     renderStep(formData({}));
     expect(await screen.findByText(TITLE)).toBeInTheDocument();
   });
+
+  // 2026-11-16: with both cards off nothing said what happens to the images.
+  const OWN_PHOTOS = "Posts will arrive without images. You add your own photos in the WordPress editor.";
+
+  it("says posts arrive without images when both image cards are off", async () => {
+    renderStep(formData({ featuredImage: false, bodyImages: false }));
+    expect(await screen.findByText(OWN_PHOTOS)).toBeInTheDocument();
+  });
+
+  it("does not say it while an image card is on", async () => {
+    renderStep(formData({ featuredImage: true, bodyImages: false }));
+    await screen.findAllByText("Body image generation");
+    expect(screen.queryByText(OWN_PHOTOS)).not.toBeInTheDocument();
+  });
 });

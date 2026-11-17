@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 import { __, sprintf } from "@wordpress/i18n";
 import {
   AlertTriangle,
+  ExternalLink,
   Image as ImageIcon,
   Loader2,
   PackageOpen,
@@ -19,6 +20,7 @@ import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutati
 import { type StockEntryView, useStockListQuery } from "@/features/campaigns/api/useStockListQuery";
 import { useStockMutations } from "@/features/campaigns/api/useStockMutations";
 import { normalizePostStatus } from "@/features/campaigns/helpers";
+import { buildPortalStockPreviewUrl } from "@/utils/portalLinks";
 
 /**
  * Stock tab — visibility + control over the campaign's pre-generated
@@ -54,7 +56,7 @@ const entryStatusLabel = (status: StockEntryView["entryStatus"]): string => {
     case "ready":
       return __("Ready", "structura");
     case "pending":
-      return __("Generating", "structura");
+      return __("Preparing", "structura");
     case "failed":
       return __("Failed", "structura");
   }
@@ -104,11 +106,11 @@ const StockBanner: FC<{ campaign: Campaign }> = ({ campaign }) => {
           <Zap size={18} className="mt-0.5 shrink-0 text-amber-500" />
           <div className="min-w-0 flex-1">
             <p className="m-0! text-sm font-bold text-neutral-800 dark:text-neutral-200">
-              {__("Pre-generation is off for this campaign", "structura")}
+              {__("Preparing ahead is off for this campaign", "structura")}
             </p>
             <p className="mt-1! mb-0! text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
               {__(
-                "Stock is a buffer of posts written ahead of your schedule using your AI provider's discounted batch tier. With it on, scheduled posts cost up to 50% less and publish in under a second — without it, every run generates fresh at full price. We highly recommend enabling it.",
+                "Preparing ahead writes posts before their scheduled run, on your AI provider's discounted batch tier. With it on, scheduled posts cost up to 50% less and publish in under a second. Without it, every run writes a fresh post at full price. We highly recommend turning it on.",
                 "structura"
               )}
             </p>
@@ -118,7 +120,7 @@ const StockBanner: FC<{ campaign: Campaign }> = ({ campaign }) => {
               ) : (
                 <Zap size={14} className="mr-1.5" />
               )}
-              {__("Enable pre-generation", "structura")}
+              {__("Turn on preparing ahead", "structura")}
             </Button>
           </div>
         </div>
@@ -132,14 +134,14 @@ const StockBanner: FC<{ campaign: Campaign }> = ({ campaign }) => {
         <Sparkles size={18} className="text-brand-500 mt-0.5 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="m-0! text-sm font-bold text-neutral-800 dark:text-neutral-200">
-            {__("What is stock?", "structura")}
+            {__("What are prepared posts?", "structura")}
           </p>
           <p className="mt-1! mb-0! text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
             {__(
-              "Stock is a small buffer of posts written ahead of your schedule on the AI provider's discounted batch tier. When a scheduled run fires, it publishes a stocked post instantly and a replacement is generated in the background. These are drafts held in the cloud — they only become real posts on your site when their scheduled run consumes them. Editing the campaign discards outdated stock automatically.",
+              "Prepared posts are written ahead of your schedule on the AI provider's discounted batch tier. The campaign keeps a few ready. When a scheduled run starts, it publishes one instantly and a replacement is prepared in the background. Prepared posts are drafts held in the cloud and only become real posts on your site when their scheduled run uses them. You can read and edit them in the customer portal before then. Editing the campaign discards outdated prepared posts automatically but keeps edited ones, unless you change the language.",
               "structura"
             )}
-            {isCloud ? " " + __("Pre-generation is always on for managed plans.", "structura") : ""}
+            {isCloud ? " " + __("Preparing ahead is always on for managed plans.", "structura") : ""}
           </p>
         </div>
       </div>
@@ -192,8 +194,8 @@ const GeneratingStrip: FC<{
           <div>
             <p className="m-0! text-sm font-semibold text-neutral-800 dark:text-neutral-200">
               {sprintf(
-                /* translators: %d: number of posts being generated. */
-                __("Generating %d post(s)…", "structura"),
+                /* translators: %d: number of posts being prepared. */
+                __("Preparing %d post(s)…", "structura"),
                 inFlight.length
               )}
               {age
@@ -208,7 +210,7 @@ const GeneratingStrip: FC<{
             {looksStuck && (
               <p className="mt-0.5! mb-0! text-xs text-amber-700 dark:text-amber-400">
                 {__(
-                  "This is taking longer than usual — the provider's batch queue may be slow. You can cancel and start over.",
+                  "This is taking longer than usual: the provider's batch queue may be slow. To cancel and start over, use Replace all.",
                   "structura"
                 )}
               </p>
@@ -221,7 +223,7 @@ const GeneratingStrip: FC<{
           ) : (
             <RefreshCw size={13} className="mr-1.5" />
           )}
-          {__("Cancel & regenerate", "structura")}
+          {__("Replace all", "structura")}
         </Button>
       </div>
     </Card>
@@ -237,7 +239,9 @@ const StockEntryRow: FC<{
   isRestocking: boolean;
   /** Managed plans never see the model name (specs/managed-ai-lineup.md §3.3). */
   hideModel: boolean;
-}> = ({ entry, onDelete, onRetry, isRestocking, hideModel }) => (
+  /** The portal preview of this entry, or null when the site's activation id is unknown. */
+  previewHref: string | null;
+}> = ({ entry, onDelete, onRetry, isRestocking, hideModel, previewHref }) => (
   <div className="group flex items-start gap-4 px-5 py-4 transition-colors hover:bg-neutral-50/50 sm:px-6 dark:hover:bg-neutral-800/30">
     {/* Thumbnail — placeholder when images are off / not ready */}
     {entry.featuredImageUrl ? (
@@ -272,6 +276,31 @@ const StockEntryRow: FC<{
       <p className="mt-1! mb-0! text-[11px] text-neutral-400 dark:text-neutral-500">
         {entry.createdAt ? dayjs(entry.createdAt).fromNow() : null}
         {entry.textModel && !hideModel ? <span> · {entry.textModel}</span> : null}
+        {entry.entryStatus === "ready" && previewHref && (
+          <>
+            {entry.createdAt || (entry.textModel && !hideModel) ? <span aria-hidden> · </span> : null}
+            {/* A text link: as a grey icon beside Discard it was missed (2026-11-17). */}
+            <a
+              href={previewHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={
+                entry.title
+                  ? sprintf(
+                      /* translators: %s: title of the prepared post. */
+                      __("Preview “%s” in the customer portal", "structura"),
+                      entry.title
+                    )
+                  : undefined
+              }
+              // Colors carry `!`: wp-admin's global `a` color rules win over Tailwind's otherwise.
+              className="text-brand-600! dark:text-brand-400! inline-flex items-center gap-1 font-semibold hover:underline"
+            >
+              {__("Preview in customer portal", "structura")}
+              <ExternalLink size={11} aria-hidden />
+            </a>
+          </>
+        )}
       </p>
     </div>
 
@@ -328,6 +357,12 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
 
   const readyCount = entries.filter((e) => e.entryStatus === "ready").length;
 
+  // The portal's preview route takes the cloud's ids. `campaign.id` is the
+  // cloud campaign id the list call above already sends; the activation id
+  // comes from the plugin config and is empty before the site is connected.
+  const activationId =
+    typeof window !== "undefined" ? window.structuraConfig?.activation_id : undefined;
+
   const handleConfirm = async () => {
     if (!confirm) return;
     try {
@@ -352,13 +387,13 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
             <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-500" />
             <div className="min-w-0 flex-1">
               <p className="m-0! text-sm font-bold text-neutral-800 dark:text-neutral-200">
-                {__("Pre-generation paused — provider errors", "structura")}
+                {__("Preparing ahead is paused", "structura")}
               </p>
               <p className="mt-1! mb-0! text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
                 {sprintf(
                   /* translators: %d: number of failed generation attempts today. */
                   __(
-                    "We hit %d failed generation attempts today, so new pre-generated posts are paused to avoid wasting your AI credits. Your scheduled posts still publish normally — they just generate fresh at run time until stock recovers.",
+                    "%d attempts failed today, so we stopped preparing posts ahead to save your credits. Scheduled posts still go out: they're written when the run starts.",
                     "structura"
                   ),
                   pregen.failureCount
@@ -366,8 +401,8 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
                 {pregen.resetsAt
                   ? " " +
                     sprintf(
-                      /* translators: %s: date/time when pre-generation resumes. */
-                      __("It resumes automatically around %s.", "structura"),
+                      /* translators: %s: date/time when preparing ahead starts again. */
+                      __("It starts again around %s.", "structura"),
                       dayjs(pregen.resetsAt).format("MMM D, HH:mm")
                     )
                   : ""}
@@ -399,8 +434,8 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
             <div className="flex items-center justify-between border-b border-neutral-100 bg-neutral-50/50 px-5 py-3 sm:px-6 dark:border-neutral-800 dark:bg-neutral-950/30">
               <span className="text-xs font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
                 {sprintf(
-                  /* translators: %d: number of ready pre-generated posts. */
-                  __("%d ready in stock", "structura"),
+                  /* translators: %d: number of prepared posts ready to publish. */
+                  __("%d prepared", "structura"),
                   readyCount
                 )}
               </span>
@@ -410,14 +445,14 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
                   size="sm"
                   onClick={() => void restock()}
                   disabled={isRestocking}
-                  title={__("Discard everything and generate fresh posts", "structura")}
+                  title={__("Discard all prepared posts and prepare new ones", "structura")}
                 >
                   {isRestocking ? (
                     <Loader2 size={13} className="mr-1.5 animate-spin" />
                   ) : (
                     <RefreshCw size={13} className="mr-1.5" />
                   )}
-                  {__("Regenerate", "structura")}
+                  {__("Replace all", "structura")}
                 </Button>
                 <Button
                   variant="secondary"
@@ -426,14 +461,14 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
                   disabled={isClearing || entries.length === 0}
                 >
                   <Trash2 size={13} className="mr-1.5" />
-                  {__("Empty stock", "structura")}
+                  {__("Discard all", "structura")}
                 </Button>
               </div>
             </div>
 
             {/* Body */}
             {isLoading ? (
-              <PageLoader label={__("Loading stock…", "structura")} size="lg" padding="lg" />
+              <PageLoader label={__("Loading prepared posts…", "structura")} size="lg" padding="lg" />
             ) : entries.length === 0 ? (
               <div className="py-16 text-center">
                 <PackageOpen
@@ -442,7 +477,7 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
                 />
                 <p className="text-sm text-neutral-400 dark:text-neutral-500">
                   {__(
-                    "Stock is empty — posts are pre-generated automatically ahead of your schedule.",
+                    "No prepared posts yet. The next ones appear here as soon as they're ready.",
                     "structura"
                   )}
                 </p>
@@ -458,7 +493,7 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
                   ) : (
                     <Zap size={13} className="mr-1.5" />
                   )}
-                  {__("Generate now", "structura")}
+                  {__("Prepare now", "structura")}
                 </Button>
               </div>
             ) : (
@@ -471,6 +506,11 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
                     onRetry={() => void restock()}
                     isRestocking={isRestocking}
                     hideModel={isCloud}
+                    previewHref={
+                      activationId
+                        ? buildPortalStockPreviewUrl(activationId, String(campaign.id), entry.stockId)
+                        : null
+                    }
                   />
                 ))}
               </div>
@@ -487,23 +527,23 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
         variant="danger"
         title={
           confirm?.type === "clear"
-            ? __("Empty the stock?", "structura")
+            ? __("Discard all prepared posts?", "structura")
             : __("Discard this post?", "structura")
         }
         description={
           confirm?.type === "clear"
             ? __(
-                "All pre-generated posts for this campaign will be discarded, including any still generating. While pre-generation stays on, fresh posts are written automatically.",
+                "Every prepared post for this campaign is discarded, including any still being prepared. While preparing ahead stays on, new ones are prepared automatically.",
                 "structura"
               )
             : __(
-                "This pre-generated post will be discarded. A replacement is written automatically while pre-generation stays on.",
+                "Another post is prepared to take its place.",
                 "structura"
               )
         }
         confirmButtonProps={{
           label:
-            confirm?.type === "clear" ? __("Empty stock", "structura") : __("Discard", "structura"),
+            confirm?.type === "clear" ? __("Discard all", "structura") : __("Discard", "structura"),
         }}
       />
     </div>

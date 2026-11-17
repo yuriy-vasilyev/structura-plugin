@@ -23,6 +23,11 @@ way. Callers pass in the plan's allowed providers and the resolved
 campaign language; the package takes no value import from `@structura/types`
 and no dependency on `@structura/i18n-contracts`.
 
+It also owns which campaign edits replace a campaign's prepared posts
+(`src/prepared-posts.ts`, `campaignChangeReplacesPreparedPosts`): the cloud's
+stock trigger discards by it and the customer portal's campaign edit page
+warns by it before a save.
+
 ## Who consumes it, and how
 
 | Consumer | Mechanism |

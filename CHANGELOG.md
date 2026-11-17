@@ -1,5 +1,39 @@
 # Changelog
 
+## [2.40.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.39.0...v2.40.0) (2026-11-17)
+
+
+### Features
+
+* **headless:** empty photo slots in paid posts that generate no body images ([b6fbe82](https://github.com/yuriy-vasilyev/structura-core/commit/b6fbe82ec584cf9df7a15ccbd71572d3f0d78454))
+* **plugin:** preview a prepared post in the customer portal ([91b3cac](https://github.com/yuriy-vasilyev/structura-core/commit/91b3cac4a57546ff84f5094e741b19ffe6edcd61))
+* **plugin:** the Stock tab is now Prepared ([25fbbdb](https://github.com/yuriy-vasilyev/structura-core/commit/25fbbdbff441dadca35011c572977dadee15836f))
+* **portal:** edit a prepared post before it goes out ([c275361](https://github.com/yuriy-vasilyev/structura-core/commit/c275361e72b5c0dc42b4ecc80368803a58349f9d))
+* **portal:** open and read a prepared post before it goes out ([3563c2a](https://github.com/yuriy-vasilyev/structura-core/commit/3563c2a19b803679e309d10d5d67943910ba7faf))
+* **portal:** send a prepared post now, edit its action steps and FAQ, upload a featured image ([dfb7484](https://github.com/yuriy-vasilyev/structura-core/commit/dfb7484acac455db383f392fb9c50d3c3c381d92))
+* **portal:** show categories and tags on the post view ([25b0cab](https://github.com/yuriy-vasilyev/structura-core/commit/25b0cab0a105559ead4d45a42087c27a3329cf26))
+* **portal:** undo and redo in the post editor, and a notice before a campaign change replaces prepared posts ([799df1d](https://github.com/yuriy-vasilyev/structura-core/commit/799df1d9637b84b4580311b3f7a23cc384d8e358))
+* **portal:** upload your own photo or generate one, at equal weight ([a856af7](https://github.com/yuriy-vasilyev/structura-core/commit/a856af7fefe306f38c323230115a6bb2da9bf1e0))
+* **stock:** campaign changes keep edited prepared posts ([48414e0](https://github.com/yuriy-vasilyev/structura-core/commit/48414e0d479a4f4921002e91872d8e36b748c559))
+* **stock:** read one prepared post for the portal preview ([eab7fb0](https://github.com/yuriy-vasilyev/structura-core/commit/eab7fb084588cd53e507533d74487309206827a2))
+* **stock:** save a member's edits to a prepared post ([bf0b9ba](https://github.com/yuriy-vasilyev/structura-core/commit/bf0b9ba9bfd5785df58a89983b47d2b73429e5f0))
+* **stock:** send a prepared post now, edit its action steps and FAQ, replace its featured image ([1d0eca4](https://github.com/yuriy-vasilyev/structura-core/commit/1d0eca43e7411a111f0233e7e8463c702ce737b2))
+
+
+### Bug Fixes
+
+* **ai:** a tag never repeats the post's category ([74944dd](https://github.com/yuriy-vasilyev/structura-core/commit/74944ddcf9c6fd2efb7a97389f60e4ceab9f97a8))
+* **headless:** regenerating an image no longer saves it to the post ([5809c11](https://github.com/yuriy-vasilyev/structura-core/commit/5809c110eca610a8acea3d5f1753e6cb1048e286))
+* **personas:** read short linked pages and name a robot check as a blocked page ([dc1c4d5](https://github.com/yuriy-vasilyev/structura-core/commit/dc1c4d520505c6dc802c31d5b78bd58092c34c16))
+* **plugin:** plain text in HowTo and FAQ structured data, and an accurate Prepared tab ([668b578](https://github.com/yuriy-vasilyev/structura-core/commit/668b57808bd6ab8befd229b62ff6ead6628dca4a))
+* **plugin:** the portal preview link on a prepared post is a text link ([e111ea7](https://github.com/yuriy-vasilyev/structura-core/commit/e111ea78965a868d0f2d924e4b51ca865f5c41cf))
+* **portal:** one Cancel and one primary button in the persona dialog ([1bb6236](https://github.com/yuriy-vasilyev/structura-core/commit/1bb6236e3ec9f241af8f38f1badf7b02c5179f24))
+* **portal:** the editor's title keeps its full height after a window resize ([e60609a](https://github.com/yuriy-vasilyev/structura-core/commit/e60609a714cdb09e7806b79a46965ad1dccd1ff8))
+* **portal:** two editors on one prepared post, clearer delivery wording, and editor fixes ([d2baf62](https://github.com/yuriy-vasilyev/structura-core/commit/d2baf621dabc914380a236ce86d1134b22699b0b))
+* **stock:** an edited prepared post goes back in line when its delivery fails ([344499e](https://github.com/yuriy-vasilyev/structura-core/commit/344499e53b359faca4e21af79e2690a98de7b523))
+* **stock:** close the known gaps around edited prepared posts and their delivery ([6d6790a](https://github.com/yuriy-vasilyev/structura-core/commit/6d6790ae21366414838643738be63a252413b688))
+* **ui:** a loading Button is always disabled ([d63a68b](https://github.com/yuriy-vasilyev/structura-core/commit/d63a68bff5a173b9020eff4f9a6b0fcaf3936ee0))
+
 ## [2.39.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.38.1...v2.39.0) (2026-11-14)
 
 

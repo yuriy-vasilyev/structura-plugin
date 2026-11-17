@@ -199,7 +199,7 @@ export interface VoiceSourcesProps {
   error?: boolean;
   /** Ask before replacing a hand-written voice. */
   confirm?: boolean;
-  /** Inside the editor dialog: no shadow. */
+  /** Inside the editor dialog: no shadow, an × in the header instead of the footer's Cancel, and an outlined draft button. */
   flat?: boolean;
   /** @defaultValue true — the heading takes focus when the panel opens. */
   focusOnMount?: boolean;
@@ -967,17 +967,20 @@ export function VoiceSources({
             <span>{readingCount > 0 ? labels.willRead(readingCount) : labels.willReadHomepage}</span>
           </p>
         )}
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={onCancel}
-          className="max-sm:order-2 max-sm:min-h-11 max-sm:w-full"
-        >
-          {labels.cancel}
-        </Button>
+        {flat ? null : (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onCancel}
+            className="max-sm:order-2 max-sm:min-h-11 max-sm:w-full"
+          >
+            {labels.cancel}
+          </Button>
+        )}
         <Button
           ref={redraftRef}
           type="button"
+          variant={flat ? "secondary" : "primary"}
           onClick={onRedraft}
           disabled={anyBusy}
           className="max-sm:order-1 max-sm:min-h-11 max-sm:w-full"
@@ -1015,6 +1018,20 @@ export function VoiceSources({
             {labels.intro}
           </p>
         </div>
+        {/* In the dialog the panel closes from its header and its draft
+            button is outlined: the dialog's own footer keeps the only
+            Cancel / primary pair (owner note 2026-11-14). */}
+        {flat && !busy && !confirm ? (
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label={labels.cancel}
+            title={labels.cancel}
+            className="-mt-1 -mr-1.5 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-neutral-500 outline-none transition-colors hover:bg-neutral-100 hover:text-neutral-700 focus-visible:ring-2 focus-visible:ring-brand-500/40 max-sm:size-11 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-neutral-200"
+          >
+            <X size={16} aria-hidden="true" />
+          </button>
+        ) : null}
       </div>
       <div
         ref={bodyRef}

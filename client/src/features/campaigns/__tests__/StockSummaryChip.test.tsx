@@ -54,7 +54,7 @@ describe("<StockSummaryChip> — visibility gates", () => {
     renderChip({ campaignId: "camp_1", pregenerationEnabled: false });
     expect(apiFetchMock).not.toHaveBeenCalled();
     expect(screen.queryByText(/ready/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Generating/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Preparing/i)).not.toBeInTheDocument();
   });
 
   it("renders nothing when total is 0 (campaign has no stock yet)", async () => {
@@ -74,7 +74,7 @@ describe("<StockSummaryChip> — visibility gates", () => {
     // for absence of "ready" / "Generating" copy across a tick.
     await Promise.resolve();
     expect(screen.queryByText(/ready/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Generating/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Preparing/i)).not.toBeInTheDocument();
   });
 });
 
@@ -93,7 +93,7 @@ describe("<StockSummaryChip> — render branches", () => {
     });
     renderChip({ campaignId: "camp_1", pregenerationEnabled: true });
     expect(await screen.findByText(/2 ready/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Generating/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Preparing/i)).not.toBeInTheDocument();
   });
 
   it("renders 'Pre-generating' when pending > 0 and no ready", async () => {
@@ -113,7 +113,7 @@ describe("<StockSummaryChip> — render branches", () => {
       },
     });
     renderChip({ campaignId: "camp_1", pregenerationEnabled: true });
-    expect(await screen.findByText("Pre-generating")).toBeInTheDocument();
+    expect(await screen.findByText("Preparing")).toBeInTheDocument();
     expect(screen.queryByText(/ready/i)).not.toBeInTheDocument();
   });
 
@@ -134,7 +134,7 @@ describe("<StockSummaryChip> — render branches", () => {
     });
     renderChip({ campaignId: "camp_1", pregenerationEnabled: true });
     expect(await screen.findByText(/1 ready/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Generating/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Preparing/i)).not.toBeInTheDocument();
   });
 
   it("renders nothing when only failed/stale entries remain (operators don't see this in the user-facing chip)", async () => {
@@ -152,6 +152,6 @@ describe("<StockSummaryChip> — render branches", () => {
     renderChip({ campaignId: "camp_1", pregenerationEnabled: true });
     await Promise.resolve();
     expect(screen.queryByText(/ready/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Generating/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Preparing/i)).not.toBeInTheDocument();
   });
 });

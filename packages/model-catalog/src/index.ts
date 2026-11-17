@@ -12,4 +12,5 @@ export * from "./catalog";
 export * from "./bindings";
 export * from "./pricing";
 export * from "./campaign-defaults";
+export * from "./prepared-posts";
 export * from "./recommendations";

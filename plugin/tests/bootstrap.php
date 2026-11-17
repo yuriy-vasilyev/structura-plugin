@@ -20,6 +20,15 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 // Composer autoloader (loads both plugin classes and test dependencies)
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
+// Defined here, not only in TestCase::setUp(): the parent of a process-
+// isolated test can autoload a plugin class while it reads a failed child's
+// result, and the class's ABSPATH guard then calls `exit`. PHPUnit stopped
+// with status 0 and no summary, so a failing test read as a pass
+// (BlockSerializerTest, 2026-11-16). Same value TestCase uses.
+if ( ! defined('ABSPATH')) {
+    define('ABSPATH', '/tmp/wordpress/');
+}
+
 // Lightweight stub for `\ActionScheduler_Store` — production code reads
 // the `STATUS_PENDING` constant directly via the class name. Real AS
 // isn't loaded under unit tests, so we mirror just the constants the

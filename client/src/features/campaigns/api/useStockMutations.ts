@@ -35,7 +35,7 @@ export const useStockMutations = (campaignId: string | number) => {
         method: "DELETE",
       }),
     onSuccess: () => {
-      toast.success(__("Stock post discarded.", "structura"));
+      toast.success(__("Prepared post discarded.", "structura"));
       invalidate();
     },
   });
@@ -47,7 +47,7 @@ export const useStockMutations = (campaignId: string | number) => {
         method: "POST",
       }),
     onSuccess: () => {
-      toast.success(__("Stock emptied.", "structura"));
+      toast.success(__("All prepared posts discarded.", "structura"));
       invalidate();
     },
   });
@@ -62,16 +62,16 @@ export const useStockMutations = (campaignId: string | number) => {
       // `rate_limited` means a refill is already underway (the cloud's
       // delete trigger won the slot) — success from the user's seat.
       if (result?.refillOk) {
-        toast.success(__("Regenerating stock — fresh posts are on the way.", "structura"));
+        toast.success(__("Replacing all prepared posts. New ones are on the way.", "structura"));
       } else if (result?.refill === "daily_cap_hit") {
         toast.error(
           __(
-            "Stock regeneration is paused for today — this campaign hit its daily refill limit.",
+            "Preparing ahead is paused for today. This campaign reached its daily limit.",
             "structura",
           ),
         );
       } else {
-        toast.error(__("Could not start the regeneration. Please try again later.", "structura"));
+        toast.error(__("Could not start preparing new posts. Please try again later.", "structura"));
       }
       invalidate();
     },

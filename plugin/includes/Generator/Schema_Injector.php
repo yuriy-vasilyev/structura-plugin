@@ -99,13 +99,19 @@ class Schema_Injector
      * `\/` as `/`, so the structured data is unchanged. Flagged in the
      * wp.org plugin review (2026-08-27).
      *
+     * `JSON_HEX_TAG` writes every `<` and `>` as `\u003C` / `\u003E`.
+     * Escaped slashes alone do not cover `<!--<script>`, which puts the
+     * HTML parser in a state where the real `</script>` no longer closes
+     * the element. Since 2026-11-16 the FAQ and HowTo text is entity-
+     * decoded, so a member can type that sequence.
+     *
      * @param array<string, mixed> $schema
      */
     private function print_schema(array $schema): void
     {
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() with slashes escaped is the correct escaping for a JSON-LD script body; esc_html() would corrupt the JSON.
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() with slashes and tags escaped is the correct escaping for a JSON-LD script body; esc_html() would corrupt the JSON.
         echo '<script type="application/ld+json">' . "\n"
-             . wp_json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+             . wp_json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_HEX_TAG)
              . "\n</script>\n";
     }
 

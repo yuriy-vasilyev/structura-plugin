@@ -77,7 +77,7 @@ export const StockSummaryChip: FC<StockSummaryChipProps> = ({
         )}
       >
         <RefreshCw size={10} className="animate-spin" aria-hidden />
-        {__("Pre-generating", "structura")}
+        {__("Preparing", "structura")}
       </div>
     );
   }

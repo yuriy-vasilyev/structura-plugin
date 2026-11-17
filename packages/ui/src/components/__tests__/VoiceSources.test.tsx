@@ -136,6 +136,23 @@ describe("VoiceSources · panel", () => {
   });
 });
 
+describe("VoiceSources · in the editor dialog", () => {
+  it("closes from the header and leaves the dialog the only primary button", () => {
+    const { props } = setup({ flat: true });
+    const cancel = screen.getAllByRole("button", { name: "Cancel" });
+    expect(cancel).toHaveLength(1);
+    expect(cancel[0].closest("div")).toContainElement(screen.getByRole("heading", { name: "Your writing" }));
+    fireEvent.click(cancel[0]);
+    expect(props.onCancel).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: /draft persona/i }).className).not.toContain("bg-brand-600");
+  });
+
+  it("has no header close while a redraft runs: the busy line owns Cancel", () => {
+    setup({ flat: true, busy: true });
+    expect(screen.getAllByRole("button", { name: "Cancel" })).toHaveLength(1);
+  });
+});
+
 describe("VoiceSources · found articles", () => {
   it("tags articles past the five pieces Not read, with the reason as description and tooltip", () => {
     setup();

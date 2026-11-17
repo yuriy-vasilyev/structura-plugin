@@ -1075,6 +1075,129 @@ class BlockSerializerTest extends TestCase
         $this->assertSame([], $schemas);
     }
 
+    /**
+     * Customer portal section edits (2026-11-16) store what a member typed
+     * with `&`, `<`, `*`, backtick and `[` as entities so the post body
+     * cannot turn them into markup. The JSON-LD showed those entities
+     * (`Q&amp;A`) instead of the text. The cloud leaves `>` as typed; both
+     * forms are covered.
+     *
+     * @test
+     */
+    public function get_schema_data_turns_typed_text_stored_as_entities_back_into_plain_text(): void
+    {
+        $schemas = $this->serializer->get_schema_data([
+            'action_steps' => [
+                'section_title' => 'Q&amp;A &lt;b>',
+                'steps' => [
+                    ['name' => 'Q&amp;A &lt;b>', 'text' => 'Q&amp;A &lt;b&gt;'],
+                ],
+            ],
+            'faq' => [
+                'section_title' => 'FAQ',
+                'items' => [
+                    ['question' => 'Q&amp;A &lt;b>', 'answer' => 'Q&amp;A &lt;b&gt;'],
+                ],
+            ],
+        ]);
+
+        [$how_to, $faq] = $schemas;
+        $this->assertSame('Q&A <b>', $how_to['name']);
+        $this->assertSame('Q&A <b>', $how_to['step'][0]['name']);
+        $this->assertSame('Q&A <b>', $how_to['step'][0]['text']);
+        $this->assertSame('Q&A <b>', $faq['mainEntity'][0]['name']);
+        $this->assertSame('Q&A <b>', $faq['mainEntity'][0]['acceptedAnswer']['text']);
+
+        $json = json_encode($schemas);
+        $this->assertIsString($json);
+        $this->assertSame($schemas, json_decode($json, true), 'The schema must survive a JSON round-trip.');
+    }
+
+    /** @test */
+    public function get_schema_data_decodes_numeric_and_named_entities(): void
+    {
+        $schemas = $this->serializer->get_schema_data([
+            'faq' => [
+                'items' => [
+                    [
+                        'question' => 'Why &#42;stars&#42;, &#96;ticks&#96; and &#91;brackets]?',
+                        'answer'   => 'Hex &#x2A; works&nbsp;too, as do &apos;quotes&quot;.',
+                    ],
+                ],
+            ],
+        ]);
+
+        $item = $schemas[0]['mainEntity'][0];
+        $this->assertSame('Why *stars*, `ticks` and [brackets]?', $item['name']);
+        $this->assertSame("Hex * works\u{00A0}too, as do 'quotes\".", $item['acceptedAnswer']['text']);
+    }
+
+    /**
+     * A member who typed an entity on purpose (`&lt;` as text) is stored
+     * double-encoded. One decode gives back what they typed; a second would
+     * turn it into a `<`.
+     *
+     * @test
+     */
+    public function get_schema_data_decodes_double_encoded_text_only_once(): void
+    {
+        $schemas = $this->serializer->get_schema_data([
+            'faq' => [
+                'items' => [
+                    ['question' => 'What is &amp;amp;?', 'answer' => 'Write &amp;lt;b&amp;gt; for a literal tag.'],
+                ],
+            ],
+        ]);
+
+        $item = $schemas[0]['mainEntity'][0];
+        $this->assertSame('What is &amp;?', $item['name']);
+        $this->assertSame('Write &lt;b&gt; for a literal tag.', $item['acceptedAnswer']['text']);
+    }
+
+    /**
+     * Writer output carries no entities, so its schema must not change by a
+     * byte. The expected JSON was captured from the builders before the
+     * entity decoding was added. Markup is still stripped from text fields;
+     * markdown was never converted in the schema and still is not.
+     *
+     * @test
+     */
+    public function get_schema_data_leaves_writer_output_byte_identical(): void
+    {
+        $schemas = $this->serializer->get_schema_data([
+            'action_steps' => [
+                'section_title' => 'How to brew pour-over coffee',
+                'steps' => [
+                    ['name' => 'Heat the water', 'text' => 'Bring water to **96°C**, just off the boil.'],
+                    ['name' => 'Grind the beans', 'text' => 'Use a <strong>medium-fine</strong> grind, like table salt.'],
+                    ['name' => 'Bloom', 'text' => 'Pour 50 g of water & wait 30 seconds. See [our guide](https://example.com/guide).'],
+                    ['name' => 'Why rinse the filter?', 'text' => 'It removes paper taste; "trust me" it\'s worth it. Keep it > 90 °C.'],
+                ],
+            ],
+            'faq' => [
+                'section_title' => 'Coffee FAQ',
+                'items' => [
+                    ['question' => 'Can I use tap water?', 'answer' => 'Yes, if it tastes good. Use `filtered` water otherwise.'],
+                    ['question' => 'How long does it take?', 'answer' => '<p>About <em>4 minutes</em> in total.</p>'],
+                    ['question' => 'Café or cafe?', 'answer' => 'Both spellings work: «café» is common in Europe.'],
+                ],
+            ],
+        ]);
+
+        $this->assertSame(
+            '[{"@context":"https:\/\/schema.org","@type":"HowTo","name":"How to brew pour-over coffee","step":['
+            . '{"@type":"HowToStep","name":"Heat the water","text":"Bring water to **96°C**, just off the boil."},'
+            . '{"@type":"HowToStep","name":"Grind the beans","text":"Use a medium-fine grind, like table salt."},'
+            . '{"@type":"HowToStep","name":"Bloom","text":"Pour 50 g of water & wait 30 seconds. See [our guide](https:\/\/example.com\/guide)."},'
+            . '{"@type":"HowToStep","name":"Why rinse the filter?","text":"It removes paper taste; \"trust me\" it\'s worth it. Keep it > 90 °C."}]},'
+            . '{"@context":"https:\/\/schema.org","@type":"FAQPage","mainEntity":['
+            . '{"@type":"Question","name":"Can I use tap water?","acceptedAnswer":{"@type":"Answer","text":"Yes, if it tastes good. Use `filtered` water otherwise."}},'
+            . '{"@type":"Question","name":"How long does it take?","acceptedAnswer":{"@type":"Answer","text":"About 4 minutes in total."}},'
+            . '{"@type":"Question","name":"Café or cafe?","acceptedAnswer":{"@type":"Answer","text":"Both spellings work: «café» is common in Europe."}}]}]',
+            json_encode($schemas, JSON_UNESCAPED_UNICODE)
+        );
+    }
+
     // ──────────────────────────────────────────────────────────────────────
     //  FREE-TIER EXTERNAL-LINK STRIPPER
     //

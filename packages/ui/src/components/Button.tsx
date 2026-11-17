@@ -25,8 +25,11 @@ export type ButtonProps = ButtonBaseProps &
   );
 
 export const Button = forwardRef<HTMLElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, loading = false, children, ...props }, ref) => {
-    const calculatedDisabled = loading || props.disabled;
+  ({ className, variant, size, asChild = false, loading = false, children, disabled, ...props }, ref) => {
+    // `disabled` stays out of the spread props: a caller's `disabled={false}`
+    // made a loading button clickable again, so a second click repeated the
+    // action it was busy with (portal Run now, 2026-11-17).
+    const calculatedDisabled = loading || disabled;
     const commonProps = {
       className: cn(buttonVariants({ variant, size, className })),
       "aria-busy": loading ? true : undefined,

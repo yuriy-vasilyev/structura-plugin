@@ -6763,7 +6763,7 @@ class Rest_Api
         if ($code !== 200) {
             return new \WP_Error(
                 'cloud_error',
-                $result['body']['error'] ?? __('Failed to fetch stock summary.', 'structura'),
+                $result['body']['error'] ?? __('Failed to fetch the summary of prepared posts.', 'structura'),
                 ['status' => 502]
             );
         }
@@ -6830,7 +6830,7 @@ class Rest_Api
             '/listCampaignStock',
             sanitize_text_field($request['id'] ?? ''),
             [],
-            __('Failed to fetch stock.', 'structura')
+            __('Failed to fetch prepared posts.', 'structura')
         );
     }
 
@@ -6846,7 +6846,7 @@ class Rest_Api
             '/deleteStockEntry',
             sanitize_text_field($request['id'] ?? ''),
             ['stock_id' => sanitize_text_field($request['stock_id'] ?? '')],
-            __('Failed to delete the stock entry.', 'structura')
+            __('Failed to discard the prepared post.', 'structura')
         );
     }
 
@@ -6861,7 +6861,7 @@ class Rest_Api
             '/clearCampaignStock',
             sanitize_text_field($request['id'] ?? ''),
             [],
-            __('Failed to empty the stock.', 'structura')
+            __('Failed to discard all prepared posts.', 'structura')
         );
     }
 
@@ -6876,7 +6876,7 @@ class Rest_Api
             '/restockCampaign',
             sanitize_text_field($request['id'] ?? ''),
             [],
-            __('Failed to regenerate the stock.', 'structura')
+            __('Failed to replace all prepared posts.', 'structura')
         );
     }
 
@@ -6910,7 +6910,7 @@ class Rest_Api
         if ($code !== 200) {
             return new \WP_Error(
                 'cloud_error',
-                $result['body']['error'] ?? __('Failed to enable pre-generation.', 'structura'),
+                $result['body']['error'] ?? __('Failed to turn on preparing ahead.', 'structura'),
                 ['status' => 502]
             );
         }

@@ -188,6 +188,14 @@ export const StepArchitecture = () => {
             </a>
           </p>
         )}
+        {!structure.featuredImage && !structure.bodyImages && !uploadsUnwritable && (
+          <p className="m-0! text-[11px] leading-snug text-neutral-500 dark:text-neutral-400">
+            {__(
+              "Posts will arrive without images. You add your own photos in the WordPress editor.",
+              "structura"
+            )}
+          </p>
+        )}
         {/* EU AI label reminder (specs/ai-image-label.md §7). */}
         <AiLabelReminder
           imagesEnabled={structure.featuredImage || structure.bodyImages}

@@ -3,6 +3,7 @@
 namespace Structura\Tests\Unit\Generator;
 
 use Brain\Monkey\Functions;
+use Structura\Generator\Block_Serializer;
 use Structura\Generator\Schema_Injector;
 use Structura\Tests\Unit\TestCase;
 
@@ -267,5 +268,34 @@ class SchemaInjectorTest extends TestCase
 
         $article = $this->nodeOfType($this->emitted(), 'BlogPosting');
         $this->assertSame($hostile, $article['headline'], 'JSON readers must still see the original string.');
+    }
+
+    public function test_script_markup_typed_into_an_faq_answer_stays_inside_the_json_ld_block(): void
+    {
+        // Customer portal edits store typed `<` as `&lt;` (2026-11-16) and the
+        // FAQ schema decodes it back. `<!--<script>` would make the HTML
+        // parser skip the real `</script>`, so no `<` may reach the page raw.
+        $typed  = '</script><!--<script>alert(1)</script>';
+        $stored = (new Block_Serializer())->get_schema_data([
+            'faq' => ['items' => [['question' => 'Safe?', 'answer' => str_replace('<', '&lt;', $typed)]]],
+        ]);
+        Functions\when('get_post_meta')->justReturn($stored);
+
+        ob_start();
+        $this->injector->inject_schema_markup();
+        $html = (string) ob_get_clean();
+
+        preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $html, $bodies);
+        $this->assertNotEmpty($bodies[1]);
+        foreach ($bodies[1] as $body) {
+            $this->assertStringNotContainsString('<', $body);
+        }
+        $this->assertSame(
+            substr_count($html, '<script type="application/ld+json">'),
+            substr_count($html, '</script>')
+        );
+
+        $faq = $this->nodeOfType($this->emitted(), 'FAQPage');
+        $this->assertSame($typed, $faq['mainEntity'][0]['acceptedAnswer']['text']);
     }
 }

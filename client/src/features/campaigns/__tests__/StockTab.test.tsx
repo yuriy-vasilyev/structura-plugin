@@ -12,9 +12,11 @@
  *     "Cancel & regenerate" CTA; past 60 min it flips to the
  *     "taking longer than usual" stuck tone.
  *   - Empty stock renders the "Generate now" CTA.
+ *   - A ready row links to its portal preview; preparing and failed rows,
+ *     and a site without an activation id, get no link.
  */
 
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const useDefaultProvidersMock = vi.hoisted(() => vi.fn());
@@ -107,21 +109,25 @@ describe("<StockTab>", () => {
     render(<StockTab campaign={makeCampaign(false)} />);
 
     expect(
-      screen.getByText(/Pre-generation is off for this campaign/i),
+      screen.getByText(/Preparing ahead is off for this campaign/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Enable pre-generation/i }),
+      screen.getByRole("button", { name: /Turn on preparing ahead/i }),
     ).toBeInTheDocument();
-    expect(screen.queryByText(/ready in stock/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^\d+ prepared$/i)).not.toBeInTheDocument();
   });
 
   it("shows the neutral explainer (always-on note) for managed plans", () => {
     setup({ isCloud: true });
     render(<StockTab campaign={makeCampaign(true)} />);
 
-    expect(screen.getByText(/What is stock\?/i)).toBeInTheDocument();
+    expect(screen.getByText(/What are prepared posts\?/i)).toBeInTheDocument();
     expect(
       screen.getByText(/always on for managed plans/i),
+    ).toBeInTheDocument();
+    // Edited prepared posts survive a campaign change (spec §6, 2026-11-16).
+    expect(
+      screen.getByText(/read and edit them in the customer portal.*keeps edited ones, unless you change the language/i),
     ).toBeInTheDocument();
   });
 
@@ -132,7 +138,7 @@ describe("<StockTab>", () => {
     expect(screen.getByText("Stocked Post")).toBeInTheDocument();
     expect(screen.getByText("A pre-generated excerpt.")).toBeInTheDocument();
     expect(screen.getByText("Ready")).toBeInTheDocument();
-    expect(screen.getByText(/1 ready in stock/i)).toBeInTheDocument();
+    expect(screen.getByText(/^1 prepared$/i)).toBeInTheDocument();
   });
 
   it("surfaces the failure reason and a retry control on failed entries", () => {
@@ -172,10 +178,11 @@ describe("<StockTab>", () => {
     });
     render(<StockTab campaign={makeCampaign(true)} />);
 
-    expect(screen.getByText(/Generating 1 post/i)).toBeInTheDocument();
+    expect(screen.getByText(/Preparing 1 post/i)).toBeInTheDocument();
+    // The strip's button and the toolbar's now share the label.
     expect(
-      screen.getByRole("button", { name: /Cancel & regenerate/i }),
-    ).toBeInTheDocument();
+      screen.getAllByRole("button", { name: /Replace all/i }),
+    ).toHaveLength(2);
     expect(
       screen.queryByText(/taking longer than usual/i),
     ).not.toBeInTheDocument();
@@ -204,9 +211,9 @@ describe("<StockTab>", () => {
     setup({ entries: [] });
     render(<StockTab campaign={makeCampaign(true)} />);
 
-    expect(screen.getByText(/Stock is empty/i)).toBeInTheDocument();
+    expect(screen.getByText(/No prepared posts yet/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Generate now/i }),
+      screen.getByRole("button", { name: /Prepare now/i }),
     ).toBeInTheDocument();
   });
 
@@ -224,10 +231,10 @@ describe("<StockTab>", () => {
     render(<StockTab campaign={makeCampaign(true)} />);
 
     expect(
-      screen.getByText(/Pre-generation paused — provider errors/i),
+      screen.getByText(/Preparing ahead is paused/i),
     ).toBeInTheDocument();
     // The failed-attempt count is surfaced in the explanation.
-    expect(screen.getByText(/26 failed generation attempts/i)).toBeInTheDocument();
+    expect(screen.getByText(/26 attempts failed today/i)).toBeInTheDocument();
   });
 
   it("shows a loading state on the discard confirmation while the delete is in flight", () => {
@@ -254,7 +261,7 @@ describe("<StockTab>", () => {
     render(<StockTab campaign={makeCampaign(true)} />);
 
     expect(
-      screen.queryByText(/Pre-generation paused/i),
+      screen.queryByText(/Preparing ahead is paused/i),
     ).not.toBeInTheDocument();
   });
 
@@ -293,12 +300,62 @@ describe("<StockTab>", () => {
     };
     setup({ isCloud: true, entries: [], pregen });
     const { unmount } = render(<StockTab campaign={makeCampaign(true)} />);
-    expect(screen.getByText(/Pre-generation paused — provider errors/i)).toBeInTheDocument();
+    expect(screen.getByText(/Preparing ahead is paused/i)).toBeInTheDocument();
     expect(screen.queryByText(/switching this campaign's AI provider/i)).not.toBeInTheDocument();
     unmount();
 
     setup({ isCloud: false, entries: [], pregen });
     render(<StockTab campaign={makeCampaign(true)} />);
     expect(screen.getByText(/switching this campaign's AI provider/i)).toBeInTheDocument();
+  });
+
+  // The plugin has no preview of its own; a ready row links to the portal's
+  // (specs/stock-preview-and-edit.md §8).
+  describe("Preview in customer portal link", () => {
+    afterEach(() => {
+      delete (window as { structuraConfig?: unknown }).structuraConfig;
+    });
+
+    it("links a ready row to its portal preview in a new tab", () => {
+      window.structuraConfig = { activation_id: "act-1" } as typeof window.structuraConfig;
+      setup({ entries: [makeEntry()] });
+      render(<StockTab campaign={makeCampaign(true)} />);
+
+      const link = screen.getByRole("link", { name: "Preview in customer portal" });
+      expect(link).toHaveAttribute(
+        "href",
+        "https://app.structurawp.com/sites/act-1/campaigns/camp-1/stock/s-1",
+      );
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+      // The visible words are the link's name; the tooltip says which post.
+      expect(link).toHaveTextContent("Preview in customer portal");
+      expect(link).toHaveAttribute("title", "Preview “Stocked Post” in the customer portal");
+    });
+
+    it("gives preparing and failed rows no link", () => {
+      window.structuraConfig = { activation_id: "act-1" } as typeof window.structuraConfig;
+      setup({
+        entries: [
+          makeEntry({ stockId: "s-gen", entryStatus: "pending", textStatus: "in_flight", title: null }),
+          makeEntry({ stockId: "s-failed", entryStatus: "failed", textStatus: "failed", title: null }),
+        ],
+      });
+      render(<StockTab campaign={makeCampaign(true)} />);
+
+      expect(screen.getByText("Preparing")).toBeInTheDocument();
+      expect(screen.getByText("Failed")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: /Preview/ })).not.toBeInTheDocument();
+    });
+
+    it("renders no link when the site has no activation id", () => {
+      // What the plugin config carries before the site is connected.
+      window.structuraConfig = { activation_id: "" } as typeof window.structuraConfig;
+      setup({ entries: [makeEntry()] });
+      render(<StockTab campaign={makeCampaign(true)} />);
+
+      expect(screen.getByText("Stocked Post")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: /Preview/ })).not.toBeInTheDocument();
+    });
   });
 });

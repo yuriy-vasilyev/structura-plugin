@@ -97,7 +97,7 @@ const buildTabs = (channelsVisible: boolean, stockReadyCount: number): TabDef[] 
   { id: "posts", label: __("Posts", "structura"), icon: FileText },
   {
     id: "stock",
-    label: __("Stock", "structura"),
+    label: __("Prepared", "structura"),
     icon: Package,
     chip: stockReadyCount,
   },

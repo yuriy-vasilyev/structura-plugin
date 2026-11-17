@@ -644,8 +644,8 @@ class Block_Serializer
             }
             $schema_steps[] = [
                 '@type' => 'HowToStep',
-                'name'  => $name,
-                'text'  => wp_strip_all_tags($text),
+                'name'  => $this->schema_text($name),
+                'text'  => $this->schema_text($text),
             ];
         }
 
@@ -656,7 +656,7 @@ class Block_Serializer
         return [
             '@context' => 'https://schema.org',
             '@type'    => 'HowTo',
-            'name'     => $action_steps['section_title'] ?? '',
+            'name'     => $this->schema_text((string)($action_steps['section_title'] ?? '')),
             'step'     => $schema_steps,
         ];
     }
@@ -673,10 +673,10 @@ class Block_Serializer
             }
             $questions[] = [
                 '@type'          => 'Question',
-                'name'           => $question,
+                'name'           => $this->schema_text($question),
                 'acceptedAnswer' => [
                     '@type' => 'Answer',
-                    'text'  => wp_strip_all_tags($answer),
+                    'text'  => $this->schema_text($answer),
                 ],
             ];
         }
@@ -690,6 +690,19 @@ class Block_Serializer
             '@type'      => 'FAQPage',
             'mainEntity' => $questions,
         ];
+    }
+
+    /** A schema.org text value: the field with its tags stripped, then its HTML entities decoded once. */
+    private function schema_text(string $value): string
+    {
+        // Strip before decoding: text a member typed in the customer portal
+        // arrives with `&`, `<`, `*`, backtick and `[` as entities (2026-11-16),
+        // so a typed `<b>` must survive as text, and one decode leaves a
+        // double-encoded `&amp;lt;` as `&lt;`. ENT_HTML5 also decodes numeric
+        // (`&#42;`) and named (`&nbsp;`) entities; wp_specialchars_decode()
+        // knows only the five HTML-special ones. Schema_Injector escapes `<`
+        // when it prints the JSON.
+        return trim(html_entity_decode(wp_strip_all_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
     private function render_table($block): string
