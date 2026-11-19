@@ -154,6 +154,15 @@ export interface CatalogModel {
    */
   lowEffort?: true;
   /**
+   * True on an image model that takes reference images in the request and
+   * draws the same character from them (specs/visual-signatures.md §13.6).
+   * Set only where a real call confirmed it (2026-11-18: Gemini 3.1 Flash
+   * Image held face, hair and drawing style in 10 of 10 scenes,
+   * research/2026-11-18-recurring-character). A site whose image model lacks
+   * it gets no character. Registry-only.
+   */
+  referenceImages?: true;
+  /**
    * Grounding-audit role this model fills, read only by
    * `resolveGroundingAuditModel` (at most one model per role, tested).
    * `premium` audits Cloud, `standard` every other audited tier. An

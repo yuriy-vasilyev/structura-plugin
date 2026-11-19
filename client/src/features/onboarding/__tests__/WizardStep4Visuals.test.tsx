@@ -332,6 +332,24 @@ describe("WizardStep4Visuals — the step", () => {
     expect(screen.queryByText(line)).toBeNull();
   });
 
+  it("paid plans get one line about a recurring character under the picker, no link and no step (recurring-character handoff §8)", async () => {
+    const text = "Add yourself or a mascot later on the Visuals page.";
+    const view = renderStep();
+    const line = (await screen.findByText(text)).closest("p")!;
+    expect(
+      screen.getByRole("radiogroup").compareDocumentPosition(line) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(within(line).queryByRole("link")).toBeNull();
+    expect(screen.queryByText("Who appears in your images?")).toBeNull();
+    view.unmount();
+    useWizardStore.getState().reset();
+    licenseMock.current = { plan: "free", isPaidLicense: false };
+    renderStep();
+    await waitFor(() => expect(screen.getAllByRole("radio")).toHaveLength(6));
+    expect(screen.queryByText(text)).toBeNull();
+  });
+
   it("free tier: format and optimize stay Pro-gated", async () => {
     licenseMock.current = { plan: "free", isPaidLicense: false };
     renderStep();

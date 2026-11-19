@@ -38,8 +38,10 @@ export interface SignaturePickerExtras {
   custom: CustomSignatureDraft | null;
   /** Opens the builder (from the "Your own" button or the saved card's Edit). */
   onOpenBuilder: () => void;
-  /** Checks "Free prompt". */
-  onSelectFree: () => void;
+  /** Checks "Free prompt"; without it the card is left out (a recurring character takes none). */
+  onSelectFree?: () => void;
+  /** The "Your own" button's line, when the page narrows what it offers. */
+  ownDescription?: string;
 }
 
 /** Props for {@link SignaturePicker}. */
@@ -48,8 +50,8 @@ export interface SignaturePickerProps {
   labelledBy: string;
   /** Library cards in display order. */
   signatures: readonly SignatureMeta[];
-  /** The checked choice. */
-  selection: SignatureSelection;
+  /** The checked choice; null checks no card (a hidden one), which keeps every card tabbable. */
+  selection: SignatureSelection | null;
   /** The preset's saved choice: its card shows "In use". Omitted in the wizard. */
   bound?: SignatureSelection | null;
   /** License plan; free and none lock the library and "Your own". */
@@ -66,6 +68,10 @@ export interface SignaturePickerProps {
   extras?: SignaturePickerExtras;
   /** The custom card's radio, so "All signatures" can return focus to it. */
   customCardRef?: Ref<HTMLButtonElement>;
+  /** The radiogroup, for a focus move onto its cards. */
+  groupRef?: Ref<HTMLDivElement>;
+  /** Id of an error line about the group; marks it invalid and describes it. */
+  errorId?: string;
 }
 
 /** The locked card footer: "Paid plans" and the upgrade link. */
@@ -121,14 +127,16 @@ export function SignaturePicker({
   onSelect,
   extras,
   customCardRef,
+  groupRef,
+  errorId,
 }: SignaturePickerProps) {
   const custom = extras?.custom ?? null;
   // The group's value names a radio; with "Free prompt" checked (a button)
   // it is undefined, which keeps every card tabbable.
   const groupValue =
-    selection.kind === "curated"
+    selection?.kind === "curated"
       ? selection.id
-      : selection.kind === "custom" && custom
+      : selection?.kind === "custom" && custom
         ? CUSTOM_CARD_VALUE
         : undefined;
 
@@ -146,7 +154,10 @@ export function SignaturePicker({
 
   return (
     <PresetRadioCardGroup
+      ref={groupRef}
       aria-labelledby={labelledBy}
+      aria-describedby={errorId}
+      aria-invalid={errorId ? true : undefined}
       value={groupValue}
       onValueChange={handleValueChange}
       className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,13rem),1fr))] gap-3"
@@ -214,7 +225,10 @@ export function SignaturePicker({
         ) : (
           <SignatureActionCard
             label={__("Your own", "structura")}
-            description={__("Set the technique, motifs and framing yourself.", "structura")}
+            description={
+              extras.ownDescription ??
+              __("Set the technique, motifs and framing yourself.", "structura")
+            }
             tile={
               <SignatureBuildTile>{__("Build from five fields", "structura")}</SignatureBuildTile>
             }
@@ -225,14 +239,14 @@ export function SignaturePicker({
           />
         ))}
 
-      {extras && (
+      {extras?.onSelectFree && (
         <SignatureActionCard
           label={__("Free prompt", "structura")}
           description={__("Describe the look in your own words.", "structura")}
           tile={<SignaturePromptTile />}
           mediumLabel={__("Text prompt", "structura")}
           inUseLabel={bound?.kind === "free" ? __("In use", "structura") : undefined}
-          selected={selection.kind === "free"}
+          selected={selection?.kind === "free"}
           onClick={extras.onSelectFree}
         />
       )}

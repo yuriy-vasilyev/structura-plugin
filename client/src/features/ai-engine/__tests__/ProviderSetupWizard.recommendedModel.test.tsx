@@ -33,6 +33,12 @@ vi.mock("../api/useSaveKey", () => ({
     isPending: false,
   }),
 }));
+vi.mock("../api/useTestKey", () => ({
+  useTestKey: () => ({
+    mutateAsync: () => Promise.resolve({ ok: true, latencyMs: 120 }),
+    isPending: false,
+  }),
+}));
 vi.mock("../api/useProviderPulse", () => ({
   useProviderPulse: () => ({ isOnline: true, latency: 120, isChecking: false, checkPulse: vi.fn() }),
 }));
@@ -89,12 +95,13 @@ const renderWizard = (props: Props = {}) =>
   );
 
 /** Connect a new key and reach the configure step. */
-const connectAndConfigure = (props: Props = {}) => {
+const connectAndConfigure = async (props: Props = {}) => {
   renderWizard(props);
   fireEvent.click(screen.getByRole("button", { name: /Get Started/ }));
   fireEvent.change(screen.getByLabelText(/API Key/), { target: { value: "sk-proj-valid-key" } });
   fireEvent.click(screen.getByRole("button", { name: /Save & Test/ }));
-  fireEvent.click(screen.getByRole("button", { name: /Configure/ }));
+  // The key is live-tested before it is saved, so the step changes async.
+  fireEvent.click(await screen.findByRole("button", { name: /Configure/ }));
 };
 
 const section = (name: "text" | "image") => screen.getByTestId(`wizard-${name}-model`);
@@ -105,8 +112,8 @@ const finish = () =>
   fireEvent.click(screen.getByRole("button", { name: /Finish Setup|Save Changes/ }));
 
 describe("<ProviderSetupWizard> Use recommended model", () => {
-  it("is on by default for a new connection and hides both dropdowns", () => {
-    connectAndConfigure();
+  it("is on by default for a new connection and hides both dropdowns", async () => {
+    await connectAndConfigure();
 
     expect(recommendedSwitch("text")).toHaveAttribute("aria-checked", "true");
     expect(recommendedSwitch("image")).toHaveAttribute("aria-checked", "true");
@@ -120,8 +127,8 @@ describe("<ProviderSetupWizard> Use recommended model", () => {
     ).toBeInTheDocument();
   });
 
-  it("saves the recommended tiers with the models they map to today", () => {
-    connectAndConfigure();
+  it("saves the recommended tiers with the models they map to today", async () => {
+    await connectAndConfigure();
     finish();
 
     expect(saved().openai).toEqual({
@@ -132,8 +139,8 @@ describe("<ProviderSetupWizard> Use recommended model", () => {
     });
   });
 
-  it("switching it off reveals the dropdown and saves the picked model with no tier", () => {
-    connectAndConfigure();
+  it("switching it off reveals the dropdown and saves the picked model with no tier", async () => {
+    await connectAndConfigure();
     fireEvent.click(recommendedSwitch("text"));
 
     const trigger = within(section("text")).getByRole("button", { name: /GPT-5.6 Sol/ });
@@ -170,8 +177,8 @@ describe("<ProviderSetupWizard> Use recommended model", () => {
     expect(recommendedSwitch("text")).toHaveAttribute("aria-checked", "true");
   });
 
-  it("Gemini: text switch without the Recommended chip, image switch with it", () => {
-    connectAndConfigure({ providerId: "gemini" });
+  it("Gemini: text switch without the Recommended chip, image switch with it", async () => {
+    await connectAndConfigure({ providerId: "gemini" });
 
     expect(recommendedSwitch("text")).toHaveAttribute("aria-checked", "true");
     expect(within(section("text")).queryByText("Recommended")).toBeNull();
@@ -186,8 +193,8 @@ describe("<ProviderSetupWizard> Use recommended model", () => {
     });
   });
 
-  it("anonymous: the image section says images are not available and saves nothing for images", () => {
-    connectAndConfigure({ imagesAvailable: false });
+  it("anonymous: the image section says images are not available and saves nothing for images", async () => {
+    await connectAndConfigure({ imagesAvailable: false });
 
     expect(
       within(section("image")).getByText("Image generation is not available on your current plan.")

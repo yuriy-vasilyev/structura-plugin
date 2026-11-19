@@ -284,3 +284,8 @@ export function acceptsTemperature(provider: AIProvider, modelId: string): boole
 export function acceptsLowEffort(provider: AIProvider, modelId: string): boolean {
   return !!MODELS.find((m) => m.provider === provider && m.id === modelId)?.lowEffort;
 }
+
+/** True when the image model takes reference images (`referenceImages`); false for unknown ids. */
+export function acceptsReferenceImages(provider: AIProvider, modelId: string): boolean {
+  return !!MODELS.find((m) => m.provider === provider && m.role === "image" && m.id === modelId)?.referenceImages;
+}

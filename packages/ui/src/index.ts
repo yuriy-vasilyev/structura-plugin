@@ -46,6 +46,7 @@ export * from "./components/Spinner";
 export * from "./components/Checkbox";
 export * from "./components/Switch";
 export * from "./components/InputField";
+export * from "./components/LinkifiedText";
 export * from "./components/FileUpload";
 export * from "./components/AttachmentRow";
 export * from "./components/ResearchAttachments";

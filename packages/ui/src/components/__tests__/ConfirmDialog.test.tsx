@@ -41,4 +41,22 @@ describe("ConfirmDialog", () => {
     expect(confirm.className).toContain("bg-white!");
     expect(confirm.className).not.toContain("bg-red-600");
   });
+
+  it("starts on the cancel button when asked, and leaves the default focus alone otherwise", () => {
+    renderDialog({ variant: "danger", initialFocus: "cancel", cancelButtonProps: { label: "Keep Lena" } });
+    expect(screen.getByRole("button", { name: "Keep Lena" })).toHaveAttribute("data-autofocus");
+    expect(screen.getByRole("button", { name: "Remove" })).not.toHaveAttribute("data-autofocus");
+  });
+
+  // wp-admin colours h1 to h3 itself; without the important flag the title was dark on dark there.
+  it("gives the title a colour that wins over a host page's heading colour", () => {
+    renderDialog();
+    const title = screen.getByRole("heading", { name: "Remove “Old Cursor install”?" });
+    expect(title).toHaveClass("text-neutral-900!", "dark:text-white!");
+  });
+
+  it("marks no button for focus by default", () => {
+    renderDialog({ variant: "danger" });
+    expect(screen.getByRole("button", { name: "Cancel" })).not.toHaveAttribute("data-autofocus");
+  });
 });

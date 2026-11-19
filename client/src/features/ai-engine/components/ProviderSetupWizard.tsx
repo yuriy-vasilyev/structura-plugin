@@ -14,13 +14,23 @@ import {
   Type,
   Zap,
 } from "lucide-react";
-import { Button, cn, Dialog, InputField, RecommendedLabel, Select, Switch } from "@structura/ui";
+import {
+  Button,
+  cn,
+  Dialog,
+  InputField,
+  LinkifiedText,
+  RecommendedLabel,
+  Select,
+  Switch,
+} from "@structura/ui";
 import { getProviderVisual } from "@/features/campaigns/constants";
 import { recommendedTier, recommendedWord } from "@/features/campaigns/aiGuidance";
 import { mirrorModelForTier } from "@/features/campaigns/modelTier";
 import type { AIProvider } from "@/features/campaigns/types";
 import { looksLikeUrlNotApiKey } from "@/utils/providerMeta";
 import { useSaveKey } from "../api/useSaveKey";
+import { useTestKey, type KeyTestResult } from "../api/useTestKey";
 import { useProviderPulse } from "../api/useProviderPulse";
 import { useAvailableModelsQuery } from "../api/useAvailableModelsQuery";
 import { useRefreshModels } from "../api/useRefreshModels";
@@ -94,6 +104,24 @@ const CAPABILITY_META = {
   },
 };
 
+/** Copy for a failed key test that carries no message from the provider. */
+function keyTestFallback(code: KeyTestResult["errorCode"]): string {
+  switch (code) {
+    case "auth":
+      return __("That key was rejected. Double-check it and try again.", "structura");
+    case "rate_limit":
+      return __("The provider is rate-limiting the test. Try again in a moment.", "structura");
+    case "model_unavailable":
+      return __("The provider didn't return a usable model. Check the key's access.", "structura");
+    case "network":
+      return __("Couldn't reach the provider. Check your connection and try again.", "structura");
+    case "timeout":
+      return __("The provider took too long to respond. Try again.", "structura");
+    default:
+      return __("The key couldn't be verified. Double-check it and try again.", "structura");
+  }
+}
+
 /* ────────────────────────────────────────────────────────────────── */
 /*  Component                                                        */
 /* ────────────────────────────────────────────────────────────────── */
@@ -149,6 +177,8 @@ export const ProviderSetupWizard = ({
   // Pre-check before saving: a pasted URL can never be a key, and the
   // masked input means the user can't see that's what they did.
   const urlPasted = looksLikeUrlNotApiKey(keyInput);
+  // Failed live test, shown under the key field until the key changes.
+  const [testFailure, setTestFailure] = useState<KeyTestResult | null>(null);
   const [selectedTextModel, setSelectedTextModel] = useState(currentTextModel ?? "");
   const [selectedImageModel, setSelectedImageModel] = useState(currentImageModel ?? "");
   // When the tier forces defaults, the toggles are always on and
@@ -163,6 +193,7 @@ export const ProviderSetupWizard = ({
 
   /* ── Queries & mutations ──────────────────────────────────────── */
   const { mutate: saveKey, isPending: isSavingKey } = useSaveKey();
+  const { mutateAsync: testKey, isPending: isTestingKey } = useTestKey();
   const { isOnline, latency, isChecking, checkPulse } = useProviderPulse(providerId, keySubmitted);
   const { data: modelsData } = useAvailableModelsQuery();
   const { mutate: refreshModels, isPending: isRefreshing } = useRefreshModels();
@@ -266,8 +297,23 @@ export const ProviderSetupWizard = ({
   }, [step, noModelsAvailable, modelsData, hasAutoRefreshed, isRefreshing, refreshModels]);
 
   /* ── Handlers ─────────────────────────────────────────────────── */
-  const handleSubmitKey = useCallback(() => {
-    if (!keyInput.trim() || urlPasted) return;
+  // The key is live-tested before it is saved (specs/provider-key-test.md §3).
+  // Until 2026-11-18 it was saved untested, and a key with no credit only
+  // failed at the first generation.
+  const handleSubmitKey = useCallback(async () => {
+    if (!keyInput.trim() || urlPasted || isTestingKey || isSavingKey) return;
+    setTestFailure(null);
+    let result: KeyTestResult;
+    try {
+      result = await testKey({ provider: providerId, key: keyInput.trim() });
+    } catch {
+      // The test could not run (cloud unreachable): network-class copy.
+      result = { ok: false, latencyMs: 0, errorCode: "network" };
+    }
+    if (!result.ok) {
+      setTestFailure(result);
+      return;
+    }
     saveKey(
       { provider: providerId, key: keyInput.trim() },
       {
@@ -278,7 +324,7 @@ export const ProviderSetupWizard = ({
         },
       }
     );
-  }, [keyInput, urlPasted, providerId, saveKey]);
+  }, [keyInput, urlPasted, isTestingKey, isSavingKey, providerId, testKey, saveKey]);
 
   const handleTestConnection = useCallback(() => {
     checkPulse();
@@ -345,6 +391,7 @@ export const ProviderSetupWizard = ({
     setStep(isConnected ? "models" : "intro");
     setKeyInput("");
     setKeySubmitted(isConnected);
+    setTestFailure(null);
     onClose();
   };
 
@@ -475,11 +522,14 @@ export const ProviderSetupWizard = ({
                 label={__("API Key", "structura")}
                 type="password"
                 value={keyInput}
-                onChange={(e) => setKeyInput(e.target.value)}
+                onChange={(e) => {
+                  setKeyInput(e.target.value);
+                  setTestFailure(null);
+                }}
                 placeholder={keyPrefix ?? __("Enter API key...", "structura")}
                 autoComplete="off"
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSubmitKey();
+                  if (e.key === "Enter") void handleSubmitKey();
                 }}
                 error={
                   urlPasted
@@ -496,7 +546,16 @@ export const ProviderSetupWizard = ({
                           "That looks like a web address, not an API key. Paste the key itself from your provider's dashboard.",
                           "structura"
                         )
-                    : undefined
+                    : testFailure
+                      ? testFailure.providerMessage
+                        ? (
+                            <LinkifiedText
+                              text={testFailure.providerMessage}
+                              newTabLabel={__("(opens in a new tab)", "structura")}
+                            />
+                          )
+                        : keyTestFallback(testFailure.errorCode)
+                      : undefined
                 }
               />
 
@@ -756,7 +815,7 @@ export const ProviderSetupWizard = ({
                 <Button
                   variant="accent"
                   onClick={handleSubmitKey}
-                  loading={isSavingKey}
+                  loading={isTestingKey || isSavingKey}
                   disabled={!keyInput.trim() || urlPasted}
                 >
                   {__("Save & Test", "structura")}

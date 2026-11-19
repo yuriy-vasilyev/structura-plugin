@@ -19,6 +19,7 @@ import {
   resolveTextOutputBudget,
   acceptsTemperature,
   acceptsLowEffort,
+  acceptsReferenceImages,
   TEXT_OUTPUT_BUDGET,
   resolveByokTierModelId,
   tierForModelId,
@@ -654,3 +655,20 @@ describe("low reasoning capability", () => {
   });
 });
 
+// specs/visual-signatures.md §13.6 (2026-11-18): a recurring character needs
+// reference images attached to the image call. Verified on one model only
+// (research/2026-11-18-recurring-character).
+describe("reference image capability", () => {
+  it("is true only for the image model the study verified", () => {
+    expect(MODELS.filter((m) => m.referenceImages).map((m) => m.id)).toEqual(["gemini-3.1-flash-image"]);
+    expect(acceptsReferenceImages("gemini", "gemini-3.1-flash-image")).toBe(true);
+    expect(acceptsReferenceImages("gemini", "gemini-3-pro-image")).toBe(false);
+    expect(acceptsReferenceImages("openai", "gpt-image-2.5-sunburst")).toBe(false);
+    expect(acceptsReferenceImages("openai", "gemini-3.1-flash-image")).toBe(false);
+    expect(acceptsReferenceImages("gemini", "unknown-image-model")).toBe(false);
+  });
+
+  it("stays off the served catalog (wire contract unchanged)", () => {
+    expect(JSON.stringify(MODEL_CATALOG)).not.toContain("referenceImages");
+  });
+});

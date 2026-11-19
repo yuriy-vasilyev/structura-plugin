@@ -36,7 +36,8 @@ DescribedInput.displayName = "DescribedInput";
 export interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   label: string;
   size?: "xs" | "sm" | "md";
-  error?: string;
+  /** Message under the field; a node when it carries links (`LinkifiedText`). */
+  error?: ReactNode;
   hiddenLabel?: boolean;
   loading?: boolean;
   errorView?: "default" | "tooltip";

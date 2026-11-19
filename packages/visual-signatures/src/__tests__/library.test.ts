@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { HOUSE_SIGNATURE_ID, VISUAL_SIGNATURES, effectiveMedium, getSignatureMeta, isSignatureId } from "../signatures";
+import {
+  HOUSE_SIGNATURE_ID,
+  VISUAL_SIGNATURES,
+  effectiveMedium,
+  getSignatureMeta,
+  isSignatureId,
+  signatureTakesCharacter,
+} from "../signatures";
 import { NEUTRAL_PALETTE, luminance, mix, normaliseHex, resolvePaletteRoles } from "../palette";
 
 describe("the library", () => {
@@ -76,5 +83,40 @@ describe("effectiveMedium", () => {
     expect(effectiveMedium({ signature: { kind: "curated", id: "unknown" }, medium: "illustration" })).toBe("illustration");
     expect(effectiveMedium({ medium: "illustration" })).toBe("illustration");
     expect(effectiveMedium({})).toBe("photography");
+  });
+});
+
+// specs/visual-signatures.md §13.2 (2026-11-18): who appears is a second
+// dimension; only some signatures can draw a recurring character.
+describe("character", () => {
+  it("is offered by ink-and-fill, paper-cut and miniature-world only", () => {
+    expect(VISUAL_SIGNATURES.filter((s) => s.character).map((s) => s.id).sort()).toEqual([
+      "ink-and-fill",
+      "miniature-world",
+      "paper-cut",
+    ]);
+  });
+
+  it("never on photography, so the house signature takes none", () => {
+    for (const s of VISUAL_SIGNATURES.filter((x) => x.medium === "photography")) expect(s.character).toBe(false);
+    expect(getSignatureMeta(HOUSE_SIGNATURE_ID)?.character).toBe(false);
+  });
+
+  it("signatureTakesCharacter: the library flag for a curated choice", () => {
+    expect(signatureTakesCharacter({ kind: "curated", id: "paper-cut" })).toBe(true);
+    expect(signatureTakesCharacter({ kind: "curated", id: "isometric-glass" })).toBe(false);
+    expect(signatureTakesCharacter({ kind: "curated", id: "editorial-reportage" })).toBe(false);
+    expect(signatureTakesCharacter({ kind: "curated", id: "retired-id" })).toBe(false);
+  });
+
+  it("signatureTakesCharacter: a custom signature by its medium", () => {
+    expect(signatureTakesCharacter({ kind: "custom", medium: "illustration" })).toBe(true);
+    expect(signatureTakesCharacter({ kind: "custom", medium: "3d_render" })).toBe(true);
+    expect(signatureTakesCharacter({ kind: "custom", medium: "photography" })).toBe(false);
+  });
+
+  it("signatureTakesCharacter: no signature (free prompt or the house fallback) takes none", () => {
+    expect(signatureTakesCharacter(undefined)).toBe(false);
+    expect(signatureTakesCharacter(null)).toBe(false);
   });
 });

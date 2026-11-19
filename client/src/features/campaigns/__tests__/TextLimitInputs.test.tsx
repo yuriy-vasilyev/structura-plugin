@@ -1,7 +1,7 @@
 /**
  * Character bounds on the wp-admin brief and topic inputs (2026-11-12 cost
  * audit): the campaign objective on Create and Edit carries `maxLength`
- * 4,000 and the Generate a Post topic 1,000, on every plan. The cloud cuts
+ * 4,000 and the Generate a Post topic the same, on every plan. The cloud cuts
  * whatever an older build sends; the input stops the customer from typing
  * past what will be used.
  *
@@ -134,11 +134,11 @@ describe.each(PLANS)("wp-admin text bounds on $plan", ({ plan, isPaidLicense }) 
     expect(objective.maxLength).toBe(4000);
   });
 
-  it("Generate a Post: the topic takes at most 1,000 characters", async () => {
+  it("Generate a Post: the topic takes at most 4,000 characters", async () => {
     renderAt("/", "/", <GeneratePostPage />);
     const topic = (await screen.findByLabelText(
       "Describe your post topic or objective"
     )) as HTMLTextAreaElement;
-    expect(topic.maxLength).toBe(1000);
+    expect(topic.maxLength).toBe(4000);
   });
 });

@@ -135,7 +135,9 @@ const Title = React.forwardRef<HTMLHeadingElement, React.ComponentProps<typeof D
     <DialogTitle
       ref={ref}
       className={cn(
-        "font-display m-0! text-xl leading-6 font-bold tracking-tight text-neutral-900 dark:text-white",
+        // The colour is important: wp-admin colours every h1 to h3 itself, which
+        // left dialog titles dark on dark there (2026-11-19).
+        "font-display m-0! text-xl leading-6 font-bold tracking-tight text-neutral-900! dark:text-white!",
         className
       )}
       {...props}

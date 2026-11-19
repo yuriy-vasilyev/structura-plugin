@@ -20,6 +20,8 @@ interface SuggestionOptions {
    * language even when the campaign targets another one (2026-09-22).
    */
   language?: string;
+  /** Request a one-off post brief from the campaign suggestion endpoint. */
+  singlePost?: true;
 }
 
 export const useMagicSuggest = () => {
@@ -47,6 +49,7 @@ export const useMagicSuggest = () => {
           context: options.context || [],
           ...(options.medium ? { medium: options.medium } : {}),
           ...(options.language ? { language: options.language } : {}),
+          ...(options.singlePost ? { singlePost: true } : {}),
         },
       });
 

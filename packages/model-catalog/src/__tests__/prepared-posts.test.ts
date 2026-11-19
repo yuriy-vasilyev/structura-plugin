@@ -14,6 +14,8 @@ const campaign = (over: Partial<PreparedPostsCampaignFields> = {}): PreparedPost
   postLength: 1500,
   enabledBlocks: ["core/paragraph", "core/heading"],
   keywordBank: ["espresso grind size", "espresso channeling"],
+  featuredImage: true,
+  bodyImages: true,
   ...over,
 });
 
@@ -39,6 +41,8 @@ describe("campaignChangeReplacesPreparedPosts", () => {
     ["enabled blocks, one swapped", { enabledBlocks: ["core/paragraph", "core/list"] }],
     ["enabled blocks, one added", { enabledBlocks: ["core/paragraph", "core/heading", "core/list"] }],
     ["enabled blocks, same set in another order", { enabledBlocks: ["core/heading", "core/paragraph"] }],
+    ["featured image switch, turned off", { featuredImage: false }],
+    ["body image switch, turned off", { bodyImages: false }],
   ] as const)("replaces the prepared posts when the %s changes", (_field, change) => {
     expect(campaignChangeReplacesPreparedPosts(campaign(), campaign(change))).toEqual(REPLACED);
   });
@@ -50,6 +54,22 @@ describe("campaignChangeReplacesPreparedPosts", () => {
   it("treats a missing block list as an empty one", () => {
     expect(campaignChangeReplacesPreparedPosts(campaign({ enabledBlocks: undefined }), campaign({ enabledBlocks: [] }))).toEqual(KEPT);
     expect(campaignChangeReplacesPreparedPosts(campaign({ enabledBlocks: null }), campaign({ enabledBlocks: [] }))).toEqual(KEPT);
+  });
+
+  // uniconfoto, 2026-11-17: two posts prepared while images were off went out
+  // without images after the customer switched them back on. Such a post
+  // carries no image concept, so nothing can be rendered for it later.
+  it("replaces the prepared posts when images are switched back on", () => {
+    const off = campaign({ featuredImage: false, bodyImages: false });
+    expect(campaignChangeReplacesPreparedPosts(off, campaign())).toEqual(REPLACED);
+    expect(campaignChangeReplacesPreparedPosts(off, campaign({ bodyImages: false }))).toEqual(REPLACED);
+    expect(campaignChangeReplacesPreparedPosts(off, campaign({ featuredImage: false }))).toEqual(REPLACED);
+  });
+
+  it("treats a missing image switch as off", () => {
+    const off = campaign({ featuredImage: false, bodyImages: false });
+    expect(campaignChangeReplacesPreparedPosts(campaign({ featuredImage: undefined, bodyImages: null }), off)).toEqual(KEPT);
+    expect(campaignChangeReplacesPreparedPosts(off, campaign({ featuredImage: undefined, bodyImages: undefined }))).toEqual(KEPT);
   });
 
   it("reports a language change, which replaces even the posts the customer edited", () => {

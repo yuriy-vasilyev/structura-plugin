@@ -255,10 +255,10 @@ test.describe("Visuals — visual signatures", () => {
     await expect(chip).toHaveAttribute("aria-pressed", "false");
     await expect(page.getByRole("textbox", { name: "Technique" })).toHaveValue("");
 
-    await page.getByRole("textbox", { name: "Name" }).fill("");
+    await page.getByRole("textbox", { name: "Name", exact: true }).fill("");
     await page.getByRole("button", { name: /Save Changes/ }).click();
     await expect(page.getByText("Name this signature to save it.")).toBeVisible();
-    await expect(page.getByRole("textbox", { name: "Name" })).toBeFocused();
+    await expect(page.getByRole("textbox", { name: "Name", exact: true })).toBeFocused();
     expect(saves).toHaveLength(0);
 
     await shots(page, "builder-desktop");

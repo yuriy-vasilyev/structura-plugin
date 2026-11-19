@@ -32,6 +32,8 @@ export interface SignaturePreviewProps {
    * empty free prompt).
    */
   buildRequest: () => PreviewVisualSignatureInput | null;
+  /** One line under the button, e.g. that previews show no character until one is approved. */
+  note?: string;
 }
 
 type PreviewStatus = "idle" | "rendering" | "ok" | "failed";
@@ -43,6 +45,7 @@ export function SignaturePreview({
   upgradeHref,
   imagesResetOn,
   buildRequest,
+  note,
 }: SignaturePreviewProps) {
   const preview = usePreviewVisualSignatureMutation();
   const [status, setStatus] = useState<PreviewStatus>("idle");
@@ -94,7 +97,7 @@ export function SignaturePreview({
       <div className="flex flex-col gap-1">
         <h3
           id={headingId}
-          className="m-0! text-base font-bold tracking-tight text-neutral-900 dark:text-white"
+          className="m-0! text-base font-bold tracking-tight text-neutral-900! dark:text-white!"
         >
           {__("Preview", "structura")}
         </h3>
@@ -209,6 +212,7 @@ export function SignaturePreview({
               )}
             </p>
           )}
+          {note && <p className="m-0! text-xs text-neutral-500 dark:text-neutral-400">{note}</p>}
         </div>
       )}
     </section>

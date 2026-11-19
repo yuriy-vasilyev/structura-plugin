@@ -1,5 +1,34 @@
 # Changelog
 
+## [2.41.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.40.0...v2.41.0) (2026-11-19)
+
+
+### Features
+
+* **ai-keys:** a failed key test shows the provider's own message, and wp-admin tests a key before saving it ([cc535a7](https://github.com/yuriy-vasilyev/structura-core/commit/cc535a70c1a72500536fc7cf2dc9c92abcb06643))
+* **functions:** clean up abandoned character drafts every day ([bb189c5](https://github.com/yuriy-vasilyev/structura-core/commit/bb189c5fe12979e0c935c794f5c8a72a541033fd))
+* **functions:** keep one recurring character in every generated image ([8dfafb8](https://github.com/yuriy-vasilyev/structura-core/commit/8dfafb8e96398f166e719c303f149d262a429368))
+* **plugin:** choose who appears in your images in wp-admin ([85b5516](https://github.com/yuriy-vasilyev/structura-core/commit/85b55168b550c3d51da201bdc80019f32ac84556))
+* **portal:** add a block before or after any block, a readable editor back label, and entradas across the Spanish portal ([a58c950](https://github.com/yuriy-vasilyev/structura-core/commit/a58c950cb52ea9f8479e92308478ae59d8ec6d47))
+* **portal:** the portal loads Inter and JetBrains Mono from its own origin ([20aa0b9](https://github.com/yuriy-vasilyev/structura-core/commit/20aa0b924978691265e2c9a4d82be1d0149f986b))
+* **web:** add a Delivery API setup prompt for other frameworks ([0946528](https://github.com/yuriy-vasilyev/structura-core/commit/09465289b7010af3f2e25d37500a5db104876656))
+* **web:** add a Next.js Delivery API setup prompt ([858e700](https://github.com/yuriy-vasilyev/structura-core/commit/858e700cb8e98b092d2246ca733b564d556af832))
+* **web:** add Astro, Nuxt, and SvelteKit delivery prompts ([8c3d94d](https://github.com/yuriy-vasilyev/structura-core/commit/8c3d94d34ba78e1111ffc05e7570bb9c7e96245d))
+* **web:** choose who appears in your images on the Visuals page ([013c283](https://github.com/yuriy-vasilyev/structura-core/commit/013c283ee01d63f8c39a317a5faba04bcff065a7))
+* **web:** make the brand palette editable during onboarding ([cb02244](https://github.com/yuriy-vasilyev/structura-core/commit/cb0224421338f669bfb29faae7df081a993502c3))
+* **www:** cross-locale links, a blog archive and crawl fixes from the 2026-11-17 SEO check ([ffa3919](https://github.com/yuriy-vasilyev/structura-core/commit/ffa39197385fd3bac8dbfa3728a14576e4ed20a2))
+
+
+### Bug Fixes
+
+* **functions:** draw a recurring character once, at full size, in its own colors ([55812f2](https://github.com/yuriy-vasilyev/structura-core/commit/55812f245fc6c0c1dfa56e3488a6b42a4eb84acc))
+* **functions:** save regenerated images onto the post in the backfill script ([3377835](https://github.com/yuriy-vasilyev/structura-core/commit/3377835f378ccdb62628e2688a7d204c62bd08e1))
+* **gsc:** the daily Search Console pull runs at 512 MiB ([9929008](https://github.com/yuriy-vasilyev/structura-core/commit/992900809e686ae1f0a6cbd57bdf240a77e71c1d))
+* keep brand colors, referral link rel and search topics intact after today's changes ([d8fb72e](https://github.com/yuriy-vasilyev/structura-core/commit/d8fb72e95a01c27fecfa5649daf9c2f1217e8c02))
+* **posts:** support longer one-off briefs and concise AI suggestions ([9c7d6e5](https://github.com/yuriy-vasilyev/structura-core/commit/9c7d6e52f22ec62f99230f9b0c7d3d8f833f1489))
+* **stock:** switching a campaign's images on or off replaces its prepared posts ([288d047](https://github.com/yuriy-vasilyev/structura-core/commit/288d047af95914a604ea5868893c60185df9ca11))
+* **web:** render inline formatting and wrap list items in the post editor ([e02a10c](https://github.com/yuriy-vasilyev/structura-core/commit/e02a10c5360a53f2584c78b0091f1e7be9f2e2a2))
+
 ## [2.40.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.39.0...v2.40.0) (2026-11-17)
 
 

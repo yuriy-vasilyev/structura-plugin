@@ -37,9 +37,17 @@ import {
   type CaptionPlacement,
   type VideoStyleKind,
 } from "@structura/ui";
-import { canUseSignatureLibrary } from "@structura/types";
+import { canUseSignatureLibrary, canUseVisualCharacter } from "@structura/types";
 import { HOUSE_SIGNATURE_ID, type SignatureId } from "@structura/visual-signatures";
-import { BadgeCheck, ChevronDown, ChevronUp, Image as ImageIcon, PenLine, Sparkles } from "lucide-react";
+import {
+  BadgeCheck,
+  ChevronDown,
+  ChevronUp,
+  Image as ImageIcon,
+  PenLine,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
 
 import {
   useDefaultProviders,
@@ -454,6 +462,17 @@ export const WizardStep4Visuals = () => {
               update({ signature: signatureForSelection(next, null), signatureTouched: true })
             }
           />
+          {/* No step for a recurring character: it is added on the Visuals page (recurring-character handoff §8). */}
+          {canUseVisualCharacter(plan) && (
+            <p className="m-0! flex! items-start gap-2 text-[13px] leading-normal text-neutral-700 dark:text-neutral-300">
+              <UserRound
+                size={15}
+                aria-hidden="true"
+                className="mt-0.5 shrink-0 text-neutral-500 dark:text-neutral-400"
+              />
+              <span>{__("Add yourself or a mascot later on the Visuals page.", "structura")}</span>
+            </p>
+          )}
         </div>
 
         <BrandPaletteSummary

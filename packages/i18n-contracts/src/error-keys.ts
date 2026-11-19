@@ -206,6 +206,9 @@ export const ERROR_KEYS = {
     // Visual signature plan gate (specs/visual-signatures.md §7): the
     // library and the builder come with paid plans.
     visualSignatureGated: "sites.visualSignatureGated",
+    // Recurring character plan gate (specs/visual-signatures.md §13.7): same
+    // row as the library; a stored character keeps rendering after a downgrade.
+    visualCharacterGated: "sites.visualCharacterGated",
     // Hard cap on the number of sites (activations) a license may own,
     // shared across surfaces (WP + Headless). Surfaced by the portal
     // "Add Site" flow when `activationsCount >= maxSites` so it can prompt an
@@ -274,6 +277,30 @@ export const ERROR_KEYS = {
     // this key is the server-side backstop.
     planRequired: "attachments.planRequired",
   },
+  visualCharacter: {
+    // The recurring character's intake and Save (specs/visual-signatures.md
+    // §13.12). One key per refusal so the portal can put the error line where
+    // the problem is (handoff §2 Save validation, §5 upload states).
+    imageWrongType: "visualCharacter.imageWrongType",
+    // HEIC has its own wording: it is the iPhone default and we do not convert.
+    imageHeic: "visualCharacter.imageHeic",
+    imageTooLarge: "visualCharacter.imageTooLarge",
+    tooManyImages: "visualCharacter.tooManyImages",
+    noImages: "visualCharacter.noImages",
+    permissionRequired: "visualCharacter.permissionRequired",
+    nameRequired: "visualCharacter.nameRequired",
+    descriptionRequired: "visualCharacter.descriptionRequired",
+    // Save refusals, in the order Save checks them.
+    signatureCannotCarry: "visualCharacter.signatureCannotCarry",
+    needsNewSheet: "visualCharacter.needsNewSheet",
+    notApproved: "visualCharacter.notApproved",
+    // Approve without a drawn sheet.
+    noSheet: "visualCharacter.noSheet",
+    // The site's image model cannot take reference images (§13.6).
+    modelUnavailable: "visualCharacter.modelUnavailable",
+    // The sheet render failed; no image was spent.
+    sheetFailed: "visualCharacter.sheetFailed",
+  },
   apiTokens: {
     // Personal access tokens for the MCP server (specs/mcp-server.md §3.2).
     nameRequired: "apiTokens.nameRequired",
@@ -311,6 +338,7 @@ export type ErrorKey =
   | (typeof ERROR_KEYS.sites)[keyof typeof ERROR_KEYS.sites]
   | (typeof ERROR_KEYS.campaigns)[keyof typeof ERROR_KEYS.campaigns]
   | (typeof ERROR_KEYS.attachments)[keyof typeof ERROR_KEYS.attachments]
+  | (typeof ERROR_KEYS.visualCharacter)[keyof typeof ERROR_KEYS.visualCharacter]
   | (typeof ERROR_KEYS.apiTokens)[keyof typeof ERROR_KEYS.apiTokens]
   | (typeof ERROR_KEYS.common)[keyof typeof ERROR_KEYS.common];
 

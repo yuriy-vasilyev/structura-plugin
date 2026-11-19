@@ -18,6 +18,7 @@ export const VISUAL_SIGNATURES: readonly SignatureMeta[] = [
     medium: "photography",
     roles: ["background", "surface", "accent", "ink"],
     house: true,
+    character: false,
     thumbnail: thumbnail("editorial-reportage"),
   },
   {
@@ -26,6 +27,7 @@ export const VISUAL_SIGNATURES: readonly SignatureMeta[] = [
     medium: "photography",
     roles: ["background", "primary", "accent", "ink"],
     house: false,
+    character: false,
     thumbnail: thumbnail("still-life-studio"),
   },
   {
@@ -34,6 +36,7 @@ export const VISUAL_SIGNATURES: readonly SignatureMeta[] = [
     medium: "illustration",
     roles: ["background", "surface", "primary", "accent", "ink"],
     house: false,
+    character: true,
     thumbnail: thumbnail("paper-cut"),
   },
   {
@@ -42,6 +45,7 @@ export const VISUAL_SIGNATURES: readonly SignatureMeta[] = [
     medium: "illustration",
     roles: ["background", "primary", "accent", "ink"],
     house: false,
+    character: true,
     thumbnail: thumbnail("ink-and-fill"),
   },
   {
@@ -50,6 +54,7 @@ export const VISUAL_SIGNATURES: readonly SignatureMeta[] = [
     medium: "3d_render",
     roles: ["background", "primary", "accent", "ink"],
     house: false,
+    character: true,
     thumbnail: thumbnail("miniature-world"),
   },
   {
@@ -58,6 +63,7 @@ export const VISUAL_SIGNATURES: readonly SignatureMeta[] = [
     medium: "3d_render",
     roles: ["background", "surface", "primary", "accent", "ink"],
     house: false,
+    character: false,
     thumbnail: thumbnail("isometric-glass"),
   },
 ];
@@ -88,4 +94,19 @@ export function effectiveMedium(preset: {
   if (sig?.kind === "curated") return getSignatureMeta(sig.id)?.medium ?? preset.medium ?? "photography";
   if (sig?.kind === "custom") return sig.medium;
   return preset.medium ?? "photography";
+}
+
+/**
+ * Whether a preset's signature can carry a recurring character
+ * (specs/visual-signatures.md §13.2): a curated signature by its library
+ * flag, a custom one when drawn or rendered (illustration, 3d_render). No
+ * signature (the free prompt, or the house fallback of an unset preset)
+ * takes none.
+ */
+export function signatureTakesCharacter(
+  signature: { kind: "curated"; id: string } | { kind: "custom"; medium: string } | null | undefined,
+): boolean {
+  if (signature?.kind === "curated") return getSignatureMeta(signature.id)?.character === true;
+  if (signature?.kind === "custom") return signature.medium === "illustration" || signature.medium === "3d_render";
+  return false;
 }

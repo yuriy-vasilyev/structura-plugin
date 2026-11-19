@@ -26,6 +26,10 @@ export interface PreparedPostsCampaignFields {
    * `{ keyword, source, usageCount }` objects on newer campaign docs.
    */
   keywordBank?: readonly unknown[] | null;
+  /** Whether posts get a featured image. */
+  featuredImage?: boolean | null;
+  /** Whether posts get an image in the body. */
+  bodyImages?: boolean | null;
 }
 
 /** A keyword bank entry's text, whatever shape the entry is stored in. */
@@ -58,6 +62,12 @@ function keywordText(entry: unknown): string {
  *     campaign no longer wants. Order-independent (the round-robin index and
  *     the settings hash both treat the bank as a set), so a pure reorder is a
  *     no-op, but any added, removed or swapped keyword replaces.
+ *   - `featuredImage` / `bodyImages`: the writer is asked for an image
+ *     concept only when the switch is on, and the images are rendered from
+ *     that concept. A post prepared with images off has none, so it went out
+ *     without images after the customer switched them back on (uniconfoto,
+ *     2026-11-17, two posts). Until then these two were deliberately not
+ *     compared. A missing value is off.
  *
  * Fields explicitly NOT compared (they would cause needless thrash):
  *   - `name`: display label only.
@@ -66,7 +76,6 @@ function keywordText(entry: unknown): string {
  *   - `schedule`: when posts publish, not what they contain.
  *   - `taxonomy` (categories/tags): applied at insert time, not baked into
  *     the blueprint.
- *   - `featuredImage` / `bodyImages`: flipping these does not change the text.
  *   - `textProvider` / `textModel` / `imageModel` / fallback fields: a
  *     provider swap is a margin and quality knob; a post written by the old
  *     provider is still a valid post, and the next batch uses the new one.
@@ -90,6 +99,8 @@ function otherFieldsDiffer(before: PreparedPostsCampaignFields, after: PreparedP
   if (before.objective !== after.objective) return true;
   if (before.campaignMode !== after.campaignMode) return true;
   if (before.postLength !== after.postLength) return true;
+  if (!!before.featuredImage !== !!after.featuredImage) return true;
+  if (!!before.bodyImages !== !!after.bodyImages) return true;
 
   // enabledBlocks is an array: compare order- and length-aware. The same
   // array saved again is a no-op; a different length or a different element

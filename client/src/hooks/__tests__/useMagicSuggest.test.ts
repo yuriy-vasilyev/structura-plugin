@@ -92,4 +92,17 @@ describe("useMagicSuggest", () => {
     const body = apiFetchMock.mock.calls[0][0].data as Record<string, unknown>;
     expect(body).not.toHaveProperty("language");
   });
+
+  it("asks WordPress for the short suggestion only for one-off posts", async () => {
+    apiFetchMock.mockResolvedValue({ result: { name: "Post", strategy: "Brief" } });
+    const { result } = renderHook(() => useMagicSuggest());
+
+    await act(async () => {
+      await result.current.suggest("campaign", { provider: "openai", singlePost: true });
+      await result.current.suggest("campaign", { provider: "openai" });
+    });
+
+    expect(apiFetchMock.mock.calls[0][0].data).toMatchObject({ mode: "campaign", singlePost: true });
+    expect(apiFetchMock.mock.calls[1][0].data).not.toHaveProperty("singlePost");
+  });
 });

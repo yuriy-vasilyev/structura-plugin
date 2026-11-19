@@ -22,6 +22,12 @@ export interface SignatureMeta {
   roles: readonly PaletteRole[];
   /** The signature every plan gets, and the default for an unbound site. */
   house: boolean;
+  /**
+   * Can draw a recurring character (specs/visual-signatures.md §13.2). Never
+   * on photography: a photoreal invented scene of a real person is uncanny
+   * when it misses.
+   */
+  character: boolean;
   /** Thumbnails of the test board in the neutral set, served from the marketing site. */
   thumbnail: { small: string; large: string };
 }

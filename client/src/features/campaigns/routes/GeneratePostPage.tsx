@@ -303,7 +303,7 @@ const GeneratePostPage = () => {
   // The suggested writing approach is not applied: this page has no
   // approach selector since 2026-10-06 and always sends the default mode.
   const generateStrategy = async (provider: AIProvider) => {
-    const data = await suggest("campaign", { provider, context: [] });
+    const data = await suggest("campaign", { provider, context: [], singlePost: true });
     if (data?.strategy) {
       update("identity", { objective: data.strategy as string });
       settleTopic(data.strategy as string);

@@ -34,6 +34,12 @@ interface ConfirmDialogProps {
   cancelButtonProps?: {
     label?: string;
   };
+  /**
+   * Where focus starts when the dialog opens. Without it, the dialog panel
+   * itself takes focus (Headless UI's default). `"cancel"` starts on the
+   * safe choice, as a destructive confirmation that can't be undone should.
+   */
+  initialFocus?: "cancel";
 }
 
 /**
@@ -54,6 +60,7 @@ export const ConfirmDialog = ({
   loading = false,
   confirmButtonProps = {},
   cancelButtonProps = {},
+  initialFocus,
 }: ConfirmDialogProps) => {
   const Icon = icon ?? (variant === "primary" ? ShieldCheck : AlertTriangle);
 
@@ -99,7 +106,13 @@ export const ConfirmDialog = ({
           </div>
         </div>
         <Dialog.Footer>
-          <Button variant="secondary" onClick={onClose} disabled={loading}>
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            disabled={loading}
+            // Headless UI focuses the element marked data-autofocus on open.
+            {...(initialFocus === "cancel" ? { "data-autofocus": true } : {})}
+          >
             {cancelLabel}
           </Button>
           <Button variant={confirmVariant} onClick={onConfirm} loading={loading}>

@@ -348,6 +348,25 @@ export const canUseSignatureBuilder = (plan: LicenseTier | string | null | undef
     : VISUAL_SIGNATURE_BUILDER_FOR_TIER.none;
 
 /**
+ * The recurring character (specs/visual-signatures.md §13.7): the same row
+ * as the library. Server-side enforcement lives in
+ * `functions/src/policy/tier-policy.ts::validateAppearanceForTier`; a stored
+ * character keeps rendering after a downgrade but cannot be changed.
+ */
+export const VISUAL_CHARACTER_FOR_TIER: Record<LicenseTier, boolean> = {
+  none: false,
+  free: false,
+  byok: true,
+  cloud: true,
+} as const;
+
+/** True when the tier may add or change a recurring character. Unknown tiers read as `none`. */
+export const canUseVisualCharacter = (plan: LicenseTier | string | null | undefined): boolean =>
+  !!plan && (plan as LicenseTier) in VISUAL_CHARACTER_FOR_TIER
+    ? VISUAL_CHARACTER_FOR_TIER[plan as LicenseTier]
+    : VISUAL_CHARACTER_FOR_TIER.none;
+
+/**
  * Maximum number of posts a single campaign may publish per week under
  * each tier. `null` means "no weekly cap" (the gate never trips).
  *
@@ -543,10 +562,11 @@ export const CAMPAIGN_OBJECTIVE_MAX_LENGTH = 4000;
 
 /**
  * Most characters a one-off post's topic may hold, on every plan. The topic
- * is that post's brief and, without a focus keyphrase, its focus keyword.
- * Only MCP bounded it before the 2026-11-12 cost audit (no known exploitation).
+ * is that post's brief, so it shares the campaign brief's bound (1,000 until
+ * 2026-11-18). Only MCP bounded it before the 2026-11-12 cost audit (no
+ * known exploitation).
  */
-export const SINGLE_POST_TOPIC_MAX_LENGTH = 1000;
+export const SINGLE_POST_TOPIC_MAX_LENGTH = CAMPAIGN_OBJECTIVE_MAX_LENGTH;
 
 /**
  * Most characters a persona's system prompt may hold on managed AI (Cloud),
@@ -1384,6 +1404,13 @@ export interface VisualPreset {
    * accents then stay on the stock styling.
    */
   palette?: string[];
+  /**
+   * The owner emptied the palette, so images render in the neutral colours
+   * even when the site's scanned colours are known. Added 2026-11-18;
+   * permanently optional: older clients store an empty `palette` without
+   * it, which still borrows the scanned colours.
+   */
+  paletteNeutral?: boolean;
   /** uid or `activation:{activationId}` when the source was a plugin save. */
   createdBy: string;
   createdAt: Timestamp;

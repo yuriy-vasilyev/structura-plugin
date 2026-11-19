@@ -27,6 +27,12 @@ vi.mock("../api/useSaveKey", () => ({
     isPending: false,
   }),
 }));
+vi.mock("../api/useTestKey", () => ({
+  useTestKey: () => ({
+    mutateAsync: () => Promise.resolve({ ok: true, latencyMs: 120 }),
+    isPending: false,
+  }),
+}));
 vi.mock("../api/useProviderPulse", () => ({
   useProviderPulse: () => ({ isOnline: true, latency: 120, isChecking: false, checkPulse: vi.fn() }),
 }));
@@ -50,7 +56,7 @@ import { ProviderSetupWizard } from "../components/ProviderSetupWizard";
 
 beforeEach(() => updateMutate.mockReset());
 
-const connectAndReachModels = () => {
+const connectAndReachModels = async () => {
   render(
     <ProviderSetupWizard
       open
@@ -66,14 +72,15 @@ const connectAndReachModels = () => {
   fireEvent.click(screen.getByRole("button", { name: /Get Started/ }));
   fireEvent.change(screen.getByLabelText(/API Key/), { target: { value: "sk-proj-valid-key" } });
   fireEvent.click(screen.getByRole("button", { name: /Save & Test/ }));
-  fireEvent.click(screen.getByRole("button", { name: /Configure/ }));
+  // The key is live-tested before it is saved, so the step changes async.
+  fireEvent.click(await screen.findByRole("button", { name: /Configure/ }));
 };
 
 const savedDefaults = () => updateMutate.mock.calls[0]?.[0]?.ai?.defaults ?? {};
 
 describe("<ProviderSetupWizard> default provider toggles on a new connection", () => {
-  it("Finish without touching the text toggle writes no text default", () => {
-    connectAndReachModels();
+  it("Finish without touching the text toggle writes no text default", async () => {
+    await connectAndReachModels();
     fireEvent.click(screen.getByRole("button", { name: /Finish Setup/ }));
 
     expect(updateMutate).toHaveBeenCalledTimes(1);
@@ -81,8 +88,8 @@ describe("<ProviderSetupWizard> default provider toggles on a new connection", (
     expect(savedDefaults().image_provider).toBe("openai");
   });
 
-  it("switching the text toggle on writes the text default", () => {
-    connectAndReachModels();
+  it("switching the text toggle on writes the text default", async () => {
+    await connectAndReachModels();
     fireEvent.click(screen.getByLabelText("Default for text generation"));
     fireEvent.click(screen.getByRole("button", { name: /Finish Setup/ }));
 

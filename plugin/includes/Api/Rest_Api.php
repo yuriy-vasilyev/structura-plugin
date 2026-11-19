@@ -37,6 +37,13 @@ class Rest_Api
     private const VISUAL_MEDIA = ['photography', 'illustration', '3d_render'];
 
     /**
+     * Largest character image data URI the upload route forwards: a 10 MB
+     * file, the cloud's own cap, base64-encoded. The SPA sends one it has
+     * scaled to 1536 px, far below this.
+     */
+    private const CHARACTER_DATA_URI_MAX = 14 * 1024 * 1024;
+
+    /**
      * Lazily-instantiated proxy for the cloud `channels*Connection` endpoints.
      * Tests inject a fake via `set_channels_connections_service()` to assert
      * the routes hand off without standing up the cloud.
@@ -104,6 +111,11 @@ class Rest_Api
         register_rest_route($this->namespace, '/keys', [
             'methods'             => 'POST',
             'callback'            => [$this, 'save_api_key'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+        register_rest_route($this->namespace, '/keys/test', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'test_api_key'],
             'permission_callback' => [$this, 'check_permission'],
         ]);
         register_rest_route($this->namespace, '/onboarding', [
@@ -648,6 +660,39 @@ class Rest_Api
         register_rest_route($this->namespace, '/visual-signature/preview', [
             'methods'             => 'POST',
             'callback'            => [$this, 'preview_visual_signature'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+
+        // Recurring character (specs/visual-signatures.md §13.12): the intake,
+        // the sheet and Remove. Save rides on the preset update above.
+        register_rest_route($this->namespace, '/visual-presets/(?P<id>[\w-]+)/character/images', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'upload_visual_character_image'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+        register_rest_route($this->namespace, '/visual-presets/(?P<id>[\w-]+)/character/images/(?P<index>\d+)', [
+            'methods'             => 'DELETE',
+            'callback'            => [$this, 'remove_visual_character_image'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+        register_rest_route($this->namespace, '/visual-presets/(?P<id>[\w-]+)/character/description', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'draft_visual_character_description'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+        register_rest_route($this->namespace, '/visual-presets/(?P<id>[\w-]+)/character/sheet', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'draw_visual_character_sheet'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+        register_rest_route($this->namespace, '/visual-presets/(?P<id>[\w-]+)/character/sheet/approve', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'approve_visual_character_sheet'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+        register_rest_route($this->namespace, '/visual-presets/(?P<id>[\w-]+)/character', [
+            'methods'             => 'DELETE',
+            'callback'            => [$this, 'remove_visual_character'],
             'permission_callback' => [$this, 'check_permission'],
         ]);
 
@@ -3693,6 +3738,7 @@ class Rest_Api
         $user_context = $request['context'] ?? [];
         $provider     = sanitize_text_field($request['provider'] ?? '');
         $plan         = License_Manager::get_plan();
+        $single_post  = $mode === 'campaign' && ($request['singlePost'] ?? false) === true;
 
         // Visual mode: the picked rendering medium drives the cloud
         // blueprint's STYLE. Validate against the known set; anything else
@@ -3745,7 +3791,7 @@ class Rest_Api
             // runs through the cloud. The free / none rate cap is
             // applied by `resolveProviderKeyForTier`; BYOK keys are
             // read from `/workspaces/{w}/credentials/{c}`.
-            return $this->execute_cloud_suggestion($mode, $site_identity, $user_context, $provider, $medium, $language);
+            return $this->execute_cloud_suggestion($mode, $site_identity, $user_context, $provider, $medium, $language, $single_post);
         } catch (\Exception $e) {
             $this->log('error', 'Suggestion execution failed: ' . $e->getMessage(), 0, 'suggestion_handler');
 
@@ -3826,7 +3872,7 @@ class Rest_Api
     /**
      * @throws \Exception
      */
-    private function execute_cloud_suggestion($mode, $site_identity, $user_context, $provider, $medium = '', $language = '')
+    private function execute_cloud_suggestion($mode, $site_identity, $user_context, $provider, $medium = '', $language = '', $single_post = false)
     {
         $license = License_Manager::get_license_data();
         $payload = Key_Manager::get_license_payload();
@@ -3857,6 +3903,9 @@ class Rest_Api
         // Omitted when empty so older cloud builds see the legacy payload.
         if ($language !== '') {
             $cloud_payload['language'] = $language;
+        }
+        if ($single_post) {
+            $cloud_payload['singlePost'] = true;
         }
 
         // 240s curl timeout — the cloud function is provisioned for 300s
@@ -4328,6 +4377,67 @@ class Rest_Api
             'image'    => $image_list,
             'defaults' => $defaults,
         ]);
+    }
+
+    /**
+     * POST /structura/v1/keys/test: live-test a pasted provider key before it
+     * is saved (specs/provider-key-test.md §3). Stores nothing. A failed test
+     * is a result, not an error; only a refused or unreachable cloud call is.
+     * Blocking on purpose: the admin is waiting for the answer, as with
+     * `/keys` and `/wizard/test-ai`.
+     *
+     * Body: { provider: "openai"|"gemini"|"anthropic", key: string }
+     */
+    public function test_api_key($request)
+    {
+        $provider = sanitize_text_field((string)$request->get_param('provider'));
+        $key      = sanitize_text_field((string)$request->get_param('key'));
+
+        if ( ! Provider_Registry::validate_provider_access($provider)) {
+            return new \WP_Error(
+                'provider_not_available',
+                __('This AI provider is not available.', 'structura'),
+                ['status' => 403],
+            );
+        }
+        if ($key === '') {
+            return new \WP_Error(
+                'invalid_request',
+                __('Paste an API key to test.', 'structura'),
+                ['status' => 400],
+            );
+        }
+
+        // 15s: the provider ping has its own 10s cap in the cloud.
+        $response = Cloud_Client::post('/testProviderCredential', [
+            'provider' => $provider,
+            'apiKey'   => $key,
+        ], ['timeout' => 15]);
+        if (is_wp_error($response)) {
+            return new \WP_Error('cloud_test_failed', $response->get_error_message(), ['status' => 502]);
+        }
+        $body   = is_array($response) && is_array($response['body'] ?? null) ? $response['body'] : [];
+        $code   = is_array($response) ? (int)($response['code'] ?? 0) : 0;
+        $result = is_array($body['result'] ?? null) ? $body['result'] : null;
+        if ($code < 200 || $code >= 300 || $result === null) {
+            $error = isset($body['error']) ? (string)$body['error']
+                : __('The key test could not run. Try again.', 'structura');
+            return new \WP_Error('cloud_test_failed', $error, ['status' => $code ?: 502]);
+        }
+
+        // Only what the wizard renders; the raw SDK message stays in the cloud
+        // logs. The provider's message is shown as React text, never as HTML.
+        $out = [
+            'ok'        => ! empty($result['ok']),
+            'latencyMs' => (int)($result['latencyMs'] ?? 0),
+        ];
+        if (isset($result['errorCode']) && is_string($result['errorCode'])) {
+            $out['errorCode'] = sanitize_key($result['errorCode']);
+        }
+        if (isset($result['providerMessage']) && is_string($result['providerMessage'])) {
+            $out['providerMessage'] = $result['providerMessage'];
+        }
+        return rest_ensure_response($out);
     }
 
     public function save_api_key($request)
@@ -7182,7 +7292,11 @@ class Rest_Api
         $error = is_array($body) && isset($body['error']) ? (string)$body['error'] : $generic_error;
         $data  = ['status' => $status ?: 502];
         if (is_array($body) && is_string($body['code'] ?? null) && $body['code'] !== '') {
-            $data['code'] = sanitize_key($body['code']);
+            // An error key (`visualCharacter.notApproved`, 2026-11-18) keeps its
+            // case and dot, which sanitize_key drops: the SPA translates by it.
+            $data['code'] = preg_match('/^[a-z][A-Za-z]*\.[A-Za-z]+$/', $body['code'])
+                ? $body['code']
+                : sanitize_key($body['code']);
         }
         return new \WP_Error('cloud_error', $error, $data);
     }
@@ -7385,7 +7499,65 @@ class Rest_Api
             $content['signature'] = $signature;
         }
 
+        // Recurring character (specs/visual-signatures.md §13.12, 2026-11-18):
+        // `appearance` and the character's form fields, on update only (the
+        // cloud ignores both on create) and only when sent, so an older SPA
+        // build keeps the stored character.
+        if ($is_update) {
+            $character = $this->sanitize_character_fields($raw);
+            if (is_wp_error($character)) {
+                return $character;
+            }
+            $content = array_merge($content, $character);
+        }
+
         return $content;
+    }
+
+    /**
+     * Wire-shape check for the recurring character's `appearance` and form
+     * fields (specs/visual-signatures.md §13.12), for preset saves and
+     * previews. Each is kept only when sent. `character` keeps the editable
+     * fields the cloud reads, capped as it caps them (name 80, description
+     * 500); anything else on it (a path, a hash, a permission record) is
+     * dropped. An unknown appearance, reference or outfit refuses with a 400.
+     *
+     * @param array<string, mixed> $raw The content or preview body.
+     * @return array<string, mixed>|\WP_Error
+     */
+    private function sanitize_character_fields(array $raw)
+    {
+        $invalid = new \WP_Error('invalid_character', __('Invalid character details.', 'structura'), ['status' => 400]);
+        $out     = [];
+        if (array_key_exists('appearance', $raw)) {
+            if ( ! in_array($raw['appearance'], ['nobody', 'person', 'mascot'], true)) {
+                return $invalid;
+            }
+            $out['appearance'] = $raw['appearance'];
+        }
+        if (array_key_exists('character', $raw)) {
+            $c = $raw['character'];
+            if ( ! is_array($c) || ! in_array($c['reference'] ?? null, ['sheet', 'asIs'], true)) {
+                return $invalid;
+            }
+            $character = [
+                'name'        => is_string($c['name'] ?? null) ? mb_substr(sanitize_text_field($c['name']), 0, 80) : '',
+                'description' => is_string($c['description'] ?? null) ? mb_substr(sanitize_text_field($c['description']), 0, 500) : '',
+                'reference'   => $c['reference'],
+                'confirmed'   => ($c['confirmed'] ?? null) === true,
+            ];
+            if (array_key_exists('outfit', $c)) {
+                if ( ! in_array($c['outfit'], ['same', 'changes'], true)) {
+                    return $invalid;
+                }
+                $character['outfit'] = $c['outfit'];
+            }
+            if (array_key_exists('keepOwnStyle', $c)) {
+                $character['keepOwnStyle'] = $c['keepOwnStyle'] === true;
+            }
+            $out['character'] = $character;
+        }
+        return $out;
     }
 
     /**
@@ -7520,10 +7692,198 @@ class Rest_Api
         if (array_key_exists('palette', $params)) {
             $payload['palette'] = $this->sanitize_palette($params['palette']);
         }
+        // The unsaved recurring character (specs/visual-signatures.md §13.12),
+        // only when sent: without it the preview draws the bound preset's
+        // saved character, as before. `useCharacterDraft` and `confirmed` are
+        // forwarded as real booleans only.
+        $character = $this->sanitize_character_fields($params);
+        if (is_wp_error($character)) {
+            return $character;
+        }
+        $payload = array_merge($payload, $character);
+        foreach (['useCharacterDraft', 'confirmed'] as $flag) {
+            if (array_key_exists($flag, $params)) {
+                $payload[$flag] = $params[$flag] === true;
+            }
+        }
         // 120s: a render takes 15 to 40 s, and the cloud function's own limit
         // is 120 s.
         $response = Cloud_Client::post('/previewVisualSignature', $payload, ['timeout' => 120]);
         return $this->forward_cloud_response($response, __('The preview did not render.', 'structura'));
+    }
+
+    /**
+     * The recurring character's kind from a request body, or null.
+     *
+     * @param mixed $raw
+     */
+    private function character_kind($raw): ?string
+    {
+        return in_array($raw, ['person', 'mascot'], true) ? $raw : null;
+    }
+
+    /**
+     * A refusal the SPA places like the cloud's own: the status, and the
+     * cloud's error key under `code`.
+     */
+    private function character_refusal(string $key, string $message, int $status = 400): \WP_Error
+    {
+        return new \WP_Error('cloud_error', $message, ['status' => $status, 'code' => $key]);
+    }
+
+    /**
+     * POST /structura/v1/visual-presets/{id}/character/images: one upload for
+     * the recurring character's draft (specs/visual-signatures.md §13.12).
+     * Body: `{ kind, data_uri }`, the image the SPA scaled to 1536 px as a
+     * JPG, PNG or WebP data URI. The cloud reads the type from the bytes.
+     * Answers `{ success, draft }`, or the cloud's status and error key. The
+     * image is never logged.
+     */
+    public function upload_visual_character_image($request)
+    {
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
+        }
+        $params = $request->get_json_params();
+        $kind   = $this->character_kind(is_array($params) ? ($params['kind'] ?? null) : null);
+        $uri    = is_array($params) ? ($params['data_uri'] ?? null) : null;
+        if ($kind === null || ! is_string($uri)) {
+            return new \WP_Error('invalid_character', __('Invalid character details.', 'structura'), ['status' => 400]);
+        }
+        if (strlen($uri) > self::CHARACTER_DATA_URI_MAX) {
+            return $this->character_refusal('visualCharacter.imageTooLarge', __('This image is larger than 10 MB. Use a smaller one.', 'structura'));
+        }
+        // Possessive, so a long payload never backtracks into the PCRE limit.
+        if ( ! preg_match('/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+\/]++={0,2}$/', $uri)) {
+            return $this->character_refusal('visualCharacter.imageWrongType', __('This file type can’t be used. Use a JPG, PNG or WebP image.', 'structura'));
+        }
+        // 60s: the cloud function's own limit; it scales and stores the image.
+        $response = Cloud_Client::post('/uploadVisualCharacterImage', [
+            'presetId' => sanitize_text_field((string)$request['id']),
+            'kind'     => $kind,
+            'dataUri'  => $uri,
+        ], ['timeout' => 60]);
+        return $this->forward_cloud_response($response, __('The image didn’t upload. Try again in a moment.', 'structura'));
+    }
+
+    /**
+     * DELETE /structura/v1/visual-presets/{id}/character/images/{index}: takes
+     * one upload out of the character's draft by its slot. Every plan.
+     */
+    public function remove_visual_character_image($request)
+    {
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
+        }
+        $response = Cloud_Client::post('/removeVisualCharacterImage', [
+            'presetId' => sanitize_text_field((string)$request['id']),
+            'index'    => absint($request['index']),
+        ]);
+        return $this->forward_cloud_response($response, __('The image couldn’t be removed. Try again in a moment.', 'structura'));
+    }
+
+    /**
+     * POST /structura/v1/visual-presets/{id}/character/description: drafts the
+     * one sentence on the character's looks from its uploads. Body:
+     * `{ kind, locale? }`. Answers `{ success, description }`; stores nothing.
+     */
+    public function draft_visual_character_description($request)
+    {
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
+        }
+        $params = $request->get_json_params();
+        $kind   = $this->character_kind(is_array($params) ? ($params['kind'] ?? null) : null);
+        if ($kind === null) {
+            return new \WP_Error('invalid_character', __('Invalid character details.', 'structura'), ['status' => 400]);
+        }
+        $payload = [
+            'presetId' => sanitize_text_field((string)$request['id']),
+            'kind'     => $kind,
+        ];
+        $locale = is_string($params['locale'] ?? null) ? $params['locale'] : '';
+        if (preg_match('/^[a-z]{2,3}([_-][A-Za-z0-9]{2,8})*$/', $locale)) {
+            $payload['locale'] = $locale;
+        }
+        // 120s: one vision call, inside the cloud function's 120 s limit.
+        $response = Cloud_Client::post('/draftVisualCharacterDescription', $payload, ['timeout' => 120]);
+        return $this->forward_cloud_response($response, __('The description could not be drafted.', 'structura'));
+    }
+
+    /**
+     * POST /structura/v1/visual-presets/{id}/character/sheet: draws a
+     * character sheet for this site from the draft's uploads, in the unsaved
+     * signature. Body: `{ kind, signature, keepOwnStyle?, confirmed }`. A
+     * finished sheet spends one image, a failed one none. Answers
+     * `{ success, draft }`, or the cloud's status and error key
+     * (`visualCharacter.sheetFailed` when the render failed).
+     */
+    public function draw_visual_character_sheet($request)
+    {
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
+        }
+        $params = $request->get_json_params();
+        if ( ! is_array($params)) {
+            $params = [];
+        }
+        $kind = $this->character_kind($params['kind'] ?? null);
+        if ($kind === null) {
+            return new \WP_Error('invalid_character', __('Invalid character details.', 'structura'), ['status' => 400]);
+        }
+        $signature = $this->sanitize_signature($params['signature'] ?? null);
+        if (is_wp_error($signature)) {
+            return $signature;
+        }
+        $payload = [
+            'presetId'  => sanitize_text_field((string)$request['id']),
+            'kind'      => $kind,
+            'signature' => $signature,
+            'confirmed' => ($params['confirmed'] ?? null) === true,
+        ];
+        if (array_key_exists('keepOwnStyle', $params)) {
+            $payload['keepOwnStyle'] = $params['keepOwnStyle'] === true;
+        }
+        // 120s: the sheet renders like a preview, inside the cloud's 120 s limit.
+        $response = Cloud_Client::post('/drawVisualCharacterSheet', $payload, ['timeout' => 120]);
+        return $this->forward_cloud_response($response, __('The sheet didn’t finish. Try again in a moment.', 'structura'));
+    }
+
+    /**
+     * POST /structura/v1/visual-presets/{id}/character/sheet/approve: approves
+     * the draft's sheet. Nothing reaches images until the preset is saved.
+     */
+    public function approve_visual_character_sheet($request)
+    {
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
+        }
+        $response = Cloud_Client::post('/approveVisualCharacterSheet', [
+            'presetId' => sanitize_text_field((string)$request['id']),
+        ]);
+        return $this->forward_cloud_response($response, __('The sheet could not be approved.', 'structura'));
+    }
+
+    /**
+     * DELETE /structura/v1/visual-presets/{id}/character: Remove. Deletes the
+     * uploads and sheets and sets "Who appears" back to Nobody at once,
+     * without a save: it is how consent is withdrawn. Every plan.
+     */
+    public function remove_visual_character($request)
+    {
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
+        }
+        $response = Cloud_Client::post('/removeVisualCharacter', [
+            'presetId' => sanitize_text_field((string)$request['id']),
+        ], ['timeout' => 60]);
+        return $this->forward_cloud_response($response, __('The character could not be removed.', 'structura'));
     }
 
     /**

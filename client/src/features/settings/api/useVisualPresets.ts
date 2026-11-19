@@ -24,6 +24,13 @@ import {
 
 import { useLicense } from "@/features/settings/api/useLicense";
 import { visualKeys } from "./keys";
+import type {
+  CharacterDraftWire,
+  CharacterSaveFields,
+  CharacterWire,
+  VisualAppearance,
+} from "./useVisualCharacter";
+import { characterErrorMessage, errorKeyOf } from "./visualCharacterErrors";
 
 /** Rendering medium for generated images (picked on the Visuals page). */
 export type VisualMedium = "photography" | "illustration" | "3d_render";
@@ -86,6 +93,18 @@ export interface VisualPresetWire {
   updatedAt: string;
   /** Number of activations under the workspace bound to this preset. */
   boundActivationCount: number;
+  /**
+   * Recurring character (specs/visual-signatures.md §13.12), on the bound
+   * preset only, from functions deployed after 2026-11-18. Absent `appearance`
+   * reads as Nobody.
+   */
+  appearance?: VisualAppearance;
+  /** The saved character, kept while `appearance` is Nobody. */
+  character?: CharacterWire;
+  /** The character's work in progress: uploads and the last drawn sheet. */
+  characterDraft?: CharacterDraftWire;
+  /** True when Save would be refused for a sheet drawn in another signature. */
+  needsNewSheet?: boolean;
 }
 
 export interface VisualPresetsResponse {
@@ -98,6 +117,12 @@ export interface VisualPresetsResponse {
    * before 2026-11-09; the plugin proxy forwards it as the cloud sends it.
    */
   visualSuggestion?: StoredVisualSuggestionWire;
+  /**
+   * Whether this site's image setup can draw a recurring character
+   * (specs/visual-signatures.md §13.6). Absent from functions deployed before
+   * the wp-admin twin, which then offers no character.
+   */
+  characterAvailable?: boolean;
 }
 
 /** The thin pass's last result as the preset list carries it, stored on the activation. */
@@ -146,9 +171,17 @@ export interface VisualContent {
    * forwards it only when sent, so builds before 2026-11-09 never touch it.
    */
   signature?: VisualSignatureChoice | null;
+  /**
+   * Recurring character (specs/visual-signatures.md §13.12): Who appears and
+   * the character's form, sent on update only when they changed. The plugin
+   * proxy forwards them only on update and only when sent.
+   */
+  appearance?: VisualAppearance;
+  character?: CharacterSaveFields;
 }
 
-const presetsKey = ["visual-presets"] as const;
+/** Query key of the preset list; the character's Remove refetches it. */
+export const presetsKey = ["visual-presets"] as const;
 
 export function useVisualPresetsQuery() {
   const { hasUsableLicense, isLicensed } = useLicense();
@@ -198,10 +231,28 @@ export function isPlanGatedError(err: unknown): boolean {
   return data?.status === 403 && (data.code === "plan_gated" || data.code === "permission-denied");
 }
 
-/** The toast for a failed preset save: the plan gate's own line, else the generic one. */
-function saveErrorToast(err: unknown) {
+/**
+ * The toast for a failed preset save: a character refusal's own line, the
+ * plan gate's (the character's when the save added or changed one, which the
+ * cloud checks first), else the generic one.
+ */
+function saveErrorToast(err: unknown, variables?: { content?: VisualContent }) {
+  const characterMessage = characterErrorMessage(errorKeyOf(err));
+  if (characterMessage) {
+    toast.error(characterMessage);
+    return;
+  }
   if (isPlanGatedError(err)) {
-    toast.error(__("That style comes with paid plans.", "structura"));
+    const content = variables?.content;
+    const characterGate =
+      content?.character !== undefined ||
+      content?.appearance === "person" ||
+      content?.appearance === "mascot";
+    toast.error(
+      characterGate
+        ? __("A recurring character is part of paid plans.", "structura")
+        : __("That style comes with paid plans.", "structura")
+    );
     return;
   }
   const message =
@@ -363,8 +414,8 @@ export function readVisualSuggestion(
   };
 }
 
-/** The admin's language for the reason sentence, when the cloud supports it. */
-function suggestionLocale(): string | undefined {
+/** The admin's language for drafted sentences, when the cloud supports it. */
+export function suggestionLocale(): string | undefined {
   const lang = typeof document === "undefined" ? "" : document.documentElement.lang;
   const base = lang.toLowerCase().split(/[-_]/)[0];
   return isSupportedLocale(base) ? base : undefined;
@@ -455,6 +506,17 @@ export interface PreviewVisualSignatureInput {
   medium?: VisualMedium;
   /** `#RRGGBB` brand colours, accent first; empty renders the neutral set. */
   palette: string[];
+  /**
+   * The unsaved "Who appears" (specs/visual-signatures.md §13.12); absent
+   * draws the bound preset's saved character, as before.
+   */
+  appearance?: VisualAppearance;
+  /** The unsaved character form, without the statement (sent as `confirmed`). */
+  character?: Omit<CharacterSaveFields, "confirmed">;
+  /** Draw from the draft's uploads and approved sheet instead of the saved ones. */
+  useCharacterDraft?: boolean;
+  /** The consent or rights statement; required with `character` or `useCharacterDraft`. */
+  confirmed?: boolean;
 }
 
 /** A rendered preview: the image and the concept it shows. */

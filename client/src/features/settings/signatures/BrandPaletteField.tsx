@@ -164,7 +164,7 @@ export function BrandPaletteField({
         <div className="flex min-w-0 flex-col gap-1">
           <h3
             id={headingId}
-            className="m-0! text-base font-bold tracking-tight text-neutral-900 dark:text-white"
+            className="m-0! text-base font-bold tracking-tight text-neutral-900! dark:text-white!"
           >
             {__("Brand palette", "structura")}
           </h3>

@@ -56,6 +56,8 @@ export interface SignatureBuilderProps {
   /** Text provider and sources for "Draft from my site". */
   draftProvider: string;
   draftSources: ContextField[];
+  /** The media offered; only Illustration and 3D render while a recurring character is chosen. */
+  media?: readonly VisualMedium[];
 }
 
 /** SignatureBuilder: the custom signature form. No save of its own; the page header's Save saves it. */
@@ -71,6 +73,7 @@ export function SignatureBuilder({
   onBack,
   draftProvider,
   draftSources,
+  media = MEDIA,
 }: SignatureBuilderProps) {
   const { suggest, isSuggesting: drafting } = useMagicSuggest();
   const { errorToast } = useToast();
@@ -162,7 +165,7 @@ export function SignatureBuilder({
             id={headingId}
             ref={headingRef}
             tabIndex={-1}
-            className="m-0! text-base font-bold tracking-tight text-neutral-900 focus:outline-none dark:text-white"
+            className="m-0! text-base font-bold tracking-tight text-neutral-900! focus:outline-none dark:text-white!"
           >
             {__("Your own signature", "structura")}
           </h3>
@@ -217,7 +220,7 @@ export function SignatureBuilder({
         <Tabs
           semantics="radio"
           aria-label={__("Medium", "structura")}
-          items={MEDIA.map((medium) => ({ id: medium, label: mediumLabel(medium) }))}
+          items={media.map((medium) => ({ id: medium, label: mediumLabel(medium) }))}
           value={draft.medium}
           onChange={(medium) =>
             onUpdate((current) => ({ ...current, medium: medium as VisualMedium }))

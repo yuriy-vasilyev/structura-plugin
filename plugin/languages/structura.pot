@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-16T21:06:50+00:00\n"
+"POT-Creation-Date: 2026-11-18T20:36:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: structura\n"
@@ -30,17 +30,17 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5009
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5063
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5128
-#: plugin/includes/Api/Rest_Api.php:1198
+#: plugin/includes/Api/Rest_Api.php:1243
 msgid "Active license required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:867
-#: plugin/includes/Api/Rest_Api.php:1140
+#: plugin/includes/Api/Rest_Api.php:1185
 msgid "Active Pro or Cloud license required to access analytics."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1423
-#: plugin/includes/Api/Rest_Api.php:1828
+#: plugin/includes/Api/Rest_Api.php:1873
 msgid "Unknown error"
 msgstr ""
 
@@ -50,31 +50,31 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5058
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5123
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5231
-#: plugin/includes/Api/Rest_Api.php:1906 plugin/includes/Api/Rest_Api.php:6651
-#: plugin/includes/Api/Rest_Api.php:6740 plugin/includes/Api/Rest_Api.php:6788
-#: plugin/includes/Api/Rest_Api.php:6943 plugin/includes/Api/Rest_Api.php:7009
-#: plugin/includes/Api/Rest_Api.php:7115
+#: plugin/includes/Api/Rest_Api.php:1951 plugin/includes/Api/Rest_Api.php:6761
+#: plugin/includes/Api/Rest_Api.php:6850 plugin/includes/Api/Rest_Api.php:6898
+#: plugin/includes/Api/Rest_Api.php:7053 plugin/includes/Api/Rest_Api.php:7119
+#: plugin/includes/Api/Rest_Api.php:7225
 msgid "Campaign ID is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1529
-#: plugin/includes/Api/Rest_Api.php:1935
+#: plugin/includes/Api/Rest_Api.php:1980
 msgid "Manual execution initiated in background."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1575
-#: plugin/includes/Api/Rest_Api.php:1981
+#: plugin/includes/Api/Rest_Api.php:2026
 msgid "Unable to delete task."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1601
-#: plugin/includes/Api/Rest_Api.php:2130
+#: plugin/includes/Api/Rest_Api.php:2175
 msgid "A post objective is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1615
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:50
-#: plugin/includes/Api/Rest_Api.php:2173
+#: plugin/includes/Api/Rest_Api.php:2218
 #: plugin/includes/Scheduler/Campaign_Validator.php:51
 msgid "A text provider is required."
 msgstr ""
@@ -82,21 +82,21 @@ msgstr ""
 #. translators: %s: provider slug (e.g. "anthropic")
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1629
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:65
-#: plugin/includes/Api/Rest_Api.php:2187
+#: plugin/includes/Api/Rest_Api.php:2232
 #: plugin/includes/Scheduler/Campaign_Validator.php:66
 msgid "Provider \"%s\" does not support image generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1647
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:98
-#: plugin/includes/Api/Rest_Api.php:2205
+#: plugin/includes/Api/Rest_Api.php:2250
 #: plugin/includes/Scheduler/Campaign_Validator.php:117
 msgid "The fallback text provider must be different from the primary."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1658
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:110
-#: plugin/includes/Api/Rest_Api.php:2216
+#: plugin/includes/Api/Rest_Api.php:2261
 #: plugin/includes/Scheduler/Campaign_Validator.php:129
 msgid "The fallback image provider must be different from the primary."
 msgstr ""
@@ -104,19 +104,19 @@ msgstr ""
 #. translators: %s: provider slug (e.g. "anthropic")
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1668
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:119
-#: plugin/includes/Api/Rest_Api.php:2226
+#: plugin/includes/Api/Rest_Api.php:2271
 #: plugin/includes/Scheduler/Campaign_Validator.php:138
 msgid "Fallback provider \"%s\" does not support image generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1762
-#: plugin/includes/Api/Rest_Api.php:2401
+#: plugin/includes/Api/Rest_Api.php:2446
 msgid ""
 "Could not cache the post request for background processing. Please try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1782
-#: plugin/includes/Api/Rest_Api.php:2421
+#: plugin/includes/Api/Rest_Api.php:2466
 msgid ""
 "Could not queue this post for background processing. Open Tools → Site "
 "Health and resolve any Structura-flagged issues (usually MySQL "
@@ -124,41 +124,41 @@ msgid ""
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1791
-#: plugin/includes/Api/Rest_Api.php:2430
+#: plugin/includes/Api/Rest_Api.php:2475
 msgid "Your post is being generated in the background."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1811
-#: plugin/includes/Api/Rest_Api.php:2451
+#: plugin/includes/Api/Rest_Api.php:2496
 msgid "Campaign not found."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1819
-#: plugin/includes/Api/Rest_Api.php:2459
+#: plugin/includes/Api/Rest_Api.php:2504
 msgid "Campaign must have an objective."
 msgstr ""
 
 #. translators: %s: campaign identity name or keyphrase.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1826
-#: plugin/includes/Api/Rest_Api.php:2466
+#: plugin/includes/Api/Rest_Api.php:2511
 msgid "Authority discovery started for \"%s\"…"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1844
-#: plugin/includes/Api/Rest_Api.php:2484
+#: plugin/includes/Api/Rest_Api.php:2529
 msgid ""
 "Campaign is missing a text provider. Please re-save the campaign settings."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1875
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2014
-#: plugin/includes/Api/Rest_Api.php:2525 plugin/includes/Api/Rest_Api.php:2678
+#: plugin/includes/Api/Rest_Api.php:2570 plugin/includes/Api/Rest_Api.php:2723
 msgid "Unknown error from discovery service."
 msgstr ""
 
 #. translators: 1: number of domains saved locally, 2: campaign id.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1896
-#: plugin/includes/Api/Rest_Api.php:2546
+#: plugin/includes/Api/Rest_Api.php:2591
 msgid ""
 "Authority discovery saved %1$d domains but cloud persist failed for campaign "
 "%2$s."
@@ -167,7 +167,7 @@ msgstr ""
 #. translators: 1: number of authority domains found, 2: number of queries the discovery service ran, 3: total wall-clock duration in milliseconds.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1904
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2022
-#: plugin/includes/Api/Rest_Api.php:2554 plugin/includes/Api/Rest_Api.php:2686
+#: plugin/includes/Api/Rest_Api.php:2599 plugin/includes/Api/Rest_Api.php:2731
 msgid ""
 "Authority discovery complete: %1$d domains found (%2$d queries, %3$dms)."
 msgstr ""
@@ -175,143 +175,143 @@ msgstr ""
 #. translators: %s: error message from the authority-discovery service.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1921
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2039
-#: plugin/includes/Api/Rest_Api.php:2570 plugin/includes/Api/Rest_Api.php:2702
+#: plugin/includes/Api/Rest_Api.php:2615 plugin/includes/Api/Rest_Api.php:2747
 msgid "Authority discovery failed: %s"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1967
-#: plugin/includes/Api/Rest_Api.php:2617
+#: plugin/includes/Api/Rest_Api.php:2662
 msgid "A keyphrase is required for discovery."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1974
-#: plugin/includes/Api/Rest_Api.php:2624
+#: plugin/includes/Api/Rest_Api.php:2669
 msgid "A text provider is required for authority discovery."
 msgstr ""
 
 #. translators: %s: campaign label (campaign name or first 60 chars of keyphrase).
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1983
-#: plugin/includes/Api/Rest_Api.php:2633
+#: plugin/includes/Api/Rest_Api.php:2678
 msgid "Authority discovery started for \"%s\" (pre-creation)…"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2063
-#: plugin/includes/Api/Rest_Api.php:2726
+#: plugin/includes/Api/Rest_Api.php:2771
 msgid "Domains must be an array."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2075
-#: plugin/includes/Api/Rest_Api.php:2738
+#: plugin/includes/Api/Rest_Api.php:2783
 msgid "Authority list could not be saved. Please try again."
 msgstr ""
 
 #. translators: %d: number of authority domains the user saved.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2082
-#: plugin/includes/Api/Rest_Api.php:2745
+#: plugin/includes/Api/Rest_Api.php:2790
 msgid "Authority domains updated manually (%d domains)."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2088
-#: plugin/includes/Api/Rest_Api.php:2751
+#: plugin/includes/Api/Rest_Api.php:2796
 msgid "Authority domains saved."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2119
-#: plugin/includes/Api/Rest_Api.php:2843
+#: plugin/includes/Api/Rest_Api.php:2888
 msgid "A keyphrase is required for keyword discovery."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2126
-#: plugin/includes/Api/Rest_Api.php:2850
+#: plugin/includes/Api/Rest_Api.php:2895
 msgid "A text provider is required for keyword discovery."
 msgstr ""
 
 #. translators: %s: campaign label (campaign name or first 60 chars of keyphrase).
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2135
-#: plugin/includes/Api/Rest_Api.php:2859
+#: plugin/includes/Api/Rest_Api.php:2904
 msgid "Keyword discovery started for \"%s\" (pre-creation)…"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2166
-#: plugin/includes/Api/Rest_Api.php:2893
+#: plugin/includes/Api/Rest_Api.php:2938
 msgid "Unknown error from keyword discovery service."
 msgstr ""
 
 #. translators: 1: number of keywords found, 2: number of queries the discovery service ran, 3: total wall-clock duration in milliseconds.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2175
-#: plugin/includes/Api/Rest_Api.php:2902
+#: plugin/includes/Api/Rest_Api.php:2947
 msgid "Keyword discovery complete: %1$d keywords found (%2$d queries, %3$dms)."
 msgstr ""
 
 #. translators: %s: error message from the keyword-discovery service.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2191
-#: plugin/includes/Api/Rest_Api.php:2928
+#: plugin/includes/Api/Rest_Api.php:2973
 msgid "Keyword discovery failed: %s"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2219
-#: plugin/includes/Api/Rest_Api.php:3567
+#: plugin/includes/Api/Rest_Api.php:3612
 msgid "Keywords must be an array."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2258
-#: plugin/includes/Api/Rest_Api.php:3613
+#: plugin/includes/Api/Rest_Api.php:3658
 msgid "Keyword bank could not be saved. Please try again."
 msgstr ""
 
 #. translators: %d: number of keywords the user saved to the bank.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2265
-#: plugin/includes/Api/Rest_Api.php:3620
+#: plugin/includes/Api/Rest_Api.php:3665
 msgid "Keyword bank updated (%d keywords)."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2271
-#: plugin/includes/Api/Rest_Api.php:3626
+#: plugin/includes/Api/Rest_Api.php:3671
 msgid "Keyword bank saved."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2282
-#: plugin/includes/Api/Rest_Api.php:3637
+#: plugin/includes/Api/Rest_Api.php:3682
 msgid "Action Scheduler not available."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2320
-#: plugin/includes/Api/Rest_Api.php:3675
+#: plugin/includes/Api/Rest_Api.php:3720
 msgid "Handshake verified. Your server is reachable."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2333
-#: plugin/includes/Api/Rest_Api.php:3690
+#: plugin/includes/Api/Rest_Api.php:3735
 msgid "Invalid suggestion mode."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2351
-#: plugin/includes/Api/Rest_Api.php:3728
+#: plugin/includes/Api/Rest_Api.php:3774
 msgid "Intelligence source not specified."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2458
-#: plugin/includes/Api/Rest_Api.php:3835
+#: plugin/includes/Api/Rest_Api.php:3881
 msgid "AI provider is required for cloud suggestions."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2495
-#: plugin/includes/Api/Rest_Api.php:3885
+#: plugin/includes/Api/Rest_Api.php:3934
 msgid "The AI service returned an unexpected error. Please try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2567
-#: plugin/includes/Api/Rest_Api.php:3959
+#: plugin/includes/Api/Rest_Api.php:4008
 msgid "Failed to disconnect provider in the cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2680
-#: plugin/includes/Api/Rest_Api.php:4072
+#: plugin/includes/Api/Rest_Api.php:4121
 msgid "Cannot delete the default persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2688
-#: plugin/includes/Api/Rest_Api.php:4080
+#: plugin/includes/Api/Rest_Api.php:4129
 msgid "Failed to delete persona."
 msgstr ""
 
@@ -320,135 +320,135 @@ msgid "This provider is not available on your current plan."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2987
-#: plugin/includes/Api/Rest_Api.php:4381
+#: plugin/includes/Api/Rest_Api.php:4491
 msgid "Failed to save the provider key in the cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3237
-#: plugin/includes/Api/Rest_Api.php:4683
+#: plugin/includes/Api/Rest_Api.php:4793
 msgid "Request body must be a JSON object."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3262
-#: plugin/includes/Api/Rest_Api.php:4708
+#: plugin/includes/Api/Rest_Api.php:4818
 msgid "Public website URL must start with https://"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3344
-#: plugin/includes/Api/Rest_Api.php:4790
+#: plugin/includes/Api/Rest_Api.php:4900
 msgid "Provide a valid https:// URL before running Quick setup."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3356
-#: plugin/includes/Api/Rest_Api.php:4802
+#: plugin/includes/Api/Rest_Api.php:4912
 msgid "Connect your license before running Quick setup."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3372
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3478
-#: plugin/includes/Api/Rest_Api.php:4818 plugin/includes/Api/Rest_Api.php:4924
+#: plugin/includes/Api/Rest_Api.php:4928 plugin/includes/Api/Rest_Api.php:5034
 msgid "Could not reach the Structura cloud. Try again in a moment."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3388
-#: plugin/includes/Api/Rest_Api.php:4834
+#: plugin/includes/Api/Rest_Api.php:4944
 msgid "Quick setup failed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3446
-#: plugin/includes/Api/Rest_Api.php:4892
+#: plugin/includes/Api/Rest_Api.php:5002
 msgid "Missing connection id."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3455
-#: plugin/includes/Api/Rest_Api.php:4901
+#: plugin/includes/Api/Rest_Api.php:5011
 msgid "Connect your license before verifying IndexNow."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3491
-#: plugin/includes/Api/Rest_Api.php:4937
+#: plugin/includes/Api/Rest_Api.php:5047
 msgid "Verification failed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3556
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3600
-#: plugin/includes/Api/Rest_Api.php:5017 plugin/includes/Api/Rest_Api.php:5061
+#: plugin/includes/Api/Rest_Api.php:5127 plugin/includes/Api/Rest_Api.php:5171
 msgid "noticeId is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3620
-#: plugin/includes/Api/Rest_Api.php:5081
+#: plugin/includes/Api/Rest_Api.php:5191
 msgid "Please enter a license key."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3629
-#: plugin/includes/Api/Rest_Api.php:5090
+#: plugin/includes/Api/Rest_Api.php:5200
 msgid "License activated successfully!"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3635
-#: plugin/includes/Api/Rest_Api.php:5096
+#: plugin/includes/Api/Rest_Api.php:5206
 msgid "Activation failed. Please check your key and try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3650
-#: plugin/includes/Api/Rest_Api.php:5118
+#: plugin/includes/Api/Rest_Api.php:5228
 msgid "License deactivated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3655
-#: plugin/includes/Api/Rest_Api.php:5123
+#: plugin/includes/Api/Rest_Api.php:5233
 msgid "Could not deactivate license."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3678
-#: plugin/includes/Api/Rest_Api.php:5146
+#: plugin/includes/Api/Rest_Api.php:5256
 msgid "Please enter your license key to confirm."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3688
 #: .tmp-wporg/structura/includes/Core/License_Manager.php:567
-#: plugin/includes/Api/Rest_Api.php:5156
+#: plugin/includes/Api/Rest_Api.php:5266
 #: plugin/includes/Core/License_Manager.php:652
 msgid "Site removed from your activations."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3692
-#: plugin/includes/Api/Rest_Api.php:5160
+#: plugin/includes/Api/Rest_Api.php:5270
 msgid "Could not remove this site. Please try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3711
-#: plugin/includes/Api/Rest_Api.php:5179
+#: plugin/includes/Api/Rest_Api.php:5289
 msgid "License plan synchronized with cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3738
-#: plugin/includes/Api/Rest_Api.php:5206
+#: plugin/includes/Api/Rest_Api.php:5316
 msgid "No license bound to this site."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3769
 #: .tmp-wporg/structura/includes/Core/License_Manager.php:80
-#: plugin/includes/Api/Rest_Api.php:5237
+#: plugin/includes/Api/Rest_Api.php:5347
 #: plugin/includes/Core/License_Manager.php:98
 msgid "Invalid server response format."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3784
-#: plugin/includes/Api/Rest_Api.php:5265
+#: plugin/includes/Api/Rest_Api.php:5375
 msgid "Cloud heartbeat rejected."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3868
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3887
-#: plugin/includes/Api/Rest_Api.php:5359 plugin/includes/Api/Rest_Api.php:5378
+#: plugin/includes/Api/Rest_Api.php:5469 plugin/includes/Api/Rest_Api.php:5488
 msgid "Unknown"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3991
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:97
-#: plugin/includes/Api/Rest_Api.php:5537
+#: plugin/includes/Api/Rest_Api.php:5647
 #: plugin/includes/Channels/Channels_Connections_Service.php:100
 msgid "Integration id and webhook URL are required."
 msgstr ""
@@ -457,7 +457,7 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4154
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:155
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:233
-#: plugin/includes/Api/Rest_Api.php:5574 plugin/includes/Api/Rest_Api.php:5828
+#: plugin/includes/Api/Rest_Api.php:5684 plugin/includes/Api/Rest_Api.php:5938
 #: plugin/includes/Channels/Channels_Connections_Service.php:165
 #: plugin/includes/Channels/Channels_Connections_Service.php:358
 msgid "Connection id is required."
@@ -465,7 +465,7 @@ msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4118
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:198
-#: plugin/includes/Api/Rest_Api.php:5790
+#: plugin/includes/Api/Rest_Api.php:5900
 #: plugin/includes/Channels/Channels_Connections_Service.php:313
 msgid "Integration id is required."
 msgstr ""
@@ -477,8 +477,8 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:104
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:224
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:254
-#: plugin/includes/Api/Rest_Api.php:5909 plugin/includes/Api/Rest_Api.php:6193
-#: plugin/includes/Api/Rest_Api.php:6240
+#: plugin/includes/Api/Rest_Api.php:6019 plugin/includes/Api/Rest_Api.php:6303
+#: plugin/includes/Api/Rest_Api.php:6350
 #: plugin/includes/Progress/Runs_Service.php:57
 #: plugin/includes/Progress/Runs_Service.php:116
 #: plugin/includes/Progress/Runs_Service.php:236
@@ -489,36 +489,36 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4389
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:144
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:151
-#: plugin/includes/Api/Rest_Api.php:6069
+#: plugin/includes/Api/Rest_Api.php:6179
 #: plugin/includes/Progress/Runs_Service.php:156
 #: plugin/includes/Progress/Runs_Service.php:163
 msgid "campaign_id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4512
-#: plugin/includes/Api/Rest_Api.php:6207
+#: plugin/includes/Api/Rest_Api.php:6317
 msgid "Active admin session required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4580
-#: plugin/includes/Api/Rest_Api.php:6275
+#: plugin/includes/Api/Rest_Api.php:6385
 msgid "run_id and cancelled_by are required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4588
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:262
-#: plugin/includes/Api/Rest_Api.php:6283
+#: plugin/includes/Api/Rest_Api.php:6393
 #: plugin/includes/Progress/Runs_Service.php:274
 msgid "cancelled_by must be \"user\" or \"system\"."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4639
-#: plugin/includes/Api/Rest_Api.php:6334
+#: plugin/includes/Api/Rest_Api.php:6444
 msgid "integration_id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4840
-#: plugin/includes/Api/Rest_Api.php:6532
+#: plugin/includes/Api/Rest_Api.php:6642
 msgid "Campaign limit reached for your current plan."
 msgstr ""
 
@@ -529,18 +529,18 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4861
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4927
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5189
-#: plugin/includes/Api/Rest_Api.php:6618 plugin/includes/Api/Rest_Api.php:6701
-#: plugin/includes/Api/Rest_Api.php:7073
+#: plugin/includes/Api/Rest_Api.php:6728 plugin/includes/Api/Rest_Api.php:6811
+#: plugin/includes/Api/Rest_Api.php:7183
 msgid "Cloud did not return campaign document."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4875
-#: plugin/includes/Api/Rest_Api.php:6632
+#: plugin/includes/Api/Rest_Api.php:6742
 msgid "New campaign deployed successfully."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4938
-#: plugin/includes/Api/Rest_Api.php:6712
+#: plugin/includes/Api/Rest_Api.php:6822
 msgid "Campaign architecture updated."
 msgstr ""
 
@@ -553,102 +553,102 @@ msgid "Failed to enable pre-generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5048
-#: plugin/includes/Api/Rest_Api.php:6933
+#: plugin/includes/Api/Rest_Api.php:7043
 msgid "Not authenticated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5087
-#: plugin/includes/Api/Rest_Api.php:6973
+#: plugin/includes/Api/Rest_Api.php:7083
 msgid "Campaign cleared."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5153
-#: plugin/includes/Api/Rest_Api.php:7040
+#: plugin/includes/Api/Rest_Api.php:7150
 msgid "Source campaign payload was empty."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5172
-#: plugin/includes/Api/Rest_Api.php:7056
+#: plugin/includes/Api/Rest_Api.php:7166
 msgid "(Copy)"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5201
-#: plugin/includes/Api/Rest_Api.php:7085
+#: plugin/includes/Api/Rest_Api.php:7195
 msgid "Campaign cloned successfully."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5239
-#: plugin/includes/Api/Rest_Api.php:7123
+#: plugin/includes/Api/Rest_Api.php:7233
 msgid "Campaign not found in cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5248
-#: plugin/includes/Api/Rest_Api.php:7132
+#: plugin/includes/Api/Rest_Api.php:7242
 msgid "Failed to update campaign status."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5259
-#: plugin/includes/Api/Rest_Api.php:7143
+#: plugin/includes/Api/Rest_Api.php:7253
 msgid "Campaign resumed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5260
-#: plugin/includes/Api/Rest_Api.php:7144
+#: plugin/includes/Api/Rest_Api.php:7254
 msgid "Campaign paused."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5292
-#: plugin/includes/Api/Rest_Api.php:7193
+#: plugin/includes/Api/Rest_Api.php:7307
 msgid "Failed to list visual presets."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5304
-#: plugin/includes/Api/Rest_Api.php:7209
+#: plugin/includes/Api/Rest_Api.php:7323
 msgid "Failed to create visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5320
-#: plugin/includes/Api/Rest_Api.php:7229
+#: plugin/includes/Api/Rest_Api.php:7343
 msgid "Failed to update visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5338
-#: plugin/includes/Api/Rest_Api.php:7247
+#: plugin/includes/Api/Rest_Api.php:7361
 msgid "Failed to fork visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5351
-#: plugin/includes/Api/Rest_Api.php:7260
+#: plugin/includes/Api/Rest_Api.php:7374
 msgid "Failed to delete visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5362
-#: plugin/includes/Api/Rest_Api.php:7271
+#: plugin/includes/Api/Rest_Api.php:7385
 msgid "Failed to bind visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5407
-#: plugin/includes/Api/Rest_Api.php:7567
+#: plugin/includes/Api/Rest_Api.php:7927
 msgid "Failed to fork persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5418
-#: plugin/includes/Api/Rest_Api.php:7578
+#: plugin/includes/Api/Rest_Api.php:7938
 msgid "Failed to set default persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5428
-#: plugin/includes/Api/Rest_Api.php:7609
+#: plugin/includes/Api/Rest_Api.php:7969
 msgid "Failed to list workspace keys."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5439
-#: plugin/includes/Api/Rest_Api.php:7620
+#: plugin/includes/Api/Rest_Api.php:7980
 msgid "Credential id and provider are required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5442
-#: plugin/includes/Api/Rest_Api.php:7623
+#: plugin/includes/Api/Rest_Api.php:7983
 msgid "Failed to bind workspace key."
 msgstr ""
 
@@ -1377,114 +1377,159 @@ msgid ""
 "update PHP to use this plugin."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:1070 plugin/includes/Api/Rest_Api.php:1183
+#: plugin/includes/Api/Rest_Api.php:1115 plugin/includes/Api/Rest_Api.php:1228
 msgid "Connect to Structura Cloud first."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:1088
+#: plugin/includes/Api/Rest_Api.php:1133
 msgid ""
 "Could not reach Structura Cloud. Check your server's outbound connection and "
 "try again."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2024
+#: plugin/includes/Api/Rest_Api.php:2069
 msgid "No file was uploaded."
 msgstr ""
 
 #. translators: the supported research attachment formats.
-#: plugin/includes/Api/Rest_Api.php:2033
+#: plugin/includes/Api/Rest_Api.php:2078
 msgid "This file type isn't supported — use PDF, DOCX, TXT, MD or HTML."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2042
+#: plugin/includes/Api/Rest_Api.php:2087
 msgid "This file is too large — files can be up to 10 MB."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2048 plugin/includes/Api/Rest_Api.php:2076
-#: plugin/includes/Api/Rest_Api.php:2081 plugin/includes/Api/Rest_Api.php:2097
-#: plugin/includes/Api/Rest_Api.php:2106
+#: plugin/includes/Api/Rest_Api.php:2093 plugin/includes/Api/Rest_Api.php:2121
+#: plugin/includes/Api/Rest_Api.php:2126 plugin/includes/Api/Rest_Api.php:2142
+#: plugin/includes/Api/Rest_Api.php:2151
 msgid "The upload failed — please try again."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2156
+#: plugin/includes/Api/Rest_Api.php:2201
 msgid "Create at least one persona before generating a post."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2812
+#: plugin/includes/Api/Rest_Api.php:2857
 msgid "Could not draft the campaign."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:3193 plugin/includes/Api/Rest_Api.php:3222
+#: plugin/includes/Api/Rest_Api.php:3238 plugin/includes/Api/Rest_Api.php:3267
 msgid "Invalid step id."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:3274
+#: plugin/includes/Api/Rest_Api.php:3319
 msgid "provider + model required."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:4354
+#: plugin/includes/Api/Rest_Api.php:4399 plugin/includes/Api/Rest_Api.php:4464
 msgid "This AI provider is not available."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:5117
+#: plugin/includes/Api/Rest_Api.php:4406
+msgid "Paste an API key to test."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:4424
+msgid "The key test could not run. Try again."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:5227
 msgid "Site removed."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:5734
+#: plugin/includes/Api/Rest_Api.php:5844
 #: plugin/includes/Channels/Channels_Events_Service.php:68
 msgid "Video job id is required."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6545
+#: plugin/includes/Api/Rest_Api.php:6655
 msgid ""
 "This publishing schedule is more frequent than your current plan allows."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6557
+#: plugin/includes/Api/Rest_Api.php:6667
 msgid "Cloud rejected the campaign request."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6766
+#: plugin/includes/Api/Rest_Api.php:6876
 msgid "Failed to fetch the summary of prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6833
+#: plugin/includes/Api/Rest_Api.php:6943
 msgid "Failed to fetch prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6849
+#: plugin/includes/Api/Rest_Api.php:6959
 msgid "Failed to discard the prepared post."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6864
+#: plugin/includes/Api/Rest_Api.php:6974
 msgid "Failed to discard all prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6879
+#: plugin/includes/Api/Rest_Api.php:6989
 msgid "Failed to replace all prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6913
+#: plugin/includes/Api/Rest_Api.php:7023
 msgid "Failed to turn on preparing ahead."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7408
+#: plugin/includes/Api/Rest_Api.php:7530 plugin/includes/Api/Rest_Api.php:7752
+#: plugin/includes/Api/Rest_Api.php:7801 plugin/includes/Api/Rest_Api.php:7836
+msgid "Invalid character details."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:7580
 msgid "Invalid visual signature."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7482
+#: plugin/includes/Api/Rest_Api.php:7654
 msgid "Could not read your site right now."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7526
+#: plugin/includes/Api/Rest_Api.php:7712
 msgid "The preview did not render."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7590
+#: plugin/includes/Api/Rest_Api.php:7755
+msgid "This image is larger than 10 MB. Use a smaller one."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:7759
+msgid "This file type can’t be used. Use a JPG, PNG or WebP image."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:7767
+msgid "The image didn’t upload. Try again in a moment."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:7784
+msgid "The image couldn’t be removed. Try again in a moment."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:7813
+msgid "The description could not be drafted."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:7853
+msgid "The sheet didn’t finish. Try again in a moment."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:7869
+msgid "The sheet could not be approved."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:7886
+msgid "The character could not be removed."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:7950
 msgid "Failed to add persona to this site."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7599
+#: plugin/includes/Api/Rest_Api.php:7959
 msgid "Failed to remove persona from this site."
 msgstr ""
 
@@ -1813,7 +1858,8 @@ msgstr ""
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1365
 #: client/src/features/channels/components/GscConnectFlow.tsx:724
 #: client/src/features/onboarding/components/AiConnectionBlocker.tsx:158
-#: client/src/features/settings/signatures/SignaturePreview.tsx:87
+#: client/src/features/settings/character/SheetApproval.tsx:220
+#: client/src/features/settings/signatures/SignaturePreview.tsx:90
 msgid "Try again"
 msgstr ""
 
@@ -1870,8 +1916,8 @@ msgstr ""
 
 #: client/src/components/Layout/headerNav.ts:38
 #: client/src/features/onboarding/components/WizardShell.tsx:88
-#: client/src/features/settings/routes/VisualsPage.tsx:623
-#: client/src/features/settings/routes/VisualsPage.tsx:643
+#: client/src/features/settings/routes/VisualsPage.tsx:770
+#: client/src/features/settings/routes/VisualsPage.tsx:790
 msgid "Visuals"
 msgstr ""
 
@@ -2222,9 +2268,9 @@ msgstr ""
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:852
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:491
 #: client/src/features/channels/components/CatalogEntryCard.tsx:215
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:601
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:631
-#: client/src/features/settings/routes/VisualsPage.tsx:964
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:620
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:650
+#: client/src/features/settings/routes/VisualsPage.tsx:1320
 msgid "Pro"
 msgstr ""
 
@@ -2268,7 +2314,7 @@ msgid "License key"
 msgstr ""
 
 #: client/src/components/Shared/SiteNotConnectedBanner.tsx:178
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:745
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:804
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:474
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:515
 #: client/src/features/campaigns/components/RunAgainConfirmDialog.tsx:268
@@ -2282,7 +2328,7 @@ msgstr ""
 #: client/src/features/channels/components/InstallModal.tsx:403
 #: client/src/features/personas/components/PersonaEditor.tsx:192
 #: client/src/features/settings/components/QuickSetupConfirmModal.tsx:153
-#: client/src/features/settings/routes/VisualsPage.tsx:1151
+#: client/src/features/settings/routes/VisualsPage.tsx:1518
 msgid "Cancel"
 msgstr ""
 
@@ -2503,7 +2549,7 @@ msgid "No license key yet? It comes with your account."
 msgstr ""
 
 #: client/src/features/account/routes/AccountPage.tsx:492
-#: client/src/features/settings/routes/VisualsPage.tsx:1204
+#: client/src/features/settings/routes/VisualsPage.tsx:1571
 msgid "View Pricing"
 msgstr ""
 
@@ -2662,7 +2708,7 @@ msgid ""
 msgstr ""
 
 #: client/src/features/ai-engine/components/DefaultProviderConfig.tsx:66
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:78
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:88
 msgid "Text Generation"
 msgstr ""
 
@@ -2672,7 +2718,7 @@ msgid "Select provider..."
 msgstr ""
 
 #: client/src/features/ai-engine/components/DefaultProviderConfig.tsx:92
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:87
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:97
 msgid "Image Generation"
 msgstr ""
 
@@ -2773,13 +2819,13 @@ msgid "Plan"
 msgstr ""
 
 #: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:219
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:475
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:71
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:522
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:81
 msgid "API Key"
 msgstr ""
 
 #: client/src/features/ai-engine/components/ProviderCatalogCard.tsx:224
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:479
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:529
 msgid "Enter API key..."
 msgstr ""
 
@@ -2791,178 +2837,202 @@ msgstr ""
 msgid "Get API Key"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:70
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:80
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:96
 #: client/src/features/dashboard/routes/DashboardPage.tsx:57
 msgid "Overview"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:72
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:82
 #: client/src/features/notices/utils.ts:230
 msgid "Connection"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:73
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:769
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:828
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:83
 #: client/src/features/personas/components/PersonaCard.tsx:98
 msgid "Configure"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:81
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:91
 msgid ""
 "Generate blog posts, articles, meta descriptions, and other written content."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:90
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:100
 msgid "Create featured images, body illustrations, and other visual content."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:423
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:111
+msgid "That key was rejected. Double-check it and try again."
+msgstr ""
+
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:113
+msgid "The provider is rate-limiting the test. Try again in a moment."
+msgstr ""
+
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:115
+msgid "The provider didn't return a usable model. Check the key's access."
+msgstr ""
+
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:117
+msgid "Couldn't reach the provider. Check your connection and try again."
+msgstr ""
+
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:119
+msgid "The provider took too long to respond. Try again."
+msgstr ""
+
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:121
+msgid "The key couldn't be verified. Double-check it and try again."
+msgstr ""
+
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:470
 msgid "Set up"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:464
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:511
 msgid "Enter your API key"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:467
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:514
 msgid "Your key is encrypted with AES-256-CBC and never leaves your server."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:489
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:539
 msgid ""
 "That looks like a web address, not an API key. Paste the key itself — it "
 "starts with \"%s\"."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:495
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:545
 msgid ""
 "That looks like a web address, not an API key. Paste the key itself from "
 "your provider's dashboard."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:510
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:569
 msgid "Get your API key from"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:531
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:590
 msgid "Connection successful"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:533
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:592
 msgid "Testing connection..."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:534
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:593
 msgid "Test your connection"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:542
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:601
 msgid "Response time:"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:551
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:610
 msgid "Test Connection"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:558
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:617
 msgid ""
 "Your API key is valid and the provider is responding. Next, choose your "
 "preferred models."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:576
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:635
 msgid "Configure provider"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:579
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:638
 msgid "Pick models and set this provider as your default."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:589
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:648
 #: client/src/features/campaigns/components/ProviderToggle.tsx:337
 msgid "Text Model"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:604
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:650
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:663
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:709
 #: client/src/features/campaigns/components/CampaignAiEngineSection.tsx:312
 msgid "Select model..."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:628
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:687
 #: client/src/features/campaigns/components/ProviderToggle.tsx:359
 msgid "Image Model"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:633
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:692
 msgid "Image generation is not available on your current plan."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:675
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:734
 msgid "Default Provider"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:679
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:738
 msgid ""
 "New campaigns will use default providers automatically. You can override per "
 "campaign."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:687
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:746
 msgid "Default for text generation"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:695
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:754
 msgid "Default for image generation"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:708
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:767
 msgid "Refreshing model catalog…"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:714
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:773
 msgid ""
 "No models available for this provider yet. The model catalog may need to "
 "sync."
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:721
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:780
 msgid "Refresh Models"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:737
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:796
 #: client/src/features/onboarding/components/WizardShell.tsx:377
 msgid "Back"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:750
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:809
 msgid "Get Started"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:762
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:821
 msgid "Save & Test"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:784
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:843
 #: client/src/features/campaigns/components/NewScheduleModal.tsx:507
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:322
 #: client/src/features/personas/components/PersonaEditor.tsx:212
 #: client/src/features/settings/routes/SettingsPage.tsx:73
-#: client/src/features/settings/routes/VisualsPage.tsx:662
+#: client/src/features/settings/routes/VisualsPage.tsx:809
 msgid "Save Changes"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:784
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:843
 msgid "Finish Setup"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:816
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:822
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:875
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:881
 msgid "Use recommended model"
 msgstr ""
 
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:829
+#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:888
 msgid ""
 "We review new models regularly and move the recommendation when a better one "
 "proves itself. We suggest leaving this choice with us."
@@ -2987,7 +3057,7 @@ msgid "site(s)"
 msgstr ""
 
 #: client/src/features/ai-engine/components/WorkspaceKeysPicker.tsx:249
-#: client/src/features/settings/routes/VisualsPage.tsx:1106
+#: client/src/features/settings/routes/VisualsPage.tsx:1462
 msgid "Use here"
 msgstr ""
 
@@ -3108,7 +3178,7 @@ msgstr ""
 
 #: client/src/features/campaigns/api/useCampaignMutations.ts:353
 #: client/src/features/campaigns/api/useCampaignMutations.ts:384
-#: client/src/features/settings/api/useVisualPresets.ts:209
+#: client/src/features/settings/api/useVisualPresets.ts:260
 #: client/src/index.tsx:55
 msgid "Action Failed:"
 msgstr ""
@@ -3185,7 +3255,7 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:422
 #: client/src/features/notices/utils.ts:186
 #: client/src/features/notices/utils.ts:192
-#: client/src/features/settings/routes/VisualsPage.tsx:1030
+#: client/src/features/settings/routes/VisualsPage.tsx:1386
 msgid "Learn more"
 msgstr ""
 
@@ -3321,8 +3391,8 @@ msgid "Discard draft"
 msgstr ""
 
 #: client/src/features/campaigns/components/CampaignDraftBanner.tsx:76
-#: client/src/features/campaigns/components/StockTab.tsx:328
-#: client/src/features/campaigns/components/StockTab.tsx:542
+#: client/src/features/campaigns/components/StockTab.tsx:332
+#: client/src/features/campaigns/components/StockTab.tsx:546
 msgid "Discard"
 msgstr ""
 
@@ -3443,6 +3513,7 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/StepArchitecture.tsx:149
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1006
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:655
+#: client/src/features/settings/character/CharacterIntake.tsx:172
 msgid "Images"
 msgstr ""
 
@@ -4088,7 +4159,7 @@ msgid ""
 msgstr ""
 
 #: client/src/features/campaigns/components/SeoTargetingSection.tsx:400
-#: client/src/features/campaigns/components/StockTab.tsx:298
+#: client/src/features/campaigns/components/StockTab.tsx:323
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:247
 #: client/src/features/channels/components/SearchPerformanceSection.tsx:111
 msgid "Retry"
@@ -4209,7 +4280,7 @@ msgid ""
 msgstr ""
 
 #: client/src/features/campaigns/components/StockTab.tsx:226
-#: client/src/features/campaigns/components/StockTab.tsx:451
+#: client/src/features/campaigns/components/StockTab.tsx:455
 msgid "Replace all"
 msgstr ""
 
@@ -4222,82 +4293,82 @@ msgstr ""
 msgid "Writing this post…"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:309
-#: client/src/features/campaigns/components/StockTab.tsx:317
-msgid "Preview in customer portal"
-msgstr ""
-
-#: client/src/features/campaigns/components/StockTab.tsx:314
+#: client/src/features/campaigns/components/StockTab.tsx:291
 msgid "Preview “%s” in the customer portal"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:386
+#: client/src/features/campaigns/components/StockTab.tsx:299
+msgid "Preview in customer portal"
+msgstr ""
+
+#: client/src/features/campaigns/components/StockTab.tsx:390
 msgid "Preparing ahead is paused"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:391
+#: client/src/features/campaigns/components/StockTab.tsx:395
 msgid ""
 "%d attempts failed today, so we stopped preparing posts ahead to save your "
 "credits. Scheduled posts still go out: they're written when the run starts."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:401
+#: client/src/features/campaigns/components/StockTab.tsx:405
 msgid "It starts again around %s."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:409
+#: client/src/features/campaigns/components/StockTab.tsx:413
 msgid ""
 "If this keeps happening, try switching this campaign's AI provider in AI "
 "Engine settings."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:434
+#: client/src/features/campaigns/components/StockTab.tsx:438
 msgid "%d prepared"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:444
+#: client/src/features/campaigns/components/StockTab.tsx:448
 msgid "Discard all prepared posts and prepare new ones"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:460
-#: client/src/features/campaigns/components/StockTab.tsx:542
+#: client/src/features/campaigns/components/StockTab.tsx:464
+#: client/src/features/campaigns/components/StockTab.tsx:546
 msgid "Discard all"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:467
+#: client/src/features/campaigns/components/StockTab.tsx:471
 msgid "Loading prepared posts…"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:475
+#: client/src/features/campaigns/components/StockTab.tsx:479
 msgid ""
 "No prepared posts yet. The next ones appear here as soon as they're ready."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:492
+#: client/src/features/campaigns/components/StockTab.tsx:496
 msgid "Prepare now"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:526
+#: client/src/features/campaigns/components/StockTab.tsx:530
 msgid "Discard all prepared posts?"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:527
+#: client/src/features/campaigns/components/StockTab.tsx:531
 msgid "Discard this post?"
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:531
+#: client/src/features/campaigns/components/StockTab.tsx:535
 msgid ""
 "Every prepared post for this campaign is discarded, including any still "
 "being prepared. While preparing ahead stays on, new ones are prepared "
 "automatically."
 msgstr ""
 
-#: client/src/features/campaigns/components/StockTab.tsx:535
+#: client/src/features/campaigns/components/StockTab.tsx:539
 msgid "Another post is prepared to take its place."
 msgstr ""
 
 #: client/src/features/campaigns/components/SuggestStrategySection.tsx:158
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:198
+#: client/src/features/settings/character/CharacterIntake.tsx:250
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:201
 msgid "Name"
 msgstr ""
 
@@ -5151,6 +5222,9 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/keywordBankLabels.ts:66
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:251
+#: client/src/features/settings/character/CharacterCard.tsx:111
+#: client/src/features/settings/character/RemoveCharacterDialog.tsx:68
+#: client/src/features/settings/character/WhoSelector.tsx:214
 #: client/src/utils/chipListLabels.ts:14 client/src/utils/referralLabels.ts:59
 #: client/src/utils/referralLabels.ts:61
 msgid "Remove %s"
@@ -5211,8 +5285,8 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/keywordBankLabels.ts:125
 #: client/src/features/campaigns/labels.ts:119
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:215
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:219
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:218
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:222
 msgid "Medium"
 msgstr ""
 
@@ -5346,6 +5420,7 @@ msgstr ""
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:268
 #: client/src/features/channels/components/ConfigureConnectionModal.tsx:946
 #: client/src/features/onboarding/components/PositioningTextArea.tsx:23
+#: client/src/features/settings/character/ZoomDialog.tsx:105
 msgid "%1$d of %2$d"
 msgstr ""
 
@@ -5446,7 +5521,7 @@ msgstr ""
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:403
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:481
 #: client/src/features/personas/components/PersonaCard.tsx:105
-#: client/src/features/settings/routes/VisualsPage.tsx:1150
+#: client/src/features/settings/routes/VisualsPage.tsx:1517
 msgid "Delete"
 msgstr ""
 
@@ -5458,7 +5533,7 @@ msgstr ""
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:434
 #: client/src/features/channels/components/ChannelConnectionRow.tsx:277
 #: client/src/features/channels/components/ChannelConnectionRow.tsx:280
-#: client/src/features/settings/signatures/SignaturePicker.tsx:209
+#: client/src/features/settings/signatures/SignaturePicker.tsx:220
 msgid "Edit"
 msgstr ""
 
@@ -5748,7 +5823,7 @@ msgstr ""
 
 #: client/src/features/campaigns/routes/CampaignsPage.tsx:762
 #: client/src/features/dashboard/components/UpgradeCard.tsx:45
-#: client/src/features/settings/routes/VisualsPage.tsx:1190
+#: client/src/features/settings/routes/VisualsPage.tsx:1557
 msgid "Get Free License"
 msgstr ""
 
@@ -5930,6 +6005,7 @@ msgstr ""
 
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1577
 #: client/src/features/onboarding/components/RedraftConfirmDialog.tsx:28
+#: client/src/features/settings/character/CharacterCard.tsx:102
 msgid "Replace"
 msgstr ""
 
@@ -6056,8 +6132,9 @@ msgid "Free account"
 msgstr ""
 
 #: client/src/features/campaigns/routes/GeneratePostPage.tsx:164
-#: client/src/features/settings/signatures/SignaturePicker.tsx:77
-#: client/src/features/settings/signatures/SignaturePreview.tsx:178
+#: client/src/features/settings/character/WhoSelector.tsx:152
+#: client/src/features/settings/signatures/SignaturePicker.tsx:83
+#: client/src/features/settings/signatures/SignaturePreview.tsx:181
 msgid "Paid plans"
 msgstr ""
 
@@ -6554,6 +6631,7 @@ msgstr ""
 
 #: client/src/features/channels/components/CaptionPackage.tsx:114
 #: client/src/features/channels/components/CaptionPackage.tsx:129
+#: client/src/features/settings/character/CharacterIntake.tsx:272
 #: client/src/features/settings/components/PublicSiteCard.tsx:373
 #: client/src/features/settings/components/QuickSetupConfirmModal.tsx:95
 msgid "Description"
@@ -6648,9 +6726,10 @@ msgstr ""
 
 #: client/src/features/channels/components/CatalogEntryCard.tsx:288
 #: client/src/features/channels/components/VideoGates.tsx:65
+#: client/src/features/settings/character/WhoSelector.tsx:160
 #: client/src/features/settings/components/VideoPresetSection.tsx:280
-#: client/src/features/settings/signatures/SignaturePicker.tsx:85
-#: client/src/features/settings/signatures/SignaturePreview.tsx:186
+#: client/src/features/settings/signatures/SignaturePicker.tsx:91
+#: client/src/features/settings/signatures/SignaturePreview.tsx:189
 msgid "Upgrade plan"
 msgstr ""
 
@@ -7399,7 +7478,7 @@ msgid "Loading search data…"
 msgstr ""
 
 #: client/src/features/channels/components/VideoEventRow.tsx:125
-#: client/src/features/settings/signatures/SignaturePreview.tsx:85
+#: client/src/features/settings/signatures/SignaturePreview.tsx:88
 msgid "Rendering"
 msgstr ""
 
@@ -7414,7 +7493,7 @@ msgstr ""
 
 #: client/src/features/channels/components/VideoEventRow.tsx:254
 #: client/src/features/channels/components/VideoEventRow.tsx:322
-#: client/src/features/settings/signatures/SignaturePreview.tsx:99
+#: client/src/features/settings/signatures/SignaturePreview.tsx:102
 msgid "Preview"
 msgstr ""
 
@@ -8708,9 +8787,9 @@ msgid "Tagline"
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep1Identity.tsx:171
-#: client/src/features/settings/routes/VisualsPage.tsx:127
-#: client/src/features/settings/routes/VisualsPage.tsx:462
-#: client/src/features/settings/routes/VisualsPage.tsx:733
+#: client/src/features/settings/routes/VisualsPage.tsx:148
+#: client/src/features/settings/routes/VisualsPage.tsx:606
+#: client/src/features/settings/routes/VisualsPage.tsx:905
 msgid "Site default"
 msgstr ""
 
@@ -8753,7 +8832,7 @@ msgid "Defaults to your WordPress home URL. Leave blank to use it."
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep1Identity.tsx:254
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:652
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:671
 #: client/src/features/onboarding/components/WizardStep5Persona.tsx:232
 msgid "Tip"
 msgstr ""
@@ -8819,7 +8898,7 @@ msgid "Something went wrong drafting from your homepage. Please try again."
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep3SeoIntelligence.tsx:375
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:83
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:91
 msgid "Reading your homepage…"
 msgstr ""
 
@@ -8885,164 +8964,168 @@ msgstr ""
 msgid "Looking for likely competitors…"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:84
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:92
 msgid "Picking out your colors…"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:85
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:93
 msgid "Matching a style to your brand…"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:89
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:97
 msgid "16:9 — Hero / wide"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:90
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:98
 msgid "1:1 — Social square"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:91
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:99
 msgid "4:3 — Standard"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:92
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:100
 msgid "3:2 — Editorial"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:93
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:101
 msgid "9:16 — Story / vertical"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:94
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:102
 msgid "3:4 — Portrait"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:95
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:103
 msgid "2:3 — Tall portrait"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:99
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:107
 msgid "WebP — recommended"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:100
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:108
 msgid "JPEG"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:101
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:109
 msgid "PNG"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:148
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:156
 msgid ""
 "Our pick for %1$s is <b>%2$s</b>, which comes with paid plans. Until then, "
 "your images use <b>%3$s</b> in your colors"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:156
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:164
 msgid "Our pick for %1$s is <b>%2$s</b>, in your colors"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:164
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:172
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:224
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:330
 msgid "Brand colors"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:399
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:418
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:407
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:426
 msgid "Visual signature"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:405
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:413
 msgid "Reading your brand"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:421
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:429
 msgid ""
 "Every image on your blog shares one look. We picked one for your brand; "
 "change it now or later on the Visuals page."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:438
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:446
 msgid "This site keeps its current style unless you pick one below."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:444
-#: client/src/features/settings/routes/VisualsPage.tsx:776
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:452
+#: client/src/features/settings/routes/VisualsPage.tsx:972
 msgid "Signature"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:469
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:473
+msgid "Add yourself or a mascot later on the Visuals page."
+msgstr ""
+
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:488
 msgid ""
 "Want a look of your own? Build it later on the Visuals page, or write a "
 "prompt there."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:500
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:519
 #: client/src/features/settings/components/VideoPresetSection.tsx:266
 msgid "Video styling"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:503
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:522
 msgid "Suggested for you"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:509
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:528
 msgid "%s — edit anytime in Visuals."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:515
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:534
 msgid "captions top"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:516
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:535
 msgid "captions middle"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:517
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:536
 msgid "captions bottom"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:520
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:539
 msgid "brand-palette accents"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:538
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:557
 #: client/src/features/settings/components/VideoPresetSection.tsx:177
 msgid "Style preset"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:549
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:568
 #: client/src/features/settings/components/VideoPresetSection.tsx:216
 #: client/src/features/settings/components/VideoPresetSection.tsx:97
 msgid "Caption placement"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:565
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:584
 msgid ""
 "Video art direction was drafted from your homepage — fine-tune it under "
 "Visuals after setup."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:580
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:599
 msgid "Default aspect ratio"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:599
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:618
 msgid "Image format"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:629
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:642
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:648
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:661
 msgid "Optimize images on upload"
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:635
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:654
 msgid "Re-encode and resize generated images for fast page loads."
 msgstr ""
 
-#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:654
+#: client/src/features/onboarding/components/WizardStep4Visuals.tsx:673
 msgid "Everything saves at the end. Edit later under Settings → Visuals."
 msgstr ""
 
@@ -9821,29 +9904,639 @@ msgstr ""
 msgid "Art direction synchronized."
 msgstr ""
 
-#: client/src/features/settings/api/useVisualPresets.ts:204
-#: client/src/features/settings/signatures/SignaturePreview.tsx:71
+#: client/src/features/settings/api/useVisualPresets.ts:253
+msgid "A recurring character is part of paid plans."
+msgstr ""
+
+#: client/src/features/settings/api/useVisualPresets.ts:254
+#: client/src/features/settings/signatures/SignaturePreview.tsx:74
 msgid "That style comes with paid plans."
 msgstr ""
 
-#: client/src/features/settings/api/useVisualPresets.ts:237
+#: client/src/features/settings/api/useVisualPresets.ts:288
 msgid "Visual preset created."
 msgstr ""
 
-#: client/src/features/settings/api/useVisualPresets.ts:252
+#: client/src/features/settings/api/useVisualPresets.ts:303
 msgid "Visual preset updated."
 msgstr ""
 
-#: client/src/features/settings/api/useVisualPresets.ts:266
+#: client/src/features/settings/api/useVisualPresets.ts:317
 msgid "Preset forked for this site."
 msgstr ""
 
-#: client/src/features/settings/api/useVisualPresets.ts:278
+#: client/src/features/settings/api/useVisualPresets.ts:329
 msgid "Visual preset deleted."
 msgstr ""
 
-#: client/src/features/settings/api/useVisualPresets.ts:295
+#: client/src/features/settings/api/useVisualPresets.ts:346
 msgid "Bound visual preset for this site."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:20
+msgid ""
+"HEIC is an iPhone photo format we can’t use. Export it as JPG first, then "
+"add it here."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:27
+msgid ""
+"A character can have up to three images. Remove one before adding another."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:32
+#: client/src/features/settings/character/CharacterIntake.tsx:209
+msgid "Add at least one image."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:34
+#: client/src/features/settings/character/CharacterIntake.tsx:395
+msgid "Confirm this before we use these images."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:36
+#: client/src/features/settings/character/CharacterIntake.tsx:260
+msgid "Give the character a name."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:38
+#: client/src/features/settings/character/CharacterIntake.tsx:296
+msgid "Describe how the character looks in one sentence."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:40
+msgid "Pick a style that can draw a character before you save."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:42
+msgid ""
+"Approve a character sheet in the new style first, or keep the old style."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:47
+#: client/src/features/settings/character/CharacterIntake.tsx:54
+msgid "Finish the character first, or choose Nobody."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:49
+msgid "Draw a character sheet first."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:51
+#: client/src/features/settings/character/WhoSelector.tsx:168
+msgid ""
+"The image setup on your website can’t work from a reference image. Switch to "
+"one that can under AI Engine to add a character."
+msgstr ""
+
+#: client/src/features/settings/api/visualCharacterErrors.ts:56
+msgid ""
+"The sheet didn’t finish. This didn’t use an image. Try again in a moment."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterCard.tsx:46
+msgid "Uses your image as it is."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterCard.tsx:50
+msgid "Keeps its own drawing style. Sheet approved on %s."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterCard.tsx:55
+msgid "Drawn in %1$s. Sheet approved on %2$s."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterCard.tsx:68
+#: client/src/features/settings/character/SheetApproval.tsx:98
+msgid "View the character sheet larger"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterCard.tsx:79
+msgid "New sheet needed"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterCard.tsx:96
+msgid "Replace %s"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterCard.tsx:119
+#: client/src/features/settings/character/WhoSelector.tsx:222
+#: client/src/features/settings/signatures/BrandPaletteField.tsx:104
+msgid "Remove"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterCard.tsx:128
+#: client/src/features/settings/character/SheetApproval.tsx:62
+msgid "Your images"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterCard.tsx:146
+msgid "Kept until you remove %s."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:51
+msgid "Finish %s first, or choose Nobody."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:102
+msgid ""
+"We draw %s in three full-length views and two close-ups, looking just like "
+"your artwork. You approve it before it’s used."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:108
+msgid ""
+"We draw the character in three full-length views and two close-ups, looking "
+"just like your artwork. You approve it before it’s used."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:113
+msgid ""
+"We draw the character in three full-length views and two close-ups, in the "
+"style you pick under Signature. You approve it before it’s used."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:120
+msgid ""
+"We draw %1$s in %2$s in three full-length views and two close-ups. You "
+"approve it before it’s used."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:129
+msgid ""
+"We draw the character in %s in three full-length views and two close-ups. "
+"You approve it before it’s used."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:139
+msgid "Drafted from your images"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:145
+msgid "Takes about a minute. You approve the sheet before anything changes."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:149
+msgid ""
+"Drawn in %s, the style picked above. Takes about a minute, and you approve "
+"it before anything changes."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:155
+msgid "Pick a style under Signature first. The sheet is drawn in it."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:157
+msgid ""
+"Nothing is redrawn and no image is used. Every new image follows your image "
+"closely."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:161
+msgid ""
+"Nothing is redrawn and no image is used. Every new image follows your "
+"artwork closely."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:166
+#: client/src/features/settings/character/SheetApproval.tsx:35
+#: client/src/features/settings/signatures/SignaturePreview.tsx:86
+msgid "· 1 image"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:176
+msgid ""
+"One to three photos or drawings. A clear face and one full-length image work "
+"best. JPG, PNG or WebP, up to 10 MB each."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:180
+msgid ""
+"One to three images of the artwork. A front view and a full-body view work "
+"best. JPG, PNG or WebP, up to 10 MB each."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:187
+msgid ""
+"We keep your images until you remove the character, so we can draw a new "
+"sheet if you change the style."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:215
+#: client/src/features/settings/character/CharacterIntake.tsx:219
+msgid "How should we use your images?"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:226
+msgid "Draw a character sheet in its own style"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:227
+msgid "Draw a character sheet in my signature"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:233
+msgid "Use my image as it is"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:235
+msgid "For drawings already in the style you want. Nothing is redrawn."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:236
+msgid ""
+"For artwork that already shows the mascot the way you want it. Nothing is "
+"redrawn."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:252
+msgid "For example, Lena"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:252
+msgid "For example, Pip"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:254
+msgid "Only for you, to tell characters apart. It never appears in images."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:274
+msgid "We draft this from your images once they’re uploaded."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:279
+msgid ""
+"One sentence on how %s looks. We keep it in every image, so fix anything "
+"that’s wrong."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:285
+msgid ""
+"One sentence on how the character looks. We keep it in every image, so fix "
+"anything that’s wrong."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:313
+#: client/src/features/settings/character/CharacterIntake.tsx:316
+msgid "Outfit"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:323
+msgid "Always the same"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:324
+msgid "Wears what’s in your images in every post."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:328
+msgid "Changes with the post"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:329
+msgid "Dresses for each topic. Face and hair stay the same."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:340
+msgid "Keep its own drawing style"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:345
+msgid ""
+"%s looks like your artwork in every image, inside scenes drawn in your "
+"signature."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:351
+msgid ""
+"The character looks like your artwork in every image, inside scenes drawn in "
+"your signature."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:374
+msgid "This is me, or I have this person’s permission"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:375
+msgid "I own this artwork or have the right to use it"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:379
+msgid "We only draw real people who have agreed to it."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:380
+msgid "We only draw mascots you’re allowed to use, such as your own brand’s."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:411
+msgid "Draw character sheet"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:422
+msgid "Use these images"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterIntake.tsx:433
+msgid "Cancel and keep %s"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterSection.tsx:51
+msgid "Your image %d"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterSection.tsx:63
+#: client/src/features/settings/character/SheetApproval.tsx:90
+msgid "Character sheet · %s"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterSection.tsx:66
+msgid "Character sheet"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterSection.tsx:77
+msgid "Your image %1$d of %2$d"
+msgstr ""
+
+#: client/src/features/settings/character/CharacterSection.tsx:94
+msgid ""
+"%s appears in every new image once you save. Replace uploads new images and "
+"draws a new sheet."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterSection.tsx:101
+msgid ""
+"Upload images of the person, then approve how we draw them. The character "
+"stays the same in every image on your website."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterSection.tsx:105
+msgid ""
+"Upload your mascot’s artwork, then approve how we draw it. The character "
+"stays the same in every image on your website."
+msgstr ""
+
+#: client/src/features/settings/character/CharacterSection.tsx:118
+msgid "Your character"
+msgstr ""
+
+#: client/src/features/settings/character/RemoveCharacterDialog.tsx:52
+msgid "Remove %s?"
+msgstr ""
+
+#: client/src/features/settings/character/RemoveCharacterDialog.tsx:57
+msgid ""
+"New images won’t include %s, and “Who appears in your images?” goes back to "
+"Nobody."
+msgstr ""
+
+#: client/src/features/settings/character/RemoveCharacterDialog.tsx:76
+#: client/src/features/settings/routes/VisualsPage.tsx:1084
+msgid "Keep %s"
+msgstr ""
+
+#: client/src/features/settings/character/RemoveCharacterDialog.tsx:101
+msgid "<b>Deleted:</b> the artwork you uploaded and the character sheet."
+msgstr ""
+
+#: client/src/features/settings/character/RemoveCharacterDialog.tsx:116
+msgid ""
+"<b>Unchanged:</b> images already published on your website. To replace one, "
+"regenerate that post’s image."
+msgstr ""
+
+#: client/src/features/settings/character/RemoveCharacterDialog.tsx:149
+msgid "This can’t be undone. To use %s again, upload the images again."
+msgstr ""
+
+#: client/src/features/settings/character/RemoveCharacterDialog.tsx:93
+msgid "<b>Deleted:</b> the image you uploaded and the character sheet."
+msgid_plural ""
+"<b>Deleted:</b> the %d images you uploaded and the character sheet."
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/src/features/settings/character/RemoveCharacterDialog.tsx:133
+msgid "%1$s is removed from the %2$d site that uses this preset."
+msgid_plural "%1$s is removed from all %2$d sites that use this preset."
+msgstr[0] ""
+msgstr[1] ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:43
+msgid "Does this look like %s?"
+msgstr ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:50
+msgid ""
+"Compare the sheet with your own images. Approve only if you’d recognize %s "
+"at a glance: every new image starts from this sheet. Press any image to see "
+"it larger."
+msgstr ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:113
+msgid "View larger"
+msgstr ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:142
+msgid "Drawing %1$s in %2$s"
+msgstr ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:146
+msgid "No sheet yet"
+msgstr ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:162
+msgid "Drawing a new sheet. Your current one stays until this one is ready."
+msgstr ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:168
+msgid ""
+"Drawing three full-length views and two close-ups of %s. This takes about a "
+"minute; you can keep editing meanwhile."
+msgstr ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:189
+msgid ""
+"The new sheet didn’t finish, so your last one is still shown. Try again in a "
+"moment, or approve the one you see."
+msgstr ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:194
+msgid "This didn’t use an image."
+msgstr ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:208
+msgid "Approve"
+msgstr ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:231
+msgid "Back to my images"
+msgstr ""
+
+#: client/src/features/settings/character/SheetApproval.tsx:236
+msgid ""
+"Try again draws a new sheet from the same images. It uses one image once it "
+"finishes."
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:47
+msgid "This image is %s MB."
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:50
+msgid "Use one under 10 MB."
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:55
+msgid "HEIC is an iPhone photo format we can’t use."
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:56
+msgid "Export it as JPG first, then add it here."
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:60
+msgid "This file type can’t be used."
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:61
+msgid "Use a JPG, PNG or WebP image."
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:125
+#: client/src/features/settings/character/visualCharacter.ts:210
+msgid "View your image %d larger"
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:139
+msgid "Remove image %d"
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:169
+#: client/src/features/settings/character/UploadSlot.tsx:171
+msgid "Uploading…"
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:201
+msgid "Choose another"
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:217
+msgid "Add image (%d of 3)"
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:241
+msgid "Add another"
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:241
+msgid "Add image"
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:245
+msgid "Optional. Drop it here or browse."
+msgstr ""
+
+#: client/src/features/settings/character/UploadSlot.tsx:246
+msgid "Drop it here or browse."
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:83
+msgid "Who appears in your images?"
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:97
+msgid ""
+"Keep the same character in every image, like you or your brand’s mascot."
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:113
+msgid "Nobody"
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:114
+msgid "Each image picks its own subject. This is how images work today."
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:122
+msgid "Person"
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:123
+msgid "You or someone you work with, drawn from photos or drawings."
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:132
+msgid "Mascot"
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:133
+msgid "Your brand’s mascot, drawn from its artwork."
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:144
+msgid ""
+"A recurring character is part of paid plans. Nobody stays selected until you "
+"upgrade."
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:177
+msgid "Open AI Engine"
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:189
+msgid "%s is saved but not used."
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:196
+msgid ""
+"New images won’t include this character. Choose Person again to bring %s "
+"back."
+msgstr ""
+
+#: client/src/features/settings/character/WhoSelector.tsx:201
+msgid ""
+"New images won’t include this character. Choose Mascot again to bring %s "
+"back."
+msgstr ""
+
+#: client/src/features/settings/character/ZoomDialog.tsx:137
+msgid "Previous image"
+msgstr ""
+
+#: client/src/features/settings/character/ZoomDialog.tsx:144
+msgid "Images to compare"
+msgstr ""
+
+#: client/src/features/settings/character/ZoomDialog.tsx:174
+msgid "Next image"
+msgstr ""
+
+#: client/src/features/settings/character/ZoomDialog.tsx:181
+msgid "Left and right arrow keys switch images. Escape closes."
+msgstr ""
+
+#: client/src/features/settings/character/ZoomDialog.tsx:187
+msgid "Showing %1$s, %2$d of %3$d"
+msgstr ""
+
+#: client/src/features/settings/character/useCharacterEditor.ts:605
+msgid "%s couldn’t be removed. Nothing was deleted. Try again in a moment."
+msgstr ""
+
+#: client/src/features/settings/character/useCharacterEditor.ts:626
+msgid "The images you uploaded and the character sheet are deleted."
+msgstr ""
+
+#: client/src/features/settings/character/useCharacterEditor.ts:629
+msgid "%s was removed."
+msgstr ""
+
+#: client/src/features/settings/character/visualCharacter.ts:197
+msgid ""
+"Character sheet of %1$s in %2$s: front, three-quarter and back views, and "
+"two close-ups of the face, neutral and smiling."
 msgstr ""
 
 #: client/src/features/settings/components/KeyPagesEditor.tsx:30
@@ -10259,246 +10952,330 @@ msgid ""
 "reinstall later or migrate."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:88
+#: client/src/features/settings/routes/VisualsPage.tsx:109
 msgid "1:1 Square Format"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:89
+#: client/src/features/settings/routes/VisualsPage.tsx:110
 msgid "4:3 Classic Professional"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:90
+#: client/src/features/settings/routes/VisualsPage.tsx:111
 msgid "3:4 Standard Portrait"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:91
+#: client/src/features/settings/routes/VisualsPage.tsx:112
 msgid "16:9 Cinematic Landscape"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:92
+#: client/src/features/settings/routes/VisualsPage.tsx:113
 msgid "9:16 Vertical Portrait"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:96
+#: client/src/features/settings/routes/VisualsPage.tsx:117
 msgid "WebP (Smallest File)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:97
+#: client/src/features/settings/routes/VisualsPage.tsx:118
 msgid "JPEG (Standard Compatibility)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:98
+#: client/src/features/settings/routes/VisualsPage.tsx:119
 msgid "PNG (Lossless)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:511
-msgid "Couldn’t read your site’s colors right now. Try again in a moment."
+#: client/src/features/settings/routes/VisualsPage.tsx:454
+#: client/src/features/settings/routes/VisualsPage.tsx:479
+#: client/src/features/settings/routes/VisualsPage.tsx:489
+#: client/src/features/settings/signatures/SignaturePicker.tsx:196
+#: client/src/features/settings/signatures/SignaturePicker.tsx:227
+msgid "Your own"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:625
-#: client/src/features/settings/routes/VisualsPage.tsx:651
-msgid "Image Generation & Optimization Engine"
-msgstr ""
-
-#: client/src/features/settings/routes/VisualsPage.tsx:635
-msgid "Calibrating Optics…"
-msgstr ""
-
-#: client/src/features/settings/routes/VisualsPage.tsx:648
-msgid "Active preset · %s"
+#: client/src/features/settings/routes/VisualsPage.tsx:480
+#: client/src/features/settings/signatures/SignaturePicker.tsx:244
+msgid "Free prompt"
 msgstr ""
 
 #: client/src/features/settings/routes/VisualsPage.tsx:657
+msgid "Couldn’t read your site’s colors right now. Try again in a moment."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:772
+#: client/src/features/settings/routes/VisualsPage.tsx:798
+msgid "Image Generation & Optimization Engine"
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:782
+msgid "Calibrating Optics…"
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:795
+msgid "Active preset · %s"
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:804
 #: client/src/features/site/routes/tabs/SiteReferralsTab.tsx:50
 msgid "Unsaved changes"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:674
+#: client/src/features/settings/routes/VisualsPage.tsx:821
 msgid "No visual preset bound to this site"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:677
+#: client/src/features/settings/routes/VisualsPage.tsx:824
 msgid ""
 "Image generation will fail until a preset is bound. Configure one below or "
 "pick an existing preset from the workspace library."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:694
+#: client/src/features/settings/routes/VisualsPage.tsx:841
 msgid "Used by %d other site(s) in this workspace"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:699
+#: client/src/features/settings/routes/VisualsPage.tsx:846
 msgid ""
 "Saving will update the preset for every site that uses it. Pick \"Save as "
 "new for this site only\" to fork into an independent preset bound to this "
 "site."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:707
+#: client/src/features/settings/routes/VisualsPage.tsx:870
 msgid "Save (update for all sites)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:716
+#: client/src/features/settings/routes/VisualsPage.tsx:879
 msgid "Save as new for this site only"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:730
+#: client/src/features/settings/routes/VisualsPage.tsx:885
+msgid "A copy is saved without the character, which stays with this preset."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:902
 msgid "Preset name"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:779
+#: client/src/features/settings/routes/VisualsPage.tsx:975
 msgid ""
 "Pick the look every image on this site shares. Examples are shown in neutral "
 "colors."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:809
+#: client/src/features/settings/routes/VisualsPage.tsx:985
+msgid ""
+"Only styles that can draw a character the same way every time are shown. "
+"Photo styles and Free prompt are hidden while a character is chosen."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:994
+msgid "Your current style, %s, is one of them, so pick a new one here."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1009
+msgid "Pick a style for %s before you save."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1012
+msgid "Pick one of these styles before you save."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1034
+msgid ""
+"Set the technique, motifs and framing yourself, as an illustration or a 3D "
+"render."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1059
+msgid "%1$s was drawn in %2$s."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1065
+msgid ""
+"To use %1$s, approve a new character sheet drawn in it. Until then, Save "
+"keeps %2$s."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1075
+msgid "Draw %1$s in %2$s · 1 image"
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1093
+msgid "%1$s needs a new sheet for %2$s."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1104
+msgid "Approve a sheet in %1$s first, or keep %2$s."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1125
+msgid "%s uses your image as it is, so no new sheet is needed for this style."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1133
+msgid ""
+"%s keeps its own drawing style, so no new sheet is needed for this style."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1145
 msgid "Your prompt"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:810
+#: client/src/features/settings/routes/VisualsPage.tsx:1146
 msgid ""
 "Describe the technique, recurring subjects and framing. We add your brand "
 "palette to it."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:814
+#: client/src/features/settings/routes/VisualsPage.tsx:1150
 msgid ""
 "Describe the look: technique, recurring subjects, framing, what to avoid"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:879
+#: client/src/features/settings/routes/VisualsPage.tsx:1195
+msgid ""
+"Previews show the style without a character until a character sheet is "
+"approved."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1235
 msgid "Suggest Video Style"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:880
+#: client/src/features/settings/routes/VisualsPage.tsx:1236
 msgid "Brand Resources (logo, guidelines, design system URL…)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:884
+#: client/src/features/settings/routes/VisualsPage.tsx:1240
 msgid "Add Resource"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:885
+#: client/src/features/settings/routes/VisualsPage.tsx:1241
 msgid "Generate Video Style"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:887
+#: client/src/features/settings/routes/VisualsPage.tsx:1243
 msgid "Company logo"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:894
+#: client/src/features/settings/routes/VisualsPage.tsx:1250
 msgid "Site Logo"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:916
+#: client/src/features/settings/routes/VisualsPage.tsx:1272
 msgid "Output Dimensions"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:923
+#: client/src/features/settings/routes/VisualsPage.tsx:1279
 msgid "Select dimensions..."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:937
+#: client/src/features/settings/routes/VisualsPage.tsx:1293
 msgid ""
 "OpenAI image models don't support 16:9 natively — your images will be "
 "rendered at 3:2 (1536×1024), the closest landscape size. For exact 16:9, "
 "switch the image provider to Gemini."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:941
+#: client/src/features/settings/routes/VisualsPage.tsx:1297
 msgid ""
 "OpenAI image models don't support 9:16 natively — your images will be "
 "rendered at 2:3 (1024×1536), the closest portrait size. For exact 9:16, "
 "switch the image provider to Gemini."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:960
+#: client/src/features/settings/routes/VisualsPage.tsx:1316
 msgid "Format Encoding"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:974
+#: client/src/features/settings/routes/VisualsPage.tsx:1330
 msgid "Select encoding..."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:990
+#: client/src/features/settings/routes/VisualsPage.tsx:1346
 msgid "AI label"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:993
+#: client/src/features/settings/routes/VisualsPage.tsx:1349
 msgid "Label images as AI-generated"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:998
+#: client/src/features/settings/routes/VisualsPage.tsx:1354
 msgid ""
 "Adds the EU “AI generated” badge to the corner of every image we create with "
 "this preset. EU rules ask publishers to mark realistic AI images."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1004
+#: client/src/features/settings/routes/VisualsPage.tsx:1360
 msgid ""
 "Images that already exist are not changed. Regenerating an image applies the "
 "current setting."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1013
-#: client/src/features/settings/routes/VisualsPage.tsx:1019
+#: client/src/features/settings/routes/VisualsPage.tsx:1369
+#: client/src/features/settings/routes/VisualsPage.tsx:1375
 msgid "EU “AI generated” badge"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1047
+#: client/src/features/settings/routes/VisualsPage.tsx:1403
 msgid "SEO Automation"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1050
+#: client/src/features/settings/routes/VisualsPage.tsx:1406
 msgid "Always on"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1054
+#: client/src/features/settings/routes/VisualsPage.tsx:1410
 msgid ""
 "Every generated image automatically gets accessible alt-text and a human-"
 "friendly, SEO-ready filename. No setup required."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1068
+#: client/src/features/settings/routes/VisualsPage.tsx:1424
 msgid "Other presets in this workspace"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1071
+#: client/src/features/settings/routes/VisualsPage.tsx:1427
 msgid ""
 "Use here binds this site to that preset (edits will propagate). Duplicate "
 "clones it into a new preset bound only to this site."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1090
+#: client/src/features/settings/routes/VisualsPage.tsx:1446
 msgid "Used by %d site(s)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1101
+#: client/src/features/settings/routes/VisualsPage.tsx:1457
 msgid "(no art direction)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1115
+#: client/src/features/settings/routes/VisualsPage.tsx:1471
 msgid "Duplicate to this site"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1138
+#: client/src/features/settings/routes/VisualsPage.tsx:1505
 msgid "Delete preset?"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1143
+#: client/src/features/settings/routes/VisualsPage.tsx:1510
 msgid "Delete \"%s\"? This is only allowed when no site is bound to it."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1169
+#: client/src/features/settings/routes/VisualsPage.tsx:1536
 msgid "Style Every Image Consistently"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1172
+#: client/src/features/settings/routes/VisualsPage.tsx:1539
 msgid ""
 "Connect a free account to define a Global Art Direction that gets injected "
 "into every AI image generation across this site."
 msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:855
+msgid "%1$s appears in new images on the %2$d site that uses it."
+msgid_plural "%1$s appears in new images on all %2$d sites."
+msgstr[0] ""
+msgstr[1] ""
 
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:45
 msgid "Pick a color"
@@ -10514,10 +11291,6 @@ msgstr ""
 
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:91
 msgid "Use as accent"
-msgstr ""
-
-#: client/src/features/settings/signatures/BrandPaletteField.tsx:104
-msgid "Remove"
 msgstr ""
 
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:172
@@ -10564,7 +11337,7 @@ msgid "Accent"
 msgstr ""
 
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:287
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:259
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:262
 #: client/src/utils/chipListLabels.ts:16
 msgid "Add"
 msgstr ""
@@ -10587,163 +11360,150 @@ msgid ""
 "them later on the Visuals page."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:101
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:104
 msgid "Drafting from your site."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:120
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:123
 msgid ""
 "Couldn’t draft from your site right now. Try again, or fill the fields "
 "yourself."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:145
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:148
 msgid "Drafted the technique and what to avoid from your site."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:148
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:151
 msgid "Fill this in to save the signature."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:155
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:158
 msgid "All signatures"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:167
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:170
 msgid "Your own signature"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:170
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:173
 msgid ""
 "Five fields fix the look of every image. Draft them from your site, then "
 "change anything."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:184
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:187
 msgid "Drafting from your site"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:186
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:189
 msgid "Draft again"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:187
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:190
 msgid "Draft from my site"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:199
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:202
 msgid "For example: Northfield sketchbook"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:200
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:203
 msgid "Shown on its card in your library."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:203
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:206
 msgid "Name this signature to save it."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:251
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:254
 msgid "Drafted"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:269
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:272
 msgid "Add “%1$s” to %2$s"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePicker.tsx:97
+#: client/src/features/settings/signatures/SignaturePicker.tsx:103
 msgid ""
 "Kept from your previous plan. If you switch to another style, you can’t pick "
 "this one again without upgrading."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePicker.tsx:168
-#: client/src/features/settings/signatures/SignaturePicker.tsx:193
-#: client/src/features/settings/signatures/SignaturePicker.tsx:234
+#: client/src/features/settings/signatures/SignaturePicker.tsx:179
+#: client/src/features/settings/signatures/SignaturePicker.tsx:204
+#: client/src/features/settings/signatures/SignaturePicker.tsx:248
 msgid "In use"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePicker.tsx:171
+#: client/src/features/settings/signatures/SignaturePicker.tsx:182
 msgid "Our pick for your brand"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePicker.tsx:185
-#: client/src/features/settings/signatures/SignaturePicker.tsx:216
-msgid "Your own"
-msgstr ""
-
-#: client/src/features/settings/signatures/SignaturePicker.tsx:189
+#: client/src/features/settings/signatures/SignaturePicker.tsx:200
 msgid "Preview it below to see it"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePicker.tsx:192
-#: client/src/features/settings/signatures/SignaturePicker.tsx:221
+#: client/src/features/settings/signatures/SignaturePicker.tsx:203
+#: client/src/features/settings/signatures/SignaturePicker.tsx:235
 msgid "Custom"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePicker.tsx:217
+#: client/src/features/settings/signatures/SignaturePicker.tsx:230
 msgid "Set the technique, motifs and framing yourself."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePicker.tsx:219
+#: client/src/features/settings/signatures/SignaturePicker.tsx:233
 msgid "Build from five fields"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePicker.tsx:230
-msgid "Free prompt"
-msgstr ""
-
-#: client/src/features/settings/signatures/SignaturePicker.tsx:231
+#: client/src/features/settings/signatures/SignaturePicker.tsx:245
 msgid "Describe the look in your own words."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePicker.tsx:233
+#: client/src/features/settings/signatures/SignaturePicker.tsx:247
 msgid "Text prompt"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePreview.tsx:73
+#: client/src/features/settings/signatures/SignaturePreview.tsx:76
 msgid ""
 "The new preview didn’t render, so your last one is still shown. Try again in "
 "a moment."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePreview.tsx:77
+#: client/src/features/settings/signatures/SignaturePreview.tsx:80
 msgid "The preview didn’t render. Try again in a moment."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePreview.tsx:83
-msgid "· 1 image"
-msgstr ""
-
-#: client/src/features/settings/signatures/SignaturePreview.tsx:89
+#: client/src/features/settings/signatures/SignaturePreview.tsx:92
 msgid "Preview again"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePreview.tsx:175
-#: client/src/features/settings/signatures/SignaturePreview.tsx:90
+#: client/src/features/settings/signatures/SignaturePreview.tsx:178
+#: client/src/features/settings/signatures/SignaturePreview.tsx:93
 msgid "Preview with my colors"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePreview.tsx:102
+#: client/src/features/settings/signatures/SignaturePreview.tsx:105
 msgid ""
 "See one sample image in this style with your colors before you save. Each "
 "preview counts as one image."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePreview.tsx:121
 #: client/src/features/settings/signatures/SignaturePreview.tsx:124
+#: client/src/features/settings/signatures/SignaturePreview.tsx:127
 msgid "Rendering your preview"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePreview.tsx:138
+#: client/src/features/settings/signatures/SignaturePreview.tsx:141
 msgid "This usually takes about 20 seconds. You can keep editing meanwhile."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePreview.tsx:147
+#: client/src/features/settings/signatures/SignaturePreview.tsx:150
 msgid "Concept"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignaturePreview.tsx:207
+#: client/src/features/settings/signatures/SignaturePreview.tsx:210
 msgid "No images left this month. Your allowance resets on %s."
 msgstr ""
 
@@ -11384,7 +12144,7 @@ msgstr ""
 msgid "Something went wrong reaching the AI service. Please try again."
 msgstr ""
 
-#: client/src/hooks/useMagicSuggest.ts:64
+#: client/src/hooks/useMagicSuggest.ts:67
 msgid "The AI returned an empty blueprint."
 msgstr ""
 

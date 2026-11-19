@@ -326,6 +326,7 @@ export const MODELS: readonly CatalogModel[] = [
     // Every Cloud image (owner decision 2026-10-06, blind
     // image test 2026-10-05: 126 images, three judges and the owner's ranking).
     managedImage: "primary",
+    referenceImages: true,
     manifest: {
       family: "image",
       endpoint: "generateContent",

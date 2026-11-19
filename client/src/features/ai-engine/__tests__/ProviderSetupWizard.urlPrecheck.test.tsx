@@ -24,6 +24,12 @@ const { saveKeyMutate } = vi.hoisted(() => ({ saveKeyMutate: vi.fn() }));
 vi.mock("../api/useSaveKey", () => ({
   useSaveKey: () => ({ mutate: saveKeyMutate, isPending: false }),
 }));
+vi.mock("../api/useTestKey", () => ({
+  useTestKey: () => ({
+    mutateAsync: () => Promise.resolve({ ok: true, latencyMs: 120 }),
+    isPending: false,
+  }),
+}));
 vi.mock("../api/useProviderPulse", () => ({
   useProviderPulse: () => ({
     isOnline: false,
@@ -102,7 +108,7 @@ describe("<ProviderSetupWizard> URL pre-check", () => {
     expect(saveKeyMutate).not.toHaveBeenCalled();
   });
 
-  it("still saves a normally shaped key", () => {
+  it("still saves a normally shaped key once its live test passes", async () => {
     renderWizard();
     goToKeyStep();
 
@@ -113,9 +119,11 @@ describe("<ProviderSetupWizard> URL pre-check", () => {
     expect(saveTest).toBeEnabled();
     fireEvent.click(saveTest);
 
-    expect(saveKeyMutate).toHaveBeenCalledWith(
-      { provider: "openai", key: "sk-proj-valid-key" },
-      expect.anything()
+    await vi.waitFor(() =>
+      expect(saveKeyMutate).toHaveBeenCalledWith(
+        { provider: "openai", key: "sk-proj-valid-key" },
+        expect.anything()
+      )
     );
   });
 });

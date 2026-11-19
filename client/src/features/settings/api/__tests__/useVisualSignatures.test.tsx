@@ -311,6 +311,43 @@ describe("preset saves (spec §7 gate)", () => {
     expect(screen.queryByText(/Action Failed/)).toBeNull();
   });
 
+  it("a save that added a character and met the plan gate says the character is a paid feature (spec §13.7)", async () => {
+    apiFetchMock.mockRejectedValue(restError(403, "plan_gated"));
+    const { wrapper } = setup();
+    const { result } = renderHook(() => useVisualPresetMutations(), { wrapper });
+
+    await rejectionOf(() =>
+      result.current.update({
+        preset_id: "p1",
+        content: {
+          global_art_direction: "",
+          aspect_ratio: "16:9",
+          format: "webp",
+          optimize_on_upload: true,
+          appearance: "person",
+        },
+      })
+    );
+
+    expect(
+      await screen.findByText("A recurring character is part of paid plans.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("That style comes with paid plans.")).toBeNull();
+  });
+
+  it("a character refusal shows its own line in the reader's language, with the key's case kept by the proxy", async () => {
+    apiFetchMock.mockRejectedValue(restError(409, "visualCharacter.notApproved"));
+    const { wrapper } = setup();
+    const { result } = renderHook(() => useVisualPresetMutations(), { wrapper });
+
+    await rejectionOf(() => result.current.update({ preset_id: "p1", label: "x" }));
+
+    expect(
+      await screen.findByText("Finish the character first, or choose Nobody.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Action Failed/)).toBeNull();
+  });
+
   it("any other failure keeps the generic toast", async () => {
     apiFetchMock.mockRejectedValue({
       code: "cloud_error",

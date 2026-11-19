@@ -12356,3 +12356,492 @@ msgstr "Vista previa en el portal de cliente"
 
 msgid "Preview “%s” in the customer portal"
 msgstr "Vista previa de «%s» en el portal de cliente"
+
+msgid "Paste an API key to test."
+msgstr "Pega una clave API para probarla."
+
+msgid "The key test could not run. Try again."
+msgstr "No se pudo ejecutar la prueba de la clave. Inténtalo de nuevo."
+
+msgid "That key was rejected. Double-check it and try again."
+msgstr "Esa clave fue rechazada. Verifícala e inténtalo de nuevo."
+
+msgid "The provider is rate-limiting the test. Try again in a moment."
+msgstr "El proveedor está limitando la prueba. Inténtalo en un momento."
+
+msgid "The provider didn't return a usable model. Check the key's access."
+msgstr "El proveedor no devolvió un modelo utilizable. Revisa el acceso de la clave."
+
+msgid "Couldn't reach the provider. Check your connection and try again."
+msgstr "No se pudo contactar al proveedor. Revisa tu conexión e inténtalo de nuevo."
+
+msgid "The provider took too long to respond. Try again."
+msgstr "El proveedor tardó demasiado en responder. Inténtalo de nuevo."
+
+msgid "The key couldn't be verified. Double-check it and try again."
+msgstr "No se pudo verificar la clave. Verifícala e inténtalo de nuevo."
+
+msgid "Invalid character details."
+msgstr "Los datos del personaje no son válidos."
+
+msgid "This image is larger than 10 MB. Use a smaller one."
+msgstr "Esta imagen pesa más de 10 MB. Usa una más pequeña."
+
+msgid "This file type can’t be used. Use a JPG, PNG or WebP image."
+msgstr "Este tipo de archivo no se puede usar. Usa una imagen JPG, PNG o WebP."
+
+msgid "The image didn’t upload. Try again in a moment."
+msgstr "La imagen no se subió. Inténtalo de nuevo en un momento."
+
+msgid "The image couldn’t be removed. Try again in a moment."
+msgstr "No se pudo quitar la imagen. Inténtalo de nuevo en un momento."
+
+msgid "The description could not be drafted."
+msgstr "No se pudo redactar la descripción."
+
+msgid "The sheet didn’t finish. Try again in a moment."
+msgstr "La hoja no se terminó. Inténtalo de nuevo en un momento."
+
+msgid "The sheet could not be approved."
+msgstr "No se pudo aprobar la hoja de personaje."
+
+msgid "The character could not be removed."
+msgstr "No se pudo eliminar el personaje."
+
+msgid "Add yourself or a mascot later on the Visuals page."
+msgstr "Añádete a ti o a una mascota más tarde en la página Visuals."
+
+msgid "A recurring character is part of paid plans."
+msgstr "Un personaje recurrente forma parte de los planes de pago."
+
+msgid "HEIC is an iPhone photo format we can’t use. Export it as JPG first, then add it here."
+msgstr "HEIC es un formato de fotos de iPhone que no podemos usar. Expórtala primero como JPG y luego añádela aquí."
+
+msgid "A character can have up to three images. Remove one before adding another."
+msgstr "Un personaje puede tener hasta tres imágenes. Quita una antes de añadir otra."
+
+msgid "Add at least one image."
+msgstr "Añade al menos una imagen."
+
+msgid "Confirm this before we use these images."
+msgstr "Confirma esto antes de que usemos estas imágenes."
+
+msgid "Give the character a name."
+msgstr "Ponle un nombre al personaje."
+
+msgid "Describe how the character looks in one sentence."
+msgstr "Describe en una frase cómo es el personaje."
+
+msgid "Pick a style that can draw a character before you save."
+msgstr "Elige un estilo que pueda dibujar un personaje antes de guardar."
+
+msgid "Approve a character sheet in the new style first, or keep the old style."
+msgstr "Aprueba primero una hoja de personaje en el nuevo estilo o conserva el estilo anterior."
+
+msgid "Finish the character first, or choose Nobody."
+msgstr "Termina primero el personaje o elige Nadie."
+
+msgid "Draw a character sheet first."
+msgstr "Dibuja primero una hoja de personaje."
+
+msgid "The image setup on your website can’t work from a reference image. Switch to one that can under AI Engine to add a character."
+msgstr "La configuración de imágenes de tu sitio web no puede trabajar a partir de una imagen de referencia. Cambia a una que sí pueda en Motor de IA para añadir un personaje."
+
+msgid "The sheet didn’t finish. This didn’t use an image. Try again in a moment."
+msgstr "La hoja no se terminó. No se ha usado ninguna imagen. Inténtalo de nuevo en un momento."
+
+msgid "Uses your image as it is."
+msgstr "Usa tu imagen tal cual."
+
+msgid "Keeps its own drawing style. Sheet approved on %s."
+msgstr "Mantiene su propio estilo de dibujo. Hoja aprobada el %s."
+
+msgid "Drawn in %1$s. Sheet approved on %2$s."
+msgstr "Dibujado en %1$s. Hoja aprobada el %2$s."
+
+msgid "View the character sheet larger"
+msgstr "Ver la hoja de personaje más grande"
+
+msgid "New sheet needed"
+msgstr "Hace falta una hoja nueva"
+
+msgid "Replace %s"
+msgstr "Reemplazar a %s"
+
+msgid "Your images"
+msgstr "Tus imágenes"
+
+msgid "Kept until you remove %s."
+msgstr "Se conservan hasta que elimines a %s."
+
+msgid "Finish %s first, or choose Nobody."
+msgstr "Termina primero a %s o elige Nadie."
+
+msgid "We draw %s in three full-length views and two close-ups, looking just like your artwork. You approve it before it’s used."
+msgstr "Dibujamos a %s en tres vistas de cuerpo entero y dos primeros planos, igual que en tu ilustración. La apruebas antes de que se use."
+
+msgid "We draw the character in three full-length views and two close-ups, looking just like your artwork. You approve it before it’s used."
+msgstr "Dibujamos al personaje en tres vistas de cuerpo entero y dos primeros planos, igual que en tu ilustración. La apruebas antes de que se use."
+
+msgid "We draw the character in three full-length views and two close-ups, in the style you pick under Signature. You approve it before it’s used."
+msgstr "Dibujamos al personaje en tres vistas de cuerpo entero y dos primeros planos, en el estilo que elijas en Firma visual. La apruebas antes de que se use."
+
+msgid "We draw %1$s in %2$s in three full-length views and two close-ups. You approve it before it’s used."
+msgstr "Dibujamos a %1$s en %2$s en tres vistas de cuerpo entero y dos primeros planos. La apruebas antes de que se use."
+
+msgid "We draw the character in %s in three full-length views and two close-ups. You approve it before it’s used."
+msgstr "Dibujamos al personaje en %s en tres vistas de cuerpo entero y dos primeros planos. La apruebas antes de que se use."
+
+msgid "Drafted from your images"
+msgstr "Redactada a partir de tus imágenes"
+
+msgid "Takes about a minute. You approve the sheet before anything changes."
+msgstr "Tarda alrededor de un minuto. Apruebas la hoja antes de que cambie nada."
+
+msgid "Drawn in %s, the style picked above. Takes about a minute, and you approve it before anything changes."
+msgstr "Se dibuja en %s, el estilo elegido arriba. Tarda alrededor de un minuto y la apruebas antes de que cambie nada."
+
+msgid "Pick a style under Signature first. The sheet is drawn in it."
+msgstr "Elige primero un estilo en Firma visual. La hoja se dibuja en él."
+
+msgid "Nothing is redrawn and no image is used. Every new image follows your image closely."
+msgstr "No se redibuja nada ni se usa ninguna imagen. Cada imagen nueva sigue de cerca tu imagen."
+
+msgid "Nothing is redrawn and no image is used. Every new image follows your artwork closely."
+msgstr "No se redibuja nada ni se usa ninguna imagen. Cada imagen nueva sigue de cerca tu ilustración."
+
+msgid "One to three photos or drawings. A clear face and one full-length image work best. JPG, PNG or WebP, up to 10 MB each."
+msgstr "De una a tres fotos o dibujos. Funcionan mejor una cara bien visible y una imagen de cuerpo entero. JPG, PNG o WebP, hasta 10 MB cada una."
+
+msgid "One to three images of the artwork. A front view and a full-body view work best. JPG, PNG or WebP, up to 10 MB each."
+msgstr "De una a tres imágenes de la ilustración. Funcionan mejor una vista frontal y una de cuerpo entero. JPG, PNG o WebP, hasta 10 MB cada una."
+
+msgid "We keep your images until you remove the character, so we can draw a new sheet if you change the style."
+msgstr "Guardamos tus imágenes hasta que elimines el personaje, para poder dibujar una hoja nueva si cambias el estilo."
+
+msgid "How should we use your images?"
+msgstr "¿Cómo usamos tus imágenes?"
+
+msgid "Draw a character sheet in its own style"
+msgstr "Dibujar una hoja de personaje en su propio estilo"
+
+msgid "Draw a character sheet in my signature"
+msgstr "Dibujar una hoja de personaje en mi firma visual"
+
+msgid "Use my image as it is"
+msgstr "Usar mi imagen tal cual"
+
+msgid "For drawings already in the style you want. Nothing is redrawn."
+msgstr "Para dibujos que ya tienen el estilo que quieres. No se redibuja nada."
+
+msgid "For artwork that already shows the mascot the way you want it. Nothing is redrawn."
+msgstr "Para ilustraciones que ya muestran la mascota como la quieres. No se redibuja nada."
+
+msgid "For example, Lena"
+msgstr "Por ejemplo, Lena"
+
+msgid "For example, Pip"
+msgstr "Por ejemplo, Pip"
+
+msgid "Only for you, to tell characters apart. It never appears in images."
+msgstr "Solo para ti, para distinguir personajes. Nunca aparece en las imágenes."
+
+msgid "We draft this from your images once they’re uploaded."
+msgstr "La redactamos a partir de tus imágenes en cuanto se suban."
+
+msgid "One sentence on how %s looks. We keep it in every image, so fix anything that’s wrong."
+msgstr "Una frase sobre cómo es %s. La mantenemos en cada imagen, así que corrige lo que no esté bien."
+
+msgid "One sentence on how the character looks. We keep it in every image, so fix anything that’s wrong."
+msgstr "Una frase sobre cómo es el personaje. La mantenemos en cada imagen, así que corrige lo que no esté bien."
+
+msgid "Outfit"
+msgstr "Ropa"
+
+msgid "Always the same"
+msgstr "Siempre la misma"
+
+msgid "Wears what’s in your images in every post."
+msgstr "Lleva en cada entrada lo que aparece en tus imágenes."
+
+msgid "Changes with the post"
+msgstr "Cambia con la entrada"
+
+msgid "Dresses for each topic. Face and hair stay the same."
+msgstr "Se viste según cada tema. La cara y el pelo no cambian."
+
+msgid "Keep its own drawing style"
+msgstr "Mantener su propio estilo de dibujo"
+
+msgid "%s looks like your artwork in every image, inside scenes drawn in your signature."
+msgstr "%s se ve como tu ilustración en cada imagen, dentro de escenas dibujadas en tu firma visual."
+
+msgid "The character looks like your artwork in every image, inside scenes drawn in your signature."
+msgstr "El personaje se ve como tu ilustración en cada imagen, dentro de escenas dibujadas en tu firma visual."
+
+msgid "This is me, or I have this person’s permission"
+msgstr "Soy yo, o tengo el permiso de esta persona"
+
+msgid "I own this artwork or have the right to use it"
+msgstr "Esta ilustración es mía o tengo derecho a usarla"
+
+msgid "We only draw real people who have agreed to it."
+msgstr "Solo dibujamos a personas reales que lo han aceptado."
+
+msgid "We only draw mascots you’re allowed to use, such as your own brand’s."
+msgstr "Solo dibujamos mascotas que puedes usar, como la de tu propia marca."
+
+msgid "Draw character sheet"
+msgstr "Dibujar hoja de personaje"
+
+msgid "Use these images"
+msgstr "Usar estas imágenes"
+
+msgid "Cancel and keep %s"
+msgstr "Cancelar y conservar a %s"
+
+msgid "Your image %d"
+msgstr "Tu imagen %d"
+
+msgid "Character sheet · %s"
+msgstr "Hoja de personaje · %s"
+
+msgid "Character sheet"
+msgstr "Hoja de personaje"
+
+msgid "Your image %1$d of %2$d"
+msgstr "Tu imagen %1$d de %2$d"
+
+msgid "%s appears in every new image once you save. Replace uploads new images and draws a new sheet."
+msgstr "%s aparece en cada imagen nueva en cuanto guardes. Reemplazar sube imágenes nuevas y dibuja una hoja nueva."
+
+msgid "Upload images of the person, then approve how we draw them. The character stays the same in every image on your website."
+msgstr "Sube imágenes de la persona y luego aprueba cómo la dibujamos. El personaje es el mismo en todas las imágenes de tu sitio web."
+
+msgid "Upload your mascot’s artwork, then approve how we draw it. The character stays the same in every image on your website."
+msgstr "Sube las ilustraciones de tu mascota y luego aprueba cómo la dibujamos. El personaje es el mismo en todas las imágenes de tu sitio web."
+
+msgid "Your character"
+msgstr "Tu personaje"
+
+msgid "Remove %s?"
+msgstr "¿Eliminar a %s?"
+
+msgid "New images won’t include %s, and “Who appears in your images?” goes back to Nobody."
+msgstr "Las imágenes nuevas no incluirán a %s y «¿Quién aparece en tus imágenes?» vuelve a Nadie."
+
+msgid "Keep %s"
+msgstr "Conservar a %s"
+
+msgid "<b>Deleted:</b> the artwork you uploaded and the character sheet."
+msgstr "<b>Se borran:</b> la ilustración que subiste y la hoja de personaje."
+
+msgid "<b>Unchanged:</b> images already published on your website. To replace one, regenerate that post’s image."
+msgstr "<b>No cambian:</b> las imágenes ya publicadas en tu sitio web. Para reemplazar una, vuelve a generar la imagen de esa entrada."
+
+msgid "This can’t be undone. To use %s again, upload the images again."
+msgstr "Esto no se puede deshacer. Para volver a usar a %s, sube de nuevo las imágenes."
+
+msgid "<b>Deleted:</b> the image you uploaded and the character sheet."
+msgid_plural "<b>Deleted:</b> the %d images you uploaded and the character sheet."
+msgstr[0] "<b>Se borra:</b> la imagen que subiste y la hoja de personaje."
+msgstr[1] "<b>Se borran:</b> las %d imágenes que subiste y la hoja de personaje."
+
+msgid "%1$s is removed from the %2$d site that uses this preset."
+msgid_plural "%1$s is removed from all %2$d sites that use this preset."
+msgstr[0] "%1$s se elimina del sitio que usa este preajuste."
+msgstr[1] "%1$s se elimina de los %2$d sitios que usan este preajuste."
+
+msgid "Does this look like %s?"
+msgstr "¿Se parece a %s?"
+
+msgid "Compare the sheet with your own images. Approve only if you’d recognize %s at a glance: every new image starts from this sheet. Press any image to see it larger."
+msgstr "Compara la hoja con tus propias imágenes. Apruébala solo si reconocerías a %s de un vistazo: cada imagen nueva parte de esta hoja. Pulsa cualquier imagen para verla más grande."
+
+msgid "View larger"
+msgstr "Ver más grande"
+
+msgid "Drawing %1$s in %2$s"
+msgstr "Dibujando a %1$s en %2$s"
+
+msgid "No sheet yet"
+msgstr "Aún no hay hoja"
+
+msgid "Drawing a new sheet. Your current one stays until this one is ready."
+msgstr "Dibujando una hoja nueva. La actual se queda hasta que la nueva esté lista."
+
+msgid "Drawing three full-length views and two close-ups of %s. This takes about a minute; you can keep editing meanwhile."
+msgstr "Dibujando tres vistas de cuerpo entero y dos primeros planos de %s. Tarda alrededor de un minuto; mientras tanto puedes seguir editando."
+
+msgid "The new sheet didn’t finish, so your last one is still shown. Try again in a moment, or approve the one you see."
+msgstr "La hoja nueva no se terminó, así que se sigue mostrando la anterior. Inténtalo de nuevo en un momento o aprueba la que ves."
+
+msgid "This didn’t use an image."
+msgstr "No se ha usado ninguna imagen."
+
+msgid "Approve"
+msgstr "Aprobar"
+
+msgid "Back to my images"
+msgstr "Volver a mis imágenes"
+
+msgid "Try again draws a new sheet from the same images. It uses one image once it finishes."
+msgstr "Intentar de nuevo dibuja una hoja nueva con las mismas imágenes. Usa una imagen cuando termina."
+
+msgid "This image is %s MB."
+msgstr "Esta imagen pesa %s MB."
+
+msgid "Use one under 10 MB."
+msgstr "Usa una de menos de 10 MB."
+
+msgid "HEIC is an iPhone photo format we can’t use."
+msgstr "HEIC es un formato de fotos de iPhone que no podemos usar."
+
+msgid "Export it as JPG first, then add it here."
+msgstr "Expórtala primero como JPG y luego añádela aquí."
+
+msgid "This file type can’t be used."
+msgstr "Este tipo de archivo no se puede usar."
+
+msgid "Use a JPG, PNG or WebP image."
+msgstr "Usa una imagen JPG, PNG o WebP."
+
+msgid "View your image %d larger"
+msgstr "Ver tu imagen %d más grande"
+
+msgid "Remove image %d"
+msgstr "Quitar la imagen %d"
+
+msgid "Uploading…"
+msgstr "Subiendo…"
+
+msgid "Choose another"
+msgstr "Elegir otra"
+
+msgid "Add image (%d of 3)"
+msgstr "Añadir imagen (%d de 3)"
+
+msgid "Add another"
+msgstr "Añadir otra"
+
+msgid "Add image"
+msgstr "Añadir imagen"
+
+msgid "Optional. Drop it here or browse."
+msgstr "Opcional. Suéltala aquí o explora."
+
+msgid "Drop it here or browse."
+msgstr "Suéltala aquí o explora."
+
+msgid "Who appears in your images?"
+msgstr "¿Quién aparece en tus imágenes?"
+
+msgid "Keep the same character in every image, like you or your brand’s mascot."
+msgstr "Mantén el mismo personaje en todas las imágenes, como tú o la mascota de tu marca."
+
+msgid "Nobody"
+msgstr "Nadie"
+
+msgid "Each image picks its own subject. This is how images work today."
+msgstr "Cada imagen elige su propio motivo. Así funcionan las imágenes hoy."
+
+msgid "Person"
+msgstr "Persona"
+
+msgid "You or someone you work with, drawn from photos or drawings."
+msgstr "Tú o alguien con quien trabajas, dibujado a partir de fotos o dibujos."
+
+msgid "Mascot"
+msgstr "Mascota"
+
+msgid "Your brand’s mascot, drawn from its artwork."
+msgstr "La mascota de tu marca, dibujada a partir de sus ilustraciones."
+
+msgid "A recurring character is part of paid plans. Nobody stays selected until you upgrade."
+msgstr "Un personaje recurrente forma parte de los planes de pago. Nadie sigue seleccionado hasta que mejores tu plan."
+
+msgid "Open AI Engine"
+msgstr "Abrir Motor de IA"
+
+msgid "%s is saved but not used."
+msgstr "%s está guardado, pero no se usa."
+
+msgid "New images won’t include this character. Choose Person again to bring %s back."
+msgstr "Las imágenes nuevas no incluirán este personaje. Vuelve a elegir Persona para recuperar a %s."
+
+msgid "New images won’t include this character. Choose Mascot again to bring %s back."
+msgstr "Las imágenes nuevas no incluirán este personaje. Vuelve a elegir Mascota para recuperar a %s."
+
+msgid "Previous image"
+msgstr "Imagen anterior"
+
+msgid "Images to compare"
+msgstr "Imágenes para comparar"
+
+msgid "Next image"
+msgstr "Imagen siguiente"
+
+msgid "Left and right arrow keys switch images. Escape closes."
+msgstr "Las flechas izquierda y derecha cambian de imagen. Escape cierra."
+
+msgid "Showing %1$s, %2$d of %3$d"
+msgstr "Mostrando %1$s, %2$d de %3$d"
+
+msgid "%s couldn’t be removed. Nothing was deleted. Try again in a moment."
+msgstr "No se pudo eliminar a %s. No se ha borrado nada. Inténtalo de nuevo en un momento."
+
+msgid "The images you uploaded and the character sheet are deleted."
+msgstr "Las imágenes que subiste y la hoja de personaje se han borrado."
+
+msgid "%s was removed."
+msgstr "%s se ha eliminado."
+
+msgid "Character sheet of %1$s in %2$s: front, three-quarter and back views, and two close-ups of the face, neutral and smiling."
+msgstr "Hoja de personaje de %1$s en %2$s: vistas de frente, de tres cuartos y de espaldas, y dos primeros planos de la cara, neutral y sonriendo."
+
+msgid "A copy is saved without the character, which stays with this preset."
+msgstr "La copia se guarda sin el personaje, que se queda en este preajuste."
+
+msgid "Only styles that can draw a character the same way every time are shown. Photo styles and Free prompt are hidden while a character is chosen."
+msgstr "Solo se muestran los estilos que pueden dibujar un personaje igual cada vez. Los estilos fotográficos y el prompt libre se ocultan mientras haya un personaje elegido."
+
+msgid "Your current style, %s, is one of them, so pick a new one here."
+msgstr "Tu estilo actual, %s, es uno de ellos, así que elige uno nuevo aquí."
+
+msgid "Pick a style for %s before you save."
+msgstr "Elige un estilo para %s antes de guardar."
+
+msgid "Pick one of these styles before you save."
+msgstr "Elige uno de estos estilos antes de guardar."
+
+msgid "Set the technique, motifs and framing yourself, as an illustration or a 3D render."
+msgstr "Define tú la técnica, los motivos y el encuadre, como ilustración o render 3D."
+
+msgid "%1$s was drawn in %2$s."
+msgstr "%1$s se dibujó en %2$s."
+
+msgid "To use %1$s, approve a new character sheet drawn in it. Until then, Save keeps %2$s."
+msgstr "Para usar %1$s, aprueba una hoja de personaje nueva dibujada en ese estilo. Hasta entonces, al guardar se mantiene %2$s."
+
+msgid "Draw %1$s in %2$s · 1 image"
+msgstr "Dibujar a %1$s en %2$s · 1 imagen"
+
+msgid "%1$s needs a new sheet for %2$s."
+msgstr "%1$s necesita una hoja nueva para %2$s."
+
+msgid "Approve a sheet in %1$s first, or keep %2$s."
+msgstr "Aprueba primero una hoja en %1$s o mantén %2$s."
+
+msgid "%s uses your image as it is, so no new sheet is needed for this style."
+msgstr "%s usa tu imagen tal cual, así que este estilo no necesita una hoja nueva."
+
+msgid "%s keeps its own drawing style, so no new sheet is needed for this style."
+msgstr "%s mantiene su propio estilo de dibujo, así que este estilo no necesita una hoja nueva."
+
+msgid "Previews show the style without a character until a character sheet is approved."
+msgstr "Las vistas previas muestran el estilo sin personaje hasta que se apruebe una hoja de personaje."
+
+msgid "%1$s appears in new images on the %2$d site that uses it."
+msgid_plural "%1$s appears in new images on all %2$d sites."
+msgstr[0] "%1$s aparece en las imágenes nuevas del sitio que lo usa."
+msgstr[1] "%1$s aparece en las imágenes nuevas de los %2$d sitios."
