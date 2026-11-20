@@ -30,58 +30,92 @@ const REPO_ROOT = path.resolve(__dirname, "../..");
 const SHOTS_DIR =
   process.env.STRUCTURA_E2E_SHOTS ?? path.resolve(__dirname, "../test-results/cloud-consent");
 
-/** Every option the anonymous-bootstrap path reads or writes. */
+/**
+ * Every option the anonymous-bootstrap path reads or writes, in the order
+ * they are deleted. `Anonymous_Bootstrap::has_cloud_consent()` backfills the
+ * consent flag on any request that still finds stashed license credentials or
+ * the bootstrapped-at sentinel, so those go first and consent last; deleting
+ * consent first let a background request re-create it (2026-11-20).
+ */
 const CLOUD_STATE_OPTIONS = [
-  "structura_cloud_consent",
   "structura_license_data",
-  "structura_install_id",
   "structura_install_bootstrapped_at",
+  "structura_install_id",
+  "structura_cloud_consent",
 ] as const;
 
-function wp(args: string[]): string {
-  return execFileSync("ddev", ["wp", ...args], {
+type OptionBackup = Record<string, { value: unknown } | null>;
+
+/**
+ * Runs PHP in one wp-cli call and returns what it printed between the
+ * markers. Each `ddev wp` call waits for ddev's file sync, so the option work
+ * is batched: one call to back up and clear, one per server-side check, one
+ * to restore.
+ */
+function wpEval(php: string): string {
+  const out = execFileSync("ddev", ["wp", "eval", `echo '<<<E2E'; ${php} echo 'E2E>>>';`], {
     cwd: REPO_ROOT,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
-  }).trim();
+  });
+  const match = out.match(/<<<E2E([\s\S]*)E2E>>>/);
+  if (!match) throw new Error(`wp eval printed no result: ${out.slice(0, 300)}`);
+  return match[1];
 }
 
-/** JSON-encoded option value, or null when the option does not exist. */
-function getOption(name: string): string | null {
-  try {
-    return wp(["option", "get", name, "--format=json"]);
-  } catch {
-    return null;
-  }
+/** A PHP expression that decodes `value` (base64 JSON, so no quoting can break it). */
+const phpValue = (value: unknown) =>
+  `json_decode(base64_decode('${Buffer.from(JSON.stringify(value)).toString("base64")}'), true)`;
+
+/** Each option's stored value, or null when it does not exist. One wp-cli call. */
+function readOptions(names: readonly string[]): Record<string, unknown> {
+  return JSON.parse(
+    wpEval(
+      `$absent = new stdClass(); $out = [];
+       foreach (${phpValue(names)} as $name) { $v = get_option($name, $absent); $out[$name] = $v === $absent ? null : $v; }
+       echo wp_json_encode($out);`,
+    ),
+  );
 }
 
-function deleteOption(name: string): void {
-  try {
-    wp(["option", "delete", name]);
-  } catch {
-    // already absent
-  }
+/** Backs up every cloud-state option, then deletes them in order. One wp-cli call. */
+function backUpAndClear(): OptionBackup {
+  return JSON.parse(
+    wpEval(
+      `$absent = new stdClass(); $backup = [];
+       foreach (${phpValue(CLOUD_STATE_OPTIONS)} as $name) {
+         $v = get_option($name, $absent);
+         $backup[$name] = $v === $absent ? null : ['value' => $v];
+         delete_option($name);
+       }
+       echo wp_json_encode($backup);`,
+    ),
+  );
+}
+
+/** Puts every option back as it was (absent ones stay absent). One wp-cli call. */
+function restore(backup: OptionBackup): void {
+  wpEval(
+    `foreach (${phpValue(backup)} as $name => $entry) {
+       if ($entry === null) { delete_option($name); } else { update_option($name, $entry['value']); }
+     }`,
+  );
 }
 
 test.describe.serial("first-run cloud consent gate", () => {
-  const backup: Record<string, string | null> = {};
+  // A `ddev wp` call took 74 to 182 s on 2026-11-20 while ddev's Mutagen sync
+  // was scanning (seconds on a healthy sync); the test makes two, the hooks
+  // one each. The calls block, so the default timeout only fires afterwards.
+  test.describe.configure({ timeout: 8 * 60_000 });
+
+  let backup: OptionBackup | null = null;
 
   test.beforeAll(() => {
-    for (const name of CLOUD_STATE_OPTIONS) {
-      backup[name] = getOption(name);
-      deleteOption(name);
-    }
+    backup = backUpAndClear();
   });
 
   test.afterAll(() => {
-    for (const name of CLOUD_STATE_OPTIONS) {
-      const value = backup[name];
-      if (value === null || value === undefined) {
-        deleteOption(name);
-      } else {
-        wp(["option", "update", name, value, "--format=json"]);
-      }
-    }
+    if (backup) restore(backup);
   });
 
   test("a fresh install shows only the consent screen and contacts nothing until the admin opts in", async ({
@@ -102,9 +136,10 @@ test.describe.serial("first-run cloud consent gate", () => {
     await expect(page.getByTestId("app-error-boundary")).toHaveCount(0);
 
     // Server-side proof that merely opening the page phoned nobody.
-    expect(getOption("structura_cloud_consent"), "consent flag").toBeNull();
-    expect(getOption("structura_install_id"), "install id").toBeNull();
-    expect(getOption("structura_install_bootstrapped_at"), "bootstrap sentinel").toBeNull();
+    const before = readOptions(CLOUD_STATE_OPTIONS);
+    expect(before.structura_cloud_consent, "consent flag").toBeNull();
+    expect(before.structura_install_id, "install id").toBeNull();
+    expect(before.structura_install_bootstrapped_at, "bootstrap sentinel").toBeNull();
 
     await page.screenshot({ path: path.join(SHOTS_DIR, "gate-light.png"), fullPage: true });
     await page.emulateMedia({ colorScheme: "dark" });
@@ -118,10 +153,11 @@ test.describe.serial("first-run cloud consent gate", () => {
     await expectSpaMounted(page, crashes);
     await page.screenshot({ path: path.join(SHOTS_DIR, "app-after-consent.png"), fullPage: false });
 
-    expect(getOption("structura_cloud_consent")).toBe('"yes"');
-    expect(getOption("structura_install_id"), "install id minted after opt-in").not.toBeNull();
+    const after = readOptions(CLOUD_STATE_OPTIONS);
+    expect(after.structura_cloud_consent).toBe("yes");
+    expect(after.structura_install_id, "install id minted after opt-in").not.toBeNull();
     expect(
-      getOption("structura_install_bootstrapped_at"),
+      after.structura_install_bootstrapped_at,
       "bootstrap ran (and succeeded against the cloud) in the consent request",
     ).not.toBeNull();
   });

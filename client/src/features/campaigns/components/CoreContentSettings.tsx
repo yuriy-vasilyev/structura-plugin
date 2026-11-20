@@ -11,6 +11,8 @@
  *     (`structura_post_status`, removed in 8ad567586). Putting it here gives
  *     agencies running many campaigns per site per-campaign control over the
  *     review workflow (e.g. drafts for the blog, auto-publish for releases).
+ *   - Registry rules with `placement: "content"` (the References list) get a
+ *     switch row here too: they decide what goes into the post.
  *
  * Visual treatment matches the grid block that was previously inlined at the
  * top of AdvancedSettings (12px icon + tiny uppercase label + Select / Input).
@@ -18,8 +20,8 @@
 
 import { useMemo } from "react";
 import { __ } from "@wordpress/i18n";
-import { FileStack, Loader2, Send, UserCheck } from "lucide-react";
-import { InputField, Select } from "@structura/ui";
+import { BookOpen, FileStack, Loader2, Send, UserCheck } from "lucide-react";
+import { cn, InputField, Select, Switch } from "@structura/ui";
 import {
   clampPostLength,
   FREE_POST_LENGTH_MAX,
@@ -28,8 +30,11 @@ import {
 } from "@structura/types";
 import { useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { useSitePersonasQuery } from "@/features/personas";
-import { useLicense } from "@/features/settings";
+import { SeoRuleName, useLicense, useSeoRules } from "@/features/settings";
+import { isContentSettingRule } from "@/features/settings/api/useSeoRules";
 import { CampaignLanguageField } from "@/features/campaigns/components/CampaignLanguageField";
+import { NeedsAuthorityLinksHint } from "@/features/campaigns/components/NeedsAuthorityLinksHint";
+import { isSeoRuleUnavailable, withSeoRule } from "@/features/campaigns/helpers";
 import { CampaignPostStatus } from "@/features/campaigns/types";
 
 const POST_STATUS_OPTIONS: Array<{ value: CampaignPostStatus; label: string }> = [
@@ -49,8 +54,15 @@ export interface CoreContentSettingsProps {
 
 export const CoreContentSettings = ({ showLanguage = true }: CoreContentSettingsProps = {}) => {
   const { formData, updateForm } = useCampaignForm();
-  const { isPaidLicense } = useLicense();
+  const { isPaidLicense, isLicensed } = useLicense();
+  const { rules } = useSeoRules();
   const { intelligence, structure } = formData;
+  // Registry rules that shape what goes into the post (the References list)
+  // sit here, always visible, rather than in Advanced Settings > SEO
+  // Directives (owner, 2026-11-20).
+  const contentRules = rules
+    ? Object.entries(rules).filter(([, rule]) => isContentSettingRule(rule))
+    : [];
   const maxPostLength = isPaidLicense ? POST_LENGTH_MAX : FREE_POST_LENGTH_MAX;
   // Site-scoped: the whole workspace library here listed every sibling
   // site's voice on a multi-site workspace (2026-09-22).
@@ -197,6 +209,47 @@ export const CoreContentSettings = ({ showLanguage = true }: CoreContentSettings
           )}
         </p>
       )}
+
+      {contentRules.map(([name, rule]) => {
+        const ruleName = name as SeoRuleName;
+        const isProLocked = ["byok", "cloud"].includes(rule.plan) && !isPaidLicense;
+        const isFreeLocked = rule.plan === "free" && !isLicensed;
+        const needsAuthority =
+          !isProLocked && !isFreeLocked && isSeoRuleUnavailable(ruleName, intelligence.seoRules);
+        const isDisabled = isProLocked || isFreeLocked || needsAuthority;
+        return (
+          <div key={name} className="space-y-1">
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-neutral-200 px-3 py-2.5 dark:border-neutral-700">
+              <div className={cn("min-w-0 space-y-0.5", isDisabled && "opacity-50")}>
+                <span className="flex items-center gap-1.5 text-xs font-medium text-neutral-800 dark:text-neutral-200">
+                  <BookOpen size={12} className="shrink-0 text-brand-500" />
+                  {rule.label}
+                  {isProLocked && (
+                    <span className="shrink-0 rounded-full bg-brand-50 px-1.5 py-0.5 text-[8px] font-black text-brand-600 uppercase dark:bg-brand-950/30 dark:text-brand-400">
+                      {__("Pro", "structura")}
+                    </span>
+                  )}
+                </span>
+                <p className="m-0! text-[11px] leading-snug text-neutral-500 dark:text-neutral-400">
+                  {rule.description}
+                </p>
+              </div>
+              <Switch
+                label={rule.label}
+                hiddenLabel
+                checked={intelligence.seoRules[ruleName] === true}
+                onChange={(checked) =>
+                  updateForm("intelligence", {
+                    seoRules: withSeoRule(intelligence.seoRules, ruleName, checked),
+                  })
+                }
+                disabled={isDisabled}
+              />
+            </div>
+            {needsAuthority && <NeedsAuthorityLinksHint />}
+          </div>
+        );
+      })}
     </div>
   );
 };

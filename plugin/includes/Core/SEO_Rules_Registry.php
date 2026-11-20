@@ -37,6 +37,9 @@ class SEO_Rules_Registry
      * Get the master list of user-toggleable rules for the UI.
      *
      * PRO status is enforced by the cloud, but reflected here for UI badges.
+     * A rule with `'placement' => 'content'` is shown with the campaign's
+     * always-visible content settings instead of under SEO Directives; it is
+     * still stored in the campaign's rules map like every other rule.
      */
     public static function get_all(): array
     {
@@ -75,6 +78,17 @@ class SEO_Rules_Registry
                 'label'       => __('Outbound link authority', 'structura'),
                 'description' => __('Add outbound links to high-authority external sources.', 'structura'),
                 'plan'        => 'byok',
+            ],
+            // Lists only studies and pages the authority links supplied, so the
+            // editors disable it while that rule is off (specs/study-lookup.md
+            // §12.3, §12.11). The wp-admin Generate page repeats the description.
+            // It decides what goes into the post, so the campaign pages show it
+            // with the content settings (owner, 2026-11-20).
+            'references_list'            => [
+                'label'       => __('References list', 'structura'),
+                'description' => __('Add a list of the studies and sources a post cites, in full, at the end of the post.', 'structura'),
+                'plan'        => 'byok',
+                'placement'   => 'content',
             ],
 
             // --- WRITING QUALITY (Pro) ---

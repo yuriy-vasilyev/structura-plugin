@@ -55,6 +55,19 @@ export const FROZEN_FAST_TEXT_MODELS: Readonly<Record<AIProvider, string>> = Obj
 });
 
 /**
+ * The study lookup's relevance call, whatever model the campaign writes with
+ * (2026-11-19): the Standard tier each provider was measured on in
+ * research/2026-11-18-research-depth ("Model dependence and tuning"). The
+ * fast tier cited off-subject papers; the campaign's model made the result
+ * swing with it. FROZEN: moves only with a new judge comparison.
+ */
+export const FROZEN_STUDY_JUDGE_MODELS: Readonly<Record<AIProvider, string>> = Object.freeze({
+  openai: "gpt-5.6-sol",
+  gemini: "gemini-3.8-flash",
+  anthropic: "claude-sonnet-5-5",
+});
+
+/**
  * Social copy and video script on BYOK and Free: the writer model a post
  * was generated with → the model its social copy runs on. A current tier
  * model maps to the model that held the same provider and tier before

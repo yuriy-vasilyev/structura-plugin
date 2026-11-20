@@ -9,7 +9,16 @@ export interface SettingsSeoRule {
   label: string;
   description: string;
   plan: PlanId;
+  /**
+   * `"content"`: shown with the campaign's always-visible content settings
+   * instead of under SEO Directives (the References list). Absent from plugin
+   * builds before 2.42.0, where every rule sits in SEO Directives.
+   */
+  placement?: "content";
 }
+
+/** Whether a registry rule is shown with the content settings rather than under SEO Directives. */
+export const isContentSettingRule = (rule: SettingsSeoRule): boolean => rule.placement === "content";
 
 export const useSeoRules = () => {
   const { hasWorkspace } = useLicense();

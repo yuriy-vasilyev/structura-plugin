@@ -38,11 +38,12 @@ import { useAiConnections, useDefaultProviders, useLicense } from "@/features/se
 import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
 import { AiLabelReminder } from "@/features/campaigns/components/AiLabelReminder";
 import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
-import type { SUPPORTED_BLOCK_TYPE } from "@/features/settings/types";
+import type { SeoRuleName, SUPPORTED_BLOCK_TYPE } from "@/features/settings/types";
 import { useAiSettingsQuery } from "@/features/ai-engine";
 import { resolveDefaultTier, usesRecommendedModel } from "@/features/ai-engine/helpers";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
-import { getCampaignFormDataForLicense } from "@/features/campaigns/helpers";
+import { getCampaignFormDataForLicense, isSeoRuleUnavailable, withSeoRule } from "@/features/campaigns/helpers";
+import { NeedsAuthorityLinksHint } from "@/features/campaigns/components/NeedsAuthorityLinksHint";
 import {
   clampPostLength,
   FREE_POST_LENGTH_MAX,
@@ -85,9 +86,14 @@ const Section = ({
         className
       )}
     >
+      {/* The overline label. Color, size and weight need `!`: wp-admin's
+          unlayered `h3` rule (#1d2327, 1.3em, 600) beat the layered utilities
+          and left these headings at 1.12:1 on the dark card (2026-11-20).
+          neutral-500 / dark neutral-400 pass AA (4.83:1, 6.99:1); the
+          guide's neutral-400 / dark neutral-500 do not. */}
       <h3
         id={titleId}
-        className="mt-0! mb-2! text-xs font-black tracking-widest text-neutral-400 uppercase dark:text-neutral-500"
+        className="mt-0! mb-2! text-[10px]! leading-none font-black! tracking-widest text-neutral-500! uppercase dark:text-neutral-400!"
       >
         {title}
       </h3>
@@ -479,10 +485,11 @@ const GeneratePostPage = () => {
   // clusters (identity/authority/competitors) rather than merging field-wise.
   const patch = (p: Partial<CampaignFormData>) => setFormData((prev) => ({ ...prev, ...p }));
 
-  const updateSeoRule = (key: string, value: boolean) =>
+  const updateSeoRule = (key: SeoRuleName, value: boolean) =>
     update("intelligence", {
-      seoRules: { ...formData.intelligence.seoRules, [key]: value },
+      seoRules: withSeoRule(formData.intelligence.seoRules, key, value),
     } as Partial<CampaignFormData["intelligence"]>);
+  const referencesNeedAuthority = isSeoRuleUnavailable("references_list", formData.intelligence.seoRules);
 
   const isValid = formData.identity.objective.length >= MIN_TOPIC_LENGTH;
   const hasApiKey = activeProviders.length > 0;
@@ -744,6 +751,11 @@ const GeneratePostPage = () => {
           onUpload={uploadResearchDoc}
           labels={RESEARCH_ATTACHMENTS_LABELS}
           disabled={isGenerating}
+          // The card's title: wp-admin's unlayered `h3` rule (#1d2327, 1.3em,
+          // 600) beat the component's layered utilities, 1.12:1 on the dark
+          // card (2026-11-20). Card-title token with `!` from here until the
+          // `h3` in packages/ui ResearchAttachments carries it itself.
+          className="[&_h3]:text-xl! [&_h3]:leading-snug [&_h3]:font-bold! [&_h3]:text-neutral-900! dark:[&_h3]:text-white!"
         />
       )}
 
@@ -1160,6 +1172,22 @@ const GeneratePostPage = () => {
               checked={formData.intelligence.seoRules.outbound_link_authority}
               onChange={(v) => updateSeoRule("outbound_link_authority", v)}
             />
+            <div>
+              <SeoToggle
+                label={__("References list", "structura")}
+                checked={formData.intelligence.seoRules.references_list === true}
+                onChange={(v) => updateSeoRule("references_list", v)}
+                disabled={referencesNeedAuthority}
+              />
+              {/* Same text as the rule's description in SEO_Rules_Registry, which the campaign pages show. */}
+              <p className="m-0! mt-1! text-[11px] leading-snug text-neutral-500 dark:text-neutral-400">
+                {__(
+                  "Add a list of the studies and sources a post cites, in full, at the end of the post.",
+                  "structura"
+                )}
+              </p>
+              {referencesNeedAuthority && <NeedsAuthorityLinksHint besideAuthority className="mt-1!" />}
+            </div>
             <SeoToggle
               label={__("E-E-A-T writing signals", "structura")}
               checked={formData.intelligence.seoRules.eeat_signals}
@@ -1226,13 +1254,22 @@ const SeoToggle = ({
   label,
   checked,
   onChange,
+  disabled = false,
 }: {
   label: string;
   checked: boolean;
   onChange: (value: boolean) => void;
+  disabled?: boolean;
 }) => (
   <div className="flex items-center justify-between">
-    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">{label}</span>
-    <Switch label={label} hiddenLabel checked={checked} onChange={onChange} />
+    <span
+      className={cn(
+        "text-sm font-medium text-neutral-700 dark:text-neutral-300",
+        disabled && "opacity-50"
+      )}
+    >
+      {label}
+    </span>
+    <Switch label={label} hiddenLabel checked={checked} onChange={onChange} disabled={disabled} />
   </div>
 );

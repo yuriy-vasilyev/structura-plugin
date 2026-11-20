@@ -113,11 +113,19 @@ export type SeoRuleName =
   | "include_statistics"
   | "internal_link_optimization"
   | "outbound_link_authority"
+  | "references_list"
   | "eeat_signals"
   | "entity_coverage";
 
 export type SeoOptimizationRules = {
-  [key in SeoRuleName]: boolean;
+  [key in Exclude<SeoRuleName, "references_list">]: boolean;
+} & {
+  /**
+   * The references list (specs/study-lookup.md §12.3). Optional on read:
+   * campaigns saved before the rule existed lack the key, and a missing key
+   * means off.
+   */
+  references_list?: boolean;
 };
 
 /**

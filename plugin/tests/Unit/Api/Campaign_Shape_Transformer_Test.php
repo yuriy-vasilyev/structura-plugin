@@ -3,6 +3,7 @@
 namespace Structura\Tests\Unit\Api;
 
 use Structura\Api\Campaign_Shape_Transformer;
+use Structura\Scheduler\Campaign_Validator;
 use Structura\Tests\Unit\TestCase;
 
 /**
@@ -803,5 +804,94 @@ class Campaign_Shape_Transformer_Test extends TestCase
 
         $old = Campaign_Shape_Transformer::cloud_to_wp(['campaignId' => 'c']);
         $this->assertNull($old['aiAdvice']);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    //  SEO RULE SHAPES
+    //
+    //  The customer portal stores `seoRules` as a list of the ids that are
+    //  on; wp-admin stores an `{id: bool}` map and its SPA reads only that.
+    //  A list cast with `(array)` reached the SPA as `["include_faq_section",
+    //  ...]`, so every rule of a portal-made campaign showed off, and a save
+    //  wrote `[true, true]` back.
+    // ──────────────────────────────────────────────────────────────────────
+
+    public function test_cloud_to_wp_reads_a_portal_rule_list_as_a_map()
+    {
+        $wp = Campaign_Shape_Transformer::cloud_to_wp([
+            'campaignId' => 'c',
+            'seoRules'   => ['include_faq_section', 'outbound_link_authority'],
+        ]);
+
+        $this->assertSame([
+            'include_faq_section'        => true,
+            'include_action_steps'       => false,
+            'include_statistics'         => false,
+            'internal_link_optimization' => false,
+            'outbound_link_authority'    => true,
+            'references_list'            => false,
+            'eeat_signals'               => false,
+            'entity_coverage'            => false,
+        ], $wp['intelligence']['seoRules']);
+    }
+
+    public function test_cloud_to_wp_keeps_an_id_from_a_rule_list_that_wp_admin_does_not_show()
+    {
+        $wp = Campaign_Shape_Transformer::cloud_to_wp([
+            'campaignId' => 'c',
+            'seoRules'   => ['number_in_title'],
+        ]);
+
+        $this->assertTrue($wp['intelligence']['seoRules']['number_in_title']);
+        $this->assertFalse($wp['intelligence']['seoRules']['include_faq_section']);
+    }
+
+    public function test_cloud_to_wp_reads_an_empty_rule_list_as_every_rule_off()
+    {
+        $wp = Campaign_Shape_Transformer::cloud_to_wp(['campaignId' => 'c', 'seoRules' => []]);
+
+        $this->assertSame([], array_filter($wp['intelligence']['seoRules']));
+        $this->assertArrayHasKey('include_faq_section', $wp['intelligence']['seoRules']);
+    }
+
+    public function test_cloud_to_wp_passes_a_wp_admin_rule_map_through()
+    {
+        // Saved before the references list existed: the missing key stays
+        // missing and the SPA reads it as off.
+        $map = ['include_faq_section' => true, 'outbound_link_authority' => false, 'eeat_signals' => true];
+
+        $wp = Campaign_Shape_Transformer::cloud_to_wp(['campaignId' => 'c', 'seoRules' => $map]);
+
+        $this->assertSame($map, $wp['intelligence']['seoRules']);
+    }
+
+    public function test_a_wp_admin_save_of_a_portal_campaign_writes_its_rules_back_as_a_map()
+    {
+        $wp = Campaign_Shape_Transformer::cloud_to_wp([
+            'campaignId' => 'c',
+            'seoRules'   => ['include_faq_section', 'outbound_link_authority'],
+        ]);
+
+        // The SPA sends back what it read, through JSON, and the save runs
+        // the same validator and patch builder as Rest_Api.
+        $sent      = json_decode(json_encode($wp['intelligence']['seoRules']), true);
+        $validated = Campaign_Validator::validate([
+            'name'                   => 'Portal campaign',
+            'topic'                  => 'A sufficiently long objective for the validator to accept',
+            'text_provider'          => 'gemini',
+            'cron_schedule'          => '0 9 * * 1',
+            'seo_optimization_rules' => $sent,
+        ]);
+        $this->assertIsArray($validated);
+
+        $patch = Campaign_Shape_Transformer::wp_update_to_cloud($validated, []);
+
+        $this->assertSame(
+            ['include_faq_section', 'outbound_link_authority'],
+            array_keys(array_filter($patch['seoRules'], function ($on, $id) {
+                return is_string($id) && $on === true;
+            }, ARRAY_FILTER_USE_BOTH))
+        );
+        $this->assertFalse($patch['seoRules']['references_list']);
     }
 }

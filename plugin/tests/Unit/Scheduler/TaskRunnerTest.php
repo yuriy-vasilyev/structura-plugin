@@ -1175,6 +1175,52 @@ class TaskRunnerTest extends TestCase
         $this->assertInstanceOf(\WP_Error::class, $response);
         $this->assertSame(['status' => 401], $response->get_error_data());
     }
+
+    /**
+     * The references list (specs/study-lookup.md §12.7) rides in the
+     * blueprint next to `faq`. Nothing between the delivery payload and the
+     * serializer may drop it. `wp_insert_post` throws after capture so the
+     * metadata writes never run.
+     *
+     * @test
+     */
+    public function a_delivered_references_list_reaches_the_post_content(): void
+    {
+        Functions\when('home_url')->justReturn('https://example.test');
+        Functions\when('sanitize_title')->returnArg();
+        $license_manager = Mockery::mock('alias:Structura\Core\License_Manager');
+        $license_manager->shouldReceive('is_pro')->andReturn(true);
+
+        $captured = null;
+        Functions\when('wp_insert_post')->alias(function ($args) use (&$captured) {
+            $captured = $args;
+            throw new \RuntimeException('stop after capture');
+        });
+
+        $entry = 'Johnson, S. M. (2021). Sleep and shift work. <em>Sleep Health</em>, 7(3), 45–67. <a href="https://doi.org/10.1016/j.sleh.2021.01.002">https://doi.org/10.1016/j.sleh.2021.01.002</a>';
+
+        try {
+            (new Task_Runner())->apply_blueprint([
+                'campaign_id' => 'c1',
+                'campaign'    => [
+                    'id'           => 'c1',
+                    'intelligence' => ['replaceLongDashes' => true, 'disableEmojis' => true],
+                    'structure'    => ['postStatus' => 'draft'],
+                ],
+                'ai_output'   => [
+                    'title'      => 'Sleep on shifts',
+                    'blocks'     => [['type' => 'core/paragraph', 'content' => 'Intro.']],
+                    'references' => ['heading' => 'References', 'items' => [$entry]],
+                ],
+            ]);
+        } catch (\RuntimeException $e) {
+            // Expected once the insert args are captured.
+        }
+
+        $this->assertIsArray($captured, 'The blueprint must reach wp_insert_post.');
+        $this->assertStringContainsString('<h2 class="wp-block-heading">References</h2>', $captured['post_content']);
+        $this->assertStringContainsString('<li>' . $entry . '</li>', $captured['post_content']);
+    }
 }
 
 /**

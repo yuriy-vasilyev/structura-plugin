@@ -53,7 +53,7 @@ export const StepSeoRules = () => {
             hasProAccess={isPaidLicense}
             isFree={rule.plan === "free"}
             hasFreeAccess={isLicensed}
-            isEnabled={seoRules[name as SeoRuleName]}
+            isEnabled={seoRules[name as SeoRuleName] === true}
             onToggle={(id) => toggleRule(id as SeoRuleName)}
           />
         ))}

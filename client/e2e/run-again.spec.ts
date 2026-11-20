@@ -39,7 +39,9 @@ const COMPLETED_RUN = {
         language: "en",
         personaName: "House voice",
       },
-      structure: { postStatus: "draft" },
+      // The plugin's one-off campaign always carries `disclosure` (since
+      // 2026-04-07, before snapshots existed), and `flattenCampaign` reads it.
+      structure: { postStatus: "draft", disclosure: { enabled: false, text: "" } },
       taxonomy: {
         categories: { mode: "auto", list: [] },
         tags: { mode: "auto", list: [] },
@@ -80,9 +82,13 @@ test.describe("single-post Run again", () => {
 
     // The header button opens the confirmation — it must NOT generate yet.
     await page.getByRole("button", { name: /Run again/i }).click();
+    // Assert on the title, not the `role="dialog"` element: the shared Dialog
+    // puts the role on a 0px-tall wrapper whose children are all fixed, which
+    // Playwright reports as hidden even while the panel is on screen.
     const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByText("Draft")).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: "Run again?" })).toBeVisible();
+    // The post-status badge (the row's "Saves as a draft" also contains "draft").
+    await expect(dialog.getByText("Draft", { exact: true })).toBeVisible();
 
     // Confirm inside the dialog → real flattenCampaign runs on the snapshot.
     const generated = page.waitForResponse((r) =>

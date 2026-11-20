@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.42.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.41.0...v2.42.0) (2026-11-20)
+
+
+### Features
+
+* **functions:** add the product update digest email and its Resend scripts ([6b3a8f0](https://github.com/yuriy-vasilyev/structura-core/commit/6b3a8f02aba235f60b1edc1f0718c89205b3e97f))
+* **functions:** cite published studies in posts when the topic has them ([f441dd4](https://github.com/yuriy-vasilyev/structura-core/commit/f441dd4c05a514bc3de04614057ececf2a61b474))
+* **functions:** posts can end with a references list of the studies and sources they cite ([85cc84c](https://github.com/yuriy-vasilyev/structura-core/commit/85cc84cfca6388ed1042e6ec6e2f71eafc7714b8))
+* **functions:** reconcile AppSumo refunds weekly ([e77b2f3](https://github.com/yuriy-vasilyev/structura-core/commit/e77b2f3b90195d3207f0cc9b26e4b8b0a20e032b))
+* **plugin:** a references list at the end of posts, and campaigns made in the customer portal keep their rules in wp-admin ([bba34fe](https://github.com/yuriy-vasilyev/structura-core/commit/bba34fed9f1a4811140f4dad5e9f68d98c953c2d))
+* **plugin:** the References list toggle sits with the campaign's content settings in wp-admin ([d8e74ec](https://github.com/yuriy-vasilyev/structura-core/commit/d8e74ec2377bf277169b3a0962c4cb78569bcddf))
+* **web:** a References list switch on campaigns and single posts in the customer portal ([132b0d3](https://github.com/yuriy-vasilyev/structura-core/commit/132b0d3dc1b1802d9e2471377b38e8246298931e))
+* **web:** list the published studies a post drew on ([41d0318](https://github.com/yuriy-vasilyev/structura-core/commit/41d031859abfcb8d37506e7e18cca60a09a666c8))
+* **web:** the References list switch sits with the campaign's content settings, not under SEO directives ([b29acab](https://github.com/yuriy-vasilyev/structura-core/commit/b29acabb57297cd3968ad59cfd4c62404a27298f))
+* **www:** add product update pages ([88edfe0](https://github.com/yuriy-vasilyev/structura-core/commit/88edfe0c339d62e37d842010247c5636fa761691))
+* **www:** add the update page for cited studies and the references list ([09598f9](https://github.com/yuriy-vasilyev/structura-core/commit/09598f9d6830282cd0ddaeab425c5eacee9a4491))
+* **www:** illustrate the cited studies and references list update page ([6c25a03](https://github.com/yuriy-vasilyev/structura-core/commit/6c25a03c5770f0e73bae9456e90c9d05f69ddd4c))
+* **www:** say what got better on the cited studies update page ([63fbfb5](https://github.com/yuriy-vasilyev/structura-core/commit/63fbfb58c6366adefea4bd3632a8ba14d12e269e))
+* **www:** split cited studies and the references list into two update pages ([80cff64](https://github.com/yuriy-vasilyev/structura-core/commit/80cff648049dfc284f596ba6bdee2ab21e776f2a))
+* **www:** track product update clicks and tag the email's links ([8144a8f](https://github.com/yuriy-vasilyev/structura-core/commit/8144a8f601e6719b34bcaaea0c74234fad364e9d))
+
+
+### Bug Fixes
+
+* **functions:** author names in the references list come from Crossref, so double surnames are right ([1d17352](https://github.com/yuriy-vasilyev/structura-core/commit/1d17352a0d050789ad1280a71bc220ad880f2fef))
+* **functions:** discard bot-check and access-denied pages as source text ([e812382](https://github.com/yuriy-vasilyev/structura-core/commit/e812382789a61e60726c958eb72fded8c5ab1e4b))
+* **functions:** link cited studies to their papers and draw on more of them ([36be2a7](https://github.com/yuriy-vasilyev/structura-core/commit/36be2a79c83fc5aae9516f7baf8511d607103e5d))
+* **functions:** recolor the wordmark text in dark-mode emails ([894c904](https://github.com/yuriy-vasilyev/structura-core/commit/894c9048ad9e6055be0726297fad82feaa863e37))
+* **web:** the Visuals page waits for the plan before showing anything you can pick ([7580df5](https://github.com/yuriy-vasilyev/structura-core/commit/7580df58b13d76b2d364fb27d10cf1d2e80eee94))
+* **www:** the references list switch is in the campaign's content settings ([e2f5bf4](https://github.com/yuriy-vasilyev/structura-core/commit/e2f5bf49ada527c2deb7528773f0941b00ca7411))
+
 ## [2.41.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.40.0...v2.41.0) (2026-11-19)
 
 

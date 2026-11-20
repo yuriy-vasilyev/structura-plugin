@@ -978,6 +978,179 @@ class BlockSerializerTest extends TestCase
     }
 
     // ──────────────────────────────────────────────────────────────────────
+    //  REFERENCES LIST (specs/study-lookup.md §12.7)
+    //
+    //  The cloud builds each entry from the study lookup as inline HTML:
+    //  escaped text, the journal in <em>, one doi.org link. The post shows
+    //  it after the FAQ and before the disclosure as an ordinary heading and
+    //  list the customer can edit in the block editor.
+    // ──────────────────────────────────────────────────────────────────────
+
+    private const ENTRY_JOHNSON = 'Johnson, S. M., &amp; Lee, K. (2021). Sleep and shift work. <em>Sleep Health</em>, 7(3), 45–67. <a href="https://doi.org/10.1016/j.sleh.2021.01.002">https://doi.org/10.1016/j.sleh.2021.01.002</a>';
+
+    /** A title-first entry: the study has no authors and its title starts with a year. */
+    private const ENTRY_TITLE_FIRST = '2019 survey of sleep habits in shift workers. (2020). <em>Occupational Medicine</em>, 70(1), 12–19. <a href="https://doi.org/10.1093/occmed/kqz001">https://doi.org/10.1093/occmed/kqz001</a>';
+
+    /** @test */
+    public function references_render_as_a_core_heading_and_list_after_the_faq_and_before_the_disclosure(): void
+    {
+        $html = $this->serializer->serialize_post([
+            'blocks'       => [['type' => 'core/paragraph', 'content' => 'Intro.']],
+            'action_steps' => ['section_title' => 'How to start', 'steps' => [['name' => 'One', 'text' => 'First.']]],
+            'faq'          => ['section_title' => 'FAQ', 'items' => [['question' => 'Why?', 'answer' => 'Because.']]],
+            'references'   => ['heading' => 'References', 'items' => [self::ENTRY_JOHNSON, self::ENTRY_TITLE_FIRST]],
+        ], ['structure' => ['disclosure' => ['enabled' => true, 'text' => 'AI-assisted.']]]);
+
+        $this->assertStringContainsString(
+            "<!-- wp:heading {\"level\":2} -->\n<h2 class=\"wp-block-heading\">References</h2>\n<!-- /wp:heading -->\n"
+            . "<!-- wp:list {\"ordered\":false} -->\n<ul class=\"wp-block-list\">"
+            . "<!-- wp:list-item -->\n<li>" . self::ENTRY_JOHNSON . "</li>\n<!-- /wp:list-item -->\n"
+            . "<!-- wp:list-item -->\n<li>" . self::ENTRY_TITLE_FIRST . "</li>\n<!-- /wp:list-item -->\n"
+            . "</ul>\n<!-- /wp:list -->\n",
+            $html
+        );
+        $this->assertLessThan(strpos($html, '>References</h2>'), strpos($html, 'Because.'),
+            'The references list comes after the FAQ');
+        $this->assertLessThan(strpos($html, 'AI-assisted.'), strpos($html, self::ENTRY_TITLE_FIRST),
+            'The disclosure comes after the references list');
+    }
+
+    /**
+     * The body list renderer strips leading digits as list markers. A
+     * title-first entry must keep its year.
+     *
+     * @test
+     */
+    public function a_reference_that_starts_with_digits_keeps_them(): void
+    {
+        $html = $this->render_references(['heading' => 'References', 'items' => [self::ENTRY_TITLE_FIRST]]);
+
+        $this->assertStringContainsString('<li>2019 survey of sleep habits in shift workers.', $html);
+    }
+
+    /** @test */
+    public function references_stay_a_separate_list_after_a_body_that_ends_with_a_list(): void
+    {
+        $html = $this->serializer->serialize_post([
+            'blocks'     => [
+                ['type' => 'core/paragraph', 'content' => 'Intro.'],
+                ['type' => 'core/list', 'content' => "- Keep a fixed bedtime\n- Dim the lights", 'attrs' => ['ordered' => false]],
+            ],
+            'references' => ['heading' => 'References', 'items' => [self::ENTRY_JOHNSON]],
+        ]);
+
+        $this->assertSame(2, substr_count($html, '<!-- wp:list {'));
+        $heading = strpos($html, '>References</h2>');
+        $this->assertLessThan($heading, strpos($html, '</ul>'), 'The body list closes before the references heading');
+        $this->assertLessThan(strpos($html, 'Johnson, S. M.'), $heading);
+    }
+
+    /**
+     * Entries are finished HTML. The inline-markdown pass body text gets
+     * would turn the asterisk pair in allele names into emphasis.
+     *
+     * @test
+     */
+    public function reference_entries_are_not_read_as_markdown(): void
+    {
+        $entry = 'Okafor, N. (2022). HLA-B*57:01 and HLA-B*58:01 carriage in a regional cohort. <em>Pharmacogenomics</em>, 23(4), 201–210. <a href="https://doi.org/10.2217/pgs-2022-0001">https://doi.org/10.2217/pgs-2022-0001</a>';
+
+        $html = $this->render_references(['heading' => 'References', 'items' => [$entry]]);
+
+        $this->assertStringContainsString('<li>' . $entry . '</li>', $html);
+        $this->assertSame(1, substr_count($html, '<a '));
+    }
+
+    /**
+     * Free installs strip every external link (strip_external_links), the
+     * entry's doi.org link included. Its text, DOI address and all, stays.
+     *
+     * @test
+     */
+    public function non_pro_installs_keep_the_reference_text_without_the_link(): void
+    {
+        $this->isPro = false;
+
+        $html = $this->render_references(['heading' => 'References', 'items' => [self::ENTRY_JOHNSON]]);
+
+        $this->assertStringContainsString('>References</h2>', $html);
+        $this->assertStringContainsString(
+            '<li>Johnson, S. M., &amp; Lee, K. (2021). Sleep and shift work. <em>Sleep Health</em>, 7(3), 45–67. https://doi.org/10.1016/j.sleh.2021.01.002</li>',
+            $html
+        );
+        $this->assertStringNotContainsString('href=', $html);
+    }
+
+    /** @test */
+    public function the_references_heading_is_rendered_as_plain_text(): void
+    {
+        $html = $this->render_references(['heading' => '<b>Quellen</b> & *Literatur*', 'items' => [self::ENTRY_JOHNSON]]);
+
+        $this->assertStringContainsString('<h2 class="wp-block-heading">Quellen &amp; *Literatur*</h2>', $html);
+    }
+
+    /** @test */
+    public function reference_entries_go_through_wp_kses_post_and_an_entry_left_empty_is_dropped(): void
+    {
+        // The unit TestCase passes wp_kses_post through untouched; a strict
+        // stand-in shows what the real filter removes.
+        Functions\when('wp_kses_post')->alias(function ($text) {
+            return strip_tags((string) $text, '<em><a>');
+        });
+
+        $html = $this->render_references(['heading' => 'References', 'items' => [
+            self::ENTRY_JOHNSON . '<script></script>',
+            '<img src="x" onerror="alert(1)">',
+        ]]);
+
+        $this->assertStringNotContainsString('<script>', $html);
+        $this->assertStringNotContainsString('<img', $html);
+        $this->assertStringContainsString('<em>Sleep Health</em>', $html);
+        $this->assertSame(1, substr_count($html, '<li>'));
+    }
+
+    /** @test */
+    public function blank_and_non_string_reference_items_are_skipped(): void
+    {
+        $html = $this->render_references(['heading' => 'References', 'items' => ['', self::ENTRY_JOHNSON, 42, '   ']]);
+
+        $this->assertSame(1, substr_count($html, '<li>'));
+    }
+
+    /**
+     * @test
+     * @dataProvider malformed_references
+     *
+     * @param mixed $references
+     */
+    public function absent_empty_or_malformed_references_render_nothing($references): void
+    {
+        $post = ['blocks' => [['type' => 'core/paragraph', 'content' => 'Intro.']]];
+
+        $this->assertSame(
+            $this->serializer->serialize_post($post),
+            $this->serializer->serialize_post($post + ['references' => $references])
+        );
+    }
+
+    public function malformed_references(): array
+    {
+        return [
+            'null'                           => [null],
+            'a string'                       => ['References'],
+            'an empty array'                 => [[]],
+            'no items'                       => [['heading' => 'References']],
+            'empty items'                    => [['heading' => 'References', 'items' => []]],
+            'items not a list'               => [['heading' => 'References', 'items' => 'Johnson (2021)']],
+            'only blank or non-string items' => [['heading' => 'References', 'items' => ['', '   ', 42, null, ['Johnson']]]],
+            'no heading'                     => [['items' => [self::ENTRY_JOHNSON]]],
+            'blank heading'                  => [['heading' => '  ', 'items' => [self::ENTRY_JOHNSON]]],
+            'heading that is only markup'    => [['heading' => '<b></b>', 'items' => [self::ENTRY_JOHNSON]]],
+            'heading not a string'           => [['heading' => ['References'], 'items' => [self::ENTRY_JOHNSON]]],
+        ];
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
     //  IMAGE BLOCK (static helper)
     // ──────────────────────────────────────────────────────────────────────
 
@@ -1386,6 +1559,17 @@ class BlockSerializerTest extends TestCase
         return $this->serializer->serialize_post([
             'blocks'       => [['type' => 'core/paragraph', 'content' => 'Intro.']],
             'action_steps' => ['section_title' => 'How to start', 'steps' => $steps],
+        ]);
+    }
+
+    /**
+     * Shorthand: serialize a post whose only extra is a references list.
+     */
+    private function render_references(array $references): string
+    {
+        return $this->serializer->serialize_post([
+            'blocks'     => [['type' => 'core/paragraph', 'content' => 'Intro.']],
+            'references' => $references,
         ]);
     }
 

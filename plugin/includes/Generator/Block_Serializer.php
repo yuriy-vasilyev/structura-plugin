@@ -85,6 +85,14 @@ class Block_Serializer
             $html .= $this->render_faq($ai_data['faq']);
         }
 
+        // References list (specs/study-lookup.md §12.7). Optional on the
+        // wire: absent when the campaign's `references_list` rule is off, the
+        // post cites none of the studies it was given, or the cloud predates
+        // the field.
+        if (isset($ai_data['references'])) {
+            $html .= $this->render_references($ai_data['references']);
+        }
+
         // Add Campaign-specific or Global Disclosure
         $html .= $this->get_disclosure_markup($campaign);
 
@@ -605,6 +613,52 @@ class Block_Serializer
         );
 
         return $html;
+    }
+
+    /**
+     * Renders the references list: a level-2 core heading and an unordered
+     * core list, one item per study the post cites. Returns '' when the
+     * field is malformed or has no usable entry.
+     *
+     * The cloud builds each entry as finished inline HTML (escaped text, the
+     * journal in `<em>`, one doi.org `<a href>`), so it skips `render_list`
+     * and `sanitize_inline_markdown`: the list renderer strips a leading year
+     * from a title-first entry as if it were a list marker, and the markdown
+     * pass reads the asterisks in names such as "HLA-B*57:01" as emphasis.
+     *
+     * @param mixed $references `{heading: string, items: string[]}` from the blueprint.
+     */
+    private function render_references($references): string
+    {
+        if ( ! is_array($references)
+             || ! is_string($references['heading'] ?? null)
+             || ! is_array($references['items'] ?? null)) {
+            return '';
+        }
+
+        $heading = trim(wp_strip_all_tags($references['heading']));
+        if ($heading === '') {
+            return '';
+        }
+
+        $items_html = '';
+        foreach ($references['items'] as $item) {
+            if ( ! is_string($item)) {
+                continue;
+            }
+            $entry = trim(wp_kses_post($item));
+            if ($entry === '') {
+                continue;
+            }
+            $items_html .= self::wrap_block('list-item', '<li>' . $entry . '</li>');
+        }
+
+        if ($items_html === '') {
+            return '';
+        }
+
+        return self::wrap_block('heading', '<h2 class="wp-block-heading">' . esc_html($heading) . '</h2>', ['level' => 2])
+               . self::wrap_block('list', '<ul class="wp-block-list">' . $items_html . '</ul>', ['ordered' => false]);
     }
 
     /**

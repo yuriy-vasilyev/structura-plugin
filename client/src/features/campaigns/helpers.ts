@@ -3,7 +3,7 @@ import { FREE_POST_LENGTH_MAX } from "@structura/types";
 import { CampaignFormData, CampaignPostStatus } from "@/features/campaigns/types";
 import { DEFAULT_CAMPAIGN_FORM_DATA } from "@/features/campaigns/constants";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
-import type { SeoOptimizationRules } from "@/features/settings/types";
+import type { SeoOptimizationRules, SeoRuleName } from "@/features/settings/types";
 
 /**
  * Coerce any persisted / wire post-status value to the two we support.
@@ -41,8 +41,30 @@ const NO_SEO_RULES: SeoOptimizationRules = {
   include_statistics: false,
   internal_link_optimization: false,
   outbound_link_authority: false,
+  references_list: false,
   eeat_signals: false,
   entity_coverage: false,
+};
+
+/**
+ * Whether a rule's toggle is held back because a rule it needs is off: the
+ * references list only lists studies the authority links supplied
+ * (specs/study-lookup.md §12.3).
+ */
+export const isSeoRuleUnavailable = (name: SeoRuleName, rules: SeoOptimizationRules): boolean =>
+  name === "references_list" && rules.outbound_link_authority !== true;
+
+/** Returns `rules` with `name` set to `value`; authority links off also turns the references list off. */
+export const withSeoRule = (
+  rules: SeoOptimizationRules,
+  name: SeoRuleName,
+  value: boolean
+): SeoOptimizationRules => {
+  const next = { ...rules, [name]: value };
+  if (name === "outbound_link_authority" && !value) {
+    next.references_list = false;
+  }
+  return next;
 };
 
 /**

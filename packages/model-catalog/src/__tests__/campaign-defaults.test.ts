@@ -5,6 +5,7 @@ import {
   resolveRecommendedTextModel,
   CONTENT_BLOCKS,
   DEFAULT_CAMPAIGN_CRON,
+  OPT_IN_SEO_RULES,
   SEO_RULES,
   type AIProvider,
   type CampaignDefaultsSeed,
@@ -168,10 +169,29 @@ describe("buildCampaignDefaults values", () => {
 
   it("uses the shared constants and leaves core/code off", () => {
     const d = buildCampaignDefaults(null, seed());
-    expect(d.seoRules).toEqual([...SEO_RULES]);
+    expect(d.seoRules).toEqual(SEO_RULES.filter((rule) => rule !== "references_list"));
     expect(d.enabledBlocks).toEqual(CONTENT_BLOCKS.filter((b) => b !== "core/code"));
     expect(d.cronSchedule).toBe(DEFAULT_CAMPAIGN_CRON);
     expect(d.bodyImages).toBe(true);
     expect(d.featuredImage).toBe(true);
+  });
+
+  it("offers the references list as a toggle and leaves it off (specs/study-lookup.md §12.3)", () => {
+    expect(SEO_RULES).toContain("references_list");
+    expect(OPT_IN_SEO_RULES).toEqual(["references_list"]);
+    // Every plan and seed: no default switches it on.
+    for (const s of [seed(), seed({ seedsModels: false }), seed({ allowedProviders: null })]) {
+      expect(buildCampaignDefaults(null, s).seoRules).not.toContain("references_list");
+    }
+    // The seven rules that were on before it are on, in the same order.
+    expect(buildCampaignDefaults(null, seed()).seoRules).toEqual([
+      "include_faq_section",
+      "include_action_steps",
+      "include_statistics",
+      "internal_link_optimization",
+      "outbound_link_authority",
+      "eeat_signals",
+      "entity_coverage",
+    ]);
   });
 });

@@ -82,6 +82,9 @@ export const getProviderVisual = (id: string): ProviderVisual =>
  *
  * `number_in_title` is deliberately absent — retired 2026-09-14, now owned by
  * the cloud's per-post cadence rotation.
+ *
+ * `references_list` is off by default everywhere (specs/study-lookup.md
+ * §12.3).
  */
 export const DEFAULT_SEO_RULES: SeoOptimizationRules = {
   include_faq_section: true,
@@ -89,6 +92,7 @@ export const DEFAULT_SEO_RULES: SeoOptimizationRules = {
   include_statistics: true,
   internal_link_optimization: true,
   outbound_link_authority: true,
+  references_list: false,
   eeat_signals: true,
   entity_coverage: true,
 };

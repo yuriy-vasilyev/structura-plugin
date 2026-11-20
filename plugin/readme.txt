@@ -322,6 +322,20 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Changelog ==
 
+= 2.42.0 =
+* New: References list. A post can end with a list of the studies and
+  sources it cites, in full, under a heading in the post's language.
+  Turn it on per campaign below Post length, Persona and Post status,
+  or on the Generate a Post page. It is off by default and needs
+  Outbound link authority.
+* Fixed: a campaign created in the customer portal showed every SEO
+  directive as off in wp-admin, and saving it there turned them off.
+* Fixed: the campaign create and edit pages no longer scroll sideways
+  on a phone.
+* Fixed: section headings on the Generate a Post page are readable in
+  dark mode.
+* Fixed: the Spanish and French label of Outbound link authority.
+
 = 2.40.0 =
 * New: the campaign's Stock tab is now called Prepared. Each prepared
   post has a "Preview in customer portal" link, where you can read the
@@ -578,6 +592,11 @@ repository:
 [github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md](https://github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md)
 
 == Upgrade Notice ==
+
+= 2.42.0 =
+Adds the References list for posts that cite studies and sources, and
+fixes campaigns from the customer portal losing their SEO directives
+when saved in wp-admin. Safe upgrade. No database migrations.
 
 = 2.40.0 =
 The Stock tab is now Prepared, with a link to read and edit each

@@ -49,7 +49,8 @@ import { CoreContentSettings } from "@/features/campaigns/components/CoreContent
 import { WritingApproachOverride } from "@/features/campaigns/components/WritingApproachOverride";
 import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
 import { AiLabelReminder } from "@/features/campaigns/components/AiLabelReminder";
-import { normalizePostStatus } from "@/features/campaigns/helpers";
+import { normalizePostStatus, withSeoRule } from "@/features/campaigns/helpers";
+import { isContentSettingRule } from "@/features/settings/api/useSeoRules";
 import { getBadgeIntentByCampaignStatus } from "@/utils/helpers";
 import { campaignStatusLabel } from "@/features/campaigns/labels";
 
@@ -137,7 +138,11 @@ const TabBar = ({
   activeStep: string;
   onStepClick: (step: string) => void;
 }) => (
-  <nav className="flex gap-1 rounded-xl bg-neutral-100 p-1 dark:bg-neutral-800">
+  // Phone width (2026-11-20): four tabs with icons measured 460px in a 390px
+  // viewport and pushed the page sideways. Below `sm` the icons go and the
+  // padding tightens so the tabs fit; a locale whose labels still don't fit
+  // scrolls inside the bar instead of widening the page.
+  <nav className="flex gap-1 overflow-x-auto rounded-xl bg-neutral-100 p-1 sm:overflow-visible dark:bg-neutral-800">
     {steps.map((step) => {
       const isActive = activeStep === step.id;
       const Icon = step.icon;
@@ -147,13 +152,15 @@ const TabBar = ({
           type="button"
           onClick={() => onStepClick(step.id)}
           className={cn(
-            "flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all",
+            "flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-bold transition-all sm:px-4",
             isActive
               ? "text-brand-700 dark:text-brand-300 bg-white shadow-sm dark:bg-neutral-700"
               : "text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300"
           )}
         >
-          <Icon size={14} />
+          {/* `max-sm:hidden`, not `hidden sm:block`: wp-admin's unlayered
+              `.hidden` rule beats the layered `sm:block`. */}
+          <Icon size={14} className="max-sm:hidden" />
           {step.label}
         </button>
       );
@@ -551,16 +558,18 @@ const EditAdvancedSettings = () => {
 
   const toggleRule = (name: SeoRuleName) => {
     updateForm("intelligence", {
-      seoRules: {
-        ...intelligence.seoRules,
-        [name]: !intelligence.seoRules[name as SeoRuleName],
-      },
+      seoRules: withSeoRule(intelligence.seoRules, name, intelligence.seoRules[name] !== true),
     });
   };
 
-  const enabledSeoCount = rules
-    ? Object.keys(rules).filter((k) => intelligence.seoRules[k as SeoRuleName]).length
-    : 0;
+  // The References list sits with the content settings, so it is neither
+  // listed nor counted here.
+  const seoDirectives = rules
+    ? Object.entries(rules).filter(([, rule]) => !isContentSettingRule(rule))
+    : [];
+  const enabledSeoCount = seoDirectives.filter(
+    ([name]) => intelligence.seoRules[name as SeoRuleName]
+  ).length;
   const enabledBlockCount = structure.enabledBlocks.length;
 
   return (
@@ -736,7 +745,7 @@ const EditAdvancedSettings = () => {
                 <Loader2 className="size-3 animate-spin text-neutral-400" />
               </div>
             ) : rules ? (
-              Object.entries(rules).map(([name, rule]) => {
+              seoDirectives.map(([name, rule]) => {
                 const isProLocked = ["byok", "cloud"].includes(rule.plan) && !isPaidLicense;
                 const isFreeLocked = rule.plan === "free" && !isLicensed;
                 return (
@@ -744,7 +753,7 @@ const EditAdvancedSettings = () => {
                     key={name}
                     label={rule.label}
                     description={rule.description}
-                    isEnabled={intelligence.seoRules[name as SeoRuleName]}
+                    isEnabled={intelligence.seoRules[name as SeoRuleName] === true}
                     onToggle={() => toggleRule(name as SeoRuleName)}
                     isDisabled={isProLocked || isFreeLocked}
                     badge={isProLocked ? <ProBadge /> : isFreeLocked ? <FreeBadge /> : undefined}

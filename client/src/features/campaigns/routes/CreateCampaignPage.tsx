@@ -54,6 +54,8 @@ import { usePersonasQuery } from "@/features/personas";
 import { PageBuilderCompatCard } from "@/features/campaigns/components/PageBuilderCompatCard";
 import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
 import { AiLabelReminder } from "@/features/campaigns/components/AiLabelReminder";
+import { withSeoRule } from "@/features/campaigns/helpers";
+import { isContentSettingRule } from "@/features/settings/api/useSeoRules";
 import { CampaignProvider, useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { useCampaignDraftStore } from "@/features/campaigns/context/draftStore";
 import {
@@ -146,8 +148,17 @@ export const HorizontalStepper = ({
   onStepClick: (step: string) => void;
 }) => {
   return (
-    <nav className="py-2">
-      <div className="flex items-start">
+    // Phone width (2026-11-20): German labels pushed the page to 426px in a
+    // 390px viewport, and long labels spilled past their 80px box. Below `sm`
+    // labels stay on one line at 10px and the connector lines give way to a
+    // narrow gap so every locale fits; a strip that still doesn't fit (German
+    // with a skipped step) scrolls inside itself, with room for the active
+    // step's ring. The row is as wide as its content and its columns never
+    // shrink, so the overflow only runs right and all of it can be scrolled
+    // to. Variants that hide below `sm` use `max-sm:hidden`: wp-admin's own
+    // unlayered `.hidden` rule beats a layered `sm:block`.
+    <nav className="overflow-x-auto px-1 py-2 sm:overflow-visible sm:px-0">
+      <div className="flex items-start max-sm:w-max max-sm:min-w-full">
         {steps.map((step, i) => {
           const isActive = activeStep === step.id;
           const isComplete = completedSteps.has(step.id);
@@ -160,7 +171,7 @@ export const HorizontalStepper = ({
           return (
             <div key={step.id} className="flex flex-1 items-start">
               {/* Step circle + label */}
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center max-sm:shrink-0">
                 <button
                   type="button"
                   onClick={() => isReachable && onStepClick(step.id)}
@@ -194,7 +205,7 @@ export const HorizontalStepper = ({
                   </div>
                   <span
                     className={cn(
-                      "max-w-[80px] text-center text-[11px] font-bold leading-tight tracking-wide",
+                      "whitespace-nowrap text-center text-[10px] font-bold leading-tight tracking-wide sm:max-w-[80px] sm:whitespace-normal sm:text-[11px]",
                       isComplete
                         ? "text-emerald-600 dark:text-emerald-400"
                         : isSkipped
@@ -211,12 +222,13 @@ export const HorizontalStepper = ({
                 </button>
               </div>
 
-              {/* Connector line */}
+              {/* Connector line. Below `sm` only the gap stays: the labels
+                  leave some lines a few pixels long, which read as stray dots. */}
               {i < steps.length - 1 && (
-                <div className="mt-5 flex flex-1 items-center px-2">
+                <div className="mt-5 flex flex-1 items-center px-1 sm:px-2">
                   <div
                     className={cn(
-                      "h-0.5 w-full rounded-full transition-colors",
+                      "h-0.5 w-full rounded-full transition-colors max-sm:hidden",
                       completedSteps.has(step.id) || skippedSteps.has(step.id)
                         ? isSkipped
                           ? "bg-neutral-300 dark:bg-neutral-600"
@@ -915,16 +927,21 @@ const AdvancedSettings = () => {
 
   const toggleRule = (name: SeoRuleName) => {
     updateForm("intelligence", {
-      seoRules: { ...intelligence.seoRules, [name]: !intelligence.seoRules[name as SeoRuleName] },
+      seoRules: withSeoRule(intelligence.seoRules, name, intelligence.seoRules[name] !== true),
     });
   };
 
   // Count helpers
   const seoRuleCount = rules ? Object.keys(rules).length : 0;
   const blockCount = CONTENT_BLOCKS.length;
-  const enabledSeoCount = rules
-    ? Object.keys(rules).filter((k) => intelligence.seoRules[k as SeoRuleName]).length
-    : 0;
+  // The References list sits with the content settings, so it is neither
+  // listed nor counted here.
+  const seoDirectives = rules
+    ? Object.entries(rules).filter(([, rule]) => !isContentSettingRule(rule))
+    : [];
+  const enabledSeoCount = seoDirectives.filter(
+    ([name]) => intelligence.seoRules[name as SeoRuleName]
+  ).length;
   const enabledBlockCount = structure.enabledBlocks.length;
 
   return (
@@ -1090,7 +1107,7 @@ const AdvancedSettings = () => {
                 <Loader2 className="size-3 animate-spin text-neutral-400" />
               </div>
             ) : rules ? (
-              Object.entries(rules).map(([name, rule]) => {
+              seoDirectives.map(([name, rule]) => {
                 const isProLocked = ["byok", "cloud"].includes(rule.plan) && !isPaidLicense;
                 const isFreeLocked = rule.plan === "free" && !isLicensed;
                 return (
@@ -1098,7 +1115,7 @@ const AdvancedSettings = () => {
                     key={name}
                     label={rule.label}
                     description={rule.description}
-                    isEnabled={intelligence.seoRules[name as SeoRuleName]}
+                    isEnabled={intelligence.seoRules[name as SeoRuleName] === true}
                     onToggle={() => toggleRule(name as SeoRuleName)}
                     isDisabled={isProLocked || isFreeLocked}
                     badge={

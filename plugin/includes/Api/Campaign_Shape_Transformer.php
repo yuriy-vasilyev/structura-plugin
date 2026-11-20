@@ -2,6 +2,8 @@
 
 namespace Structura\Api;
 
+use Structura\Core\SEO_Rules_Registry;
+
 if ( ! defined('ABSPATH')) {
     exit;
 }
@@ -50,6 +52,37 @@ class Campaign_Shape_Transformer
 
     /** Text providers the provider advice can be hidden for. */
     private const AI_ADVICE_PROVIDERS = ['openai', 'gemini', 'anthropic'];
+
+    /**
+     * Returns a campaign's SEO rules as the `{id: bool}` map the SPA reads.
+     *
+     * The customer portal stores the ids that are on as a list; wp-admin
+     * stores the map. The SPA read a list as every rule off, and a save then
+     * wrote `[true, true]`, which the cloud reads as no rules (2026-11-20). A
+     * list becomes every registry rule, the listed ids on and the rest off,
+     * so a wp-admin save writes a map; the portal and the cloud read both
+     * shapes. A map passes through unchanged.
+     *
+     * @param mixed $raw `seoRules` from the cloud campaign doc.
+     */
+    private static function normalize_seo_rules_read($raw): array
+    {
+        if ( ! is_array($raw)) {
+            $raw = [];
+        }
+        if ($raw !== [] && array_keys($raw) !== range(0, count($raw) - 1)) {
+            return $raw;
+        }
+
+        $rules = array_fill_keys(array_keys(SEO_Rules_Registry::get_all()), false);
+        foreach ($raw as $id) {
+            if (is_string($id) && $id !== '') {
+                $rules[$id] = true;
+            }
+        }
+
+        return $rules;
+    }
 
     /**
      * Convert a cloud flat CampaignDoc to WP cluster shape.
@@ -102,7 +135,7 @@ class Campaign_Shape_Transformer
                 'replaceLongDashes'     => (bool) ($cloud['replaceLongDashes'] ?? false),
                 'disableEmojis'         => (bool) ($cloud['disableEmojis'] ?? false),
                 'postLength'            => (int) ($cloud['postLength'] ?? self::DEFAULT_POST_LENGTH),
-                'seoRules'              => (array) ($cloud['seoRules'] ?? []),
+                'seoRules'              => self::normalize_seo_rules_read($cloud['seoRules'] ?? []),
             ],
             'structure'    => [
                 'enabledBlocks' => (array) ($cloud['enabledBlocks'] ?? []),

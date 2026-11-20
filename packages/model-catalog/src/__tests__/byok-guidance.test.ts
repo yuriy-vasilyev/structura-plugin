@@ -18,6 +18,7 @@ import {
   resolveRecommendedImageModel,
   resolveRecommendedTextModel,
   resolveSocialCopyModelId,
+  resolveStudyJudgeModelId,
   resolveSuggestionModelId,
   resolveSupersededTextModelId,
   resolveUtilityModelId,
@@ -86,6 +87,25 @@ describe("social copy on BYOK and Free (FROZEN)", () => {
       ["openai", "claude-sonnet-5-5"],
     ] as Array<[AIProvider, string]>) {
       expect(resolveSocialCopyModelId(p, id)).toBe(id);
+    }
+  });
+});
+
+// The study lookup's relevance call (2026-11-19, research/2026-11-18-research-depth
+// README "Model dependence and tuning"): measured on these three ids against the
+// campaign's own model, which made what a post is offered swing with it.
+describe("study lookup judge (FROZEN)", () => {
+  it("is the Standard-tier model each provider was measured on", () => {
+    expect(resolveStudyJudgeModelId("openai")).toBe("gpt-5.6-sol");
+    expect(resolveStudyJudgeModelId("anthropic")).toBe("claude-sonnet-5-5");
+    expect(resolveStudyJudgeModelId("gemini")).toBe("gemini-3.8-flash");
+  });
+
+  it("names a text model the registry lists for that provider", () => {
+    for (const p of PROVIDERS) {
+      expect(["top", "mid", "cheap"].map((t) => getRegistryModelId(p, "text", t as "top" | "mid" | "cheap"))).toContain(
+        resolveStudyJudgeModelId(p),
+      );
     }
   });
 });

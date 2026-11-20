@@ -17,7 +17,8 @@ import { RECOMMENDATIONS } from "./recommendations";
  */
 
 /**
- * The SEO directive slugs exposed as toggles.
+ * The SEO directive slugs exposed as toggles. Every one but
+ * {@link OPT_IN_SEO_RULES} is on in {@link buildCampaignDefaults}.
  *
  * `number_in_title` was removed on 2026-09-14: whether a headline carries a
  * digit is craft rather than a per-project decision, and shipping it ON by
@@ -31,9 +32,20 @@ export const SEO_RULES = [
   "include_statistics",
   "internal_link_optimization",
   "outbound_link_authority",
+  // After the rule it needs, so the two switches sit side by side.
+  "references_list",
   "eeat_signals",
   "entity_coverage",
 ] as const;
+
+/**
+ * The {@link SEO_RULES} that stay off until the customer switches them on.
+ * `references_list` lists the studies a post cites, in full, at its end
+ * (specs/study-lookup.md §12.3).
+ */
+export const OPT_IN_SEO_RULES = [
+  "references_list",
+] as const satisfies readonly (typeof SEO_RULES)[number][];
 
 /** Gutenberg block vocabulary the generator supports (WP surfaces). */
 export const CONTENT_BLOCKS = [
@@ -386,7 +398,7 @@ export function buildCampaignDefaults(
     replaceLongDashes: true,
     disableEmojis: true,
     postLength: seed.postLength,
-    seoRules: [...SEO_RULES],
+    seoRules: SEO_RULES.filter((rule) => !(OPT_IN_SEO_RULES as readonly string[]).includes(rule)),
     // All blocks on by default EXCEPT core/code: most blogs (recipes, travel,
     // local business…) have no natural code content, and a default-on code
     // block invites the writer to force-fit one. Mirrors the wp-admin SPA,

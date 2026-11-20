@@ -797,7 +797,7 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:80
 #: plugin/includes/Core/SEO_Rules_Registry.php:75
 msgid "Outbound link authority"
-msgstr "Autorité ausgehende la Links"
+msgstr "Autorité des liens sortants"
 
 #: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:81
 #: plugin/includes/Core/SEO_Rules_Registry.php:76
@@ -12949,3 +12949,15 @@ msgid "%1$s appears in new images on the %2$d site that uses it."
 msgid_plural "%1$s appears in new images on all %2$d sites."
 msgstr[0] "%1$s apparaît dans les nouvelles images du site qui l'utilise."
 msgstr[1] "%1$s apparaît dans les nouvelles images des %2$d sites."
+
+msgid "References list"
+msgstr "Liste des références"
+
+msgid "Add a list of the studies and sources a post cites, in full, at the end of the post."
+msgstr "Ajouter à la fin de l'article la liste complète des études et des sources qu'il cite."
+
+msgid "Turn on authority links to use this."
+msgstr "Activez d'abord les liens d'autorité."
+
+msgid "Turn on Outbound link authority under Advanced Settings > SEO Directives to use this."
+msgstr "Activez d'abord « Autorité des liens sortants » dans Paramètres avancés > Directives SEO."

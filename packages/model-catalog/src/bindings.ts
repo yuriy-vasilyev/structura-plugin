@@ -3,6 +3,7 @@ import type { ModelRole, ModelTier } from "./types";
 import { getDefaultModel, getRegistryModelId, type ImageProvider } from "./catalog";
 import {
   FROZEN_FAST_TEXT_MODELS,
+  FROZEN_STUDY_JUDGE_MODELS,
   FROZEN_LEGACY_DEFAULT_TEXT_MODELS,
   FROZEN_MANAGED_TEXT_MODELS,
   FROZEN_SOCIAL_COPY_TEXT_MODELS,
@@ -95,6 +96,11 @@ export function resolveSocialCopyModelId(provider: AIProvider, writerModelId: st
 /** The fast text model (the authority ranker, served `defaults.fast`). FROZEN pending its own test. */
 export function resolveFastModelId(provider: AIProvider): string {
   return FROZEN_FAST_TEXT_MODELS[provider];
+}
+
+/** The model the study lookup's relevance call runs on, on the writer's provider and key. FROZEN (see `FROZEN_STUDY_JUDGE_MODELS`). */
+export function resolveStudyJudgeModelId(provider: AIProvider): string {
+  return FROZEN_STUDY_JUDGE_MODELS[provider];
 }
 
 /**

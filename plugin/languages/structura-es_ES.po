@@ -796,7 +796,7 @@ msgstr "Incorpora enlaces internos relevantes según el contexto del sitio."
 #: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:80
 #: plugin/includes/Core/SEO_Rules_Registry.php:75
 msgid "Outbound link authority"
-msgstr "Autoridad ausgehende la Links"
+msgstr "Autoridad de enlaces salientes"
 
 #: .tmp-wporg/structura/includes/Core/SEO_Rules_Registry.php:81
 #: plugin/includes/Core/SEO_Rules_Registry.php:76
@@ -12845,3 +12845,15 @@ msgid "%1$s appears in new images on the %2$d site that uses it."
 msgid_plural "%1$s appears in new images on all %2$d sites."
 msgstr[0] "%1$s aparece en las imágenes nuevas del sitio que lo usa."
 msgstr[1] "%1$s aparece en las imágenes nuevas de los %2$d sitios."
+
+msgid "References list"
+msgstr "Lista de referencias"
+
+msgid "Add a list of the studies and sources a post cites, in full, at the end of the post."
+msgstr "Añade al final de la entrada una lista completa de los estudios y fuentes que cita."
+
+msgid "Turn on authority links to use this."
+msgstr "Activa primero los enlaces de autoridad."
+
+msgid "Turn on Outbound link authority under Advanced Settings > SEO Directives to use this."
+msgstr "Activa primero «Autoridad de enlaces salientes» en Configuración avanzada > Directivas SEO."

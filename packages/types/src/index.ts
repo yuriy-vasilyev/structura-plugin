@@ -2329,7 +2329,9 @@ export type Milestone =
   // Surfaced sub-phases of the research window (between `research` and
   // `outlining`). Each is emitted by `gatherResearch` ONLY when that phase
   // actually executes — `competitor_analysis` when the Jina outline scrape
-  // runs, `authority` when vetted-domain link resolution runs. Both are
+  // runs, `authority` (once) when vetted-domain link resolution or the study
+  // lookup runs (2026-11-19, specs/study-lookup.md §7; the lookup has no id
+  // of its own on purpose). Both are
   // Pro-gated work, so on Free tier they never emit (and the SPA hides them).
   // Added 2026-05-27 to make the real SEO research depth visible rather than
   // hiding it inside a single "Researching your topic" beat.
@@ -2631,8 +2633,29 @@ export interface PostResearchSnapshot {
     /** Outline headings, levels 2-4, at most 60. */
     headings?: Array<{ level: 2 | 3 | 4; text: string }>;
   }>;
-  /** Official pages read (0-3), numbered as in the prompt. */
-  official: Array<{ url: string; site: string; title: string; readAt: Timestamp }>;
+  /**
+   * Official pages read (0-3), numbered as in the prompt; after them, the
+   * studies the study lookup supplied (up to 10), numbered the same way
+   * (specs/study-lookup.md §4).
+   */
+  official: Array<{
+    url: string;
+    site: string;
+    title: string;
+    readAt: Timestamp;
+    /**
+     * `"study"` for a study from the study lookup. Optional: absent on pages
+     * and on every snapshot saved before functions deployed after
+     * 2026-11-19; absent reads as a page.
+     */
+    kind?: "page" | "study";
+    /**
+     * A study's authors (the first three, then "et al."), year, journal and
+     * DOI as the index gave them; present only with `kind: "study"`. Never
+     * the abstract: that is prompt input only (specs/study-lookup.md §6).
+     */
+    study?: { doi?: string; authors: string; year?: number; journal?: string };
+  }>;
   /** External links present in the delivered body. */
   cited: Array<{ url: string; site: string; title: string }>;
 }

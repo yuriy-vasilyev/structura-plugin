@@ -1,7 +1,23 @@
-import { forwardRef } from "react";
+import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { Field, Label, Switch as HeadlessSwitch } from "@headlessui/react";
 import { cn } from "../utils";
 import { switchVariants } from "../variants/switch";
+
+/**
+ * The `<button>` Headless UI's `Switch` renders, joining the ids it computes
+ * from the field's own descriptions with the ones the caller passed as
+ * `aria-describedby`. Headless UI's own value would otherwise replace the
+ * caller's: it is set even when the field has no description, as
+ * `undefined`. Same fix as `DescribedInput` in InputField.
+ */
+const DescribedButton = forwardRef<
+  HTMLButtonElement,
+  ButtonHTMLAttributes<HTMLButtonElement> & { extraDescribedBy?: string }
+>(({ extraDescribedBy, "aria-describedby": fieldDescribedBy, ...props }, ref) => {
+  const describedBy = [fieldDescribedBy, extraDescribedBy].filter(Boolean).join(" ");
+  return <button ref={ref} aria-describedby={describedBy || undefined} {...props} />;
+});
+DescribedButton.displayName = "DescribedButton";
 
 export interface SwitchProps {
   label: string;
@@ -11,6 +27,8 @@ export interface SwitchProps {
   className?: string;
   description?: string;
   disabled?: boolean;
+  /** Ids of text outside the Switch that describes it, such as a hint beside a hidden label. */
+  "aria-describedby"?: string;
 }
 
 /**
@@ -21,7 +39,20 @@ export interface SwitchProps {
  * - Section 6.1: Border Radius — rounded-full for switch track and thumb
  */
 export const Switch = forwardRef<HTMLDivElement, SwitchProps>(
-  ({ label, hiddenLabel, checked, onChange, className, description, disabled, ...props }, ref) => {
+  (
+    {
+      label,
+      hiddenLabel,
+      checked,
+      onChange,
+      className,
+      description,
+      disabled,
+      "aria-describedby": callerDescribedBy,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <div ref={ref}>
         <Field className={cn("flex items-start justify-between gap-4", className)}>
@@ -48,6 +79,8 @@ export const Switch = forwardRef<HTMLDivElement, SwitchProps>(
           </div>
 
           <HeadlessSwitch
+            as={DescribedButton}
+            extraDescribedBy={callerDescribedBy}
             checked={checked}
             onChange={onChange}
             disabled={disabled}

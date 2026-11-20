@@ -12930,3 +12930,15 @@ msgid "%1$s appears in new images on the %2$d site that uses it."
 msgid_plural "%1$s appears in new images on all %2$d sites."
 msgstr[0] "%1$s erscheint in neuen Bildern auf der Website, die es nutzt."
 msgstr[1] "%1$s erscheint in neuen Bildern auf allen %2$d Websites."
+
+msgid "References list"
+msgstr "Literaturverzeichnis"
+
+msgid "Add a list of the studies and sources a post cites, in full, at the end of the post."
+msgstr "Füge am Ende des Beitrags eine vollständige Liste der Studien und Quellen hinzu, die er zitiert."
+
+msgid "Turn on authority links to use this."
+msgstr "Schalte dafür zuerst die Autoritäts-Links ein."
+
+msgid "Turn on Outbound link authority under Advanced Settings > SEO Directives to use this."
+msgstr "Schalte dafür zuerst „Autorität ausgehender Links“ unter Erweiterte Einstellungen > SEO-Richtlinien ein."
