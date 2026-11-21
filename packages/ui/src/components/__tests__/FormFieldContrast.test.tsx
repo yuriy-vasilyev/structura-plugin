@@ -18,6 +18,11 @@ import {
 } from "../../variants/form-field";
 
 const PLACEHOLDER_CLASSES = ["placeholder:text-gray-500", "dark:placeholder:text-gray-400"];
+/**
+ * The control's own dark tones carry `!`: wp-admin's forms.css colors inputs
+ * #2c3338 and placeholders #646970, 1.4:1 and 3.2:1 on the dark field (2026-11-21).
+ */
+const CONTROL_CLASSES = ["placeholder:text-gray-500", "dark:placeholder:text-gray-400!", "dark:text-white!"];
 
 /** The class tokens of a cva output. */
 const tokens = (classes: string) => classes.split(/\s+/).filter(Boolean);
@@ -67,8 +72,11 @@ describe("Select placeholder", () => {
 
 describe("input placeholders", () => {
   it("the default group and the element variant both use gray-500, dark gray-400", () => {
+    expect(tokens(formFieldGroupVariants({ intent: "default" }))).toEqual(
+      expect.arrayContaining(PLACEHOLDER_CLASSES)
+    );
+    expect(tokens(formFieldElementVariants())).toEqual(expect.arrayContaining(CONTROL_CLASSES));
     for (const classes of [formFieldGroupVariants({ intent: "default" }), formFieldElementVariants()]) {
-      expect(tokens(classes)).toEqual(expect.arrayContaining(PLACEHOLDER_CLASSES));
       expect(tokens(classes)).not.toContain("placeholder:text-gray-400");
     }
   });
@@ -80,7 +88,7 @@ describe("input placeholders", () => {
         <TextArea label="Notes" placeholder="Anything else" />
       </>
     );
-    expect(screen.getByLabelText("Website")).toHaveClass(...PLACEHOLDER_CLASSES);
-    expect(screen.getByLabelText("Notes")).toHaveClass(...PLACEHOLDER_CLASSES);
+    expect(screen.getByLabelText("Website")).toHaveClass(...CONTROL_CLASSES);
+    expect(screen.getByLabelText("Notes")).toHaveClass(...CONTROL_CLASSES);
   });
 });

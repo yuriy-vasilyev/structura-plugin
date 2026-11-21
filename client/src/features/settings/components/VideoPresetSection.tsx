@@ -135,8 +135,8 @@ export interface VideoPresetSectionProps {
 
 /**
  * The full Video section body for the preset editor. The caller owns the
- * `border-t` divider + `id="video"` anchor wrapper so the locked teaser
- * can live at the same deep-link target.
+ * wrapper (the Visuals page's Video tab panel) so the locked teaser can
+ * live at the same deep-link target.
  */
 export function VideoPresetSection({
   videoStyle,

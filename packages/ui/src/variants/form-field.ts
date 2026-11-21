@@ -53,7 +53,9 @@ export const formFieldGroupVariants = cva(
  */
 export const formFieldElementVariants = cva(
   // Placeholder tones: gray-400 was 2.6:1 on white, under AA (2026-11-08 contrast audit).
-  "w-full !bg-transparent !border-0 !shadow-none !outline-none !ring-0 leading-none focus:outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400 dark:text-white",
+  // The dark text and placeholder need `!`: forms.css colors them #2c3338 and #646970,
+  // which read 1.4:1 and 3.2:1 on the dark field in wp-admin (2026-11-21).
+  "w-full !bg-transparent !border-0 !shadow-none !outline-none !ring-0 leading-none focus:outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400! dark:text-white!",
   {
     variants: {
       size: {

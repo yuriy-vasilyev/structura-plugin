@@ -3657,7 +3657,7 @@ msgstr "Brouillon"
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1013
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:652
 msgid "Images"
-msgstr "Bilde la"
+msgstr "Images"
 
 #: client/src/features/campaigns/components/CampaignRunsTab.tsx:319
 msgid "Publishing"
@@ -12961,3 +12961,33 @@ msgstr "Activez d'abord les liens d'autorité."
 
 msgid "Turn on Outbound link authority under Advanced Settings > SEO Directives to use this."
 msgstr "Activez d'abord « Autorité des liens sortants » dans Paramètres avancés > Directives SEO."
+
+msgid "Switch preset"
+msgstr "Changer de préréglage"
+
+msgid "Search by name"
+msgstr "Rechercher par nom"
+
+msgid "No other presets in your library."
+msgstr "Aucun autre préréglage dans votre bibliothèque."
+
+msgid "No presets match your search."
+msgstr "Aucun préréglage ne correspond à votre recherche."
+
+msgid "Not used"
+msgstr "Non utilisé"
+
+msgid "Not used · edited %s"
+msgstr "Non utilisé · modifié le %s"
+
+msgid "Output"
+msgstr "Sortie"
+
+msgid "Every image gets alt text and an SEO-friendly filename automatically."
+msgstr "Chaque image reçoit automatiquement un texte alternatif et un nom de fichier optimisé pour le SEO."
+
+msgid "Dimensions"
+msgstr "Dimensions"
+
+msgid "Format"
+msgstr "Format"

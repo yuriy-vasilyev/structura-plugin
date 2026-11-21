@@ -9,7 +9,9 @@ const BASE = __dirname;
  */
 export async function matchedDeclarations(el: Element, property: string): Promise<string[]> {
   const compiler = await compile(
-    '@import "@structura/tailwind-config/theme.css";\n@tailwind utilities;',
+    // Tailwind's own theme first, as the apps load it: it holds `--spacing`,
+    // without which no spacing-based utility (`translate-x-1`) compiles.
+    '@import "tailwindcss/theme.css";\n@import "@structura/tailwind-config/theme.css";\n@tailwind utilities;',
     { base: BASE, onDependency: () => {} }
   );
   // optimize() lowers nesting, so every variant becomes one flat selector.

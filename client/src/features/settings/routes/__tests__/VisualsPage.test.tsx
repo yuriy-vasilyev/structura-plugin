@@ -183,12 +183,13 @@ describe("VisualsPage", () => {
 });
 
 /**
- * AI label card (specs/ai-image-label.md §7, 2026-10-05): a switch on the
- * bound preset, sent to the plugin as `content.ai_label` (the field
+ * AI label (specs/ai-image-label.md §7, 2026-10-05): a switch on the bound
+ * preset, sent to the plugin as `content.ai_label` (the field
  * `sanitize_visual_content` accepts). Every plan: no Pro badge, never
- * disabled by plan.
+ * disabled by plan. A card in the side column until 2026-11-21, a group in
+ * the Images tab's Output section since.
  */
-describe("VisualsPage AI label card", () => {
+describe("VisualsPage AI label", () => {
   const preset = (over: Record<string, unknown> = {}) => ({
     presetId: "preset-bound",
     label: "Bound Preset",
@@ -223,16 +224,16 @@ describe("VisualsPage AI label card", () => {
   it.each([
     ["free", false],
     ["byok", true],
-  ])("%s: renders after Format Encoding with an enabled switch and no Pro badge", (plan, paid) => {
+  ])("%s: in Output after Format, an enabled switch and no Pro badge", (plan, paid) => {
     licenseMock.mockReturnValue({ plan, isPaidLicense: paid });
     setPresets();
     renderPage();
 
-    const heading = screen.getByRole("heading", { name: "AI label" });
-    const encoding = screen.getByRole("heading", { name: "Format Encoding" });
-    expect(encoding.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    const card = heading.closest(".p-6\\!") as HTMLElement;
-    expect(card).not.toBeNull();
+    const output = screen.getByRole("region", { name: "Output" });
+    const card = within(output).getByRole("group", { name: "AI label" });
+    expect(within(card).getByRole("heading", { name: "AI label" })).toBeInTheDocument();
+    const encoding = within(output).getByRole("button", { name: /^Format/ });
+    expect(encoding.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(aiSwitch()).toBeEnabled();
     expect(card.textContent).not.toContain("Pro");
     expect(card.className).not.toContain("pointer-events-none");

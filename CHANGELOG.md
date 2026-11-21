@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.43.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.42.0...v2.43.0) (2026-11-21)
+
+
+### Features
+
+* **functions:** add a partner program note to the product update digest ([edbee2e](https://github.com/yuriy-vasilyev/structura-core/commit/edbee2ee006f84fba75814b72f5480524f0cf304))
+* **functions:** listWorkspaceVisualPresets can return a single preset ([f441d4b](https://github.com/yuriy-vasilyev/structura-core/commit/f441d4b1718c24af95d39680027c4645fba05182))
+* **web,client:** site Visuals page is one column with a preset popup and Images and Video tabs ([adc41f2](https://github.com/yuriy-vasilyev/structura-core/commit/adc41f2e64dc1e657e4a0f953f16510ac8d3f8e1))
+
+
+### Bug Fixes
+
+* **client:** page background, titles and field text are readable in dark mode ([2824924](https://github.com/yuriy-vasilyev/structura-core/commit/28249240c43c2c8cded97b42660ce9c4f03855ab))
+* **ui:** an off switch keeps the same gap to the track edge as an on one ([9e6bdc2](https://github.com/yuriy-vasilyev/structura-core/commit/9e6bdc2cd115398db8a03759d8e7655937bb31b2))
+* **www:** date the German DR checker copy change in the sitemap ([cf3dd19](https://github.com/yuriy-vasilyev/structura-core/commit/cf3dd19a9e90bbeba9c72173b3d62f797a845fa5))
+* **www:** link the autoblogging page from the footer ([775ebe1](https://github.com/yuriy-vasilyev/structura-core/commit/775ebe140cf7dc21549295f8883075968ab2ca62))
+* **www:** name the domain ranking query on the German DR checker ([df9f7ad](https://github.com/yuriy-vasilyev/structura-core/commit/df9f7ad64b906af0581630c451dc6a12e358f3e0))
+* **www:** the references list switch is in the campaign's Strategy section ([1f99f27](https://github.com/yuriy-vasilyev/structura-core/commit/1f99f276b002cd860479f46b5d8e1ce1299b6d0b))
+
 ## [2.42.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.41.0...v2.42.0) (2026-11-20)
 
 

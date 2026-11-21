@@ -37,6 +37,7 @@ export * from "./components/VideoStylePreview";
 export * from "./components/PlacementRadio";
 export * from "./components/SectionGateTeaser";
 export * from "./components/PaletteSwatches";
+export * from "./components/PresetLibraryDialog";
 export * from "./components/AiGeneratedBadge";
 export * from "./ai-label-reminder";
 export * from "./components/ProgressBar";

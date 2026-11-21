@@ -23,6 +23,8 @@ const mocks = vi.hoisted(() => ({
   create: vi.fn(),
   update: vi.fn(),
   fork: vi.fn(),
+  bind: vi.fn(),
+  remove: vi.fn(),
 }));
 
 vi.mock("@wordpress/api-fetch", () => ({ default: mocks.apiFetch }));
@@ -45,8 +47,8 @@ vi.mock("@/features/settings", () => ({
     create: mocks.create,
     update: mocks.update,
     fork: mocks.fork,
-    remove: vi.fn(),
-    bind: vi.fn(),
+    remove: mocks.remove,
+    bind: mocks.bind,
     isCreating: false,
     isUpdating: false,
     isForking: false,
@@ -146,6 +148,8 @@ beforeEach(() => {
   mocks.create.mockReset().mockResolvedValue({});
   mocks.update.mockReset().mockResolvedValue({});
   mocks.fork.mockReset().mockResolvedValue({ preset: { presetId: "p-fork" } });
+  mocks.bind.mockReset().mockResolvedValue({});
+  mocks.remove.mockReset().mockResolvedValue({});
   suggestAnswer = { suggestion: SUGGESTION, homepageRead: true };
   previewAnswer = Promise.resolve({
     success: true,
@@ -337,7 +341,7 @@ describe("Visuals page — Your own", () => {
     await waitFor(() => expect(heading).toHaveFocus());
     expect(screen.queryByRole("radiogroup", { name: "Signature" })).toBeNull();
     expect(screen.getByRole("textbox", { name: "Name" })).toHaveValue("Northfield Garden");
-    // Palette and Preview stay below the builder.
+    // The palette above and Preview below stay with the builder.
     expect(screen.getByRole("heading", { name: "Brand palette" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Preview" })).toBeInTheDocument();
   });
@@ -565,39 +569,155 @@ describe("Visuals page — preview", () => {
   });
 });
 
-describe("Visuals page — other presets", () => {
-  // 2026-11-09: the class read `mt-1!line-clamp-2`, one unknown token, so
-  // long art directions were never clamped.
-  it("clamps a library preset's art direction to two lines", () => {
+// 2026-11-21: the card listing every other preset of the workspace (25+ rows
+// of raw prompt text) became the Switch preset popup. Use here, Duplicate
+// and delete still run the page's own handlers.
+describe("Visuals page — Switch preset", () => {
+  const library = (boundPresetId: string | null = "p1") => {
     mocks.presets = {
-      boundPresetId: "p1",
+      boundPresetId,
       presets: [
-        preset(),
-        preset({ presetId: "p2", label: "Other", globalArtDirection: "Second preset words" }),
-      ],
-    };
-    renderPage();
-    const line = screen.getByText("Second preset words");
-    expect(line.className.split(/\s+/)).toContain("line-clamp-2");
-  });
-
-  it("names a library preset's signature instead of its unused free text", () => {
-    mocks.presets = {
-      boundPresetId: "p1",
-      presets: [
-        preset(),
+        preset({ updatedAt: "2026-11-20T09:00:00.000Z" }),
         preset({
           presetId: "p2",
-          label: "Other",
+          label: "Uniconfoto",
           globalArtDirection: "",
           signature: { kind: "curated", id: "miniature-world", version: 1 },
+          palette: ["#112233", "#445566"],
+          boundActivationCount: 2,
+          updatedAt: "2026-11-18T09:00:00.000Z",
+        }),
+        preset({
+          presetId: "p3",
+          label: "Old words",
+          globalArtDirection: "Second preset words",
+          boundActivationCount: 0,
+          updatedAt: "2025-09-12T09:00:00.000Z",
+        }),
+        preset({
+          presetId: "p4",
+          label: "Agency look",
+          signature: {
+            kind: "custom",
+            name: "Agency ink",
+            medium: "illustration",
+            technique: "Ink",
+            motifs: "Tools",
+            composition: "Centred",
+            avoid: "Text",
+          },
+          updatedAt: "2026-11-19T09:00:00.000Z",
         }),
       ],
     };
+  };
+  const switchButtons = () => screen.queryAllByRole("button", { name: "Switch preset" });
+  const dialog = () => screen.getByRole("dialog", { name: "Switch preset" });
+  const rowOf = (name: string) =>
+    within(dialog()).getByText(name).closest<HTMLElement>('[role="listitem"]')!;
+  const rowNames = () =>
+    within(dialog())
+      .getAllByRole("listitem")
+      .map((item) => item.querySelector("[data-slot='preset-name']")?.textContent);
+
+  beforeEach(() => {
+    // wp-admin sets the page language; dates follow it.
+    document.documentElement.lang = "en-US";
+  });
+
+  it("replaces the card of other presets with a Switch preset button on the preset", () => {
+    library();
     renderPage();
-    const item = screen.getByText("Other").closest("li")!;
-    expect(within(item).getByText("Miniature world")).toBeInTheDocument();
-    expect(within(item).queryByText("(no art direction)")).toBeNull();
+    expect(screen.queryByText("Other presets in this workspace")).toBeNull();
+    expect(screen.queryByText("Uniconfoto")).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(switchButtons()).toHaveLength(1);
+  });
+
+  it("offers no Switch preset when the workspace has no other preset", () => {
+    renderPage();
+    expect(switchButtons()).toHaveLength(0);
+  });
+
+  it("lists the other presets newest first by look and usage, never by their prompt text", () => {
+    library();
+    renderPage();
+    fireEvent.click(switchButtons()[0]!);
+    expect(rowNames()).toEqual(["Agency look", "Uniconfoto", "Old words"]);
+    expect(rowOf("Uniconfoto")).toHaveTextContent("Miniature world");
+    expect(rowOf("Uniconfoto")).toHaveTextContent("Used by 2 site(s)");
+    expect(rowOf("Uniconfoto").querySelector("img")).toHaveAttribute(
+      "src",
+      "https://www.structurawp.com/visual-signatures/miniature-world-640.webp"
+    );
+    expect(rowOf("Agency look")).toHaveTextContent("Agency ink");
+    expect(rowOf("Old words")).toHaveTextContent("Free prompt");
+    expect(rowOf("Old words")).toHaveTextContent("Not used · edited Sep 12, 2025");
+    expect(within(dialog()).queryByText(/Second preset words/)).toBeNull();
+    fireEvent.change(within(dialog()).getByRole("searchbox", { name: "Search by name" }), {
+      target: { value: "unicon" },
+    });
+    expect(rowNames()).toEqual(["Uniconfoto"]);
+  });
+
+  it("Use here binds the preset through the page's handler and closes", async () => {
+    library();
+    renderPage();
+    fireEvent.click(switchButtons()[0]!);
+    fireEvent.click(within(rowOf("Uniconfoto")).getByRole("button", { name: "Use here" }));
+    await waitFor(() => expect(mocks.bind).toHaveBeenCalledWith({ preset_id: "p2" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("Duplicate forks the preset for this site and closes", async () => {
+    library();
+    renderPage();
+    fireEvent.click(switchButtons()[0]!);
+    fireEvent.click(within(rowOf("Old words")).getByRole("button", { name: "Duplicate to this site" }));
+    await waitFor(() =>
+      expect(mocks.fork).toHaveBeenCalledWith({ preset_id: "p3", bind_to_activation: true })
+    );
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("while Use here runs, the other actions wait; a failure keeps the popup open", async () => {
+    library();
+    let fail!: (error: Error) => void;
+    mocks.bind.mockReturnValue(new Promise((_resolve, reject) => (fail = reject)));
+    renderPage();
+    fireEvent.click(switchButtons()[0]!);
+    fireEvent.click(within(rowOf("Uniconfoto")).getByRole("button", { name: "Use here" }));
+    await waitFor(() =>
+      expect(within(rowOf("Agency look")).getByRole("button", { name: "Use here" })).toBeDisabled()
+    );
+    expect(within(rowOf("Uniconfoto")).getByRole("button", { name: /Use here/ })).toHaveAttribute(
+      "aria-busy",
+      "true"
+    );
+    await act(async () => fail(new Error("offline")));
+    expect(dialog()).toBeInTheDocument();
+    expect(within(rowOf("Agency look")).getByRole("button", { name: "Use here" })).toBeEnabled();
+  });
+
+  it("deletes only an unused preset, after the page's confirmation", async () => {
+    library();
+    renderPage();
+    fireEvent.click(switchButtons()[0]!);
+    expect(within(rowOf("Uniconfoto")).queryByRole("button", { name: "Delete" })).toBeNull();
+    expect(within(rowOf("Agency look")).queryByRole("button", { name: "Delete" })).toBeNull();
+    fireEvent.click(within(rowOf("Old words")).getByRole("button", { name: "Delete" }));
+    const confirm = await screen.findByRole("dialog", { name: "Delete preset?" });
+    fireEvent.click(within(confirm).getByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(mocks.remove).toHaveBeenCalledWith("p3"));
+  });
+
+  it("an unbound site picks a preset from its warning", () => {
+    library(null);
+    renderPage();
+    expect(switchButtons()).toHaveLength(1);
+    const banner = screen.getByText("No visual preset bound to this site").parentElement!;
+    fireEvent.click(within(banner).getByRole("button", { name: "Switch preset" }));
+    expect(rowNames()).toEqual(["Default", "Agency look", "Uniconfoto", "Old words"]);
   });
 });
 

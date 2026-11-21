@@ -12942,3 +12942,33 @@ msgstr "Schalte dafür zuerst die Autoritäts-Links ein."
 
 msgid "Turn on Outbound link authority under Advanced Settings > SEO Directives to use this."
 msgstr "Schalte dafür zuerst „Autorität ausgehender Links“ unter Erweiterte Einstellungen > SEO-Richtlinien ein."
+
+msgid "Switch preset"
+msgstr "Preset wechseln"
+
+msgid "Search by name"
+msgstr "Nach Name suchen"
+
+msgid "No other presets in your library."
+msgstr "Keine weiteren Presets in deiner Bibliothek."
+
+msgid "No presets match your search."
+msgstr "Kein Preset passt zu deiner Suche."
+
+msgid "Not used"
+msgstr "Nicht verwendet"
+
+msgid "Not used · edited %s"
+msgstr "Nicht verwendet · bearbeitet am %s"
+
+msgid "Output"
+msgstr "Ausgabe"
+
+msgid "Every image gets alt text and an SEO-friendly filename automatically."
+msgstr "Jedes Bild bekommt automatisch einen Alt-Text und einen SEO-freundlichen Dateinamen."
+
+msgid "Dimensions"
+msgstr "Abmessungen"
+
+msgid "Format"
+msgstr "Format"

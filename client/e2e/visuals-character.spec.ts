@@ -99,6 +99,38 @@ async function paidLicense(page: Page) {
   );
 }
 
+/**
+ * Routes the channel catalog's Video entry as installable, which gives the
+ * Visuals page its Video tab (a local site the cloud cannot reach gets no
+ * usable catalog, so no tabs).
+ */
+async function videoTab(page: Page) {
+  await page.route(/structura\/v1\/channels\/catalog/, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        plan: "byok",
+        activeAddons: [],
+        entries: [
+          {
+            id: "video",
+            name: "Video",
+            description: "Short videos from your posts.",
+            category: "social",
+            capabilities: [],
+            authType: "none",
+            iconUrl: "",
+            gating: { requiredPlan: "cloud", requiredAddon: null },
+            entitlement: { canInstall: true, blocker: null },
+          },
+        ],
+      }),
+    })
+  );
+}
+
 interface CharacterRoutes {
   /** Bodies of the preset saves. */
   saves: Array<Record<string, unknown>>;
@@ -396,6 +428,33 @@ test.describe("Visuals — recurring character", () => {
     );
     await expect(page.getByText("Lena was removed.")).toBeVisible();
     expect(routes.calls).toEqual(["DELETE "]);
+    expect(routes.saves).toHaveLength(0);
+    await expectSpaMounted(page, crashes);
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+  });
+
+  // 2026-11-21: Save sits in the header, so it can be pressed from the Video
+  // tab while the refused field is on the hidden Images tab. A browser will
+  // not focus a hidden element, so Images has to show before focus moves.
+  test("Person without a style: Save from the Video tab brings Images forward with focus on the first card", async ({
+    page,
+    crashes,
+  }) => {
+    await paidLicense(page);
+    await videoTab(page);
+    const routes = await visuals(page);
+    await openVisuals(page);
+    await expectSpaMounted(page, crashes);
+
+    await page.getByRole("radio", { name: /^Person/ }).click();
+    await page.getByRole("tab", { name: "Video" }).click();
+    await expect(page.getByRole("radiogroup", { name: "Signature" })).toBeHidden();
+    await page.getByRole("button", { name: /Save Changes/ }).click();
+
+    await expect(page.getByRole("tab", { name: "Images" })).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByText("Pick one of these styles before you save.")).toBeVisible();
+    const grid = page.getByRole("radiogroup", { name: "Signature" });
+    await expect(grid.getByRole("radio", { name: /^Paper cut/ })).toBeFocused();
     expect(routes.saves).toHaveLength(0);
     await expectSpaMounted(page, crashes);
     await page.unrouteAll({ behavior: "ignoreErrors" });

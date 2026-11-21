@@ -107,7 +107,8 @@ const App = () => {
             HashRouter so useLocation/useNavigate work; renders
             nothing itself. */}
         <OnboardingAutoRedirectBridge />
-        <div className="structura-app-wrapper -ml-2.5 bg-[#f0f0f1] sm:-ml-5">
+        {/* No background utility here: it would beat the wrapper's dark rule in style.css. */}
+        <div className="structura-app-wrapper -ml-2.5 sm:-ml-5">
           <Header />
           <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             <AppErrorBoundary resetOnNavigation>

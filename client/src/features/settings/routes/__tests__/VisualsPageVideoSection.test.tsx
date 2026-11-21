@@ -2,7 +2,9 @@
  * VisualsPage — the per-preset "Video" section (video-visuals handoff §1).
  *
  * Video styling moved out of the Video channel's Configure dialog and onto
- * the visual preset. This suite pins the wp-admin surface of that move:
+ * the visual preset. This suite pins the wp-admin surface of that move; the
+ * section lives in the page's Video tab since 2026-11-21, so each test opens
+ * that tab as a user would:
  *
  *   1. Eligible plans (catalog says the Video channel is installable)
  *      render the full section — style preset cards, video art direction,
@@ -13,7 +15,7 @@
  *      intent — and none of the gated fields render.
  *   3. Unknown eligibility (catalog still loading / degraded / entry
  *      missing on an older cloud) renders neither — no teaser flash for
- *      paying customers, no premium editor leak.
+ *      paying customers, no premium editor leak, and no Video tab.
  *   4. Saving persists the video fields through the existing preset save
  *      path (`content.video_style` / `video_art_direction` /
  *      `caption_placement` / `palette` on the wire).
@@ -24,7 +26,7 @@
  */
 
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, render as rtlRender, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render as rtlRender, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastProvider } from "@structura/ui";
 import type { ReactElement } from "react";
@@ -152,6 +154,12 @@ function renderPage() {
   );
 }
 
+/** Opens the Video tab as a user would and returns its panel. */
+function openVideoTab() {
+  fireEvent.click(screen.getByRole("tab", { name: "Video" }));
+  return screen.getByRole("tabpanel", { name: "Video" });
+}
+
 beforeEach(() => {
   apiFetchMock
     .mockReset()
@@ -163,54 +171,56 @@ beforeEach(() => {
 });
 
 describe("VisualsPage — Video section (eligible plan)", () => {
-  it("renders the Video section seeded from the bound preset's video fields", () => {
+  it("renders the Video section in its tab, seeded from the bound preset's video fields", () => {
     renderPage();
+    const video = openVideoTab();
 
     // Section head: title + plan badge. Video comes with every Cloud
     // option since 2026-10-12, so the badge names Cloud.
-    expect(screen.getByText("Video")).toBeInTheDocument();
-    expect(screen.getByText("Cloud")).toBeInTheDocument();
+    expect(within(video).getByText("Video")).toBeInTheDocument();
+    expect(within(video).getByText("Cloud")).toBeInTheDocument();
     expect(screen.queryByText("Cloud Pro")).toBeNull();
 
     // Style preset radiogroup with the three cards; preset's kinetic wins.
-    const styleGroup = screen.getByRole("radiogroup", {
+    const styleGroup = within(video).getByRole("radiogroup", {
       name: /video style preset/i,
     });
     expect(styleGroup).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /clean/i })).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /bold/i })).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /kinetic/i })).toHaveAttribute(
+    expect(within(video).getByRole("radio", { name: /clean/i })).toBeInTheDocument();
+    expect(within(video).getByRole("radio", { name: /bold/i })).toBeInTheDocument();
+    expect(within(video).getByRole("radio", { name: /kinetic/i })).toHaveAttribute(
       "aria-checked",
       "true",
     );
 
     // Video art direction textarea seeded from the preset.
     expect(
-      screen.getByRole("textbox", { name: /video art direction/i }),
+      within(video).getByRole("textbox", { name: /video art direction/i }),
     ).toHaveValue("FOOTAGE: real workplaces");
 
     // Caption placement radiogroup; preset's middle wins.
     expect(
-      screen.getByRole("radiogroup", { name: /caption placement/i }),
+      within(video).getByRole("radiogroup", { name: /caption placement/i }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /middle/i })).toHaveAttribute(
+    expect(within(video).getByRole("radio", { name: /middle/i })).toHaveAttribute(
       "aria-checked",
       "true",
     );
     expect(
-      screen.getByText("Bottom feels native on Shorts, TikTok and Reels."),
+      within(video).getByText("Bottom feels native on Shorts, TikTok and Reels."),
     ).toBeInTheDocument();
 
     // Automatic palette pickup row — no toggle, just the explainer + swatches.
-    expect(screen.getByText("Brand palette in captions")).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /preset palette/i })).toBeInTheDocument();
+    expect(within(video).getByText("Brand palette in captions")).toBeInTheDocument();
+    expect(within(video).getByRole("img", { name: /preset palette/i })).toBeInTheDocument();
   });
 
   it("persists video fields through the preset save path", async () => {
     renderPage();
+    const video = openVideoTab();
 
     // Move captions to the bottom, then save the bound preset.
-    fireEvent.click(screen.getByRole("radio", { name: /bottom/i }));
+    fireEvent.click(within(video).getByRole("radio", { name: /bottom/i }));
     fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
 
     await waitFor(() => {
@@ -259,17 +269,19 @@ describe("VisualsPage — Video section (eligible plan)", () => {
       palette: ["#123456"],
     });
     renderPage();
+    const video = openVideoTab();
 
-    fireEvent.click(screen.getByRole("button", { name: /suggest video style/i }));
+    fireEvent.click(within(video).getByRole("button", { name: /suggest video style/i }));
 
     await waitFor(() =>
       expect(
-        screen.getByRole("textbox", { name: /video art direction/i }),
+        within(video).getByRole("textbox", { name: /video art direction/i }),
       ).toHaveValue("NEW VIDEO DIRECTION"),
     );
     // The image prompt is a sibling, never merged — the video suggest
     // must not replace it. The preset has no signature, so it shows as the
-    // free prompt.
+    // free prompt, on the Images tab.
+    fireEvent.click(screen.getByRole("tab", { name: "Images" }));
     expect(screen.getByRole("textbox", { name: /your prompt/i })).toHaveValue(
       "IMAGE STYLE PROMPT",
     );
@@ -290,44 +302,49 @@ describe("VisualsPage — Video section (eligible plan)", () => {
 
   it("keeps the video suggest when the image-style suggest panel is gone", () => {
     renderPage();
+    const video = openVideoTab();
 
-    expect(screen.getByRole("button", { name: /suggest video style/i })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /suggest image style/i })).toBeNull();
+    expect(within(video).getByRole("button", { name: /suggest video style/i })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /suggest image style/i, hidden: true }),
+    ).toBeNull();
   });
 });
 
 describe("VisualsPage — Video section gating", () => {
-  it("renders the locked teaser (and none of the fields) for ineligible plans", () => {
+  it("renders the locked teaser (and none of the fields) in the Video tab for ineligible plans", () => {
     eligibilityMock.current = "locked";
     renderPage();
+    const video = openVideoTab();
 
-    expect(screen.getByText("Video styling")).toBeInTheDocument();
+    expect(within(video).getByText("Video styling")).toBeInTheDocument();
     expect(screen.queryByText("Cloud Pro")).toBeNull();
-    const upgrade = screen.getByRole("link", { name: /upgrade plan/i });
+    const upgrade = within(video).getByRole("link", { name: /upgrade plan/i });
     expect(upgrade).toHaveAttribute(
       "href",
       expect.stringContaining("intent=unlock_video"),
     );
 
-    // Gated fields are neither rendered nor fetched.
+    // Gated fields are neither rendered nor fetched, on either tab.
     expect(
-      screen.queryByRole("radiogroup", { name: /video style preset/i }),
+      screen.queryByRole("radiogroup", { name: /video style preset/i, hidden: true }),
     ).toBeNull();
     expect(
-      screen.queryByRole("textbox", { name: /video art direction/i }),
+      screen.queryByRole("textbox", { name: /video art direction/i, hidden: true }),
     ).toBeNull();
     expect(
-      screen.queryByRole("radiogroup", { name: /caption placement/i }),
+      screen.queryByRole("radiogroup", { name: /caption placement/i, hidden: true }),
     ).toBeNull();
   });
 
-  it("renders neither section nor teaser while eligibility is unknown", () => {
+  it("renders neither section, teaser nor Video tab while eligibility is unknown", () => {
     eligibilityMock.current = "unknown";
     renderPage();
 
     expect(screen.queryByText("Video styling")).toBeNull();
     expect(
-      screen.queryByRole("radiogroup", { name: /video style preset/i }),
+      screen.queryByRole("radiogroup", { name: /video style preset/i, hidden: true }),
     ).toBeNull();
+    expect(screen.queryByRole("tab", { name: "Video" })).toBeNull();
   });
 });

@@ -28,6 +28,7 @@ const mocks = vi.hoisted(() => ({
   presets: undefined as Record<string, unknown> | undefined,
   update: vi.fn(),
   fork: vi.fn(),
+  videoEligibility: "unknown" as "eligible" | "locked" | "unknown",
 }));
 
 vi.mock("@wordpress/api-fetch", () => ({ default: mocks.apiFetch }));
@@ -38,6 +39,8 @@ vi.mock("@/features/settings", () => ({
     defaultImageProvider: "gemini",
     defaultTextProvider: "gemini",
     isCloud: false,
+    // Read by the Video tab's suggest panel.
+    isProviderIncomplete: () => false,
   }),
   usePublicSiteProfile: () => ({
     data: {
@@ -63,7 +66,7 @@ vi.mock("@/features/settings", () => ({
 }));
 
 vi.mock("@/features/channels/hooks/useVideoStylingEligibility", () => ({
-  useVideoStylingEligibility: () => "unknown",
+  useVideoStylingEligibility: () => mocks.videoEligibility,
 }));
 
 import { VisualsPage } from "../VisualsPage";
@@ -240,6 +243,7 @@ beforeEach(() => {
   mocks.license = { plan: "byok", isPaidLicense: true };
   mocks.update.mockReset().mockResolvedValue({});
   mocks.fork.mockReset().mockResolvedValue({ preset: { presetId: "p-fork" } });
+  mocks.videoEligibility = "unknown";
   previewAnswer = Promise.resolve({
     success: true,
     imageUrl: "https://cdn.test/p.webp",
@@ -270,15 +274,16 @@ describe("Who appears (handoff §3)", () => {
     expect(screen.queryByText("Unsaved changes")).toBeNull();
   });
 
-  it("sits before the signature, and the character section between signature and palette", () => {
+  it("sits under the palette and before the signature, the character section between signature and preview", () => {
     renderPage();
     selectPerson();
     const order = [
+      "Brand palette",
       "Who appears in your images?",
       "Signature",
       "Your character",
-      "Brand palette",
       "Preview",
+      "Output",
     ].map((name) => screen.getByRole("heading", { name }));
     for (let i = 1; i < order.length; i++) {
       expect(
@@ -445,6 +450,67 @@ describe("Save refusals, in the handoff's order (§2)", () => {
     expect(lastContent().signature).toEqual({ kind: "curated", id: "paper-cut", version: 1 });
     expect(lastContent()).not.toHaveProperty("character");
     expect(lastContent()).not.toHaveProperty("appearance");
+  });
+});
+
+// 2026-11-21: Save sits in the page header, so it can be pressed from the
+// Video tab while the field it refuses is on the hidden Images tab.
+describe("Save refusals while the Video tab shows", () => {
+  const imagesTab = () => screen.getByRole("tab", { name: "Images" });
+  const openVideoTab = () => fireEvent.click(screen.getByRole("tab", { name: "Video" }));
+
+  beforeEach(() => {
+    mocks.videoEligibility = "eligible";
+    // A browser never focuses an element that is not rendered, such as one in
+    // the hidden tab panel; jsdom does. Put the browser's rule back so a focus
+    // move that runs before Images shows fails here as it would there.
+    const focus = HTMLElement.prototype.focus;
+    vi.spyOn(HTMLElement.prototype, "focus").mockImplementation(function (
+      this: HTMLElement,
+      options?: FocusOptions
+    ) {
+      if (this.closest("[hidden]")) return;
+      focus.call(this, options);
+    });
+  });
+
+  it("no style: Images comes forward with the grid's error and focus on its first card", async () => {
+    renderPage();
+    selectPerson();
+    openVideoTab();
+    fireEvent.click(save());
+    expect(mocks.update).not.toHaveBeenCalled();
+    expect(imagesTab()).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Pick one of these styles before you save."
+    );
+    await waitFor(() => expect(card("Paper cut")).toHaveFocus());
+  });
+
+  it("a sheet drawn for another style: Images comes forward with focus on the notice's primary", async () => {
+    bindPreset({ signature: INK, appearance: "person", character: LENA });
+    renderPage();
+    fireEvent.click(card("Paper cut"));
+    const primary = await screen.findByRole("button", { name: "Draw Lena in Paper cut · 1 image" });
+    openVideoTab();
+    fireEvent.click(save());
+    expect(mocks.update).not.toHaveBeenCalled();
+    expect(imagesTab()).toHaveAttribute("aria-selected", "true");
+    await waitFor(() => expect(primary).toHaveFocus());
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Approve a sheet in Paper cut first, or keep Ink and fill."
+    );
+  });
+
+  it("not finished: Images comes forward with focus on the next-step button", async () => {
+    renderPage();
+    selectPerson();
+    fireEvent.click(card("Ink and fill"));
+    openVideoTab();
+    fireEvent.click(save());
+    expect(mocks.update).not.toHaveBeenCalled();
+    expect(imagesTab()).toHaveAttribute("aria-selected", "true");
+    await waitFor(() => expect(drawButton()).toHaveFocus());
   });
 });
 

@@ -30,8 +30,10 @@
         color: var(--color-neutral-600);
     }
 
+    /* Dark base per specs/design-guide.md §4.3: a radial gradient, not a flat fill. */
     :is(.dark, .dark *) .structura-app-wrapper {
-        background-color: var(--color-neutral-950);
+        background-color: #0a0a14;
+        background-image: radial-gradient(ellipse at top, #1a1a2e 0%, #0a0a14 70%);
         color: var(--color-neutral-300);
     }
 

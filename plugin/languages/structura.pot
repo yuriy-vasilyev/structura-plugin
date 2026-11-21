@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-20T18:11:42+00:00\n"
+"POT-Creation-Date: 2026-11-21T11:38:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: structura\n"
@@ -1926,8 +1926,9 @@ msgstr ""
 
 #: client/src/components/Layout/headerNav.ts:38
 #: client/src/features/onboarding/components/WizardShell.tsx:88
-#: client/src/features/settings/routes/VisualsPage.tsx:770
-#: client/src/features/settings/routes/VisualsPage.tsx:790
+#: client/src/features/settings/routes/VisualsPage.tsx:1050
+#: client/src/features/settings/routes/VisualsPage.tsx:889
+#: client/src/features/settings/routes/VisualsPage.tsx:909
 msgid "Visuals"
 msgstr ""
 
@@ -2281,7 +2282,7 @@ msgstr ""
 #: client/src/features/channels/components/CatalogEntryCard.tsx:215
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:620
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:650
-#: client/src/features/settings/routes/VisualsPage.tsx:1320
+#: client/src/features/settings/routes/VisualsPage.tsx:1424
 msgid "Pro"
 msgstr ""
 
@@ -2339,7 +2340,7 @@ msgstr ""
 #: client/src/features/channels/components/InstallModal.tsx:403
 #: client/src/features/personas/components/PersonaEditor.tsx:192
 #: client/src/features/settings/components/QuickSetupConfirmModal.tsx:153
-#: client/src/features/settings/routes/VisualsPage.tsx:1518
+#: client/src/features/settings/routes/VisualsPage.tsx:1607
 msgid "Cancel"
 msgstr ""
 
@@ -2560,7 +2561,7 @@ msgid "No license key yet? It comes with your account."
 msgstr ""
 
 #: client/src/features/account/routes/AccountPage.tsx:492
-#: client/src/features/settings/routes/VisualsPage.tsx:1571
+#: client/src/features/settings/routes/VisualsPage.tsx:1660
 msgid "View Pricing"
 msgstr ""
 
@@ -3030,7 +3031,7 @@ msgstr ""
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:329
 #: client/src/features/personas/components/PersonaEditor.tsx:212
 #: client/src/features/settings/routes/SettingsPage.tsx:73
-#: client/src/features/settings/routes/VisualsPage.tsx:809
+#: client/src/features/settings/routes/VisualsPage.tsx:928
 msgid "Save Changes"
 msgstr ""
 
@@ -3068,7 +3069,7 @@ msgid "site(s)"
 msgstr ""
 
 #: client/src/features/ai-engine/components/WorkspaceKeysPicker.tsx:249
-#: client/src/features/settings/routes/VisualsPage.tsx:1462
+#: client/src/features/settings/routes/VisualsPage.tsx:1570
 msgid "Use here"
 msgstr ""
 
@@ -3266,7 +3267,7 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:422
 #: client/src/features/notices/utils.ts:186
 #: client/src/features/notices/utils.ts:192
-#: client/src/features/settings/routes/VisualsPage.tsx:1386
+#: client/src/features/settings/routes/VisualsPage.tsx:1486
 msgid "Learn more"
 msgstr ""
 
@@ -3525,6 +3526,8 @@ msgstr ""
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1023
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:664
 #: client/src/features/settings/character/CharacterIntake.tsx:172
+#: client/src/features/settings/routes/VisualsPage.tsx:1054
+#: client/src/features/settings/routes/VisualsPage.tsx:1066
 msgid "Images"
 msgstr ""
 
@@ -5542,7 +5545,8 @@ msgstr ""
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:403
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:481
 #: client/src/features/personas/components/PersonaCard.tsx:105
-#: client/src/features/settings/routes/VisualsPage.tsx:1517
+#: client/src/features/settings/routes/VisualsPage.tsx:1572
+#: client/src/features/settings/routes/VisualsPage.tsx:1606
 msgid "Delete"
 msgstr ""
 
@@ -5844,7 +5848,7 @@ msgstr ""
 
 #: client/src/features/campaigns/routes/CampaignsPage.tsx:762
 #: client/src/features/dashboard/components/UpgradeCard.tsx:45
-#: client/src/features/settings/routes/VisualsPage.tsx:1557
+#: client/src/features/settings/routes/VisualsPage.tsx:1646
 msgid "Get Free License"
 msgstr ""
 
@@ -6802,6 +6806,8 @@ msgstr ""
 
 #: client/src/features/channels/components/CatalogEntryCard.tsx:346
 #: client/src/features/settings/components/VideoPresetSection.tsx:161
+#: client/src/features/settings/routes/VisualsPage.tsx:1055
+#: client/src/features/settings/routes/VisualsPage.tsx:1502
 msgid "Video"
 msgstr ""
 
@@ -8808,9 +8814,9 @@ msgid "Tagline"
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep1Identity.tsx:171
-#: client/src/features/settings/routes/VisualsPage.tsx:148
-#: client/src/features/settings/routes/VisualsPage.tsx:606
-#: client/src/features/settings/routes/VisualsPage.tsx:905
+#: client/src/features/settings/routes/VisualsPage.tsx:1025
+#: client/src/features/settings/routes/VisualsPage.tsx:150
+#: client/src/features/settings/routes/VisualsPage.tsx:662
 msgid "Site default"
 msgstr ""
 
@@ -9044,6 +9050,7 @@ msgid "Our pick for %1$s is <b>%2$s</b>, in your colors"
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:172
+#: client/src/features/settings/routes/VisualsPage.tsx:1573
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:224
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:330
 msgid "Brand colors"
@@ -9069,7 +9076,7 @@ msgid "This site keeps its current style unless you pick one below."
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:452
-#: client/src/features/settings/routes/VisualsPage.tsx:972
+#: client/src/features/settings/routes/VisualsPage.tsx:1130
 msgid "Signature"
 msgstr ""
 
@@ -10313,7 +10320,7 @@ msgid ""
 msgstr ""
 
 #: client/src/features/settings/character/RemoveCharacterDialog.tsx:76
-#: client/src/features/settings/routes/VisualsPage.tsx:1084
+#: client/src/features/settings/routes/VisualsPage.tsx:1242
 msgid "Keep %s"
 msgstr ""
 
@@ -10973,326 +10980,332 @@ msgid ""
 "reinstall later or migrate."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:109
+#: client/src/features/settings/routes/VisualsPage.tsx:111
 msgid "1:1 Square Format"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:110
+#: client/src/features/settings/routes/VisualsPage.tsx:112
 msgid "4:3 Classic Professional"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:111
+#: client/src/features/settings/routes/VisualsPage.tsx:113
 msgid "3:4 Standard Portrait"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:112
+#: client/src/features/settings/routes/VisualsPage.tsx:114
 msgid "16:9 Cinematic Landscape"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:113
+#: client/src/features/settings/routes/VisualsPage.tsx:115
 msgid "9:16 Vertical Portrait"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:117
+#: client/src/features/settings/routes/VisualsPage.tsx:119
 msgid "WebP (Smallest File)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:118
+#: client/src/features/settings/routes/VisualsPage.tsx:120
 msgid "JPEG (Standard Compatibility)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:119
+#: client/src/features/settings/routes/VisualsPage.tsx:121
 msgid "PNG (Lossless)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:454
-#: client/src/features/settings/routes/VisualsPage.tsx:479
-#: client/src/features/settings/routes/VisualsPage.tsx:489
+#: client/src/features/settings/routes/VisualsPage.tsx:495
+#: client/src/features/settings/routes/VisualsPage.tsx:520
+#: client/src/features/settings/routes/VisualsPage.tsx:530
 #: client/src/features/settings/signatures/SignaturePicker.tsx:196
 #: client/src/features/settings/signatures/SignaturePicker.tsx:227
 msgid "Your own"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:480
+#: client/src/features/settings/routes/VisualsPage.tsx:521
+#: client/src/features/settings/routes/VisualsPage.tsx:807
 #: client/src/features/settings/signatures/SignaturePicker.tsx:244
 msgid "Free prompt"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:657
+#: client/src/features/settings/routes/VisualsPage.tsx:714
 msgid "Couldn’t read your site’s colors right now. Try again in a moment."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:772
-#: client/src/features/settings/routes/VisualsPage.tsx:798
+#: client/src/features/settings/routes/VisualsPage.tsx:813
+msgid "Used by %d site(s)"
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:819
+msgid "Not used · edited %s"
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:822
+msgid "Not used"
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1567
+#: client/src/features/settings/routes/VisualsPage.tsx:829
+msgid "Switch preset"
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:891
+#: client/src/features/settings/routes/VisualsPage.tsx:917
 msgid "Image Generation & Optimization Engine"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:782
+#: client/src/features/settings/routes/VisualsPage.tsx:901
 msgid "Calibrating Optics…"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:795
+#: client/src/features/settings/routes/VisualsPage.tsx:914
 msgid "Active preset · %s"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:804
+#: client/src/features/settings/routes/VisualsPage.tsx:923
 #: client/src/features/site/routes/tabs/SiteReferralsTab.tsx:50
 msgid "Unsaved changes"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:821
+#: client/src/features/settings/routes/VisualsPage.tsx:940
 msgid "No visual preset bound to this site"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:824
+#: client/src/features/settings/routes/VisualsPage.tsx:943
 msgid ""
 "Image generation will fail until a preset is bound. Configure one below or "
 "pick an existing preset from the workspace library."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:841
+#: client/src/features/settings/routes/VisualsPage.tsx:961
 msgid "Used by %d other site(s) in this workspace"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:846
+#: client/src/features/settings/routes/VisualsPage.tsx:966
 msgid ""
 "Saving will update the preset for every site that uses it. Pick \"Save as "
 "new for this site only\" to fork into an independent preset bound to this "
 "site."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:870
+#: client/src/features/settings/routes/VisualsPage.tsx:990
 msgid "Save (update for all sites)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:879
+#: client/src/features/settings/routes/VisualsPage.tsx:999
 msgid "Save as new for this site only"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:885
+#: client/src/features/settings/routes/VisualsPage.tsx:1005
 msgid "A copy is saved without the character, which stays with this preset."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:902
+#: client/src/features/settings/routes/VisualsPage.tsx:1022
 msgid "Preset name"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:975
+#: client/src/features/settings/routes/VisualsPage.tsx:1133
 msgid ""
 "Pick the look every image on this site shares. Examples are shown in neutral "
 "colors."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:985
+#: client/src/features/settings/routes/VisualsPage.tsx:1143
 msgid ""
 "Only styles that can draw a character the same way every time are shown. "
 "Photo styles and Free prompt are hidden while a character is chosen."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:994
+#: client/src/features/settings/routes/VisualsPage.tsx:1152
 msgid "Your current style, %s, is one of them, so pick a new one here."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1009
+#: client/src/features/settings/routes/VisualsPage.tsx:1167
 msgid "Pick a style for %s before you save."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1012
+#: client/src/features/settings/routes/VisualsPage.tsx:1170
 msgid "Pick one of these styles before you save."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1034
+#: client/src/features/settings/routes/VisualsPage.tsx:1192
 msgid ""
 "Set the technique, motifs and framing yourself, as an illustration or a 3D "
 "render."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1059
+#: client/src/features/settings/routes/VisualsPage.tsx:1217
 msgid "%1$s was drawn in %2$s."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1065
+#: client/src/features/settings/routes/VisualsPage.tsx:1223
 msgid ""
 "To use %1$s, approve a new character sheet drawn in it. Until then, Save "
 "keeps %2$s."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1075
+#: client/src/features/settings/routes/VisualsPage.tsx:1233
 msgid "Draw %1$s in %2$s · 1 image"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1093
+#: client/src/features/settings/routes/VisualsPage.tsx:1251
 msgid "%1$s needs a new sheet for %2$s."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1104
+#: client/src/features/settings/routes/VisualsPage.tsx:1262
 msgid "Approve a sheet in %1$s first, or keep %2$s."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1125
+#: client/src/features/settings/routes/VisualsPage.tsx:1283
 msgid "%s uses your image as it is, so no new sheet is needed for this style."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1133
+#: client/src/features/settings/routes/VisualsPage.tsx:1291
 msgid ""
 "%s keeps its own drawing style, so no new sheet is needed for this style."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1145
+#: client/src/features/settings/routes/VisualsPage.tsx:1303
 msgid "Your prompt"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1146
+#: client/src/features/settings/routes/VisualsPage.tsx:1304
 msgid ""
 "Describe the technique, recurring subjects and framing. We add your brand "
 "palette to it."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1150
+#: client/src/features/settings/routes/VisualsPage.tsx:1308
 msgid ""
 "Describe the look: technique, recurring subjects, framing, what to avoid"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1195
+#: client/src/features/settings/routes/VisualsPage.tsx:1343
 msgid ""
 "Previews show the style without a character until a character sheet is "
 "approved."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1235
-msgid "Suggest Video Style"
+#: client/src/features/settings/routes/VisualsPage.tsx:1361
+msgid "Output"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1236
-msgid "Brand Resources (logo, guidelines, design system URL…)"
+#: client/src/features/settings/routes/VisualsPage.tsx:1371
+msgid "Every image gets alt text and an SEO-friendly filename automatically."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1240
-msgid "Add Resource"
+#: client/src/features/settings/routes/VisualsPage.tsx:1386
+msgid "Dimensions"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1241
-msgid "Generate Video Style"
-msgstr ""
-
-#: client/src/features/settings/routes/VisualsPage.tsx:1243
-msgid "Company logo"
-msgstr ""
-
-#: client/src/features/settings/routes/VisualsPage.tsx:1250
-msgid "Site Logo"
-msgstr ""
-
-#: client/src/features/settings/routes/VisualsPage.tsx:1272
-msgid "Output Dimensions"
-msgstr ""
-
-#: client/src/features/settings/routes/VisualsPage.tsx:1279
+#: client/src/features/settings/routes/VisualsPage.tsx:1388
 msgid "Select dimensions..."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1293
+#: client/src/features/settings/routes/VisualsPage.tsx:1402
 msgid ""
 "OpenAI image models don't support 16:9 natively — your images will be "
 "rendered at 3:2 (1536×1024), the closest landscape size. For exact 16:9, "
 "switch the image provider to Gemini."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1297
+#: client/src/features/settings/routes/VisualsPage.tsx:1406
 msgid ""
 "OpenAI image models don't support 9:16 natively — your images will be "
 "rendered at 2:3 (1024×1536), the closest portrait size. For exact 9:16, "
 "switch the image provider to Gemini."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1316
-msgid "Format Encoding"
+#: client/src/features/settings/routes/VisualsPage.tsx:1421
+msgid "Format"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1330
+#: client/src/features/settings/routes/VisualsPage.tsx:1428
 msgid "Select encoding..."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1346
+#: client/src/features/settings/routes/VisualsPage.tsx:1446
 msgid "AI label"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1349
+#: client/src/features/settings/routes/VisualsPage.tsx:1449
 msgid "Label images as AI-generated"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1354
+#: client/src/features/settings/routes/VisualsPage.tsx:1454
 msgid ""
 "Adds the EU “AI generated” badge to the corner of every image we create with "
 "this preset. EU rules ask publishers to mark realistic AI images."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1360
+#: client/src/features/settings/routes/VisualsPage.tsx:1460
 msgid ""
 "Images that already exist are not changed. Regenerating an image applies the "
 "current setting."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1369
-#: client/src/features/settings/routes/VisualsPage.tsx:1375
+#: client/src/features/settings/routes/VisualsPage.tsx:1469
+#: client/src/features/settings/routes/VisualsPage.tsx:1475
 msgid "EU “AI generated” badge"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1403
-msgid "SEO Automation"
+#: client/src/features/settings/routes/VisualsPage.tsx:1526
+msgid "Suggest Video Style"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1406
-msgid "Always on"
+#: client/src/features/settings/routes/VisualsPage.tsx:1527
+msgid "Brand Resources (logo, guidelines, design system URL…)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1410
-msgid ""
-"Every generated image automatically gets accessible alt-text and a human-"
-"friendly, SEO-ready filename. No setup required."
+#: client/src/features/settings/routes/VisualsPage.tsx:1531
+msgid "Add Resource"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1424
-msgid "Other presets in this workspace"
+#: client/src/features/settings/routes/VisualsPage.tsx:1532
+msgid "Generate Video Style"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1427
-msgid ""
-"Use here binds this site to that preset (edits will propagate). Duplicate "
-"clones it into a new preset bound only to this site."
+#: client/src/features/settings/routes/VisualsPage.tsx:1534
+msgid "Company logo"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1446
-msgid "Used by %d site(s)"
+#: client/src/features/settings/routes/VisualsPage.tsx:1541
+msgid "Site Logo"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1457
-msgid "(no art direction)"
+#: client/src/features/settings/routes/VisualsPage.tsx:1569
+msgid "Search by name"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1471
+#: client/src/features/settings/routes/VisualsPage.tsx:1571
 msgid "Duplicate to this site"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1505
+#: client/src/features/settings/routes/VisualsPage.tsx:1574
+msgid "No other presets in your library."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1575
+msgid "No presets match your search."
+msgstr ""
+
+#: client/src/features/settings/routes/VisualsPage.tsx:1594
 msgid "Delete preset?"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1510
+#: client/src/features/settings/routes/VisualsPage.tsx:1599
 msgid "Delete \"%s\"? This is only allowed when no site is bound to it."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1536
+#: client/src/features/settings/routes/VisualsPage.tsx:1625
 msgid "Style Every Image Consistently"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1539
+#: client/src/features/settings/routes/VisualsPage.tsx:1628
 msgid ""
 "Connect a free account to define a Global Art Direction that gets injected "
 "into every AI image generation across this site."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:855
+#: client/src/features/settings/routes/VisualsPage.tsx:975
 msgid "%1$s appears in new images on the %2$d site that uses it."
 msgid_plural "%1$s appears in new images on all %2$d sites."
 msgstr[0] ""

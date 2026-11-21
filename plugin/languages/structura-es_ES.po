@@ -3635,7 +3635,7 @@ msgstr "Borrador"
 #: client/src/features/campaigns/routes/CreateCampaignPage.tsx:1013
 #: client/src/features/campaigns/routes/EditCampaignPage.tsx:652
 msgid "Images"
-msgstr "Bilde la"
+msgstr "Imágenes"
 
 #: client/src/features/campaigns/components/CampaignRunsTab.tsx:319
 msgid "Publishing"
@@ -12857,3 +12857,33 @@ msgstr "Activa primero los enlaces de autoridad."
 
 msgid "Turn on Outbound link authority under Advanced Settings > SEO Directives to use this."
 msgstr "Activa primero «Autoridad de enlaces salientes» en Configuración avanzada > Directivas SEO."
+
+msgid "Switch preset"
+msgstr "Cambiar de preajuste"
+
+msgid "Search by name"
+msgstr "Buscar por nombre"
+
+msgid "No other presets in your library."
+msgstr "No hay más preajustes en tu biblioteca."
+
+msgid "No presets match your search."
+msgstr "Ningún preajuste coincide con tu búsqueda."
+
+msgid "Not used"
+msgstr "Sin usar"
+
+msgid "Not used · edited %s"
+msgstr "Sin usar · editado el %s"
+
+msgid "Output"
+msgstr "Salida"
+
+msgid "Every image gets alt text and an SEO-friendly filename automatically."
+msgstr "Cada imagen recibe automáticamente un texto alternativo y un nombre de archivo apto para SEO."
+
+msgid "Dimensions"
+msgstr "Dimensiones"
+
+msgid "Format"
+msgstr "Formato"
