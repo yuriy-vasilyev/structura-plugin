@@ -486,7 +486,7 @@ export const WizardStep4Visuals = () => {
             <PenLine size={14} className="text-brand-500 mt-0.5 shrink-0" aria-hidden="true" />
             <span>
               {__(
-                "Want a look of your own? Build it later on the Visuals page, or write a prompt there.",
+                "Want a look of your own? After setup, open the Visuals page and choose Your own or Free prompt.",
                 "structura",
               )}
             </span>

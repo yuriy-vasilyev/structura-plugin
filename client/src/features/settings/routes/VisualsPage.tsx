@@ -1119,6 +1119,8 @@ export const VisualsPage = () => {
               draftProvider={defaultTextProvider}
               draftSources={draftSources}
               media={characterMode ? CHARACTER_MEDIA : undefined}
+              // The palette editor's own path, so dirty state, Save and the preview see it.
+              onUseColors={(palette) => updateDraft({ palette })}
             />
           ) : (
             <section aria-labelledby={signatureHeadingId} className="flex flex-col gap-4">

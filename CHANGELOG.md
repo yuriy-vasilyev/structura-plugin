@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.44.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.43.0...v2.44.0) (2026-11-23)
+
+
+### Features
+
+* **client,plugin:** draft a signature from images in wp-admin ([332ddfa](https://github.com/yuriy-vasilyev/structura-core/commit/332ddfaaa2fa7287e98092632ace72976c1de1d9))
+* **functions:** draft a visual signature from sample images ([17336cd](https://github.com/yuriy-vasilyev/structura-core/commit/17336cdf47005382132b24e2cef4b92a95c4a628))
+* **web:** draft a signature from images in the portal ([60606fc](https://github.com/yuriy-vasilyev/structura-core/commit/60606fc29d2b980c50c7d4d2a513caa00aa9312a))
+* **www:** add the ToastLaunch featured badge to the homepage footer rotator ([7f40e10](https://github.com/yuriy-vasilyev/structura-core/commit/7f40e10168dc705467d60a1feaf5dbc55bad9593))
+
+
+### Bug Fixes
+
+* **client,web:** say where the free prompt lives in the setup wizard's Visuals hint ([8017cca](https://github.com/yuriy-vasilyev/structura-core/commit/8017ccae65915b7f99f704d4a446046489a225f8))
+* **functions:** keep tinted dark and light tones in the colors drafted from images ([9ec293d](https://github.com/yuriy-vasilyev/structura-core/commit/9ec293d12b4f3ee1fb46ee590beaa20fc5efc97b))
+
+
+### Reverts
+
+* **www:** remove the ToastLaunch badge from the homepage footer rotator ([181293a](https://github.com/yuriy-vasilyev/structura-core/commit/181293a8443ff15edf09b7b73203b94e80ed8928))
+
 ## [2.43.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.42.0...v2.43.0) (2026-11-21)
 
 

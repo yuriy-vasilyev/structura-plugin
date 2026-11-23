@@ -299,6 +299,39 @@ export function BrandPaletteField({
   );
 }
 
+/** Props for {@link PaletteSwatchList}. */
+export interface PaletteSwatchListProps {
+  /** `#RRGGBB` colours, accent first. */
+  palette: string[];
+  /** Id of the visible label that names the list. */
+  labelledBy: string;
+}
+
+/** Read-only swatches as the palette editor shows them: each with its hex, the first marked Accent. */
+export function PaletteSwatchList({ palette, labelledBy }: PaletteSwatchListProps) {
+  return (
+    <ul aria-labelledby={labelledBy} className="m-0! flex list-none flex-wrap gap-3 p-0!">
+      {palette.map((hex, index) => (
+        <li key={`${hex}-${index}`} className="m-0! flex w-16 flex-col items-center gap-1.5">
+          <span
+            aria-hidden="true"
+            className={`size-14 rounded-xl ${SWATCH_RING}`}
+            style={{ backgroundColor: hex }}
+          />
+          <span className="font-mono text-[11px] text-neutral-700 dark:text-neutral-300">
+            {hex}
+          </span>
+          {index === 0 && (
+            <span className="text-[11px] font-bold text-neutral-900 dark:text-white">
+              {__("Accent", "structura")}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /** Props for {@link BrandPaletteSummary}. */
 export interface BrandPaletteSummaryProps {
   /** `#RRGGBB` colours, accent first. */

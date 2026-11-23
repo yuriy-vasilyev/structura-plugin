@@ -542,3 +542,38 @@ export function usePreviewVisualSignatureMutation() {
     meta: { silentError: true },
   });
 }
+
+/** Body of `POST /structura/v1/visual-signature/draft-from-images` (specs/visual-signatures.md §14.3). */
+export interface DraftSignatureFromImagesInput {
+  /** One to three JPG, PNG or WebP data URIs the browser scaled to 1536 px. */
+  images: string[];
+  /** The media the builder offers; the drafted medium is one of them. */
+  media: VisualMedium[];
+  /** en, de, es or fr: the language of the technique and avoid lines. Absent means en. */
+  locale?: string;
+}
+
+/** What "Draft from images" drafts. */
+export interface DraftSignatureFromImagesResult {
+  medium: VisualMedium;
+  technique: string;
+  avoid: string;
+  /** Up to six `#RRGGBB` colours the samples share, accent first; missing reads as none. */
+  palette?: string[];
+}
+
+/**
+ * "Draft from images": one vision pass over the samples drafts the medium,
+ * the technique and what to avoid. Stores nothing; the caller shows failures.
+ */
+export function useDraftSignatureFromImagesMutation() {
+  return useMutation({
+    mutationFn: (input: DraftSignatureFromImagesInput) =>
+      apiFetch<{ success: true } & DraftSignatureFromImagesResult>({
+        path: "/structura/v1/visual-signature/draft-from-images",
+        method: "POST",
+        data: input,
+      }),
+    meta: { silentError: true },
+  });
+}

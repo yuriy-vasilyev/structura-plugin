@@ -11990,6 +11990,9 @@ msgstr "Ajouter une couleur"
 msgid "Add “%1$s” to %2$s"
 msgstr "Ajouter « %1$s » à %2$s"
 
+msgid "Add one to three images."
+msgstr "Ajoutez entre une et trois images."
+
 msgid "All signatures"
 msgstr "Toutes les signatures"
 
@@ -12023,6 +12026,9 @@ msgstr "Un trait noir assuré et une seule couleur en aplat."
 msgid "Could not read your site right now."
 msgstr "Impossible de lire votre site pour le moment."
 
+msgid "Couldn’t draft from your images right now. Try again, or fill the fields yourself."
+msgstr "Impossible de rédiger à partir de vos images pour le moment. Réessayez, ou remplissez les champs vous-même."
+
 msgid "Couldn’t draft from your site right now. Try again, or fill the fields yourself."
 msgstr "Impossible de rédiger à partir de votre site pour le moment. Réessayez, ou remplissez les champs vous-même."
 
@@ -12044,14 +12050,24 @@ msgstr "Décrivez la technique, les sujets récurrents et le cadrage. Nous y ajo
 msgid "Desks and laptops"
 msgstr "Bureaux et ordinateurs portables"
 
+msgctxt "verb"
+msgid "Draft"
+msgstr "Rédiger"
+
 msgid "Draft again"
 msgstr "Rédiger à nouveau"
+
+msgid "Draft from images"
+msgstr "Rédiger à partir d'images"
 
 msgid "Draft from my site"
 msgstr "Rédiger à partir de mon site"
 
 msgid "Drafted"
 msgstr "Rédigé"
+
+msgid "Drafted the medium, the technique and what to avoid from your images."
+msgstr "Le support, la technique et ce qu'il faut éviter ont été rédigés à partir de vos images."
 
 msgid "Drafted the technique and what to avoid from your site."
 msgstr "La technique et ce qu'il faut éviter ont été rédigés à partir de votre site."
@@ -12061,6 +12077,21 @@ msgstr "Rédaction à partir de votre site"
 
 msgid "Drafting from your site."
 msgstr "Rédaction à partir de votre site."
+
+msgid "Reading your images"
+msgstr "Lecture de vos images"
+
+msgid "Upload up to three images in the style you want. We read the style from them and draft the medium, the technique and what to avoid. The images aren’t stored."
+msgstr "Importez jusqu'à trois images dans le style souhaité. Nous en lisons le style et rédigeons le support, la technique et ce qu'il faut éviter. Les images ne sont pas conservées."
+
+msgid "Colors in your images"
+msgstr "Couleurs de vos images"
+
+msgid "Use these colors"
+msgstr "Utiliser ces couleurs"
+
+msgid "Applied the colors from your images."
+msgstr "Les couleurs de vos images ont été appliquées."
 
 msgid "Drawn images: line, shape and flat color."
 msgstr "Des images dessinées : trait, formes et aplats."
@@ -12083,8 +12114,8 @@ msgstr "À hauteur des yeux"
 msgid "Fill this in to save the signature."
 msgstr "Remplissez ce champ pour enregistrer la signature."
 
-msgid "Five fields fix the look of every image. Draft them from your site, then change anything."
-msgstr "Cinq champs fixent l'apparence de chaque image. Rédigez-les à partir de votre site, puis modifiez ce que vous voulez."
+msgid "Five fields fix the look of every image. Draft them from your site or from images, then change anything."
+msgstr "Cinq champs fixent l'apparence de chaque image. Rédigez-les à partir de votre site ou d'images, puis modifiez ce que vous voulez."
 
 msgid "Flat color background"
 msgstr "Fond en aplat de couleur"
@@ -12398,8 +12429,8 @@ msgstr "Grain du papier visible"
 msgid "Visual signature"
 msgstr "Signature visuelle"
 
-msgid "Want a look of your own? Build it later on the Visuals page, or write a prompt there."
-msgstr "Envie d'une apparence bien à vous ? Créez-la plus tard sur la page Visuels, ou écrivez-y un prompt."
+msgid "Want a look of your own? After setup, open the Visuals page and choose Your own or Free prompt."
+msgstr "Envie d'une apparence bien à vous ? Après la configuration, ouvrez la page Visuels et choisissez « La vôtre » ou « Prompt libre »."
 
 msgid "Your colors"
 msgstr "Vos couleurs"

@@ -8,19 +8,24 @@ use Structura\Api\Rest_Api;
 use Structura\Tests\Unit\TestCase;
 
 /**
- * The two visual-signature proxies (specs/visual-signatures.md §6, §8):
+ * The visual-signature proxies (specs/visual-signatures.md §6, §8, §14.3):
  *
  *   - `POST /visual-signature/suggest` → cloud `/suggestVisualSignature`:
  *     the thin pass, `{ locale? }` in, the cloud's answer out unchanged.
  *   - `POST /visual-signature/preview` → cloud `/previewVisualSignature`:
  *     the unsaved choice and palette mapped to camelCase, a 120 s budget,
  *     and the cloud's status and code forwarded on a refusal.
+ *   - `POST /visual-signature/draft-from-images` → cloud
+ *     `/draftVisualSignatureFromImages`: one to three image data URIs, the
+ *     media on offer and the locale, checked here before the cloud, a 120 s
+ *     budget, and the cloud's status and error key forwarded on a refusal.
  *
  * The real License_Manager runs against a staged license payload
  * (Key_Manager is the storage edge); Cloud_Client is the network edge.
  *
  * @covers \Structura\Api\Rest_Api::suggest_visual_signature
  * @covers \Structura\Api\Rest_Api::preview_visual_signature
+ * @covers \Structura\Api\Rest_Api::draft_visual_signature_from_images
  *
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
@@ -32,6 +37,9 @@ class VisualSignatureRoutesTest extends TestCase
         'api_token'     => 'tok_live',
         'activation_id' => 'act_1',
     ];
+
+    private const PNG_URI  = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+    private const JPEG_URI = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP8=';
 
     protected function setUp(): void
     {
@@ -373,5 +381,179 @@ class VisualSignatureRoutesTest extends TestCase
         }
         $this->assertSame('suggest_visual_signature', $routes['/visual-signature/suggest'][0]['callback'][1]);
         $this->assertSame('preview_visual_signature', $routes['/visual-signature/preview'][0]['callback'][1]);
+    }
+
+    // ── Draft from images ──────────────────────────────────────────────
+
+    /** @test */
+    public function draft_from_images_is_registered_behind_the_admin_permission_check(): void
+    {
+        $routes = [];
+        Functions\when('register_rest_route')->alias(function ($namespace, $route, $args) use (&$routes) {
+            $routes[$route][] = $args;
+        });
+
+        (new Rest_Api())->register_routes();
+
+        $route = '/visual-signature/draft-from-images';
+        $this->assertArrayHasKey($route, $routes);
+        $this->assertSame('POST', $routes[$route][0]['methods']);
+        $this->assertSame('draft_visual_signature_from_images', $routes[$route][0]['callback'][1]);
+        $this->assertSame('check_permission', $routes[$route][0]['permission_callback'][1]);
+    }
+
+    /** @test */
+    public function draft_from_images_is_refused_before_the_cloud_without_a_connection(): void
+    {
+        $this->stage_license_payload(null);
+        $this->expect_no_cloud_call();
+
+        $result = (new Rest_Api())->draft_visual_signature_from_images($this->make_request(['images' => [self::PNG_URI]]));
+
+        $this->assertInstanceOf(\WP_Error::class, $result);
+        $this->assertSame('no_workspace', $result->get_error_code());
+    }
+
+    /** @test */
+    public function draft_from_images_forwards_the_images_known_media_and_locale_with_a_120s_budget(): void
+    {
+        $this->stage_license_payload(self::CONNECTED_PAYLOAD);
+        $body     = [
+            'success'   => true,
+            'medium'    => 'illustration',
+            'technique' => 'Flat vector shapes.',
+            'avoid'     => 'Gradients.',
+            'palette'   => ['#2F6B4F', '#C8553D'],
+        ];
+        $captured = null;
+        $args     = null;
+        $this->expect_cloud_call('/draftVisualSignatureFromImages', ['code' => 200, 'body' => $body], $captured, $args);
+
+        $result = (new Rest_Api())->draft_visual_signature_from_images($this->make_request([
+            'images'      => [self::PNG_URI, self::JPEG_URI],
+            'media'       => ['illustration', 'watercolour', '3d_render', 'illustration', 7],
+            'locale'      => 'de',
+            'workspaceId' => 'w-other',
+        ]));
+
+        $this->assertSame($body, $result);
+        // The colours the samples share reach the SPA, which offers them (spec §14.4).
+        $this->assertSame(['#2F6B4F', '#C8553D'], $result['palette']);
+        $this->assertSame([
+            'images' => [self::PNG_URI, self::JPEG_URI],
+            'media'  => ['illustration', '3d_render'],
+            'locale' => 'de',
+        ], $captured);
+        $this->assertSame(120, $args['timeout']);
+    }
+
+    /** @test */
+    public function draft_from_images_leaves_out_media_with_nothing_known_and_a_malformed_locale(): void
+    {
+        $this->stage_license_payload(self::CONNECTED_PAYLOAD);
+        $captured = null;
+        $this->expect_cloud_call(
+            '/draftVisualSignatureFromImages',
+            ['code' => 200, 'body' => ['success' => true, 'medium' => 'photography', 'technique' => 't', 'avoid' => 'a']],
+            $captured
+        );
+
+        (new Rest_Api())->draft_visual_signature_from_images($this->make_request([
+            'images' => [self::PNG_URI],
+            'media'  => ['watercolour'],
+            'locale' => '<i>fr</i>',
+        ]));
+
+        $this->assertSame(['images' => [self::PNG_URI]], $captured);
+    }
+
+    /** @test */
+    public function draft_from_images_refuses_anything_but_one_to_three_strings_before_the_cloud(): void
+    {
+        $this->stage_license_payload(self::CONNECTED_PAYLOAD);
+        $this->expect_no_cloud_call();
+        $api = new Rest_Api();
+
+        foreach ([
+            'none'        => [],
+            'four'        => [self::PNG_URI, self::PNG_URI, self::PNG_URI, self::PNG_URI],
+            'not a list'  => self::PNG_URI,
+            'not strings' => [['dataUri' => self::PNG_URI]],
+        ] as $case => $images) {
+            $result = $api->draft_visual_signature_from_images($this->make_request(['images' => $images]));
+            $this->assertInstanceOf(\WP_Error::class, $result, $case);
+            $this->assertSame('invalid_images', $result->get_error_code(), $case);
+            $this->assertSame(400, $result->get_error_data()['status'], $case);
+        }
+
+        $missing = $api->draft_visual_signature_from_images($this->make_request(['media' => ['illustration']]));
+        $this->assertSame('invalid_images', $missing->get_error_code());
+    }
+
+    /** @test */
+    public function draft_from_images_refuses_a_data_uri_that_is_not_a_jpg_png_or_webp_before_the_cloud(): void
+    {
+        $this->stage_license_payload(self::CONNECTED_PAYLOAD);
+        $this->expect_no_cloud_call();
+        $api = new Rest_Api();
+
+        foreach ([
+            'data:image/heic;base64,AAAA',
+            'data:image/svg+xml;base64,PHN2Zz4=',
+            'https://example.com/photo.jpg',
+            'data:image/png;base64,iVBOR<script>w0K',
+        ] as $uri) {
+            // The good image first: one refused sample refuses the request.
+            $result = $api->draft_visual_signature_from_images($this->make_request(['images' => [self::PNG_URI, $uri]]));
+            $this->assertSame(['status' => 400, 'code' => 'visualCharacter.imageWrongType'], $result->get_error_data(), $uri);
+        }
+    }
+
+    /** @test */
+    public function draft_from_images_refuses_a_body_over_14_mb_before_the_cloud(): void
+    {
+        $this->stage_license_payload(self::CONNECTED_PAYLOAD);
+        $this->expect_no_cloud_call();
+
+        // Each image alone is under the cap; together they are over it.
+        $half = 'data:image/jpeg;base64,' . str_repeat('A', 7 * 1024 * 1024);
+        $result = (new Rest_Api())->draft_visual_signature_from_images($this->make_request(['images' => [$half, $half]]));
+
+        $this->assertSame(['status' => 400, 'code' => 'visualCharacter.imageTooLarge'], $result->get_error_data());
+    }
+
+    /**
+     * @return array<string, array{0: int, 1: string, 2: array<string, mixed>}>
+     */
+    public function draftRefusals(): array
+    {
+        return [
+            'plan gate'  => [403, 'plan_gated', ['status' => 403, 'code' => 'plan_gated']],
+            'rate limit' => [429, 'ai_rate_limited', ['status' => 429, 'code' => 'ai_rate_limited']],
+            'failed'     => [500, 'common.internal', ['status' => 500, 'code' => 'common.internal']],
+            'bytes'      => [400, 'visualCharacter.imageHeic', ['status' => 400, 'code' => 'visualCharacter.imageHeic']],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider draftRefusals
+     *
+     * @param array<string, mixed> $expected
+     */
+    public function draft_from_images_forwards_a_cloud_refusal_with_its_status_and_code(int $status, string $code, array $expected): void
+    {
+        $this->stage_license_payload(self::CONNECTED_PAYLOAD);
+        $captured = null;
+        $this->expect_cloud_call('/draftVisualSignatureFromImages', [
+            'code' => $status,
+            'body' => ['success' => false, 'code' => $code, 'error' => 'Refused by the cloud.'],
+        ], $captured);
+
+        $result = (new Rest_Api())->draft_visual_signature_from_images($this->make_request(['images' => [self::PNG_URI]]));
+
+        $this->assertInstanceOf(\WP_Error::class, $result);
+        $this->assertSame('Refused by the cloud.', $result->get_error_message());
+        $this->assertSame($expected, $result->get_error_data());
     }
 }

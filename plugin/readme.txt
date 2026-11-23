@@ -322,6 +322,16 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Changelog ==
 
+= 2.44.0 =
+* New: Draft from images. In the signature builder on the Visuals page,
+  upload up to three images in the style you want and get a draft of
+  the medium, the technique and what to avoid. The colors the images
+  share are offered too, and are applied only when you choose Use
+  these colors. The images are not stored.
+* Changed: the setup wizard's Visuals step now says where to write a
+  look of your own after setup: the Visuals page, under Your own or
+  Free prompt.
+
 = 2.42.0 =
 * New: References list. A post can end with a list of the studies and
   sources it cites, in full, under a heading in the post's language.
@@ -592,6 +602,10 @@ repository:
 [github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md](https://github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md)
 
 == Upgrade Notice ==
+
+= 2.44.0 =
+Adds Draft from images to the signature builder on the Visuals page.
+Safe upgrade. No database migrations.
 
 = 2.42.0 =
 Adds the References list for posts that cite studies and sources, and

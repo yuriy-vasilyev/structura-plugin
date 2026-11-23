@@ -39,7 +39,8 @@ class Rest_Api
     /**
      * Largest character image data URI the upload route forwards: a 10 MB
      * file, the cloud's own cap, base64-encoded. The SPA sends one it has
-     * scaled to 1536 px, far below this.
+     * scaled to 1536 px, far below this. "Draft from images" caps its
+     * samples' total at the same size.
      */
     private const CHARACTER_DATA_URI_MAX = 14 * 1024 * 1024;
 
@@ -660,6 +661,12 @@ class Rest_Api
         register_rest_route($this->namespace, '/visual-signature/preview', [
             'methods'             => 'POST',
             'callback'            => [$this, 'preview_visual_signature'],
+            'permission_callback' => [$this, 'check_permission'],
+        ]);
+        // "Draft from images" (specs/visual-signatures.md §14.3).
+        register_rest_route($this->namespace, '/visual-signature/draft-from-images', [
+            'methods'             => 'POST',
+            'callback'            => [$this, 'draft_visual_signature_from_images'],
             'permission_callback' => [$this, 'check_permission'],
         ]);
 
@@ -7713,6 +7720,64 @@ class Rest_Api
     }
 
     /**
+     * POST /structura/v1/visual-signature/draft-from-images: "Draft from
+     * images" (specs/visual-signatures.md §14.3). Body: `{ images, media?,
+     * locale? }`, one to three JPG, PNG or WebP data URIs the SPA scaled to
+     * 1536 px, the media the builder offers and the language of the drafted
+     * text. Answers `{ success, medium, technique, avoid, palette }`, or the
+     * cloud's status and error key (403 `plan_gated` off the builder's plans).
+     * The images are read once by the cloud and never logged or stored.
+     */
+    public function draft_visual_signature_from_images($request)
+    {
+        $denied = $this->require_cloud_connection();
+        if ($denied) {
+            return $denied;
+        }
+        $params = $request->get_json_params();
+        if ( ! is_array($params)) {
+            $params = [];
+        }
+        $images = $params['images'] ?? null;
+        $count  = is_array($images) ? count($images) : 0;
+        if ($count < 1 || $count > 3 || count(array_filter($images, 'is_string')) !== $count) {
+            return new \WP_Error('invalid_images', __('Add one to three images.', 'structura'), ['status' => 400]);
+        }
+        $images = array_values($images);
+        if (array_sum(array_map('strlen', $images)) > self::CHARACTER_DATA_URI_MAX) {
+            return $this->character_refusal('visualCharacter.imageTooLarge', __('This image is larger than 10 MB. Use a smaller one.', 'structura'));
+        }
+        foreach ($images as $uri) {
+            if ( ! $this->is_image_data_uri($uri)) {
+                return $this->character_refusal('visualCharacter.imageWrongType', __('This file type can’t be used. Use a JPG, PNG or WebP image.', 'structura'));
+            }
+        }
+        $payload = ['images' => $images];
+        // The media on offer, in the builder's order: the cloud falls back to
+        // the first one. None known leaves it out, which means all three.
+        $requested = is_array($params['media'] ?? null) ? $params['media'] : [];
+        $media     = [];
+        foreach ($requested as $medium) {
+            if (in_array($medium, self::VISUAL_MEDIA, true) && ! in_array($medium, $media, true)) {
+                $media[] = $medium;
+            }
+        }
+        if ($media) {
+            $payload['media'] = $media;
+        }
+        $locale = is_string($params['locale'] ?? null) ? $params['locale'] : '';
+        if (preg_match('/^[a-z]{2,3}([_-][A-Za-z0-9]{2,8})*$/', $locale)) {
+            $payload['locale'] = $locale;
+        }
+        // 120s: one vision call, inside the cloud function's 120 s limit.
+        $response = Cloud_Client::post('/draftVisualSignatureFromImages', $payload, ['timeout' => 120]);
+        return $this->forward_cloud_response(
+            $response,
+            __('Couldn’t draft from your images right now. Try again, or fill the fields yourself.', 'structura')
+        );
+    }
+
+    /**
      * The recurring character's kind from a request body, or null.
      *
      * @param mixed $raw
@@ -7729,6 +7794,13 @@ class Rest_Api
     private function character_refusal(string $key, string $message, int $status = 400): \WP_Error
     {
         return new \WP_Error('cloud_error', $message, ['status' => $status, 'code' => $key]);
+    }
+
+    /** Whether `$uri` is a base64 JPG, PNG or WebP data URI; the cloud checks the bytes. */
+    private function is_image_data_uri(string $uri): bool
+    {
+        // Possessive, so a long payload never backtracks into the PCRE limit.
+        return (bool)preg_match('/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+\/]++={0,2}$/', $uri);
     }
 
     /**
@@ -7754,8 +7826,7 @@ class Rest_Api
         if (strlen($uri) > self::CHARACTER_DATA_URI_MAX) {
             return $this->character_refusal('visualCharacter.imageTooLarge', __('This image is larger than 10 MB. Use a smaller one.', 'structura'));
         }
-        // Possessive, so a long payload never backtracks into the PCRE limit.
-        if ( ! preg_match('/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+\/]++={0,2}$/', $uri)) {
+        if ( ! $this->is_image_data_uri($uri)) {
             return $this->character_refusal('visualCharacter.imageWrongType', __('This file type can’t be used. Use a JPG, PNG or WebP image.', 'structura'));
         }
         // 60s: the cloud function's own limit; it scales and stores the image.

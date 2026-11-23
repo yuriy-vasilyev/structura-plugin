@@ -35,11 +35,11 @@ export type SignatureSelection =
 export interface CustomSignatureDraft {
   /** Shown on the "Your own" card; required to save. */
   name: string;
-  /** Photography, illustration or 3D render; the user's choice, never drafted. */
+  /** Photography, illustration or 3D render; the user's choice, which "Draft from images" also sets (spec §14.2). */
   medium: VisualMedium;
   /** Technique, motifs, composition and avoid; each required to save. */
   fields: Record<BuilderField, string>;
-  /** Fields "Draft from my site" filled; each mark clears on that field's first edit. */
+  /** Fields a draft (from the site or from images) filled; each mark clears on that field's first edit. */
   drafted: Partial<Record<BuilderField, true>>;
 }
 

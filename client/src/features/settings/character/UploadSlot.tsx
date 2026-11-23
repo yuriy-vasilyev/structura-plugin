@@ -1,9 +1,10 @@
 /**
  * One square image slot of the character intake (recurring-character
- * handoff §5): empty (required or optional) as a drop target, uploading with
- * the browser's preview, uploaded with Remove, or refused (too large, HEIC,
- * other type) with Choose another. The dropzone vocabulary is `FileUpload`'s;
- * errors stay in the slot.
+ * handoff §5), also the sample slots of the builder's "Draft from images"
+ * (specs/visual-signatures.md §14.4): empty (required or optional) as a drop
+ * target, uploading with the browser's preview, uploaded with Remove, or
+ * refused (too large, HEIC, other type) with Choose another. The dropzone
+ * vocabulary is `FileUpload`'s; errors stay in the slot.
  */
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { __, sprintf } from "@wordpress/i18n";
@@ -26,7 +27,7 @@ export interface UploadSlotProps {
   view: UploadSlotView;
   onPick: (file: File) => void;
   onRemove?: () => void;
-  /** Opens the zoom on an uploaded image. */
+  /** Opens the zoom on an uploaded image; without it the image is not a button. */
   onZoom?: () => void;
   /** Another upload or removal is running. */
   disabled?: boolean;
@@ -113,24 +114,31 @@ export function UploadSlot({
   );
 
   if (view.kind === "uploaded") {
+    const image = view.url && <img src={view.url} alt="" className="h-full w-full object-cover" />;
     return (
       <div className="flex min-w-0 flex-col gap-1.5">
         <div className="relative aspect-square overflow-hidden rounded-xl bg-neutral-100 ring-1 ring-neutral-200 ring-inset dark:bg-neutral-800 dark:ring-neutral-700">
-          <button
-            ref={slotRef}
-            type="button"
-            onClick={onZoom}
-            aria-label={sprintf(
-              /* translators: %d: the image's position, 1 to 3 */
-              __("View your image %d larger", "structura"),
-              n
-            )}
-            className="focus-visible:ring-brand-500/70 block h-full w-full cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-inset"
-          >
-            {view.url && <img src={view.url} alt="" className="h-full w-full object-cover" />}
-          </button>
+          {onZoom ? (
+            <button
+              ref={slotRef}
+              type="button"
+              onClick={onZoom}
+              aria-label={sprintf(
+                /* translators: %d: the image's position, 1 to 3 */
+                __("View your image %d larger", "structura"),
+                n
+              )}
+              className="focus-visible:ring-brand-500/70 block h-full w-full cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-inset"
+            >
+              {image}
+            </button>
+          ) : (
+            image
+          )}
           {onRemove && (
             <button
+              // Without a zoom, Remove is the slot's focusable element.
+              ref={onZoom ? undefined : slotRef}
               type="button"
               onClick={onRemove}
               disabled={disabled}

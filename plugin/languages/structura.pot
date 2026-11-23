@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-21T11:38:32+00:00\n"
+"POT-Creation-Date: 2026-11-23T18:06:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 "X-Domain: structura\n"
@@ -30,17 +30,17 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5009
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5063
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5128
-#: plugin/includes/Api/Rest_Api.php:1243
+#: plugin/includes/Api/Rest_Api.php:1250
 msgid "Active license required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:867
-#: plugin/includes/Api/Rest_Api.php:1185
+#: plugin/includes/Api/Rest_Api.php:1192
 msgid "Active Pro or Cloud license required to access analytics."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1423
-#: plugin/includes/Api/Rest_Api.php:1873
+#: plugin/includes/Api/Rest_Api.php:1880
 msgid "Unknown error"
 msgstr ""
 
@@ -50,31 +50,31 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5058
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5123
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5231
-#: plugin/includes/Api/Rest_Api.php:1951 plugin/includes/Api/Rest_Api.php:6761
-#: plugin/includes/Api/Rest_Api.php:6850 plugin/includes/Api/Rest_Api.php:6898
-#: plugin/includes/Api/Rest_Api.php:7053 plugin/includes/Api/Rest_Api.php:7119
-#: plugin/includes/Api/Rest_Api.php:7225
+#: plugin/includes/Api/Rest_Api.php:1958 plugin/includes/Api/Rest_Api.php:6768
+#: plugin/includes/Api/Rest_Api.php:6857 plugin/includes/Api/Rest_Api.php:6905
+#: plugin/includes/Api/Rest_Api.php:7060 plugin/includes/Api/Rest_Api.php:7126
+#: plugin/includes/Api/Rest_Api.php:7232
 msgid "Campaign ID is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1529
-#: plugin/includes/Api/Rest_Api.php:1980
+#: plugin/includes/Api/Rest_Api.php:1987
 msgid "Manual execution initiated in background."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1575
-#: plugin/includes/Api/Rest_Api.php:2026
+#: plugin/includes/Api/Rest_Api.php:2033
 msgid "Unable to delete task."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1601
-#: plugin/includes/Api/Rest_Api.php:2175
+#: plugin/includes/Api/Rest_Api.php:2182
 msgid "A post objective is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1615
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:50
-#: plugin/includes/Api/Rest_Api.php:2218
+#: plugin/includes/Api/Rest_Api.php:2225
 #: plugin/includes/Scheduler/Campaign_Validator.php:51
 msgid "A text provider is required."
 msgstr ""
@@ -82,21 +82,21 @@ msgstr ""
 #. translators: %s: provider slug (e.g. "anthropic")
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1629
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:65
-#: plugin/includes/Api/Rest_Api.php:2232
+#: plugin/includes/Api/Rest_Api.php:2239
 #: plugin/includes/Scheduler/Campaign_Validator.php:66
 msgid "Provider \"%s\" does not support image generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1647
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:98
-#: plugin/includes/Api/Rest_Api.php:2250
+#: plugin/includes/Api/Rest_Api.php:2257
 #: plugin/includes/Scheduler/Campaign_Validator.php:117
 msgid "The fallback text provider must be different from the primary."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1658
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:110
-#: plugin/includes/Api/Rest_Api.php:2261
+#: plugin/includes/Api/Rest_Api.php:2268
 #: plugin/includes/Scheduler/Campaign_Validator.php:129
 msgid "The fallback image provider must be different from the primary."
 msgstr ""
@@ -104,19 +104,19 @@ msgstr ""
 #. translators: %s: provider slug (e.g. "anthropic")
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1668
 #: .tmp-wporg/structura/includes/Scheduler/Campaign_Validator.php:119
-#: plugin/includes/Api/Rest_Api.php:2271
+#: plugin/includes/Api/Rest_Api.php:2278
 #: plugin/includes/Scheduler/Campaign_Validator.php:138
 msgid "Fallback provider \"%s\" does not support image generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1762
-#: plugin/includes/Api/Rest_Api.php:2446
+#: plugin/includes/Api/Rest_Api.php:2453
 msgid ""
 "Could not cache the post request for background processing. Please try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1782
-#: plugin/includes/Api/Rest_Api.php:2466
+#: plugin/includes/Api/Rest_Api.php:2473
 msgid ""
 "Could not queue this post for background processing. Open Tools → Site "
 "Health and resolve any Structura-flagged issues (usually MySQL "
@@ -124,41 +124,41 @@ msgid ""
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1791
-#: plugin/includes/Api/Rest_Api.php:2475
+#: plugin/includes/Api/Rest_Api.php:2482
 msgid "Your post is being generated in the background."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1811
-#: plugin/includes/Api/Rest_Api.php:2496
+#: plugin/includes/Api/Rest_Api.php:2503
 msgid "Campaign not found."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1819
-#: plugin/includes/Api/Rest_Api.php:2504
+#: plugin/includes/Api/Rest_Api.php:2511
 msgid "Campaign must have an objective."
 msgstr ""
 
 #. translators: %s: campaign identity name or keyphrase.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1826
-#: plugin/includes/Api/Rest_Api.php:2511
+#: plugin/includes/Api/Rest_Api.php:2518
 msgid "Authority discovery started for \"%s\"…"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1844
-#: plugin/includes/Api/Rest_Api.php:2529
+#: plugin/includes/Api/Rest_Api.php:2536
 msgid ""
 "Campaign is missing a text provider. Please re-save the campaign settings."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1875
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2014
-#: plugin/includes/Api/Rest_Api.php:2570 plugin/includes/Api/Rest_Api.php:2723
+#: plugin/includes/Api/Rest_Api.php:2577 plugin/includes/Api/Rest_Api.php:2730
 msgid "Unknown error from discovery service."
 msgstr ""
 
 #. translators: 1: number of domains saved locally, 2: campaign id.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1896
-#: plugin/includes/Api/Rest_Api.php:2591
+#: plugin/includes/Api/Rest_Api.php:2598
 msgid ""
 "Authority discovery saved %1$d domains but cloud persist failed for campaign "
 "%2$s."
@@ -167,7 +167,7 @@ msgstr ""
 #. translators: 1: number of authority domains found, 2: number of queries the discovery service ran, 3: total wall-clock duration in milliseconds.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1904
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2022
-#: plugin/includes/Api/Rest_Api.php:2599 plugin/includes/Api/Rest_Api.php:2731
+#: plugin/includes/Api/Rest_Api.php:2606 plugin/includes/Api/Rest_Api.php:2738
 msgid ""
 "Authority discovery complete: %1$d domains found (%2$d queries, %3$dms)."
 msgstr ""
@@ -175,143 +175,143 @@ msgstr ""
 #. translators: %s: error message from the authority-discovery service.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1921
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2039
-#: plugin/includes/Api/Rest_Api.php:2615 plugin/includes/Api/Rest_Api.php:2747
+#: plugin/includes/Api/Rest_Api.php:2622 plugin/includes/Api/Rest_Api.php:2754
 msgid "Authority discovery failed: %s"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1967
-#: plugin/includes/Api/Rest_Api.php:2662
+#: plugin/includes/Api/Rest_Api.php:2669
 msgid "A keyphrase is required for discovery."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1974
-#: plugin/includes/Api/Rest_Api.php:2669
+#: plugin/includes/Api/Rest_Api.php:2676
 msgid "A text provider is required for authority discovery."
 msgstr ""
 
 #. translators: %s: campaign label (campaign name or first 60 chars of keyphrase).
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:1983
-#: plugin/includes/Api/Rest_Api.php:2678
+#: plugin/includes/Api/Rest_Api.php:2685
 msgid "Authority discovery started for \"%s\" (pre-creation)…"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2063
-#: plugin/includes/Api/Rest_Api.php:2771
+#: plugin/includes/Api/Rest_Api.php:2778
 msgid "Domains must be an array."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2075
-#: plugin/includes/Api/Rest_Api.php:2783
+#: plugin/includes/Api/Rest_Api.php:2790
 msgid "Authority list could not be saved. Please try again."
 msgstr ""
 
 #. translators: %d: number of authority domains the user saved.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2082
-#: plugin/includes/Api/Rest_Api.php:2790
+#: plugin/includes/Api/Rest_Api.php:2797
 msgid "Authority domains updated manually (%d domains)."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2088
-#: plugin/includes/Api/Rest_Api.php:2796
+#: plugin/includes/Api/Rest_Api.php:2803
 msgid "Authority domains saved."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2119
-#: plugin/includes/Api/Rest_Api.php:2888
+#: plugin/includes/Api/Rest_Api.php:2895
 msgid "A keyphrase is required for keyword discovery."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2126
-#: plugin/includes/Api/Rest_Api.php:2895
+#: plugin/includes/Api/Rest_Api.php:2902
 msgid "A text provider is required for keyword discovery."
 msgstr ""
 
 #. translators: %s: campaign label (campaign name or first 60 chars of keyphrase).
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2135
-#: plugin/includes/Api/Rest_Api.php:2904
+#: plugin/includes/Api/Rest_Api.php:2911
 msgid "Keyword discovery started for \"%s\" (pre-creation)…"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2166
-#: plugin/includes/Api/Rest_Api.php:2938
+#: plugin/includes/Api/Rest_Api.php:2945
 msgid "Unknown error from keyword discovery service."
 msgstr ""
 
 #. translators: 1: number of keywords found, 2: number of queries the discovery service ran, 3: total wall-clock duration in milliseconds.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2175
-#: plugin/includes/Api/Rest_Api.php:2947
+#: plugin/includes/Api/Rest_Api.php:2954
 msgid "Keyword discovery complete: %1$d keywords found (%2$d queries, %3$dms)."
 msgstr ""
 
 #. translators: %s: error message from the keyword-discovery service.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2191
-#: plugin/includes/Api/Rest_Api.php:2973
+#: plugin/includes/Api/Rest_Api.php:2980
 msgid "Keyword discovery failed: %s"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2219
-#: plugin/includes/Api/Rest_Api.php:3612
+#: plugin/includes/Api/Rest_Api.php:3619
 msgid "Keywords must be an array."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2258
-#: plugin/includes/Api/Rest_Api.php:3658
+#: plugin/includes/Api/Rest_Api.php:3665
 msgid "Keyword bank could not be saved. Please try again."
 msgstr ""
 
 #. translators: %d: number of keywords the user saved to the bank.
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2265
-#: plugin/includes/Api/Rest_Api.php:3665
+#: plugin/includes/Api/Rest_Api.php:3672
 msgid "Keyword bank updated (%d keywords)."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2271
-#: plugin/includes/Api/Rest_Api.php:3671
+#: plugin/includes/Api/Rest_Api.php:3678
 msgid "Keyword bank saved."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2282
-#: plugin/includes/Api/Rest_Api.php:3682
+#: plugin/includes/Api/Rest_Api.php:3689
 msgid "Action Scheduler not available."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2320
-#: plugin/includes/Api/Rest_Api.php:3720
+#: plugin/includes/Api/Rest_Api.php:3727
 msgid "Handshake verified. Your server is reachable."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2333
-#: plugin/includes/Api/Rest_Api.php:3735
+#: plugin/includes/Api/Rest_Api.php:3742
 msgid "Invalid suggestion mode."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2351
-#: plugin/includes/Api/Rest_Api.php:3774
+#: plugin/includes/Api/Rest_Api.php:3781
 msgid "Intelligence source not specified."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2458
-#: plugin/includes/Api/Rest_Api.php:3881
+#: plugin/includes/Api/Rest_Api.php:3888
 msgid "AI provider is required for cloud suggestions."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2495
-#: plugin/includes/Api/Rest_Api.php:3934
+#: plugin/includes/Api/Rest_Api.php:3941
 msgid "The AI service returned an unexpected error. Please try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2567
-#: plugin/includes/Api/Rest_Api.php:4008
+#: plugin/includes/Api/Rest_Api.php:4015
 msgid "Failed to disconnect provider in the cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2680
-#: plugin/includes/Api/Rest_Api.php:4121
+#: plugin/includes/Api/Rest_Api.php:4128
 msgid "Cannot delete the default persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2688
-#: plugin/includes/Api/Rest_Api.php:4129
+#: plugin/includes/Api/Rest_Api.php:4136
 msgid "Failed to delete persona."
 msgstr ""
 
@@ -320,135 +320,135 @@ msgid "This provider is not available on your current plan."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:2987
-#: plugin/includes/Api/Rest_Api.php:4491
+#: plugin/includes/Api/Rest_Api.php:4498
 msgid "Failed to save the provider key in the cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3237
-#: plugin/includes/Api/Rest_Api.php:4793
+#: plugin/includes/Api/Rest_Api.php:4800
 msgid "Request body must be a JSON object."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3262
-#: plugin/includes/Api/Rest_Api.php:4818
+#: plugin/includes/Api/Rest_Api.php:4825
 msgid "Public website URL must start with https://"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3344
-#: plugin/includes/Api/Rest_Api.php:4900
+#: plugin/includes/Api/Rest_Api.php:4907
 msgid "Provide a valid https:// URL before running Quick setup."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3356
-#: plugin/includes/Api/Rest_Api.php:4912
+#: plugin/includes/Api/Rest_Api.php:4919
 msgid "Connect your license before running Quick setup."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3372
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3478
-#: plugin/includes/Api/Rest_Api.php:4928 plugin/includes/Api/Rest_Api.php:5034
+#: plugin/includes/Api/Rest_Api.php:4935 plugin/includes/Api/Rest_Api.php:5041
 msgid "Could not reach the Structura cloud. Try again in a moment."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3388
-#: plugin/includes/Api/Rest_Api.php:4944
+#: plugin/includes/Api/Rest_Api.php:4951
 msgid "Quick setup failed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3446
-#: plugin/includes/Api/Rest_Api.php:5002
+#: plugin/includes/Api/Rest_Api.php:5009
 msgid "Missing connection id."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3455
-#: plugin/includes/Api/Rest_Api.php:5011
+#: plugin/includes/Api/Rest_Api.php:5018
 msgid "Connect your license before verifying IndexNow."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3491
-#: plugin/includes/Api/Rest_Api.php:5047
+#: plugin/includes/Api/Rest_Api.php:5054
 msgid "Verification failed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3556
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3600
-#: plugin/includes/Api/Rest_Api.php:5127 plugin/includes/Api/Rest_Api.php:5171
+#: plugin/includes/Api/Rest_Api.php:5134 plugin/includes/Api/Rest_Api.php:5178
 msgid "noticeId is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3620
-#: plugin/includes/Api/Rest_Api.php:5191
+#: plugin/includes/Api/Rest_Api.php:5198
 msgid "Please enter a license key."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3629
-#: plugin/includes/Api/Rest_Api.php:5200
+#: plugin/includes/Api/Rest_Api.php:5207
 msgid "License activated successfully!"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3635
-#: plugin/includes/Api/Rest_Api.php:5206
+#: plugin/includes/Api/Rest_Api.php:5213
 msgid "Activation failed. Please check your key and try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3650
-#: plugin/includes/Api/Rest_Api.php:5228
+#: plugin/includes/Api/Rest_Api.php:5235
 msgid "License deactivated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3655
-#: plugin/includes/Api/Rest_Api.php:5233
+#: plugin/includes/Api/Rest_Api.php:5240
 msgid "Could not deactivate license."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3678
-#: plugin/includes/Api/Rest_Api.php:5256
+#: plugin/includes/Api/Rest_Api.php:5263
 msgid "Please enter your license key to confirm."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3688
 #: .tmp-wporg/structura/includes/Core/License_Manager.php:567
-#: plugin/includes/Api/Rest_Api.php:5266
+#: plugin/includes/Api/Rest_Api.php:5273
 #: plugin/includes/Core/License_Manager.php:652
 msgid "Site removed from your activations."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3692
-#: plugin/includes/Api/Rest_Api.php:5270
+#: plugin/includes/Api/Rest_Api.php:5277
 msgid "Could not remove this site. Please try again."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3711
-#: plugin/includes/Api/Rest_Api.php:5289
+#: plugin/includes/Api/Rest_Api.php:5296
 msgid "License plan synchronized with cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3738
-#: plugin/includes/Api/Rest_Api.php:5316
+#: plugin/includes/Api/Rest_Api.php:5323
 msgid "No license bound to this site."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3769
 #: .tmp-wporg/structura/includes/Core/License_Manager.php:80
-#: plugin/includes/Api/Rest_Api.php:5347
+#: plugin/includes/Api/Rest_Api.php:5354
 #: plugin/includes/Core/License_Manager.php:98
 msgid "Invalid server response format."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3784
-#: plugin/includes/Api/Rest_Api.php:5375
+#: plugin/includes/Api/Rest_Api.php:5382
 msgid "Cloud heartbeat rejected."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3868
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3887
-#: plugin/includes/Api/Rest_Api.php:5469 plugin/includes/Api/Rest_Api.php:5488
+#: plugin/includes/Api/Rest_Api.php:5476 plugin/includes/Api/Rest_Api.php:5495
 msgid "Unknown"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:3991
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:97
-#: plugin/includes/Api/Rest_Api.php:5647
+#: plugin/includes/Api/Rest_Api.php:5654
 #: plugin/includes/Channels/Channels_Connections_Service.php:100
 msgid "Integration id and webhook URL are required."
 msgstr ""
@@ -457,7 +457,7 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4154
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:155
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:233
-#: plugin/includes/Api/Rest_Api.php:5684 plugin/includes/Api/Rest_Api.php:5938
+#: plugin/includes/Api/Rest_Api.php:5691 plugin/includes/Api/Rest_Api.php:5945
 #: plugin/includes/Channels/Channels_Connections_Service.php:165
 #: plugin/includes/Channels/Channels_Connections_Service.php:358
 msgid "Connection id is required."
@@ -465,7 +465,7 @@ msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4118
 #: .tmp-wporg/structura/includes/Channels/Channels_Connections_Service.php:198
-#: plugin/includes/Api/Rest_Api.php:5900
+#: plugin/includes/Api/Rest_Api.php:5907
 #: plugin/includes/Channels/Channels_Connections_Service.php:313
 msgid "Integration id is required."
 msgstr ""
@@ -477,8 +477,8 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:104
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:224
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:254
-#: plugin/includes/Api/Rest_Api.php:6019 plugin/includes/Api/Rest_Api.php:6303
-#: plugin/includes/Api/Rest_Api.php:6350
+#: plugin/includes/Api/Rest_Api.php:6026 plugin/includes/Api/Rest_Api.php:6310
+#: plugin/includes/Api/Rest_Api.php:6357
 #: plugin/includes/Progress/Runs_Service.php:57
 #: plugin/includes/Progress/Runs_Service.php:116
 #: plugin/includes/Progress/Runs_Service.php:236
@@ -489,36 +489,36 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4389
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:144
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:151
-#: plugin/includes/Api/Rest_Api.php:6179
+#: plugin/includes/Api/Rest_Api.php:6186
 #: plugin/includes/Progress/Runs_Service.php:156
 #: plugin/includes/Progress/Runs_Service.php:163
 msgid "campaign_id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4512
-#: plugin/includes/Api/Rest_Api.php:6317
+#: plugin/includes/Api/Rest_Api.php:6324
 msgid "Active admin session required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4580
-#: plugin/includes/Api/Rest_Api.php:6385
+#: plugin/includes/Api/Rest_Api.php:6392
 msgid "run_id and cancelled_by are required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4588
 #: .tmp-wporg/structura/includes/Progress/Runs_Service.php:262
-#: plugin/includes/Api/Rest_Api.php:6393
+#: plugin/includes/Api/Rest_Api.php:6400
 #: plugin/includes/Progress/Runs_Service.php:274
 msgid "cancelled_by must be \"user\" or \"system\"."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4639
-#: plugin/includes/Api/Rest_Api.php:6444
+#: plugin/includes/Api/Rest_Api.php:6451
 msgid "integration_id is required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4840
-#: plugin/includes/Api/Rest_Api.php:6642
+#: plugin/includes/Api/Rest_Api.php:6649
 msgid "Campaign limit reached for your current plan."
 msgstr ""
 
@@ -529,18 +529,18 @@ msgstr ""
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4861
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4927
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5189
-#: plugin/includes/Api/Rest_Api.php:6728 plugin/includes/Api/Rest_Api.php:6811
-#: plugin/includes/Api/Rest_Api.php:7183
+#: plugin/includes/Api/Rest_Api.php:6735 plugin/includes/Api/Rest_Api.php:6818
+#: plugin/includes/Api/Rest_Api.php:7190
 msgid "Cloud did not return campaign document."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4875
-#: plugin/includes/Api/Rest_Api.php:6742
+#: plugin/includes/Api/Rest_Api.php:6749
 msgid "New campaign deployed successfully."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:4938
-#: plugin/includes/Api/Rest_Api.php:6822
+#: plugin/includes/Api/Rest_Api.php:6829
 msgid "Campaign architecture updated."
 msgstr ""
 
@@ -553,102 +553,102 @@ msgid "Failed to enable pre-generation."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5048
-#: plugin/includes/Api/Rest_Api.php:7043
+#: plugin/includes/Api/Rest_Api.php:7050
 msgid "Not authenticated."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5087
-#: plugin/includes/Api/Rest_Api.php:7083
+#: plugin/includes/Api/Rest_Api.php:7090
 msgid "Campaign cleared."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5153
-#: plugin/includes/Api/Rest_Api.php:7150
+#: plugin/includes/Api/Rest_Api.php:7157
 msgid "Source campaign payload was empty."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5172
-#: plugin/includes/Api/Rest_Api.php:7166
+#: plugin/includes/Api/Rest_Api.php:7173
 msgid "(Copy)"
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5201
-#: plugin/includes/Api/Rest_Api.php:7195
+#: plugin/includes/Api/Rest_Api.php:7202
 msgid "Campaign cloned successfully."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5239
-#: plugin/includes/Api/Rest_Api.php:7233
+#: plugin/includes/Api/Rest_Api.php:7240
 msgid "Campaign not found in cloud."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5248
-#: plugin/includes/Api/Rest_Api.php:7242
+#: plugin/includes/Api/Rest_Api.php:7249
 msgid "Failed to update campaign status."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5259
-#: plugin/includes/Api/Rest_Api.php:7253
+#: plugin/includes/Api/Rest_Api.php:7260
 msgid "Campaign resumed."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5260
-#: plugin/includes/Api/Rest_Api.php:7254
+#: plugin/includes/Api/Rest_Api.php:7261
 msgid "Campaign paused."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5292
-#: plugin/includes/Api/Rest_Api.php:7307
+#: plugin/includes/Api/Rest_Api.php:7314
 msgid "Failed to list visual presets."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5304
-#: plugin/includes/Api/Rest_Api.php:7323
+#: plugin/includes/Api/Rest_Api.php:7330
 msgid "Failed to create visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5320
-#: plugin/includes/Api/Rest_Api.php:7343
+#: plugin/includes/Api/Rest_Api.php:7350
 msgid "Failed to update visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5338
-#: plugin/includes/Api/Rest_Api.php:7361
+#: plugin/includes/Api/Rest_Api.php:7368
 msgid "Failed to fork visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5351
-#: plugin/includes/Api/Rest_Api.php:7374
+#: plugin/includes/Api/Rest_Api.php:7381
 msgid "Failed to delete visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5362
-#: plugin/includes/Api/Rest_Api.php:7385
+#: plugin/includes/Api/Rest_Api.php:7392
 msgid "Failed to bind visual preset."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5407
-#: plugin/includes/Api/Rest_Api.php:7927
+#: plugin/includes/Api/Rest_Api.php:7998
 msgid "Failed to fork persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5418
-#: plugin/includes/Api/Rest_Api.php:7938
+#: plugin/includes/Api/Rest_Api.php:8009
 msgid "Failed to set default persona."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5428
-#: plugin/includes/Api/Rest_Api.php:7969
+#: plugin/includes/Api/Rest_Api.php:8040
 msgid "Failed to list workspace keys."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5439
-#: plugin/includes/Api/Rest_Api.php:7980
+#: plugin/includes/Api/Rest_Api.php:8051
 msgid "Credential id and provider are required."
 msgstr ""
 
 #: .tmp-wporg/structura/includes/Api/Rest_Api.php:5442
-#: plugin/includes/Api/Rest_Api.php:7983
+#: plugin/includes/Api/Rest_Api.php:8054
 msgid "Failed to bind workspace key."
 msgstr ""
 
@@ -1377,159 +1377,169 @@ msgid ""
 "update PHP to use this plugin."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:1115 plugin/includes/Api/Rest_Api.php:1228
+#: plugin/includes/Api/Rest_Api.php:1122 plugin/includes/Api/Rest_Api.php:1235
 msgid "Connect to Structura Cloud first."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:1133
+#: plugin/includes/Api/Rest_Api.php:1140
 msgid ""
 "Could not reach Structura Cloud. Check your server's outbound connection and "
 "try again."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2069
+#: plugin/includes/Api/Rest_Api.php:2076
 msgid "No file was uploaded."
 msgstr ""
 
 #. translators: the supported research attachment formats.
-#: plugin/includes/Api/Rest_Api.php:2078
+#: plugin/includes/Api/Rest_Api.php:2085
 msgid "This file type isn't supported — use PDF, DOCX, TXT, MD or HTML."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2087
+#: plugin/includes/Api/Rest_Api.php:2094
 msgid "This file is too large — files can be up to 10 MB."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2093 plugin/includes/Api/Rest_Api.php:2121
-#: plugin/includes/Api/Rest_Api.php:2126 plugin/includes/Api/Rest_Api.php:2142
-#: plugin/includes/Api/Rest_Api.php:2151
+#: plugin/includes/Api/Rest_Api.php:2100 plugin/includes/Api/Rest_Api.php:2128
+#: plugin/includes/Api/Rest_Api.php:2133 plugin/includes/Api/Rest_Api.php:2149
+#: plugin/includes/Api/Rest_Api.php:2158
 msgid "The upload failed — please try again."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2201
+#: plugin/includes/Api/Rest_Api.php:2208
 msgid "Create at least one persona before generating a post."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:2857
+#: plugin/includes/Api/Rest_Api.php:2864
 msgid "Could not draft the campaign."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:3238 plugin/includes/Api/Rest_Api.php:3267
+#: plugin/includes/Api/Rest_Api.php:3245 plugin/includes/Api/Rest_Api.php:3274
 msgid "Invalid step id."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:3319
+#: plugin/includes/Api/Rest_Api.php:3326
 msgid "provider + model required."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:4399 plugin/includes/Api/Rest_Api.php:4464
+#: plugin/includes/Api/Rest_Api.php:4406 plugin/includes/Api/Rest_Api.php:4471
 msgid "This AI provider is not available."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:4406
+#: plugin/includes/Api/Rest_Api.php:4413
 msgid "Paste an API key to test."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:4424
+#: plugin/includes/Api/Rest_Api.php:4431
 msgid "The key test could not run. Try again."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:5227
+#: plugin/includes/Api/Rest_Api.php:5234
 msgid "Site removed."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:5844
+#: plugin/includes/Api/Rest_Api.php:5851
 #: plugin/includes/Channels/Channels_Events_Service.php:68
 msgid "Video job id is required."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6655
+#: plugin/includes/Api/Rest_Api.php:6662
 msgid ""
 "This publishing schedule is more frequent than your current plan allows."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6667
+#: plugin/includes/Api/Rest_Api.php:6674
 msgid "Cloud rejected the campaign request."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6876
+#: plugin/includes/Api/Rest_Api.php:6883
 msgid "Failed to fetch the summary of prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6943
+#: plugin/includes/Api/Rest_Api.php:6950
 msgid "Failed to fetch prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6959
+#: plugin/includes/Api/Rest_Api.php:6966
 msgid "Failed to discard the prepared post."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6974
+#: plugin/includes/Api/Rest_Api.php:6981
 msgid "Failed to discard all prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:6989
+#: plugin/includes/Api/Rest_Api.php:6996
 msgid "Failed to replace all prepared posts."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7023
+#: plugin/includes/Api/Rest_Api.php:7030
 msgid "Failed to turn on preparing ahead."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7530 plugin/includes/Api/Rest_Api.php:7752
-#: plugin/includes/Api/Rest_Api.php:7801 plugin/includes/Api/Rest_Api.php:7836
+#: plugin/includes/Api/Rest_Api.php:7537 plugin/includes/Api/Rest_Api.php:7824
+#: plugin/includes/Api/Rest_Api.php:7872 plugin/includes/Api/Rest_Api.php:7907
 msgid "Invalid character details."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7580
+#: plugin/includes/Api/Rest_Api.php:7587
 msgid "Invalid visual signature."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7654
+#: plugin/includes/Api/Rest_Api.php:7661
 msgid "Could not read your site right now."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7712
+#: plugin/includes/Api/Rest_Api.php:7719
 msgid "The preview did not render."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7755
+#: plugin/includes/Api/Rest_Api.php:7744
+msgid "Add one to three images."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:7748 plugin/includes/Api/Rest_Api.php:7827
 msgid "This image is larger than 10 MB. Use a smaller one."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7759
+#: plugin/includes/Api/Rest_Api.php:7752 plugin/includes/Api/Rest_Api.php:7830
 msgid "This file type can’t be used. Use a JPG, PNG or WebP image."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7767
+#: plugin/includes/Api/Rest_Api.php:7776
+msgid ""
+"Couldn’t draft from your images right now. Try again, or fill the fields "
+"yourself."
+msgstr ""
+
+#: plugin/includes/Api/Rest_Api.php:7838
 msgid "The image didn’t upload. Try again in a moment."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7784
+#: plugin/includes/Api/Rest_Api.php:7855
 msgid "The image couldn’t be removed. Try again in a moment."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7813
+#: plugin/includes/Api/Rest_Api.php:7884
 msgid "The description could not be drafted."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7853
+#: plugin/includes/Api/Rest_Api.php:7924
 msgid "The sheet didn’t finish. Try again in a moment."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7869
+#: plugin/includes/Api/Rest_Api.php:7940
 msgid "The sheet could not be approved."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7886
+#: plugin/includes/Api/Rest_Api.php:7957
 msgid "The character could not be removed."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7950
+#: plugin/includes/Api/Rest_Api.php:8021
 msgid "Failed to add persona to this site."
 msgstr ""
 
-#: plugin/includes/Api/Rest_Api.php:7959
+#: plugin/includes/Api/Rest_Api.php:8030
 msgid "Failed to remove persona from this site."
 msgstr ""
 
@@ -2282,7 +2292,7 @@ msgstr ""
 #: client/src/features/channels/components/CatalogEntryCard.tsx:215
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:620
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:650
-#: client/src/features/settings/routes/VisualsPage.tsx:1424
+#: client/src/features/settings/routes/VisualsPage.tsx:1426
 msgid "Pro"
 msgstr ""
 
@@ -2340,7 +2350,7 @@ msgstr ""
 #: client/src/features/channels/components/InstallModal.tsx:403
 #: client/src/features/personas/components/PersonaEditor.tsx:192
 #: client/src/features/settings/components/QuickSetupConfirmModal.tsx:153
-#: client/src/features/settings/routes/VisualsPage.tsx:1607
+#: client/src/features/settings/routes/VisualsPage.tsx:1609
 msgid "Cancel"
 msgstr ""
 
@@ -2561,7 +2571,7 @@ msgid "No license key yet? It comes with your account."
 msgstr ""
 
 #: client/src/features/account/routes/AccountPage.tsx:492
-#: client/src/features/settings/routes/VisualsPage.tsx:1660
+#: client/src/features/settings/routes/VisualsPage.tsx:1662
 msgid "View Pricing"
 msgstr ""
 
@@ -3069,7 +3079,7 @@ msgid "site(s)"
 msgstr ""
 
 #: client/src/features/ai-engine/components/WorkspaceKeysPicker.tsx:249
-#: client/src/features/settings/routes/VisualsPage.tsx:1570
+#: client/src/features/settings/routes/VisualsPage.tsx:1572
 msgid "Use here"
 msgstr ""
 
@@ -3267,7 +3277,7 @@ msgstr ""
 #: client/src/features/campaigns/components/steps/StepKeywords.tsx:422
 #: client/src/features/notices/utils.ts:186
 #: client/src/features/notices/utils.ts:192
-#: client/src/features/settings/routes/VisualsPage.tsx:1486
+#: client/src/features/settings/routes/VisualsPage.tsx:1488
 msgid "Learn more"
 msgstr ""
 
@@ -4392,7 +4402,7 @@ msgstr ""
 
 #: client/src/features/campaigns/components/SuggestStrategySection.tsx:158
 #: client/src/features/settings/character/CharacterIntake.tsx:252
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:201
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:308
 msgid "Name"
 msgstr ""
 
@@ -5309,8 +5319,8 @@ msgstr ""
 
 #: client/src/features/campaigns/components/steps/keywordBankLabels.ts:125
 #: client/src/features/campaigns/labels.ts:119
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:218
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:222
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:325
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:329
 msgid "Medium"
 msgstr ""
 
@@ -5545,8 +5555,8 @@ msgstr ""
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:403
 #: client/src/features/campaigns/routes/CampaignViewPage.tsx:481
 #: client/src/features/personas/components/PersonaCard.tsx:105
-#: client/src/features/settings/routes/VisualsPage.tsx:1572
-#: client/src/features/settings/routes/VisualsPage.tsx:1606
+#: client/src/features/settings/routes/VisualsPage.tsx:1574
+#: client/src/features/settings/routes/VisualsPage.tsx:1608
 msgid "Delete"
 msgstr ""
 
@@ -5848,7 +5858,7 @@ msgstr ""
 
 #: client/src/features/campaigns/routes/CampaignsPage.tsx:762
 #: client/src/features/dashboard/components/UpgradeCard.tsx:45
-#: client/src/features/settings/routes/VisualsPage.tsx:1646
+#: client/src/features/settings/routes/VisualsPage.tsx:1648
 msgid "Get Free License"
 msgstr ""
 
@@ -6807,7 +6817,7 @@ msgstr ""
 #: client/src/features/channels/components/CatalogEntryCard.tsx:346
 #: client/src/features/settings/components/VideoPresetSection.tsx:161
 #: client/src/features/settings/routes/VisualsPage.tsx:1055
-#: client/src/features/settings/routes/VisualsPage.tsx:1502
+#: client/src/features/settings/routes/VisualsPage.tsx:1504
 msgid "Video"
 msgstr ""
 
@@ -9050,9 +9060,9 @@ msgid "Our pick for %1$s is <b>%2$s</b>, in your colors"
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:172
-#: client/src/features/settings/routes/VisualsPage.tsx:1573
+#: client/src/features/settings/routes/VisualsPage.tsx:1575
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:224
-#: client/src/features/settings/signatures/BrandPaletteField.tsx:330
+#: client/src/features/settings/signatures/BrandPaletteField.tsx:363
 msgid "Brand colors"
 msgstr ""
 
@@ -9076,7 +9086,7 @@ msgid "This site keeps its current style unless you pick one below."
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:452
-#: client/src/features/settings/routes/VisualsPage.tsx:1130
+#: client/src/features/settings/routes/VisualsPage.tsx:1132
 msgid "Signature"
 msgstr ""
 
@@ -9086,8 +9096,8 @@ msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:488
 msgid ""
-"Want a look of your own? Build it later on the Visuals page, or write a "
-"prompt there."
+"Want a look of your own? After setup, open the Visuals page and choose Your "
+"own or Free prompt."
 msgstr ""
 
 #: client/src/features/onboarding/components/WizardStep4Visuals.tsx:519
@@ -10320,7 +10330,7 @@ msgid ""
 msgstr ""
 
 #: client/src/features/settings/character/RemoveCharacterDialog.tsx:76
-#: client/src/features/settings/routes/VisualsPage.tsx:1242
+#: client/src/features/settings/routes/VisualsPage.tsx:1244
 msgid "Keep %s"
 msgstr ""
 
@@ -10408,65 +10418,65 @@ msgid ""
 "finishes."
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:47
+#: client/src/features/settings/character/UploadSlot.tsx:48
 msgid "This image is %s MB."
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:50
+#: client/src/features/settings/character/UploadSlot.tsx:51
 msgid "Use one under 10 MB."
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:55
+#: client/src/features/settings/character/UploadSlot.tsx:56
 msgid "HEIC is an iPhone photo format we can’t use."
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:56
+#: client/src/features/settings/character/UploadSlot.tsx:57
 msgid "Export it as JPG first, then add it here."
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:60
+#: client/src/features/settings/character/UploadSlot.tsx:61
 msgid "This file type can’t be used."
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:61
+#: client/src/features/settings/character/UploadSlot.tsx:62
 msgid "Use a JPG, PNG or WebP image."
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:125
+#: client/src/features/settings/character/UploadSlot.tsx:128
 #: client/src/features/settings/character/visualCharacter.ts:210
 msgid "View your image %d larger"
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:139
+#: client/src/features/settings/character/UploadSlot.tsx:147
 msgid "Remove image %d"
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:169
-#: client/src/features/settings/character/UploadSlot.tsx:171
+#: client/src/features/settings/character/UploadSlot.tsx:177
+#: client/src/features/settings/character/UploadSlot.tsx:179
 msgid "Uploading…"
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:201
+#: client/src/features/settings/character/UploadSlot.tsx:209
 msgid "Choose another"
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:217
+#: client/src/features/settings/character/UploadSlot.tsx:225
 msgid "Add image (%d of 3)"
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:241
+#: client/src/features/settings/character/UploadSlot.tsx:249
 msgid "Add another"
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:241
+#: client/src/features/settings/character/UploadSlot.tsx:249
 msgid "Add image"
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:245
+#: client/src/features/settings/character/UploadSlot.tsx:253
 msgid "Optional. Drop it here or browse."
 msgstr ""
 
-#: client/src/features/settings/character/UploadSlot.tsx:246
+#: client/src/features/settings/character/UploadSlot.tsx:254
 msgid "Drop it here or browse."
 msgstr ""
 
@@ -11042,7 +11052,7 @@ msgstr ""
 msgid "Not used"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1567
+#: client/src/features/settings/routes/VisualsPage.tsx:1569
 #: client/src/features/settings/routes/VisualsPage.tsx:829
 msgid "Switch preset"
 msgstr ""
@@ -11102,204 +11112,204 @@ msgstr ""
 msgid "Preset name"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1133
+#: client/src/features/settings/routes/VisualsPage.tsx:1135
 msgid ""
 "Pick the look every image on this site shares. Examples are shown in neutral "
 "colors."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1143
+#: client/src/features/settings/routes/VisualsPage.tsx:1145
 msgid ""
 "Only styles that can draw a character the same way every time are shown. "
 "Photo styles and Free prompt are hidden while a character is chosen."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1152
+#: client/src/features/settings/routes/VisualsPage.tsx:1154
 msgid "Your current style, %s, is one of them, so pick a new one here."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1167
+#: client/src/features/settings/routes/VisualsPage.tsx:1169
 msgid "Pick a style for %s before you save."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1170
+#: client/src/features/settings/routes/VisualsPage.tsx:1172
 msgid "Pick one of these styles before you save."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1192
+#: client/src/features/settings/routes/VisualsPage.tsx:1194
 msgid ""
 "Set the technique, motifs and framing yourself, as an illustration or a 3D "
 "render."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1217
+#: client/src/features/settings/routes/VisualsPage.tsx:1219
 msgid "%1$s was drawn in %2$s."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1223
+#: client/src/features/settings/routes/VisualsPage.tsx:1225
 msgid ""
 "To use %1$s, approve a new character sheet drawn in it. Until then, Save "
 "keeps %2$s."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1233
+#: client/src/features/settings/routes/VisualsPage.tsx:1235
 msgid "Draw %1$s in %2$s · 1 image"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1251
+#: client/src/features/settings/routes/VisualsPage.tsx:1253
 msgid "%1$s needs a new sheet for %2$s."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1262
+#: client/src/features/settings/routes/VisualsPage.tsx:1264
 msgid "Approve a sheet in %1$s first, or keep %2$s."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1283
+#: client/src/features/settings/routes/VisualsPage.tsx:1285
 msgid "%s uses your image as it is, so no new sheet is needed for this style."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1291
+#: client/src/features/settings/routes/VisualsPage.tsx:1293
 msgid ""
 "%s keeps its own drawing style, so no new sheet is needed for this style."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1303
+#: client/src/features/settings/routes/VisualsPage.tsx:1305
 msgid "Your prompt"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1304
+#: client/src/features/settings/routes/VisualsPage.tsx:1306
 msgid ""
 "Describe the technique, recurring subjects and framing. We add your brand "
 "palette to it."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1308
+#: client/src/features/settings/routes/VisualsPage.tsx:1310
 msgid ""
 "Describe the look: technique, recurring subjects, framing, what to avoid"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1343
+#: client/src/features/settings/routes/VisualsPage.tsx:1345
 msgid ""
 "Previews show the style without a character until a character sheet is "
 "approved."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1361
+#: client/src/features/settings/routes/VisualsPage.tsx:1363
 msgid "Output"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1371
+#: client/src/features/settings/routes/VisualsPage.tsx:1373
 msgid "Every image gets alt text and an SEO-friendly filename automatically."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1386
+#: client/src/features/settings/routes/VisualsPage.tsx:1388
 msgid "Dimensions"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1388
+#: client/src/features/settings/routes/VisualsPage.tsx:1390
 msgid "Select dimensions..."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1402
+#: client/src/features/settings/routes/VisualsPage.tsx:1404
 msgid ""
 "OpenAI image models don't support 16:9 natively — your images will be "
 "rendered at 3:2 (1536×1024), the closest landscape size. For exact 16:9, "
 "switch the image provider to Gemini."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1406
+#: client/src/features/settings/routes/VisualsPage.tsx:1408
 msgid ""
 "OpenAI image models don't support 9:16 natively — your images will be "
 "rendered at 2:3 (1024×1536), the closest portrait size. For exact 9:16, "
 "switch the image provider to Gemini."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1421
+#: client/src/features/settings/routes/VisualsPage.tsx:1423
 msgid "Format"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1428
+#: client/src/features/settings/routes/VisualsPage.tsx:1430
 msgid "Select encoding..."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1446
+#: client/src/features/settings/routes/VisualsPage.tsx:1448
 msgid "AI label"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1449
+#: client/src/features/settings/routes/VisualsPage.tsx:1451
 msgid "Label images as AI-generated"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1454
+#: client/src/features/settings/routes/VisualsPage.tsx:1456
 msgid ""
 "Adds the EU “AI generated” badge to the corner of every image we create with "
 "this preset. EU rules ask publishers to mark realistic AI images."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1460
+#: client/src/features/settings/routes/VisualsPage.tsx:1462
 msgid ""
 "Images that already exist are not changed. Regenerating an image applies the "
 "current setting."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1469
-#: client/src/features/settings/routes/VisualsPage.tsx:1475
+#: client/src/features/settings/routes/VisualsPage.tsx:1471
+#: client/src/features/settings/routes/VisualsPage.tsx:1477
 msgid "EU “AI generated” badge"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1526
+#: client/src/features/settings/routes/VisualsPage.tsx:1528
 msgid "Suggest Video Style"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1527
+#: client/src/features/settings/routes/VisualsPage.tsx:1529
 msgid "Brand Resources (logo, guidelines, design system URL…)"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1531
+#: client/src/features/settings/routes/VisualsPage.tsx:1533
 msgid "Add Resource"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1532
+#: client/src/features/settings/routes/VisualsPage.tsx:1534
 msgid "Generate Video Style"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1534
+#: client/src/features/settings/routes/VisualsPage.tsx:1536
 msgid "Company logo"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1541
+#: client/src/features/settings/routes/VisualsPage.tsx:1543
 msgid "Site Logo"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1569
+#: client/src/features/settings/routes/VisualsPage.tsx:1571
 msgid "Search by name"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1571
+#: client/src/features/settings/routes/VisualsPage.tsx:1573
 msgid "Duplicate to this site"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1574
+#: client/src/features/settings/routes/VisualsPage.tsx:1576
 msgid "No other presets in your library."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1575
+#: client/src/features/settings/routes/VisualsPage.tsx:1577
 msgid "No presets match your search."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1594
+#: client/src/features/settings/routes/VisualsPage.tsx:1596
 msgid "Delete preset?"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1599
+#: client/src/features/settings/routes/VisualsPage.tsx:1601
 msgid "Delete \"%s\"? This is only allowed when no site is bound to it."
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1625
+#: client/src/features/settings/routes/VisualsPage.tsx:1627
 msgid "Style Every Image Consistently"
 msgstr ""
 
-#: client/src/features/settings/routes/VisualsPage.tsx:1628
+#: client/src/features/settings/routes/VisualsPage.tsx:1630
 msgid ""
 "Connect a free account to define a Global Art Direction that gets injected "
 "into every AI image generation across this site."
@@ -11336,7 +11346,7 @@ msgid "Re-scan site"
 msgstr ""
 
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:193
-#: client/src/features/settings/signatures/BrandPaletteField.tsx:326
+#: client/src/features/settings/signatures/BrandPaletteField.tsx:359
 msgid "Reading your homepage for colors…"
 msgstr ""
 
@@ -11367,11 +11377,12 @@ msgid "Edit color %s"
 msgstr ""
 
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:268
+#: client/src/features/settings/signatures/BrandPaletteField.tsx:326
 msgid "Accent"
 msgstr ""
 
 #: client/src/features/settings/signatures/BrandPaletteField.tsx:287
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:262
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:369
 #: client/src/utils/chipListLabels.ts:16
 msgid "Add"
 msgstr ""
@@ -11380,81 +11391,119 @@ msgstr ""
 msgid "Up to six colors. Remove one to add another."
 msgstr ""
 
-#: client/src/features/settings/signatures/BrandPaletteField.tsx:318
+#: client/src/features/settings/signatures/BrandPaletteField.tsx:351
 msgid "Your colors"
 msgstr ""
 
-#: client/src/features/settings/signatures/BrandPaletteField.tsx:353
+#: client/src/features/settings/signatures/BrandPaletteField.tsx:386
 msgid "Re-scan"
 msgstr ""
 
-#: client/src/features/settings/signatures/BrandPaletteField.tsx:358
+#: client/src/features/settings/signatures/BrandPaletteField.tsx:391
 msgid ""
 "Your colors are applied to the style you pick, in images and videos. Edit "
 "them later on the Visuals page."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:104
+#: client/src/features/settings/signatures/ImageDraftPanel.tsx:57
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:285
+msgid "Draft from images"
+msgstr ""
+
+#: client/src/features/settings/signatures/ImageDraftPanel.tsx:61
+msgid ""
+"Upload up to three images in the style you want. We read the style from them "
+"and draft the medium, the technique and what to avoid. The images aren’t "
+"stored."
+msgstr ""
+
+#: client/src/features/settings/signatures/ImageDraftPanel.tsx:93
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:190
+msgid "Reading your images"
+msgstr ""
+
+#: client/src/features/settings/signatures/ImageDraftPanel.tsx:102
+msgid "Colors in your images"
+msgstr ""
+
+#: client/src/features/settings/signatures/ImageDraftPanel.tsx:107
+msgid "Use these colors"
+msgstr ""
+
+#: client/src/features/settings/signatures/ImageDraftPanel.tsx:93
+msgctxt "verb"
+msgid "Draft"
+msgstr ""
+
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:149
 msgid "Drafting from your site."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:123
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:168
 msgid ""
 "Couldn’t draft from your site right now. Try again, or fill the fields "
 "yourself."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:148
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:177
 msgid "Drafted the technique and what to avoid from your site."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:151
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:224
+msgid "Drafted the medium, the technique and what to avoid from your images."
+msgstr ""
+
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:231
+msgid "Applied the colors from your images."
+msgstr ""
+
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:234
 msgid "Fill this in to save the signature."
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:158
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:241
 msgid "All signatures"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:170
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:253
 msgid "Your own signature"
 msgstr ""
 
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:173
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:256
 msgid ""
-"Five fields fix the look of every image. Draft them from your site, then "
-"change anything."
-msgstr ""
-
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:187
-msgid "Drafting from your site"
-msgstr ""
-
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:189
-msgid "Draft again"
-msgstr ""
-
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:190
-msgid "Draft from my site"
-msgstr ""
-
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:202
-msgid "For example: Northfield sketchbook"
-msgstr ""
-
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:203
-msgid "Shown on its card in your library."
-msgstr ""
-
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:206
-msgid "Name this signature to save it."
-msgstr ""
-
-#: client/src/features/settings/signatures/SignatureBuilder.tsx:254
-msgid "Drafted"
+"Five fields fix the look of every image. Draft them from your site or from "
+"images, then change anything."
 msgstr ""
 
 #: client/src/features/settings/signatures/SignatureBuilder.tsx:272
+msgid "Drafting from your site"
+msgstr ""
+
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:274
+msgid "Draft again"
+msgstr ""
+
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:275
+msgid "Draft from my site"
+msgstr ""
+
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:309
+msgid "For example: Northfield sketchbook"
+msgstr ""
+
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:310
+msgid "Shown on its card in your library."
+msgstr ""
+
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:313
+msgid "Name this signature to save it."
+msgstr ""
+
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:361
+msgid "Drafted"
+msgstr ""
+
+#: client/src/features/settings/signatures/SignatureBuilder.tsx:379
 msgid "Add “%1$s” to %2$s"
 msgstr ""
 

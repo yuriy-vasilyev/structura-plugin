@@ -321,7 +321,7 @@ describe("WizardStep4Visuals — the step", () => {
 
   it("paid plans get the build-later line; free plans don't", async () => {
     const line =
-      "Want a look of your own? Build it later on the Visuals page, or write a prompt there.";
+      "Want a look of your own? After setup, open the Visuals page and choose Your own or Free prompt.";
     const view = renderStep();
     expect(await screen.findByText(line)).toBeInTheDocument();
     view.unmount();

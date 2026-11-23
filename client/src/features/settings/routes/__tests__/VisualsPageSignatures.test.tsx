@@ -8,7 +8,7 @@
  * save mutations are stubbed at the settings barrel, as the page's other
  * suites do.
  */
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastProvider } from "@structura/ui";
@@ -728,5 +728,78 @@ describe("Visuals page — act hygiene", () => {
       await Promise.resolve();
     });
     expect(screen.getByRole("radiogroup", { name: "Signature" })).toBeInTheDocument();
+  });
+});
+
+describe("Visuals page — colors from Draft from images (spec §14.4)", () => {
+  /** The browser's decoder and canvas, stubbed at the DOM edge (jsdom has neither). */
+  function stubImageDecoding() {
+    vi.stubGlobal(
+      "createImageBitmap",
+      vi.fn(async () => ({ width: 2000, height: 1500, close: vi.fn() }))
+    );
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
+      () => ({ drawImage: vi.fn() }) as unknown as CanvasRenderingContext2D
+    );
+    vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((callback, type) =>
+      callback(new Blob(["shrunk"], { type: type ?? "image/jpeg" }))
+    );
+    URL.createObjectURL = vi.fn(() => "blob:preview");
+    URL.revokeObjectURL = vi.fn();
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("Use these colors replaces the form's palette, which Save then sends; the draft alone leaves it", async () => {
+    bindPreset({
+      signature: { kind: "curated", id: "editorial-reportage", version: 1 },
+      palette: ["#111111"],
+    });
+    stubImageDecoding();
+    mocks.apiFetch.mockImplementation((request: { path: string }) =>
+      request.path === "/structura/v1/visual-signature/draft-from-images"
+        ? Promise.resolve({
+            success: true,
+            medium: "illustration",
+            technique: "Flat vector shapes.",
+            avoid: "Gradients.",
+            palette: ["#2F6B4F", "#C8553D"],
+          })
+        : routeApiFetch(request)
+    );
+    renderPage();
+    fireEvent.click(screen.getByRole("button", { name: /^Your own/ }));
+    await screen.findByRole("heading", { name: "Your own signature" });
+    fireEvent.click(screen.getByRole("button", { name: "Draft from images" }));
+    const panel = screen.getByRole("group", { name: "Draft from images" });
+    fireEvent.change(panel.querySelector<HTMLInputElement>('input[type="file"]')!, {
+      target: { files: [new File(["x"], "a.jpg", { type: "image/jpeg" })] },
+    });
+    await waitFor(() => expect(within(panel).getByRole("button", { name: "Draft" })).toBeEnabled());
+
+    fireEvent.click(within(panel).getByRole("button", { name: "Draft" }));
+
+    const useColors = await within(panel).findByRole("button", { name: "Use these colors" });
+    expect(screen.getByRole("button", { name: "Edit color #111111, accent" })).toBeInTheDocument();
+
+    fireEvent.click(useColors);
+
+    expect(screen.getByRole("button", { name: "Edit color #2F6B4F, accent" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit color #C8553D" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Edit color #111111/ })).toBeNull();
+
+    for (const [label, value] of [
+      ["Motifs", "Plants and leaves"],
+      ["Composition", "One hero object, centred"],
+    ]) {
+      fireEvent.change(screen.getByRole("textbox", { name: label }), { target: { value } });
+    }
+    fireEvent.click(save());
+    await waitFor(() => expect(mocks.update).toHaveBeenCalled());
+    expect(lastUpdateContent().palette).toEqual(["#2F6B4F", "#C8553D"]);
+    expect(lastUpdateContent().signature).toMatchObject({ kind: "custom", medium: "illustration" });
   });
 });
