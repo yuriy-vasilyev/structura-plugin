@@ -92,9 +92,14 @@ export const FROZEN_SOCIAL_COPY_TEXT_MODELS: Readonly<Record<AIProvider, Readonl
  * wizard picks the recommended image model). New builds show no label for
  * image models. Text `recommended` derives from `RECOMMENDATIONS`.
  * FROZEN pending its own test.
+ *
+ * OpenAI's was `gpt-image-2` until 2026-11-25, when it left the served
+ * catalog (specs/byok-ai-guidance.md §2.1): no old build can preselect it
+ * any more, and every build falls back to `defaults.image`, the only
+ * listed OpenAI image model, when no image entry is recommended.
  */
 export const FROZEN_RECOMMENDED_IMAGE_MODELS: Readonly<Record<AIProvider, string | undefined>> = Object.freeze({
-  openai: "gpt-image-2",
+  openai: undefined,
   gemini: "gemini-3.1-flash-image",
   anthropic: undefined,
 });

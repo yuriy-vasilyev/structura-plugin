@@ -59,9 +59,17 @@ vi.mock("@/features/campaigns/api/useCampaignMutations", () => ({
   }),
 }));
 
+// The served catalog answers, so a page that read it again would have names to show.
 vi.mock("@/features/ai-engine/api/useAvailableModelsQuery", () => ({
   useAvailableModelsQuery: () => ({
-    data: { text: [{ id: "gpt-x", name: "GPT-X" }], image: [] },
+    data: {
+      text: [{ id: "gpt-5.6-sol", name: "GPT-5.6 Sol", provider: "openai" }],
+      image: [{ id: "gemini-3.1-flash-image", name: "Gemini 3.1 Flash Image", provider: "gemini" }],
+      defaults: {
+        openai: { text: "gpt-5.6-sol", fast: "", image: "" },
+        gemini: { text: "", fast: "", image: "gemini-3.1-flash-image" },
+      },
+    },
   }),
 }));
 
@@ -115,6 +123,7 @@ vi.mock("@structura/ui", () => {
 });
 
 import { SinglePostRunDetailPage } from "../routes/SinglePostRunDetailPage";
+import { MODEL_NAME } from "@/test/modelNames";
 
 const makeRun = (over: Record<string, unknown>) => ({
   data: {
@@ -335,7 +344,10 @@ describe("SinglePostRunDetailPage — provider and model names by plan (2026-10-
     },
   };
 
-  it("BYOK: shows the text provider, and provider · model rows in Run again", async () => {
+  // Owner decision 2026-11-25 (specs/byok-ai-guidance.md §2.2): the Run
+  // again rows read "OpenAI · GPT-5.6 Sol" that morning; they name the
+  // provider only now, never the stored model or the one the replay runs.
+  it("BYOK: shows the text provider, and provider-only rows in Run again", async () => {
     runQueryMock.current = makeRun({ inputSnapshot: snapshotWithProviders });
     render(<SinglePostRunDetailPage />);
 
@@ -344,8 +356,10 @@ describe("SinglePostRunDetailPage — provider and model names by plan (2026-10-
 
     fireEvent.click(screen.getByRole("button", { name: /Run again/ }));
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText("OpenAI · GPT-X")).toBeInTheDocument();
-    expect(within(dialog).getByText("Gemini · imagen-x")).toBeInTheDocument();
+    expect(within(dialog).getByText("OpenAI")).toBeInTheDocument();
+    expect(within(dialog).getByText("Gemini")).toBeInTheDocument();
+    expect(dialog.textContent).not.toMatch(MODEL_NAME);
+    expect(dialog.textContent).not.toMatch(/imagen-x/);
   });
 
   it("managed: no provider and no model names, text or image", async () => {

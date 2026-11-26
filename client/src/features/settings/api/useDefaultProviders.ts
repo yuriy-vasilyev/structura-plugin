@@ -18,13 +18,13 @@ import { orderTextProviders } from "@/features/campaigns/aiGuidance";
  *
  * Key flags:
  *  - `hasExplicitDefaults` — user has explicitly set at least a text default provider
- *  - `isFullyConfigured` — user has explicit defaults for BOTH text + image AND models
- *    chosen for each. When true, the ProviderToggle can be tucked into Advanced Settings.
+ *  - `isFullyConfigured` — user has explicit defaults for BOTH text + image.
+ *    When true, the ProviderToggle can be tucked into Advanced Settings.
  *    When false, it should be visible inline so the user can configure.
  */
 export const useDefaultProviders = () => {
   const { data: ai } = useAiSettingsQuery();
-  const { textProviders, imageProviders, activeProviders, incompleteProviders, isProviderIncomplete } = useAiConnections();
+  const { textProviders, imageProviders, activeProviders } = useAiConnections();
   const { plan } = useLicense();
 
   const isCloud = isManagedPlan(plan as PlanId);
@@ -118,10 +118,9 @@ export const useDefaultProviders = () => {
   // True when providers were auto-resolved (not explicitly chosen by user).
   const isAutoResolved = !hasExplicitTextDefault && activeProviders.length > 0;
 
-  // True when BOTH default providers are explicitly set.
-  // Models are guaranteed by the provider setup wizard (required before save),
-  // so we only need to check for explicit default selections here.
-  // Cloud users are always fully configured — providers/models are managed server-side.
+  // True when BOTH default providers are explicitly set (no model is chosen
+  // since 2026-11-25). Cloud users are always fully configured — providers
+  // and models are managed server-side.
   // When true, ProviderToggle is tucked into Advanced Settings.
   // When false, it's visible inline during campaign creation.
   const isFullyConfigured = isCloud || (hasExplicitTextDefault && hasExplicitImageDefault);
@@ -131,8 +130,6 @@ export const useDefaultProviders = () => {
     defaultImageProvider,
     availableProviders,
     availableImageProviders,
-    incompleteProviders,
-    isProviderIncomplete,
     hasExplicitDefaults,
     hasExplicitTextDefault,
     hasExplicitImageDefault,

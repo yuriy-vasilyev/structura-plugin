@@ -30,10 +30,6 @@ interface WizardTarget {
   keyUrl: string;
   keyPrefix?: string;
   isConnected: boolean;
-  textModel?: string;
-  imageModel?: string;
-  textTier?: string;
-  imageTier?: string;
   isDefaultText: boolean;
   isDefaultImage: boolean;
 }
@@ -52,7 +48,8 @@ interface WizardTarget {
  * the plan makes images is passed to the wizard instead.
  *
  * Clicking "Set Up" / "Manage" opens a multi-step wizard that handles
- * API key, connection test, model selection, AND default provider config.
+ * API key, connection test, AND default provider config. It names the
+ * models the provider runs; no model is chosen since 2026-11-25.
  */
 export const AiEngine = () => {
   const { data: settings, isLoading } = useAiSettingsQuery();
@@ -125,10 +122,6 @@ export const AiEngine = () => {
       keyUrl: meta.key_url,
       keyPrefix: meta.key_prefix,
       isConnected: reconfigure && !!status?.connected,
-      textModel: status?.text_model,
-      imageModel: status?.image_model,
-      textTier: status?.text_tier,
-      imageTier: status?.image_tier,
       isDefaultText: defaults.text_provider === id,
       isDefaultImage: defaults.image_provider === id,
     });
@@ -193,11 +186,6 @@ export const AiEngine = () => {
                 const status = providers[id];
                 if (!meta || !status) return null;
 
-                // Provider is incomplete if connected but missing required models
-                const needsText = status.capabilities.includes("text") && !status.text_model;
-                const needsImage = status.capabilities.includes("image") && !status.image_model;
-                const isIncomplete = needsText || needsImage;
-
                 return (
                   <InstalledProviderCard
                     key={id}
@@ -209,7 +197,6 @@ export const AiEngine = () => {
                     isCloud={isCloud}
                     isDefaultText={defaults.text_provider === id}
                     isDefaultImage={defaults.image_provider === id}
-                    incomplete={isIncomplete}
                     onManage={() => openWizard(id, true)}
                   />
                 );
@@ -316,10 +303,6 @@ export const AiEngine = () => {
           keyUrl={wizardTarget.keyUrl}
           keyPrefix={wizardTarget.keyPrefix}
           isConnected={wizardTarget.isConnected}
-          currentTextModel={wizardTarget.textModel}
-          currentImageModel={wizardTarget.imageModel}
-          currentTextTier={wizardTarget.textTier}
-          currentImageTier={wizardTarget.imageTier}
           isDefaultText={wizardTarget.isDefaultText}
           isDefaultImage={wizardTarget.isDefaultImage}
           imagesAvailable={imagesAvailable}

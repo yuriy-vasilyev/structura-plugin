@@ -49,7 +49,7 @@ export function characterErrorMessage(key: string | undefined): string | null {
       return __("Draw a character sheet first.", "structura");
     case "visualCharacter.modelUnavailable":
       return __(
-        "The image setup on your website can’t work from a reference image. Switch to one that can under AI Engine to add a character.",
+        "A character needs images drawn with Gemini or OpenAI. Under AI Engine, connect Gemini or OpenAI and turn on Default for image generation, then come back.",
         "structura"
       );
     case "visualCharacter.sheetFailed":

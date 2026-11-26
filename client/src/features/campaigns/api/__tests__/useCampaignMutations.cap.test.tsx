@@ -59,8 +59,6 @@ const minimalCampaignFormData = {
   intelligence: {
     textProvider: "openai",
     imageProvider: null,
-    textModel: "",
-    imageModel: "",
     fallbackTextProvider: null,
     fallbackImageProvider: null,
     personaId: 1,

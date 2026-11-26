@@ -1,9 +1,6 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { CampaignFormData } from "../types";
 import { useLicense, useDefaultProviders } from "@/features/settings";
-import { useAiSettingsQuery } from "@/features/ai-engine";
-import { useAvailableModelsQuery } from "@/features/ai-engine/api/useAvailableModelsQuery";
-import { resolveDefaultModel, resolveDefaultTier } from "@/features/ai-engine/helpers";
 import { DEFAULT_CAMPAIGN_FORM_DATA } from "@/features/campaigns/constants";
 import { getCampaignFormDataForLicense } from "@/features/campaigns/helpers";
 import { useCampaignDraftStore } from "./draftStore";
@@ -77,140 +74,10 @@ const buildIsValid = (formData: CampaignFormData, mode: SchedulerMode) => (step:
   }
 };
 
-// ─── Model backfill — shared by both providers ─────────────────────────
-
-/**
- * Backfills empty `textModel` / `imageModel` once provider settings and
- * the model catalog hydrate, keyed off whichever provider the form
- * currently holds.
- *
- * Why at the provider level: the previous backfill lived in mount
- * effects inside `<CampaignAiEngineSection>` / `<ProviderToggle>` —
- * components tucked into the collapsed Advanced Settings group. A
- * campaign created without ever expanding it persisted `textModel: ""`
- * and every run leaned on the cloud's silent fallback ("[engine] Empty
- * textModel on campaign", observed 2026-06-04). Filling here guarantees
- * the create/update payload carries the model the pickers would have
- * shown, regardless of which step components mounted. Also heals legacy
- * empty-model campaigns on their next edit→save.
- *
- * The provider itself is never the gap — both providers seed
- * `textProvider`/`imageProvider` from `useDefaultProviders`, which
- * resolves even without an explicit default (first connected with the
- * capability → first active → "gemini"). Model source priority lives in
- * `resolveDefaultModel`; if neither source has hydrated yet the field
- * stays "" and the cloud-side fallback remains the safety net.
- *
- * Managed plans are skipped — models resolve server-side from curated
- * per-plan defaults and the BYOK pickers aren't rendered.
- */
-interface ModelBackfillPatch {
-  textModel?: string;
-  imageModel?: string;
-  /**
-   * The tier that goes with a filled model: the site default's stored tier
-   * or the tier its model belongs to (2026-10-06, specs/open-providers.md).
-   * Applied only together with its model, so the campaign stores the tier
-   * the cloud resolves at generation time.
-   */
-  textTier?: "top" | "mid";
-  imageTier?: "top" | "mid";
-  /**
-   * The providers the models were resolved AGAINST. Appliers must
-   * re-check these against current state before writing: the effect's
-   * closure can be one render stale (e.g. the license-defaults
-   * bootstrap swaps the draft's provider in the same effect flush),
-   * and applying a model resolved for provider A onto a form that now
-   * holds provider B would silently mis-pair them. The effect re-runs
-   * against the fresh provider after a rejected apply, so the fill
-   * still converges.
-   */
-  resolvedFor: { textProvider: string; imageProvider: string };
-}
-
-const useModelBackfill = (
-  intelligence: CampaignFormData["intelligence"],
-  applyPatch: (patch: ModelBackfillPatch) => void,
-) => {
-  const { isCloud } = useDefaultProviders();
-  const { data: ai } = useAiSettingsQuery();
-  const { data: availableModels } = useAvailableModelsQuery();
-
-  const { textProvider, imageProvider, textModel, imageModel } = intelligence;
-
-  useEffect(() => {
-    if (isCloud) return;
-
-    const patch: ModelBackfillPatch = {
-      resolvedFor: { textProvider, imageProvider },
-    };
-    if (!textModel) {
-      const resolved = resolveDefaultModel({
-        provider: textProvider,
-        capability: "text",
-        providerSettings: ai?.providers,
-        catalogDefaults: availableModels?.defaults,
-      });
-      if (resolved) {
-        patch.textModel = resolved;
-        patch.textTier = resolveDefaultTier({
-          provider: textProvider,
-          capability: "text",
-          providerSettings: ai?.providers,
-        });
-      }
-    }
-    if (!imageModel) {
-      const resolved = resolveDefaultModel({
-        provider: imageProvider,
-        capability: "image",
-        providerSettings: ai?.providers,
-        catalogDefaults: availableModels?.defaults,
-      });
-      if (resolved) {
-        patch.imageModel = resolved;
-        patch.imageTier = resolveDefaultTier({
-          provider: imageProvider,
-          capability: "image",
-          providerSettings: ai?.providers,
-        });
-      }
-    }
-    if (patch.textModel || patch.imageModel) applyPatch(patch);
-  }, [
-    isCloud,
-    ai,
-    availableModels,
-    textProvider,
-    imageProvider,
-    textModel,
-    imageModel,
-    applyPatch,
-  ]);
-};
-
-/**
- * Drops the parts of a backfill patch that no longer apply to the
- * current intelligence state — field already filled, or provider
- * changed since the patch was resolved (see `ModelBackfillPatch`).
- */
-const guardModelPatch = (
-  patch: ModelBackfillPatch,
-  current: CampaignFormData["intelligence"],
-): Partial<
-  Pick<CampaignFormData["intelligence"], "textModel" | "imageModel" | "textTier" | "imageTier">
-> => ({
-  ...(patch.textModel &&
-  !current.textModel &&
-  current.textProvider === patch.resolvedFor.textProvider
-    ? { textModel: patch.textModel, ...(patch.textTier ? { textTier: patch.textTier } : {}) }
-    : {}),
-  ...(patch.imageModel &&
-  !current.imageModel &&
-  current.imageProvider === patch.resolvedFor.imageProvider
-    ? { imageModel: patch.imageModel, ...(patch.imageTier ? { imageTier: patch.imageTier } : {}) }
-    : {}),
-});
+// The form-level model backfill (`useModelBackfill`, 2026-06-04) was removed
+// on 2026-11-25 with model selection itself: no campaign stores a model or a
+// tier, and the cloud runs each provider's Standard model
+// (specs/byok-ai-guidance.md §2.2).
 
 // ─── Edit / single-post mode — local state ─────────────────────────────
 
@@ -266,17 +133,6 @@ const LocalCampaignProvider = ({
     },
     []
   );
-
-  const applyModelPatch = useCallback(
-    (patch: ModelBackfillPatch) =>
-      setFormData((prev) => {
-        const safe = guardModelPatch(patch, prev.intelligence);
-        if (!safe.textModel && !safe.imageModel) return prev;
-        return { ...prev, intelligence: { ...prev.intelligence, ...safe } };
-      }),
-    []
-  );
-  useModelBackfill(formData.intelligence, applyModelPatch);
 
   const value = useMemo(
     () => ({ formData, updateForm, isValid: buildIsValid(formData, mode), mode, isCreate: false }),
@@ -336,26 +192,6 @@ const PersistedCampaignProvider = ({
     defaultImageProvider,
     replaceForm,
   ]);
-
-  // System-initiated fill — must not flip `lastUpdatedAt`, or an
-  // untouched draft would start showing the "Resume draft" banner and
-  // block the license-defaults bootstrap above.
-  const applyModelPatch = useCallback(
-    (patch: ModelBackfillPatch) => {
-      // Guard against the store's CURRENT state, not the render
-      // closure — the bootstrap effect above can replace the form
-      // (provider included) in the same flush this patch was resolved
-      // in.
-      const safe = guardModelPatch(
-        patch,
-        useCampaignDraftStore.getState().formData.intelligence,
-      );
-      if (!safe.textModel && !safe.imageModel) return;
-      updateFormStore("intelligence", safe, { markTouched: false });
-    },
-    [updateFormStore]
-  );
-  useModelBackfill(formData.intelligence, applyModelPatch);
 
   const value = useMemo(
     () => ({

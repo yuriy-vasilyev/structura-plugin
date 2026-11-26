@@ -537,53 +537,34 @@ class CampaignValidatorTest extends TestCase
             'provider'       => 'anthropic',
             'text_provider'  => 'anthropic',
             'image_provider' => 'gemini',
-            'text_model'     => 'claude-sonnet-4-5-20250514',
-            'image_model'    => 'imagen-3.0-generate-002',
         ]));
 
         $this->assertIsArray($result);
         $this->assertSame('anthropic', $result['text_provider']);
         $this->assertSame('gemini', $result['image_provider']);
-        $this->assertSame('claude-sonnet-4-5-20250514', $result['text_model']);
-        $this->assertSame('imagen-3.0-generate-002', $result['image_model']);
     }
 
-    /** @test */
-    public function it_passes_a_valid_model_tier_through_to_clean(): void
+    /**
+     * No campaign picks a model or a tier since 2026-11-25
+     * (specs/byok-ai-guidance.md §2.2): whatever a request still sends,
+     * nothing of it reaches the cleaned output, so the transformer never
+     * forwards a model or a tier to the cloud.
+     *
+     * @test
+     */
+    public function it_keeps_no_model_or_tier_from_the_request(): void
     {
         $result = Campaign_Validator::validate($this->validPayload([
-            'text_tier'  => 'top',
-            'image_tier' => 'mid',
+            'text_model'  => 'claude-opus-5-5',
+            'image_model' => 'gemini-3-pro-image',
+            'text_tier'   => 'top',
+            'image_tier'  => 'mid',
         ]));
 
         $this->assertIsArray($result);
-        $this->assertSame('top', $result['text_tier']);
-        $this->assertSame('mid', $result['image_tier']);
-    }
-
-    /** @test */
-    public function it_omits_the_model_tier_when_absent(): void
-    {
-        // §10: no tier in the payload → no key in $clean, so the transformer
-        // never forwards one and a PATCH can't wipe a stored tier.
-        $result = Campaign_Validator::validate($this->validPayload());
-
-        $this->assertIsArray($result);
-        $this->assertArrayNotHasKey('text_tier', $result);
-        $this->assertArrayNotHasKey('image_tier', $result);
-    }
-
-    /** @test */
-    public function it_drops_an_out_of_whitelist_model_tier(): void
-    {
-        $result = Campaign_Validator::validate($this->validPayload([
-            'text_tier'  => 'cheap',      // registry-only, never picker-selectable
-            'image_tier' => 'flagship',   // not a real tier
-        ]));
-
-        $this->assertIsArray($result);
-        $this->assertArrayNotHasKey('text_tier', $result);
-        $this->assertArrayNotHasKey('image_tier', $result);
+        foreach (['text_model', 'image_model', 'text_tier', 'image_tier'] as $key) {
+            $this->assertArrayNotHasKey($key, $result);
+        }
     }
 
     /** @test */

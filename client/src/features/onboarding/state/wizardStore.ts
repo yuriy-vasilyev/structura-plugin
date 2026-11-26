@@ -59,14 +59,13 @@ export interface SiteIdentityDraft {
 /**
  * Step 2 — AI engine. We don't store provider keys here (the reused
  * ProviderSetupWizard writes those to the workspace credential store
- * live). We only mirror the resolved default text/image model so the
- * batched final save can persist the workspace's chosen defaults.
+ * live). We only mirror the resolved default text/image provider so the
+ * batched final save can persist the workspace's chosen defaults (no
+ * model since 2026-11-25: none is chosen).
  */
 export interface AiEngineDraft {
   textProvider?: string;
-  textModel?: string;
   imageProvider?: string;
-  imageModel?: string;
 }
 
 /** Step 3 — SEO intelligence. */

@@ -1,6 +1,4 @@
 import type { AIProvider, CampaignMode, ReferralLink } from "@structura/types";
-import { getRegistryModelId } from "./catalog";
-import { resolveRecommendedTextModel } from "./bindings";
 import { RECOMMENDATIONS } from "./recommendations";
 
 /**
@@ -12,8 +10,7 @@ import { RECOMMENDATIONS } from "./recommendations";
  * Value imports stay inside this package on purpose: `@structura/types` is a
  * type-only dependency here, and `@structura/i18n-contracts` is not a
  * dependency at all. Callers therefore resolve the plan's provider allowlist,
- * whether the plan seeds models, the post length and the campaign language
- * themselves and pass them in.
+ * the post length and the campaign language themselves and pass them in.
  */
 
 /**
@@ -126,7 +123,8 @@ export function buildCampaignCron(input: { hour: number; minute: number; days: n
 /**
  * The provider half of the site's setup-wizard AI defaults
  * (`LicenseActivation.aiDefaults`). The stored models are deliberately not
- * part of it; {@link buildCampaignDefaults} says why.
+ * part of it: a campaign stores no model since 2026-11-25
+ * ({@link buildCampaignDefaults}).
  */
 export interface SiteAiProviderDefaults {
   /** The site's preferred text provider. */
@@ -152,12 +150,6 @@ export interface CampaignDefaultsSeed {
   language: string;
   /** Target word count (`DEFAULT_POST_LENGTH` in `@structura/types`). */
   postLength: number;
-  /**
-   * Whether to seed concrete text and image models. False on Cloud and Cloud
-   * Pro: the server resolves the model from the plan, and the portal never
-   * holds a model name for those plans (specs/managed-ai-lineup.md §3.2).
-   */
-  seedsModels: boolean;
 }
 
 /**
@@ -174,18 +166,14 @@ export interface CampaignDefaults {
   objective: string;
   /** SEO strategy the keyword discovery and writer follow. */
   campaignMode: CampaignMode;
-  /** Text generation provider. */
+  /**
+   * Text generation provider. No model or tier travels with it since
+   * 2026-11-25: the cloud runs the provider's Standard model (own keys) or
+   * the managed lineup (Cloud), specs/byok-ai-guidance.md §2.2.
+   */
   textProvider: AIProvider;
-  /** BYOK text quality tier; the cloud resolves the model from it at run time. */
-  textTier: "top" | "mid";
-  /** BYOK image quality tier; the cloud resolves the model from it at run time. */
-  imageTier: "top" | "mid";
-  /** Registry mirror of the text tier's model, kept for display and legacy reads. */
-  textModel: string;
   /** Image generation provider; `null` when the campaign generates no images. */
   imageProvider: AIProvider | null;
-  /** Registry mirror of the image tier's model, kept for display and legacy reads. */
-  imageModel: string;
   /** Text provider to retry on when the primary fails. */
   fallbackTextProvider: AIProvider | null;
   /** Image provider to retry on when the primary fails. */
@@ -276,10 +264,6 @@ export function pregenTier(planId: string | undefined | null): "free" | "managed
 export interface PlanClampedFields {
   /** Keep a stock of pre-generated posts ready. */
   pregenerationEnabled: boolean;
-  /** Concrete text model; empty on managed plans. */
-  textModel: string;
-  /** Concrete image model; empty on managed plans. */
-  imageModel: string;
 }
 
 /**
@@ -287,6 +271,11 @@ export interface PlanClampedFields {
  * control does the same live, but a user who never opens Advanced
  * settings would otherwise ship the default `pregenerationEnabled:
  * true` on a Free plan.
+ *
+ * Until 2026-11-25 it also wrote empty `textModel` and `imageModel` on
+ * managed plans (a seeded model surfaced as the post's "AI model" on Cloud
+ * Pro, 2026-07-14). No client sends a model since then
+ * (specs/byok-ai-guidance.md §2.2), so there is nothing to clear.
  */
 export function clampCampaignForPlan<T extends PlanClampedFields>(
   form: T,
@@ -294,16 +283,7 @@ export function clampCampaignForPlan<T extends PlanClampedFields>(
 ): T {
   const tier = pregenTier(planId);
   if (tier === "free") return { ...form, pregenerationEnabled: false };
-  if (tier === "managed") {
-    // Managed campaigns must not persist a model: the cloud resolves it
-    // from the plan and ignores a stored one, but whatever lands on the
-    // doc surfaced later as the post's "AI model" — Cloud Pro campaigns
-    // were showing the seeded mid-tier default (2026-07-14). Clearing here
-    // also self-heals existing campaigns on their next save. The text
-    // provider stays: it is hidden on managed plans, but the save's
-    // provider gate still reads it (specs/managed-ai-lineup.md §3.2).
-    return { ...form, pregenerationEnabled: true, textModel: "", imageModel: "" };
-  }
+  if (tier === "managed") return { ...form, pregenerationEnabled: true };
   return form;
 }
 
@@ -321,22 +301,18 @@ function orderByRecommendation<P extends string>(capability: "text" | "image", p
  * New-campaign defaults — the plugin SPA's paid-tier baseline.
  *
  * `aiDefaults` (optional) seeds the PROVIDER from the site's setup-wizard
- * choice. The concrete models are always the registry mirror of the seeded
- * tier — never `aiDefaults.textModel`/`imageModel`: those were written from a
- * hand-maintained map that went stale and seeded retired, 404-ing ids.
+ * choice. No model or tier is seeded on any plan since 2026-11-25: the cloud
+ * runs the provider's Standard model whatever a campaign stores
+ * (specs/byok-ai-guidance.md §2.2).
  *
  * Provider pick order (per capability): aiDefaults if allowed+connected →
  * the best connected+allowed provider in the capability's recommendation
  * order (text since specs/byok-ai-guidance.md §3; images, Gemini then
  * OpenAI, since 2026-10-06, specs/open-providers.md) →
- * aiDefaults if merely allowed → Gemini baseline. Text opens on the
- * provider's recommended tier, which is Standard, so the 2026-07-23 rule
- * below holds.
+ * aiDefaults if merely allowed → Gemini baseline.
  * A provider outside the tier allowlist (`seed.allowedProviders`) or without
  * a bound credential would save fine and then fail every run with
  * `credentials_missing` — filtering here keeps the seed honest.
- *
- * `seed.seedsModels` false (a managed plan) seeds no concrete model.
  */
 export function buildCampaignDefaults(
   aiDefaults: SiteAiProviderDefaults | null | undefined,
@@ -372,25 +348,7 @@ export function buildCampaignDefaults(
     objective: "",
     campaignMode: "traffic_magnet",
     textProvider,
-    // New BYOK campaigns open on the STANDARD (mid) tier: the cost runs on the
-    // user's own key, so Top is an explicit opt-in, never a default
-    // (2026-07-23: the "top" default silently moved Anthropic campaigns from
-    // Sonnet to Opus). The concrete models below are the tier's registry
-    // mirror so display / legacy reads stay consistent with what runs.
-    // The provider's recommended tier, Standard for every provider
-    // (RECOMMENDATIONS, 2026-10-02).
-    textTier: resolveRecommendedTextModel(textProvider).tier,
-    imageTier: "mid",
-    // Seed real model ids — an empty string used to survive all the
-    // way into the campaign doc when the user never touched the
-    // Strategy step's model field, and the run then had no model.
-    textModel: seed.seedsModels ? resolveRecommendedTextModel(textProvider).model : "",
     imageProvider,
-    // Image field must mirror a real IMAGE model — reusing the text model
-    // here is what shipped campaigns with `gemini-3-flash-preview` (a text
-    // model) as their image model, which the image endpoint rejects
-    // ("Aspect ratio is not enabled for this model").
-    imageModel: seed.seedsModels ? (getRegistryModelId(imageProvider, "image", "mid") ?? "") : "",
     fallbackTextProvider: null,
     fallbackImageProvider: null,
     personaId: "random",

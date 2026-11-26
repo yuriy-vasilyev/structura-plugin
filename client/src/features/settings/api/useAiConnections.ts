@@ -36,28 +36,13 @@ export const useAiConnections = () => {
           .map(([slug]) => slug)
       : [];
 
-  /**
-   * Incomplete providers: connected (API key saved) but missing model selection.
-   * A text provider is incomplete if it has no text_model set.
-   * An image provider is incomplete if it has no image_model set.
-   * We check both since a provider can have multiple capabilities.
-   */
-  const incompleteProviders = ai?.providers
-    ? Object.entries(ai.providers)
-        .filter(([_, p]) => {
-          if (!p.connected) return false;
-          const needsText = p.capabilities.includes("text") && !p.text_model;
-          const needsImage = p.capabilities.includes("image") && !p.image_model;
-          return needsText || needsImage;
-        })
-        .map(([slug]) => slug)
-    : [];
+  // "Incomplete" providers (connected, no model selected) went on
+  // 2026-11-25: no model is selected any more (specs/byok-ai-guidance.md §2.2).
 
   return {
     activeProviders,
     textProviders: getProvidersByCapability("text"),
     imageProviders: getProvidersByCapability("image"),
-    incompleteProviders,
     isLoading,
     /**
      * True while the background revalidation against
@@ -71,6 +56,5 @@ export const useAiConnections = () => {
      */
     isFetching,
     isProviderActive: (slug: string) => activeProviders.includes(slug),
-    isProviderIncomplete: (slug: string) => incompleteProviders.includes(slug),
   };
 };

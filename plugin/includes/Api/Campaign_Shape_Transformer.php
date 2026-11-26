@@ -120,10 +120,10 @@ class Campaign_Shape_Transformer
             'intelligence' => [
                 'textProvider'          => $cloud['textProvider'] ?? 'gemini',
                 'textModel'             => $cloud['textModel'] ?? '',
-                // Model quality tier (top|mid). Null on campaigns saved before
-                // the tier picker shipped — the SPA reads null as "no tier,
-                // fall back to the concrete model" and the picker opens on the
-                // model rather than a tier.
+                // Model quality tier (top|mid), null on campaigns saved before
+                // the tier picker shipped. No SPA surface reads these four
+                // since 2026-11-25 (specs/byok-ai-guidance.md §2.2); they stay
+                // on the cluster Task_Runner forwards, and the cloud ignores them.
                 'textTier'              => $cloud['textTier'] ?? null,
                 'imageTier'             => $cloud['imageTier'] ?? null,
                 'imageProvider'         => $cloud['imageProvider'] ?? null,
@@ -306,10 +306,12 @@ class Campaign_Shape_Transformer
             'name'                  => sanitize_text_field($wp_input['name'] ?? ''),
             'objective'             => sanitize_textarea_field($wp_input['objective'] ?? $wp_input['topic'] ?? ''),
             'campaignMode'          => sanitize_key($wp_input['campaign_mode'] ?? 'traffic_magnet'),
+            // No textModel / imageModel / textTier / imageTier since
+            // 2026-11-25 (specs/byok-ai-guidance.md §2.2): the cloud runs each
+            // provider's Standard model. /patchCampaign merges only the keys
+            // sent, so a save leaves what an older plugin stored untouched.
             'textProvider'          => sanitize_key($wp_input['text_provider'] ?? $wp_input['provider'] ?? ''),
-            'textModel'             => sanitize_text_field($wp_input['text_model'] ?? ''),
             'imageProvider'         => self::normalize_nullable($wp_input['image_provider'] ?? null),
-            'imageModel'            => sanitize_text_field($wp_input['image_model'] ?? ''),
             'fallbackTextProvider'  => self::normalize_nullable($wp_input['fallback_text_provider'] ?? null),
             'fallbackImageProvider' => self::normalize_nullable($wp_input['fallback_image_provider'] ?? null),
             'personaId'             => self::normalize_persona_id($wp_input['persona_id'] ?? 1),
@@ -352,19 +354,6 @@ class Campaign_Shape_Transformer
             }
         }
 
-
-        // Model quality tier — forwarded ONLY when the SPA supplied a valid
-        // top|mid. Omitting it otherwise keeps a tier-less campaign resolving
-        // off textModel/imageModel and stops a PATCH that doesn't carry the
-        // tier from writing a null over a stored one (rollout §10). The
-        // Campaign_Validator already whitelisted the value; this guards the
-        // wp_cluster_to_cloud / direct callers that skip the validator.
-        if (in_array($wp_input['text_tier'] ?? null, ['top', 'mid'], true)) {
-            $cloud['textTier'] = $wp_input['text_tier'];
-        }
-        if (in_array($wp_input['image_tier'] ?? null, ['top', 'mid'], true)) {
-            $cloud['imageTier'] = $wp_input['image_tier'];
-        }
 
         // Provider advice hidden / shown again (specs/byok-ai-guidance.md §4).
         // Forwarded only when the SPA sent it, so a save that didn't touch

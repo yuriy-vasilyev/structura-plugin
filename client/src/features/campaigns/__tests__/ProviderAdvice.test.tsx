@@ -10,9 +10,9 @@
  *   - the three situations of the spec §3 table, on BYOK, Free and anonymous
  *     alike (rows 4 and 5 retired 2026-10-06);
  *   - nothing on managed plans, nothing for a non-caution provider;
- *   - Switch: provider + recommended tier, confirmation, Undo focused and
- *     announced; Undo restores, refocuses the provider control and
- *     announces the notice again;
+ *   - Switch: the provider only (no tier since 2026-11-25), confirmation,
+ *     Undo focused and announced; Undo restores, refocuses the provider
+ *     control and announces the notice again;
  *   - hide: collapses, focus to Show advice; Show: expands, focus to the
  *     first action; no × without `onHide` (generate page);
  *   - Connect opens the setup wizard on the provider; Upgrade is a new-tab
@@ -72,7 +72,7 @@ import type { AIProvider } from "../types";
 const LEAD = "Gemini isn’t recommended for writing.";
 const REASON = "In our tests, its posts contained more invented details.";
 
-/** A form stand-in: holds the provider and tier, and a focusable provider control. */
+/** A form stand-in: holds the provider, and a focusable provider control. */
 function Harness({
   initial = "gemini",
   withHide = true,
@@ -81,13 +81,12 @@ function Harness({
   withHide?: boolean;
 }) {
   const [provider, setProvider] = useState<AIProvider>(initial);
-  const [tier, setTier] = useState<string>("top");
   const [hidden, setHidden] = useState(false);
   const controlRef = useRef<HTMLButtonElement>(null);
   return (
     <div>
       <button type="button" ref={controlRef} data-testid="provider-control">
-        {provider}/{tier}
+        {provider}
       </button>
       <button type="button" onClick={() => setProvider("gemini")}>
         pick gemini
@@ -98,13 +97,11 @@ function Harness({
       <ProviderAdvice
         provider={provider}
         hidden={hidden}
-        onSwitch={(to, nextTier) => {
-          const previous = { provider, tier };
+        onSwitch={(to) => {
+          const previous = provider;
           setProvider(to);
-          setTier(nextTier);
           return () => {
-            setProvider(previous.provider);
-            setTier(previous.tier);
+            setProvider(previous);
             controlRef.current?.focus();
           };
         }}
@@ -193,32 +190,28 @@ describe("ProviderAdvice — when it shows nothing", () => {
 });
 
 describe("ProviderAdvice — Switch and Undo", () => {
-  it("switches to the recommended tier, confirms, focuses Undo and announces", async () => {
+  it("switches the provider, confirms, focuses Undo and announces", async () => {
     env.connected = ["gemini", "anthropic"];
     render(<Harness />);
 
     fireEvent.click(screen.getByRole("button", { name: "Switch to Claude" }));
 
-    // Provider + its recommended tier (Standard).
-    expect(screen.getByTestId("provider-control")).toHaveTextContent("anthropic/mid");
-    expect(
-      screen.getByText("Switched to Claude with its recommended model.")
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("provider-control")).toHaveTextContent("anthropic");
+    // No "with its recommended model": there is one model per provider since 2026-11-25.
+    expect(screen.getByText("Switched to Claude.")).toBeInTheDocument();
     const undo = screen.getByRole("button", { name: "Undo" });
     await waitFor(() => expect(undo).toHaveFocus());
-    await waitFor(() =>
-      expect(status()).toHaveTextContent("Switched to Claude with its recommended model.")
-    );
+    await waitFor(() => expect(status()).toHaveTextContent("Switched to Claude."));
   });
 
-  it("Undo restores provider and tier, refocuses the provider control and announces the notice", async () => {
+  it("Undo restores the provider, refocuses the provider control and announces the notice", async () => {
     env.connected = ["gemini", "anthropic"];
     render(<Harness />);
 
     fireEvent.click(screen.getByRole("button", { name: "Switch to Claude" }));
     fireEvent.click(screen.getByRole("button", { name: "Undo" }));
 
-    expect(screen.getByTestId("provider-control")).toHaveTextContent("gemini/top");
+    expect(screen.getByTestId("provider-control")).toHaveTextContent("gemini");
     expect(screen.getByTestId("provider-control")).toHaveFocus();
     expect(screen.getByRole("button", { name: "Switch to Claude" })).toBeInTheDocument();
     await waitFor(() => expect(status()).toHaveTextContent(`${LEAD} ${REASON}`));

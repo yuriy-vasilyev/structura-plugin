@@ -41,12 +41,15 @@ function toEntry(m: CatalogModel, recommendedId: string | undefined): CatalogMod
 }
 
 function buildProvider(provider: AIProvider): ProviderCatalog {
-  // Only text + image models are served to plugin pickers — `tts` is
-  // registry-only, so it never leaks into defaults / arrays / manifest and the
-  // wire contract stays byte-identical.
-  // `unlisted` entries (known, not offered) stay out the same way.
+  // Served: the role default only, which is the Standard model an own-key
+  // post or image runs on. Since 2026-11-25 no customer picks a model or a
+  // tier (owner decision, specs/byok-ai-guidance.md §2.2) and the cloud runs
+  // the Standard model whatever a client sends, so an un-updated plugin's
+  // provider wizard and regenerate modal, which list these arrays, offer only
+  // what runs. Every other entry keeps its tier in the registry for the
+  // internal bindings. `tts` and `unlisted` entries never have the flag.
   const models = MODELS.filter(
-    (m) => m.provider === provider && (m.role === "text" || m.role === "image") && !m.unlisted,
+    (m) => m.provider === provider && (m.role === "text" || m.role === "image") && m.default && !m.unlisted,
   );
   const text = models.filter((m) => m.role === "text");
   const image = models.filter((m) => m.role === "image");
@@ -119,21 +122,13 @@ export function getRecommendedModel(provider: AIProvider, role: "text"): string 
 export type ImageProvider = Extract<AIProvider, "openai" | "gemini">;
 
 /**
- * True when `modelId` is a registered image model for `provider`. Used by the
- * image resolver to validate per-regen model overrides from managed-tier
- * callers. `requireMidOnly` narrows the check to mid-tier (`default`) entries —
- * the Cloud-tier UI gate that lets Cloud users swap among mid models but not
- * elevate to top.
+ * True when `modelId` is a served image model for `provider`, which since
+ * 2026-11-25 is the provider's one Standard image model. The admin post
+ * refresh (`functions/src/headless/posts/refresh-core.ts`) validates its
+ * `--image-model` override with it.
  */
-export function isKnownImageModelForProvider(
-  provider: ImageProvider,
-  modelId: string,
-  requireMidOnly = false,
-): boolean {
-  const entry = MODEL_CATALOG[provider].image.find((m) => m.id === modelId);
-  if (!entry) return false;
-  if (requireMidOnly) return entry.default === true;
-  return true;
+export function isKnownImageModelForProvider(provider: ImageProvider, modelId: string): boolean {
+  return MODEL_CATALOG[provider].image.some((m) => m.id === modelId);
 }
 
 /**
@@ -152,8 +147,7 @@ export function getRegistryModelId(
 
 /**
  * The full registry entry (id + display name + metadata) for a
- * `(provider, role, tier)`, or `undefined` if none exists. The tier picker UI
- * uses this to label options with the model name — `Top (Gemini 3.1 Pro)`.
+ * `(provider, role, tier)`, or `undefined` if none exists.
  */
 export function getRegistryModel(
   provider: AIProvider,
@@ -163,26 +157,6 @@ export function getRegistryModel(
   return MODELS.find(
     (m) => m.provider === provider && m.role === role && m.tier === tier,
   );
-}
-
-/**
- * Reverse lookup: the quality tier a concrete registry model id belongs to,
- * or `undefined` for a retired/unknown id. Legacy campaigns (pre-tier rollout)
- * store only a concrete model — pickers use this to open on the tier that
- * matches the stored model instead of assuming one, so a legacy Standard-model
- * campaign is never displayed (or silently re-saved) as Top. A superseded id
- * answers the tier it held (`supersededTier`), the tier it now runs on.
- */
-export function tierForModelId(
-  provider: AIProvider,
-  role: ModelRole,
-  modelId: string | null | undefined,
-): ModelTier | undefined {
-  if (!modelId) return undefined;
-  const m = MODELS.find(
-    (x) => x.provider === provider && x.role === role && x.id === modelId,
-  );
-  return m?.tier ?? m?.supersededTier;
 }
 
 /**

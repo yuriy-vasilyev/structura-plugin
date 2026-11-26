@@ -62,6 +62,7 @@ vi.mock("@/features/settings/api/useLicense", () => ({
 }));
 
 import { RunDetailPage } from "../routes/RunDetailPage";
+import { MODEL_NAME } from "@/test/modelNames";
 
 /**
  * Canonical succeeded-run fixture. Individual tests spread this and
@@ -285,13 +286,14 @@ describe("RunDetailPage", () => {
       await screen.findByText("Voice of the Brand"),
     ).toBeInTheDocument();
 
-    // Provider label maps openai → "OpenAI" and renders the model id
-    // inside parens. We match on a loose substring so a future
-    // whitespace / formatting tweak doesn't break the test.
-    expect(screen.getByText(/OpenAI/)).toBeInTheDocument();
-    expect(screen.getByText(/\(gpt-4o\)/)).toBeInTheDocument();
-    expect(screen.getByText(/Gemini/)).toBeInTheDocument();
-    expect(screen.getByText(/\(imagen-3.0-fast\)/)).toBeInTheDocument();
+    // Provider label maps openai → "OpenAI". The model id the run recorded
+    // rode in parens until the owner's decision of 2026-11-25: no customer
+    // surface names a model.
+    const providers = screen.getByText("AI Intelligence").parentElement!;
+    expect(providers).toHaveTextContent("OpenAI");
+    expect(providers).toHaveTextContent("Gemini");
+    expect(providers.textContent).not.toMatch(MODEL_NAME);
+    expect(providers.textContent).not.toMatch(/\(|\)/);
   });
 
   it("hides the AI Intelligence rows on a managed plan (2026-10-01)", async () => {
@@ -310,9 +312,8 @@ describe("RunDetailPage", () => {
     expect(screen.queryByText(/imagen-3.0-fast/)).not.toBeInTheDocument();
   });
 
-  it("renders no empty provider row or empty parens when the cloud sends blank names (BYOK)", async () => {
-    // A blank provider id renders no row; a blank model renders the
-    // provider name without "()".
+  it("renders no empty provider row when the cloud sends blank names (BYOK)", async () => {
+    // A blank provider id renders no row.
     apiFetchMock.mockResolvedValueOnce({
       success: true,
       run: {

@@ -150,9 +150,10 @@ class Campaign_Shape_Transformer_Test extends TestCase
         $this->assertSame('Rank for WordPress', $cloud['objective']);
         $this->assertSame('traffic_magnet', $cloud['campaignMode']);
         $this->assertSame('openai', $cloud['textProvider']);
-        $this->assertSame('gpt-4o', $cloud['textModel']);
         $this->assertSame('openai', $cloud['imageProvider']);
-        $this->assertSame('dall-e-3', $cloud['imageModel']);
+        // No model is forwarded since 2026-11-25, even when the input names one.
+        $this->assertArrayNotHasKey('textModel', $cloud);
+        $this->assertArrayNotHasKey('imageModel', $cloud);
         $this->assertSame('gemini', $cloud['fallbackTextProvider']);
         $this->assertNull($cloud['fallbackImageProvider']);
         $this->assertSame(3, $cloud['personaId']);
@@ -554,58 +555,25 @@ class Campaign_Shape_Transformer_Test extends TestCase
     }
 
     /**
-     * Test: a valid top|mid model tier survives SPA → cloud as textTier/imageTier.
-     *
-     * The tier is the tier-based replacement for the concrete text_model /
-     * image_model; the cloud resolves the concrete model at gen time and
-     * prefers the tier when present (rollout §10).
+     * Test: SPA → cloud forwards no model and no tier, whatever the input
+     * holds. No campaign picks either since 2026-11-25
+     * (specs/byok-ai-guidance.md §2.2), and /patchCampaign merges only the
+     * keys present, so a save also leaves what an older plugin stored
+     * untouched (the cloud ignores it).
      */
-    public function test_wp_input_to_cloud_forwards_valid_model_tier()
+    public function test_wp_input_to_cloud_forwards_no_model_or_tier()
     {
         $cloud = Campaign_Shape_Transformer::wp_input_to_cloud([
-            'name'       => 'Tiered campaign',
-            'text_tier'  => 'top',
-            'image_tier' => 'mid',
+            'name'        => 'Tiered campaign',
+            'text_model'  => 'claude-opus-5-5',
+            'image_model' => 'gemini-3-pro-image',
+            'text_tier'   => 'top',
+            'image_tier'  => 'mid',
         ]);
 
-        $this->assertSame('top', $cloud['textTier']);
-        $this->assertSame('mid', $cloud['imageTier']);
-    }
-
-    /**
-     * Test: an absent tier leaves the keys OUT of the cloud shape entirely.
-     *
-     * This is the §10 back-compat contract: /patchCampaign merges only the
-     * keys present in the body, so omitting textTier/imageTier on a save that
-     * carries no tier can never wipe a tier the campaign already stored, and a
-     * tier-less campaign keeps resolving off textModel/imageModel.
-     */
-    public function test_wp_input_to_cloud_omits_absent_model_tier()
-    {
-        $cloud = Campaign_Shape_Transformer::wp_input_to_cloud([
-            'name'       => 'No tier',
-            'text_model' => 'gpt-5.2-2025-12-11',
-        ]);
-
-        $this->assertArrayNotHasKey('textTier', $cloud);
-        $this->assertArrayNotHasKey('imageTier', $cloud);
-    }
-
-    /**
-     * Test: a tier value outside the {top, mid} whitelist is dropped, not
-     * forwarded — a stray "cheap"/"flagship"/typo can't pin a campaign to a
-     * tier the picker never offers.
-     */
-    public function test_wp_input_to_cloud_drops_out_of_whitelist_tier()
-    {
-        $cloud = Campaign_Shape_Transformer::wp_input_to_cloud([
-            'name'       => 'Bad tier',
-            'text_tier'  => 'cheap',
-            'image_tier' => 'flagship',
-        ]);
-
-        $this->assertArrayNotHasKey('textTier', $cloud);
-        $this->assertArrayNotHasKey('imageTier', $cloud);
+        foreach (['textModel', 'imageModel', 'textTier', 'imageTier'] as $key) {
+            $this->assertArrayNotHasKey($key, $cloud);
+        }
     }
 
     /**

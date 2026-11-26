@@ -276,11 +276,10 @@ class Task_Runner
         string $image_type,
         array $image_data,
         array $campaign,
-        // 2026-05-02 — optional per-call image model override. Set
-        // by the post-meta-box regen handlers when the user picks a
-        // specific model in the modal. Null means "use the campaign /
-        // tier default" (the legacy behaviour).
-        ?string $override_image_model = null,
+        // The per-call image model (2026-05-02) and tier (top|mid)
+        // overrides went on 2026-11-25 with the regen modal's model
+        // picker: no model or tier is picked, and the cloud runs the
+        // provider's Standard model (specs/byok-ai-guidance.md §2.2).
         // 2026-05-07 — optional per-call image provider override.
         // The post-meta-box modal now lets users pick from any of
         // their connected image providers, not just the post's
@@ -289,13 +288,7 @@ class Task_Runner
         // forwarding it here, so by the time we see it we can trust
         // the user has a key for it. Null means "use the campaign's
         // configured provider" (the legacy behaviour).
-        ?string $override_image_provider = null,
-        // Optional per-call quality tier (top|mid) from the post-editor's
-        // Top/Standard regen picker — the tier-based replacement for the
-        // concrete model override. When set, the cloud resolves the concrete
-        // image model from (provider, tier) and prefers it over the model.
-        // Null means "use the campaign / tier default".
-        ?string $override_image_tier = null
+        ?string $override_image_provider = null
     ): void {
         try {
             $license_data   = License_Manager::get_license_data();
@@ -309,9 +302,7 @@ class Task_Runner
             // `delegate_image_to_cloud` forwards the chosen provider
             // on the wire too. Clearing the campaign's pinned model
             // is essential — a Gemini-pinned model id forwarded with
-            // an OpenAI provider would fail validation cloud-side;
-            // `$override_image_model` (set by the same picker) takes
-            // its place via the existing delegate path.
+            // an OpenAI provider would fail validation cloud-side.
             if (is_string($override_image_provider) && $override_image_provider !== '') {
                 $campaign['intelligence']['imageProvider'] = $override_image_provider;
                 $campaign['intelligence']['imageModel']    = null;
@@ -369,9 +360,7 @@ class Task_Runner
                 $campaign,
                 $image_data,
                 $license_data,
-                $image_type,
-                $override_image_model,
-                $override_image_tier
+                $image_type
             );
 
             if (is_wp_error($raw_pixels)) {
@@ -443,9 +432,7 @@ class Task_Runner
         array $campaign,
         array &$image_data,
         array $license,
-        ?string $slot = null,
-        ?string $override_model = null,
-        ?string $override_tier = null
+        ?string $slot = null
     ) {
         $image_provider = $campaign['intelligence']['imageProvider'] ?? null;
 
@@ -455,24 +442,11 @@ class Task_Runner
             throw new \Exception('No image provider configured for this campaign.');
         }
 
-        // Pass the campaign-pinned model verbatim. The cloud's image
-        // resolver applies PLAN_DEFAULTS for managed tiers when null
-        // and validates BYOK callers carry a recognised model id.
+        // Pass the campaign-pinned model verbatim. The cloud ignores it
+        // since 2026-11-25 (every own-key image runs the provider's
+        // Standard model, specs/byok-ai-guidance.md §2.2); it still travels
+        // for clouds deployed before that.
         $model = $campaign['intelligence']['imageModel'] ?? null;
-
-        // 2026-05-02 — per-regen model override from the post-meta-box
-        // image-model picker. Wins over the campaign default for both
-        // BYOK and managed tiers; the cloud-side resolver
-        // (`resolveImageProviderAndModel`) validates the model is a
-        // known catalog entry for the provider AND, for Cloud tier,
-        // that it's a mid-tier model. Sanitised to keep an injection-
-        // safe id (model ids are always alnum + hyphens + dots).
-        if (is_string($override_model) && $override_model !== '') {
-            $sanitised = preg_replace('/[^A-Za-z0-9._\-]/', '', $override_model);
-            if ($sanitised !== '') {
-                $model = $sanitised;
-            }
-        }
 
         // Mirror the text path: forward the fallback image provider so the
         // cloud's `executeCloudImageStep` has the intent, and include the
@@ -551,15 +525,6 @@ class Task_Runner
 
         if ($fallback_image_provider) {
             $payload['fallbackImageProvider'] = $fallback_image_provider;
-        }
-
-        // Per-regen quality tier (top|mid) from the post-editor's Top/Standard
-        // picker. The cloud's `resolveImageProviderAndModel` resolves the
-        // concrete image model from (provider, tier) and PREFERS it over
-        // `model`; managed tiers ignore it. Forwarded only when a valid tier
-        // is present so a regen that carries only a model still works (§10).
-        if (in_array($override_tier, ['top', 'mid'], true)) {
-            $payload['imageTier'] = $override_tier;
         }
 
         // BYOK keys are no longer sent on the wire. The cloud's

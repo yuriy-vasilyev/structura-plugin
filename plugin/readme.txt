@@ -322,6 +322,17 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Changelog ==
 
+= 2.45.0 =
+* New: a recurring character works with OpenAI images. If OpenAI draws
+  your images, you can now choose Person or Mascot on the Visuals page;
+  before, this needed Google Gemini.
+* Changed: you choose the AI provider, not the model. The model and
+  tier choices are gone from the AI Engine settings, campaigns, one-off
+  posts and the post editor box. Each provider runs a model we test and
+  keep up to date, and screens name the provider only.
+* Fixed: dashboard numbers, card titles and the queue card are readable
+  in dark mode.
+
 = 2.44.0 =
 * New: Draft from images. In the signature builder on the Visuals page,
   upload up to three images in the style you want and get a draft of
@@ -602,6 +613,10 @@ repository:
 [github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md](https://github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md)
 
 == Upgrade Notice ==
+
+= 2.45.0 =
+Recurring characters now work with OpenAI images, and model choices are
+replaced by a provider choice. Safe upgrade. No database migrations.
 
 = 2.44.0 =
 Adds Draft from images to the signature builder on the Visuals page.

@@ -1809,8 +1809,16 @@ export interface LicenseActivation {
    */
   aiDefaults?: {
     textProvider: AIProvider;
+    /**
+     * The text provider's Standard model id. No generation path reads it
+     * since 2026-11-25: no plan picks a model and own-key posts run the
+     * provider's Standard model (specs/byok-ai-guidance.md §2.2). The cloud
+     * stores the Standard id whatever a client sends; older docs may hold
+     * another id.
+     */
     textModel: string;
     imageProvider: AIProvider | null;
+    /** The image provider's Standard model id, or `""`; as {@link textModel}. */
     imageModel: string;
     /**
      * `auto` while the text default follows the site's connected keys:

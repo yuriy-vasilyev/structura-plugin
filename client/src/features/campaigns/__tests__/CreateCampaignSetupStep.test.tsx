@@ -59,6 +59,8 @@ const h = vi.hoisted(() => ({
   providers: {} as Record<string, unknown>,
   /** Text providers with a key behind them (`useAiConnections`). */
   textProviders: ["openai"] as string[],
+  /** What the plugin's served catalog relay (`GET /structura/v1/models`) answers. */
+  models: undefined as unknown,
 }));
 
 vi.mock("@/features/settings", () => ({
@@ -94,11 +96,12 @@ vi.mock("@/features/personas", () => {
 
 vi.mock("@/features/ai-engine", () => ({ useAiSettingsQuery: () => ({ data: {} }) }));
 vi.mock("@/features/ai-engine/api/useAvailableModelsQuery", () => ({
-  useAvailableModelsQuery: () => ({ data: undefined }),
+  useAvailableModelsQuery: () => ({ data: h.models }),
 }));
 
 import CreateCampaignPage from "../routes/CreateCampaignPage";
 import { useCampaignDraftStore } from "../context/draftStore";
+import { MODEL_NAME } from "@/test/modelNames";
 
 const DRAFT_PATH = "/structura/v1/campaigns/draft-setup";
 
@@ -162,6 +165,7 @@ beforeEach(() => {
   h.siteLanguage = "de-DE";
   h.providers = {};
   h.textProviders = ["openai"];
+  h.models = undefined;
   // The wizard resumes from localStorage; a leftover draft would pin the
   // language and short-circuit the seeding this file is about.
   useCampaignDraftStore.getState().discardDraft();
@@ -457,6 +461,34 @@ describe("New campaign — provider advice under the inline provider block (2026
       expect(document.querySelector('[data-text-provider="gemini"]')!.className).toContain("ring-2"),
     );
     expect(document.activeElement).toBe(document.querySelector('[data-text-provider="gemini"]'));
+  });
+
+  // Owner decision 2026-11-25: the block showed an "Engine" grid with the
+  // model each chosen provider runs; no customer surface names a model now.
+  it("names no model in the inline provider block, with the served catalog loaded", async () => {
+    inlineByok();
+    h.models = {
+      text: [
+        { id: "gpt-5.6-sol", name: "GPT-5.6 Sol", provider: "openai" },
+        { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", provider: "gemini" },
+      ],
+      image: [
+        { id: "gpt-image-2.6-flare", name: "GPT Image 2.6 Flare", provider: "openai" },
+        { id: "gemini-3.1-flash-image", name: "Gemini 3.1 Flash Image", provider: "gemini" },
+      ],
+      defaults: {
+        openai: { text: "gpt-5.6-sol", fast: "", image: "gpt-image-2.6-flare" },
+        gemini: { text: "gemini-3.8-flash", fast: "", image: "gemini-3.1-flash-image" },
+      },
+    };
+    renderWizard();
+
+    expect(await screen.findByText("Text Provider")).toBeTruthy();
+    expect(screen.getByText("Image Provider")).toBeTruthy();
+    for (const label of ["Engine", "Text Model", "Image Model"]) {
+      expect(screen.queryByText(label)).toBeNull();
+    }
+    expect(document.body.textContent).not.toMatch(MODEL_NAME);
   });
 
   it("no advice for a Gemini default with no key behind it", async () => {

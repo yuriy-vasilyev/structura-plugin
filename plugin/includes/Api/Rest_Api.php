@@ -2302,20 +2302,9 @@ class Rest_Api
                 // re-introduce the Claude+Gemini-routed-to-OpenAI bug.
                 'textProvider'          => $raw_text_provider,
                 'imageProvider'         => $image_provider,
-                'textModel'             => sanitize_text_field($params['text_model'] ?? ''),
-                'imageModel'            => sanitize_text_field($params['image_model'] ?? ''),
-                // Model quality tier (top|mid) for the one-shot run. When the
-                // picker sends one the cloud resolves the concrete model at
-                // gen time and prefers it over *_model; null (no tier sent)
-                // falls back to the concrete model. This inline campaign is
-                // ephemeral and shipped in full every run, so null here can't
-                // clobber a stored value the way a PATCH could.
-                'textTier'              => in_array($params['text_tier'] ?? null, ['top', 'mid'], true)
-                    ? sanitize_key($params['text_tier'])
-                    : null,
-                'imageTier'             => in_array($params['image_tier'] ?? null, ['top', 'mid'], true)
-                    ? sanitize_key($params['image_tier'])
-                    : null,
+                // No textModel / imageModel / textTier / imageTier since
+                // 2026-11-25: the cloud runs each provider's Standard model
+                // (specs/byok-ai-guidance.md §2.2).
                 // Optional campaign-level fallback providers — Task_Runner
                 // stamps these on the cloud payload so transient errors on
                 // the primary are recovered from automatically. Null when
@@ -4561,26 +4550,18 @@ class Rest_Api
         $providers      = [];
 
         foreach ($tier_available as $id => $meta) {
-            $default_text  = Provider_Registry::get_default_model($id, 'text');
-            $default_image = Provider_Registry::get_default_model($id, 'image');
-            $binding       = $bindings_by_provider[$id] ?? null;
+            $binding = $bindings_by_provider[$id] ?? null;
 
+            // No text_model / image_model / text_tier / image_tier since
+            // 2026-11-25: no site picks a model or a tier (owner decision,
+            // specs/byok-ai-guidance.md §2.2). The SPA names the model each
+            // provider runs from the served catalog (`/models`).
             $providers[$id] = [
                 'connected'    => $binding !== null,
                 'masked_key'   => is_array($binding) && isset($binding['maskedKey'])
                     ? (string)$binding['maskedKey']
                     : '',
                 'capabilities' => $meta['capabilities'],
-                'text_model'   => get_option("structura_text_model_{$id}", $default_text),
-                'image_model'  => get_option("structura_image_model_{$id}", $default_image),
-                // The tier the provider wizard's "Use recommended model"
-                // switch stored, or '' when the site picked a model (or
-                // never used the switch). A stored tier wins over the
-                // model id in the SPA, so the site default follows the
-                // catalog when that tier's model moves. Since 2026-10-06,
-                // specs/open-providers.md.
-                'text_tier'    => self::sanitize_model_tier(get_option("structura_text_tier_{$id}", '')),
-                'image_tier'   => self::sanitize_model_tier(get_option("structura_image_tier_{$id}", '')),
             ];
         }
 
@@ -4615,18 +4596,6 @@ class Rest_Api
                 true),
             'scheduler_simple_mode' => self::get_user_meta_with_default('structura_scheduler_simple_mode', true),
         ];
-    }
-
-    /**
-     * Returns the stored model tier ("top" or "mid"), or '' for anything else.
-     *
-     * @param mixed $tier
-     */
-    private static function sanitize_model_tier($tier): string
-    {
-        $tier = is_string($tier) ? strtolower(sanitize_text_field($tier)) : '';
-
-        return in_array($tier, ['top', 'mid'], true) ? $tier : '';
     }
 
     /**
@@ -4688,29 +4657,11 @@ class Rest_Api
         if (isset($params['ai'])) {
             $ai = $params['ai'];
 
-            // Per-provider model overrides (generic — works for any provider ID)
-            $all_providers = Provider_Registry::get_all_providers();
-            foreach ($all_providers as $pid => $_meta) {
-                if (isset($ai[$pid])) {
-                    $pdata = $ai[$pid];
-                    if (isset($pdata['text_model'])) {
-                        update_option("structura_text_model_{$pid}", sanitize_text_field($pdata['text_model']));
-                    }
-                    if (isset($pdata['image_model'])) {
-                        update_option("structura_image_model_{$pid}", sanitize_text_field($pdata['image_model']));
-                    }
-                    // Optional since 2026-10-06 (specs/open-providers.md):
-                    // the wizard's recommended-model switch sends the tier
-                    // ("top" | "mid") with the mirrored model, or '' to
-                    // clear it when the customer picks a model.
-                    if (isset($pdata['text_tier'])) {
-                        update_option("structura_text_tier_{$pid}", self::sanitize_model_tier($pdata['text_tier']));
-                    }
-                    if (isset($pdata['image_tier'])) {
-                        update_option("structura_image_tier_{$pid}", self::sanitize_model_tier($pdata['image_tier']));
-                    }
-                }
-            }
+            // The per-provider model and tier options
+            // (`structura_{text,image}_{model,tier}_{provider}`) are no longer
+            // written since 2026-11-25: no site picks a model or a tier
+            // (specs/byok-ai-guidance.md §2.2). Values already stored stay
+            // in wp_options unread.
 
             // Default provider selections
             if (isset($ai['defaults'])) {

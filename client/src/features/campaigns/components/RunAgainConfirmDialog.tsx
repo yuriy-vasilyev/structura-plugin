@@ -22,8 +22,8 @@ import {
  * from the plan, so this guards the action: reassure what happens, then let the
  * owner verify the settings — above all Draft vs Publish — before committing.
  *
- * Provider rows show the brand logo + "Provider · Model" (the caller resolves
- * the label from the now-landed @structura/model-catalog); this component stays
+ * Provider rows show the brand logo + the provider's name (the caller resolves
+ * the label; no model is named since 2026-11-25); this component stays
  * presentational and just renders what it's handed.
  */
 
@@ -42,8 +42,8 @@ export interface RunAgainConfirmDialogProps {
   postStatus: "publish" | "draft" | "pending";
   /**
    * Resolved provider rows (text/image). `value` is the display string, e.g.
-   * "OpenAI · GPT-5.2"; `providerId` drives the brand logo. Caller-resolved so
-   * the modal stays free of catalog lookups.
+   * "OpenAI"; `providerId` drives the brand logo. Caller-resolved so the
+   * modal stays free of lookups.
    */
   providers?: Array<{
     key: string;

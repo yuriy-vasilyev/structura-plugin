@@ -112,8 +112,6 @@ const storedCampaign = (seoRules: Record<string, boolean>): Campaign => ({
   intelligence: {
     textProvider: "openai",
     imageProvider: "openai",
-    textModel: "",
-    imageModel: "",
     personaId: "p1",
     language: "en",
     postLength: 1200,

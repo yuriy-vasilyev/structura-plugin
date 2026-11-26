@@ -57,8 +57,6 @@ export const StepSummary = () => {
                 <span className="text-neutral-900">{intelligence.textProvider}</span>
               </div>
               <div className="flex flex-col text-[10px] font-bold text-neutral-400 uppercase">
-                {intelligence.textModel && <div>• {intelligence.textModel}</div>}
-                {intelligence.imageModel && <div>• {intelligence.imageModel}</div>}
               </div>
             </div>
             <div className="space-y-4">

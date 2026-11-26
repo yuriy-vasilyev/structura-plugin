@@ -53,10 +53,9 @@ function explainError(code: ConnectionTestErrorCode | undefined): string {
         "structura",
       );
     case "model_unavailable":
-      return __(
-        "The selected model wasn't available for this account.",
-        "structura",
-      );
+      // No model is selected since 2026-11-25: the same words as the
+      // provider wizard's key test.
+      return __("The provider didn't return a usable model. Check the key's access.", "structura");
     case "timeout":
       return __(
         "The provider didn't respond in time. The connection may be slow or the model warming up.",

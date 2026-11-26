@@ -44,18 +44,6 @@ export function resolveByokDefaultTextModelId(provider: AIProvider): string {
 }
 
 /**
- * The model a stored concrete text id runs on a BYOK or Free post: the
- * current model of the tier a superseded id held, else the id unchanged
- * (a current model, or one that never had a tier such as `gpt-4o`).
- * Spec: specs/byok-ai-guidance.md §2.
- */
-export function resolveSupersededTextModelId(provider: AIProvider, modelId: string): string {
-  const m = MODELS.find((x) => x.provider === provider && x.role === "text" && x.id === modelId);
-  if (!m?.supersededTier) return modelId;
-  return getRegistryModelId(provider, "text", m.supersededTier) ?? modelId;
-}
-
-/**
  * The recommended text tier for a provider (`RECOMMENDATIONS.text.model`),
  * or `mid` for a provider without one (Gemini), and that tier's model.
  */
@@ -218,13 +206,11 @@ export function resolveManagedImageBinding(
 }
 
 /**
- * Resolve a BYOK-selected tier to a concrete model id. The BYOK picker offers
- * `top` + `mid`; the campaign stores the tier (not the id), and this resolves it
- * at generation time so a model bump applies to every saved campaign.
- *
- * Returns `undefined` when no tier is stored (a legacy campaign that still holds
- * a concrete model id) — the caller then keeps using that stored model. Falls
- * back to `mid` if the provider carries no model at the requested tier.
+ * The concrete model id for a `(provider, capability, tier)`, falling back to
+ * `mid` when the provider carries no model at that tier; `undefined` without
+ * a tier. No customer picks a tier since 2026-11-25
+ * (specs/byok-ai-guidance.md §2.2); the admin post refresh still names Top
+ * for its OpenAI image (`functions/src/headless/posts/refresh-core.ts`).
  */
 export function resolveByokTierModelId(
   provider: AIProvider,
@@ -294,4 +280,16 @@ export function acceptsLowEffort(provider: AIProvider, modelId: string): boolean
 /** True when the image model takes reference images (`referenceImages`); false for unknown ids. */
 export function acceptsReferenceImages(provider: AIProvider, modelId: string): boolean {
   return !!MODELS.find((m) => m.provider === provider && m.role === "image" && m.id === modelId)?.referenceImages;
+}
+
+/**
+ * The quality an OpenAI image request sends when its caller names none: the
+ * model's `default_quality`. Without it the API's own default, "auto", drew
+ * two of three `gpt-image-2.6-flare` images at xhigh (2,459 output tokens
+ * against 1,353 at high, measured 2026-11-25). `undefined` for a model the
+ * catalog does not know or one without a default.
+ */
+export function resolveDefaultImageQuality(provider: AIProvider, modelId: string): "low" | "medium" | "high" | undefined {
+  const quality = MODELS.find((m) => m.provider === provider && m.role === "image" && m.id === modelId)?.manifest?.default_quality;
+  return quality === "low" || quality === "medium" || quality === "high" ? quality : undefined;
 }

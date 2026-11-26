@@ -21,8 +21,9 @@ use Structura\Tests\Unit\TestCase;
  *   - the file parses and every provider is present;
  *   - text and image defaults are listed models of the right capability;
  *   - every listed model has a manifest entry;
- *   - the BYOK tier models of the 2026-10-02 refresh are listed and the
- *     superseded ids are not.
+ *   - since 2026-11-25 each provider lists one text and one image model, the
+ *     Standard one, as the served catalog does (specs/byok-ai-guidance.md
+ *     §2.2), and no superseded, Top, cheap or untiered id.
  *
  * @covers \Structura\Core\Provider_Registry::get_models
  * @covers \Structura\Core\Provider_Registry::get_default_model
@@ -94,7 +95,7 @@ class ProviderRegistryFallbackModelsTest extends TestCase
     public function defaults_match_the_served_catalog(): void
     {
         $expected = [
-            'openai'    => ['text' => 'gpt-5.6-sol', 'fast' => 'gpt-5.4-mini', 'image' => 'gpt-image-1-mini'],
+            'openai'    => ['text' => 'gpt-5.6-sol', 'fast' => 'gpt-5.4-mini', 'image' => 'gpt-image-2.6-flare'],
             'gemini'    => ['text' => 'gemini-3.8-flash', 'fast' => 'gemini-3.5-flash', 'image' => 'gemini-3.1-flash-image'],
             'anthropic' => ['text' => 'claude-sonnet-5-5', 'fast' => 'claude-haiku-4-5-20251001', 'image' => ''],
         ];
@@ -120,9 +121,25 @@ class ProviderRegistryFallbackModelsTest extends TestCase
         }
     }
 
-    /** @test */
-    public function the_refreshed_tier_models_are_listed_and_the_superseded_ones_are_not(): void
+    /**
+     * No customer picks a model or a tier since 2026-11-25 (owner decision,
+     * specs/byok-ai-guidance.md §2.2): the cloud runs each provider's Standard
+     * model, so the offline catalog lists that one model per role, like the
+     * served one, and an old wizard offers nothing the cloud would ignore.
+     *
+     * @test
+     */
+    public function each_provider_lists_only_its_standard_text_model(): void
     {
+        $this->assertSame(['gpt-5.6-sol'], array_column(Provider_Registry::get_models('openai', 'text'), 'id'));
+        $this->assertSame(['gemini-3.8-flash'], array_column(Provider_Registry::get_models('gemini', 'text'), 'id'));
+        $this->assertSame(['claude-sonnet-5-5'], array_column(Provider_Registry::get_models('anthropic', 'text'), 'id'));
+
+        foreach (self::PROVIDERS as $provider) {
+            $listed = array_column(Provider_Registry::get_models($provider, 'text'), 'id');
+            $this->assertSame([Provider_Registry::get_default_model($provider, 'text')], $listed);
+        }
+
         $text = array_merge(
             ...array_map(
                 static function (string $p): array {
@@ -131,12 +148,36 @@ class ProviderRegistryFallbackModelsTest extends TestCase
                 self::PROVIDERS
             )
         );
-
-        foreach (['claude-sonnet-5-5', 'claude-opus-5-5', 'gpt-5.6-sol', 'gpt-6-astra', 'gemini-3.8-flash', 'gemini-3.1-pro-preview'] as $id) {
-            $this->assertContains($id, $text);
-        }
-        foreach (['claude-sonnet-5', 'claude-opus-4-8', 'gpt-5.4-mini', 'gpt-5.2-2025-12-11', 'gemini-3.5-flash', 'claude-sonnet-4-6', 'dall-e-3'] as $id) {
+        $gone = [
+            // Top tier, cheap tier and untiered ids, unlisted 2026-11-25.
+            'claude-opus-5-5', 'gpt-6-astra', 'gemini-3.1-pro-preview', 'claude-haiku-4-5-20251001',
+            'gpt-5-nano-2025-08-07', 'gemini-3.1-flash-lite', 'gpt-4o', 'gpt-4o-mini', 'gemini-2.5-pro',
+            // Superseded 2026-10-02 and older retirees.
+            'claude-sonnet-5', 'claude-opus-4-8', 'gpt-5.4-mini', 'gpt-5.2-2025-12-11', 'gemini-3.5-flash', 'claude-sonnet-4-6', 'dall-e-3',
+        ];
+        foreach ($gone as $id) {
             $this->assertNotContains($id, $text);
+            $this->assertNull(Provider_Registry::get_model_manifest($id), "$id still has a manifest entry");
         }
+    }
+
+    /**
+     * Own-key OpenAI images run on one model since 2026-11-25
+     * (specs/byok-ai-guidance.md §2.1): GPT Image 1 Mini (shut down
+     * 2026-12-01) and GPT Image 2 left the served catalog.
+     *
+     * @test
+     */
+    public function openai_offers_one_image_model_and_not_the_retired_ones(): void
+    {
+        $image = array_column(Provider_Registry::get_models('openai', 'image'), 'id');
+
+        $this->assertSame(['gpt-image-2.6-flare'], $image);
+        foreach (['gpt-image-1-mini', 'gpt-image-2'] as $retired) {
+            $this->assertNull(Provider_Registry::get_model_manifest($retired), "$retired still has a manifest entry");
+        }
+        // Gemini's Top image model left with the tier picker (2026-11-25).
+        $this->assertSame(['gemini-3.1-flash-image'], array_column(Provider_Registry::get_models('gemini', 'image'), 'id'));
+        $this->assertNull(Provider_Registry::get_model_manifest('gemini-3-pro-image'));
     }
 }

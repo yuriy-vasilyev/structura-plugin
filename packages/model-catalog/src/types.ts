@@ -158,7 +158,9 @@ export interface CatalogModel {
    * draws the same character from them (specs/visual-signatures.md §13.6).
    * Set only where a real call confirmed it (2026-11-18: Gemini 3.1 Flash
    * Image held face, hair and drawing style in 10 of 10 scenes,
-   * research/2026-11-18-recurring-character). A site whose image model lacks
+   * research/2026-11-18-recurring-character; 2026-11-25: GPT Image 2.5 and
+   * 2.6 Sunburst and Flare in 12 of 12 on /v1/images/edits,
+   * research/2026-11-25-openai-character). A site whose image model lacks
    * it gets no character. Registry-only.
    */
   referenceImages?: true;
@@ -204,11 +206,11 @@ export interface CatalogModel {
   unlisted?: true;
   /**
    * Set on an `unlisted` text model that used to hold this BYOK tier and was
-   * replaced by a newer model (2026-10-01 refresh). A campaign, schedule or
-   * request that stores only this concrete id runs the tier's current model
-   * (`resolveSupersededTextModelId`), and pickers open on this tier
-   * (`tierForModelId`). The id itself stays callable for the frozen bindings.
-   * Spec: specs/byok-ai-guidance.md §2.
+   * replaced by a newer model (2026-10-01 refresh). A record only since
+   * 2026-11-25: nothing resolves through it, because own-key posts run the
+   * provider's Standard model whatever id was stored
+   * (specs/byok-ai-guidance.md §2.2). The id itself stays callable for the
+   * frozen bindings.
    */
   supersededTier?: Exclude<ModelTier, "cheap">;
   /** Runtime routing + capability metadata. */

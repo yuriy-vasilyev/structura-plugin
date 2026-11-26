@@ -9,7 +9,6 @@ import { useDefaultProviders, useLicense } from "@/features/settings";
 import { Card, InputField, Select, TextArea } from "@structura/ui";
 import { AIProvider, CampaignMode } from "@/features/campaigns/types";
 import { ProviderToggle } from "../ProviderToggle";
-import { mirrorModelForTier } from "@/features/campaigns/modelTier";
 import { useMagicSuggest } from "@/hooks/useMagicSuggest";
 import { MagicSuggestButton } from "@/features/campaigns/components/MagicSuggestButton";
 
@@ -35,7 +34,7 @@ export const SimpleStepStrategy = () => {
   );
   const { plan } = useLicense();
   const { suggest, isSuggesting: isStrategizing } = useMagicSuggest();
-  const { availableProviders, availableImageProviders, isFullyConfigured, isCloud } = useDefaultProviders();
+  const { availableProviders, availableImageProviders, isFullyConfigured } = useDefaultProviders();
   const isSingle = mode === "single";
 
   // Cloud auto-detects homepage + landing pages from site_identity
@@ -122,39 +121,10 @@ export const SimpleStepStrategy = () => {
           <ProviderToggle
             textProvider={formData.intelligence.textProvider}
             imageProvider={formData.intelligence.imageProvider}
-            onTextProviderChange={(p) =>
-              updateForm("intelligence", {
-                textProvider: p,
-                textModel:
-                  mirrorModelForTier(p, "text", formData.intelligence.textTier ?? "mid") ?? "",
-              })
-            }
-            onImageProviderChange={(p) =>
-              updateForm("intelligence", {
-                imageProvider: p,
-                imageModel:
-                  mirrorModelForTier(p, "image", formData.intelligence.imageTier ?? "mid") ?? "",
-              })
-            }
+            onTextProviderChange={(p) => updateForm("intelligence", { textProvider: p })}
+            onImageProviderChange={(p) => updateForm("intelligence", { imageProvider: p })}
             availableTextProviders={availableProviders}
             availableImageProviders={availableImageProviders}
-            showTierSelectors={!isCloud}
-            textTier={formData.intelligence.textTier ?? "mid"}
-            imageTier={formData.intelligence.imageTier ?? "mid"}
-            onTextTierChange={(t) =>
-              updateForm("intelligence", {
-                textTier: t,
-                textModel:
-                  mirrorModelForTier(formData.intelligence.textProvider, "text", t) ?? "",
-              })
-            }
-            onImageTierChange={(t) =>
-              updateForm("intelligence", {
-                imageTier: t,
-                imageModel:
-                  mirrorModelForTier(formData.intelligence.imageProvider, "image", t) ?? "",
-              })
-            }
           />
         </Card>
       )}

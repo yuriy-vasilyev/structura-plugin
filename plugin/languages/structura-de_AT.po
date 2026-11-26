@@ -3023,36 +3023,22 @@ msgid "Test Connection"
 msgstr "Verbindung testen"
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:558
-msgid ""
-"Your API key is valid and the provider is responding. Next, choose your "
-"preferred models."
-msgstr ""
-"Dein API-Schlüssel ist gültig und der Anbieter antwortet. Wähle als Nächstes "
-"deine bevorzugten Modelle."
+msgid "Your API key is valid and the provider is responding."
+msgstr "Dein API-Schlüssel ist gültig und der Anbieter antwortet."
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:576
 msgid "Configure provider"
 msgstr "Anbieter konfigurieren"
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:579
-msgid "Pick models and set this provider as your default."
-msgstr "Modelle auswählen und diesen Anbieter als Standard festlegen."
-
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:589
-#: client/src/features/campaigns/components/ProviderToggle.tsx:337
-msgid "Text Model"
-msgstr "Textmodell"
+msgid "Set this provider as your default."
+msgstr "Lege diesen Anbieter als Standard fest."
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:604
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:650
 #: client/src/features/campaigns/components/CampaignAiEngineSection.tsx:312
 msgid "Select model..."
 msgstr "Modell auswählen..."
-
-#: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:628
-#: client/src/features/campaigns/components/ProviderToggle.tsx:359
-msgid "Image Model"
-msgstr "Bildmodell"
 
 #: client/src/features/ai-engine/components/ProviderSetupWizard.tsx:633
 msgid "Image generation is not available on your current plan."
@@ -3429,10 +3415,6 @@ msgstr "Keine"
 #: client/src/features/campaigns/components/CampaignAiEngineSection.tsx:266
 msgid "Provider"
 msgstr "Anbieter"
-
-#: client/src/features/campaigns/components/CampaignAiEngineSection.tsx:303
-msgid "Model"
-msgstr "Modell"
 
 #: client/src/features/campaigns/components/CampaignAiEngineSection.tsx:337
 msgid "Fallback"
@@ -4041,8 +4023,8 @@ msgstr "Zu Cloud wechseln, dort betreiben wir die KI"
 
 #: client/src/features/campaigns/components/ProviderAdvice.tsx:134
 msgctxt "ai advice"
-msgid "Switched to %s with its recommended model."
-msgstr "Zu %s mit dem empfohlenen Modell gewechselt."
+msgid "Switched to %s."
+msgstr "Zu %s gewechselt."
 
 #: client/src/features/campaigns/components/ProviderAdvice.tsx:213
 msgctxt "ai advice"
@@ -9411,12 +9393,8 @@ msgstr ""
 "die du als Standard möchtest – du kannst sie später pro Beitrag wechseln."
 
 #: client/src/features/onboarding/components/WizardStep2AiEngine.tsx:155
-msgid ""
-"Connect at least one provider so the rest of setup can use AI. Pick a model "
-"and we'll handle the provider."
-msgstr ""
-"Verbinde mindestens einen Anbieter, damit der Rest der Einrichtung KI nutzen "
-"kann. Wähle ein Modell, und wir kümmern uns um den Anbieter."
+msgid "Connect at least one provider so the rest of setup can use AI. We run each provider’s current model for you."
+msgstr "Verbinde mindestens einen Anbieter, damit der Rest der Einrichtung KI nutzen kann. Wir nutzen für dich das aktuelle Modell jedes Anbieters."
 
 #: client/src/features/onboarding/components/WizardStep2AiEngine.tsx:167
 msgid "Your providers"
@@ -12560,8 +12538,8 @@ msgstr "Stelle die Figur zuerst fertig oder wähle „Niemand“."
 msgid "Draw a character sheet first."
 msgstr "Zeichne zuerst ein Figurenblatt."
 
-msgid "The image setup on your website can’t work from a reference image. Switch to one that can under AI Engine to add a character."
-msgstr "Die Bildeinstellung deiner Website kann nicht mit einem Referenzbild arbeiten. Wechsle unter KI-Engine zu einer, die das kann, um eine Figur hinzuzufügen."
+msgid "A character needs images drawn with Gemini or OpenAI. Under AI Engine, connect Gemini or OpenAI and turn on Default for image generation, then come back."
+msgstr "Für eine Figur brauchst du Bilder von Gemini oder OpenAI. Verbinde unter KI-Engine Gemini oder OpenAI, schalte „Standard für Bildgenerierung“ ein und komm dann zurück."
 
 msgid "The sheet didn’t finish. This didn’t use an image. Try again in a moment."
 msgstr "Das Figurenblatt wurde nicht fertig. Dafür wurde kein Bild verbraucht. Versuche es gleich noch einmal."

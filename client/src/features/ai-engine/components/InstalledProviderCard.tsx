@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { __ } from "@wordpress/i18n";
 import {
-  AlertTriangle,
   CheckCircle2,
   RefreshCw,
   Settings2,
@@ -11,7 +10,7 @@ import {
   ShieldCheck,
   Star,
 } from "lucide-react";
-import { Badge, Button, ConfirmDialog, RecommendedLabel, Tooltip, cn } from "@structura/ui";
+import { Badge, Button, ConfirmDialog, RecommendedLabel, cn } from "@structura/ui";
 import { getProviderMeta } from "@/utils/providerMeta";
 import { getProviderVisual } from "@/features/campaigns/constants";
 import { providerRecommendationLabel } from "@/features/campaigns/aiGuidance";
@@ -29,8 +28,6 @@ interface InstalledProviderCardProps {
   isDefaultText: boolean;
   /** Whether this is the default image provider. */
   isDefaultImage: boolean;
-  /** Whether onboarding is incomplete (connected but models not selected). */
-  incomplete?: boolean;
   onManage: () => void;
 }
 
@@ -58,7 +55,6 @@ export const InstalledProviderCard = ({
   isCloud,
   isDefaultText,
   isDefaultImage,
-  incomplete = false,
   onManage,
 }: InstalledProviderCardProps) => {
   const { latency, isChecking, checkPulse } = useProviderPulse(id, true);
@@ -73,9 +69,8 @@ export const InstalledProviderCard = ({
       <div
         className={cn(
           "group relative flex flex-col rounded-2xl border bg-white shadow-sm transition-all dark:bg-neutral-900",
-          incomplete
-            ? "border-amber-300/60 dark:border-amber-700/40"
-            : cn(providerVis.border, providerVis.glow)
+          providerVis.border,
+          providerVis.glow
         )}
       >
         {/* ── Card body ─────────────────────────────────────────── */}
@@ -107,21 +102,9 @@ export const InstalledProviderCard = ({
                 {!isCloud && providerRecommendationLabel(id) && (
                   <RecommendedLabel label={providerRecommendationLabel(id) as string} />
                 )}
-                {incomplete ? (
-                  <Tooltip
-                    title={__(
-                      "Setup incomplete — select models in the provider settings",
-                      "structura"
-                    )}
-                    position="top"
-                  >
-                    <span className="inline-flex shrink-0">
-                      <AlertTriangle size={14} className="text-amber-500" />
-                    </span>
-                  </Tooltip>
-                ) : (
-                  <CheckCircle2 size={14} className="shrink-0 text-emerald-500" />
-                )}
+                {/* No "setup incomplete" state since 2026-11-25: it meant no
+                    model was selected, and no model is selected any more. */}
+                <CheckCircle2 size={14} className="shrink-0 text-emerald-500" />
               </div>
               <p className="mt-0.5!line-clamp-2 mb-0! text-[11px] leading-relaxed text-neutral-400 dark:text-neutral-500">
                 {description}
@@ -148,13 +131,6 @@ export const InstalledProviderCard = ({
                 </span>
               );
             })}
-
-            {incomplete && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-700 uppercase dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
-                <AlertTriangle size={9} />
-                {__("Incomplete Setup", "structura")}
-              </span>
-            )}
 
             {isDefaultText && (
               <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-600 uppercase dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400">

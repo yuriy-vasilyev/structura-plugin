@@ -1,8 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   buildCampaignDefaults,
-  getRegistryModelId,
-  resolveRecommendedTextModel,
+  clampCampaignForPlan,
   CONTENT_BLOCKS,
   DEFAULT_CAMPAIGN_CRON,
   OPT_IN_SEO_RULES,
@@ -21,7 +20,6 @@ const seed = (over: Partial<CampaignDefaultsSeed> = {}): CampaignDefaultsSeed =>
   allowedProviders: ALL,
   language: "en",
   postLength: 1200,
-  seedsModels: true,
   ...over,
 });
 
@@ -119,43 +117,23 @@ describe("buildCampaignDefaults provider pick order", () => {
 });
 
 describe("buildCampaignDefaults values", () => {
-  it("derives the models from the registry's mid tier, never from the site's stored models", () => {
-    // The activation's `aiDefaults` carries stale model ids alongside the providers.
+  // Owner decision 2026-11-25 (specs/byok-ai-guidance.md §2.2): no plan
+  // picks a model or a tier, and the cloud runs the provider's Standard model
+  // whatever a campaign stores, so a new campaign stores neither.
+  it("carries no model and no tier on any plan, whatever the site's defaults hold", () => {
     const siteAiDefaults = {
       textProvider: "openai",
-      textModel: "retired-text-id",
+      textModel: "gpt-6-astra",
       imageProvider: "openai",
       imageModel: "retired-image-id",
     };
-    const d = buildCampaignDefaults(siteAiDefaults, seed());
-    expect(d.textTier).toBe("mid");
-    expect(d.imageTier).toBe("mid");
-    expect(d.textModel).toBe(getRegistryModelId("openai", "text", "mid"));
-    expect(d.imageModel).toBe(getRegistryModelId("openai", "image", "mid"));
-    expect(d.imageModel).not.toBe(d.textModel);
-  });
-
-  it("opens text on the provider's recommended tier and model", () => {
-    for (const provider of ["anthropic", "openai", "gemini"] as const) {
-      const d = buildCampaignDefaults({ textProvider: provider }, seed());
-      expect(d.textTier).toBe(resolveRecommendedTextModel(provider).tier);
-      expect(d.textModel).toBe(resolveRecommendedTextModel(provider).model);
+    for (const s of [seed(), seed({ allowedProviders: null })]) {
+      const d = buildCampaignDefaults(siteAiDefaults, s);
+      expect(d).toMatchObject({ textProvider: "openai", imageProvider: "openai" });
+      for (const field of ["textModel", "imageModel", "textTier", "imageTier"]) {
+        expect(d).not.toHaveProperty(field);
+      }
     }
-  });
-
-  it("seeds no concrete model when the caller's plan owns it (specs/managed-ai-lineup.md §3.2)", () => {
-    const d = buildCampaignDefaults(
-      { textProvider: "openai", imageProvider: "openai" },
-      seed({ seedsModels: false })
-    );
-    expect(d).toMatchObject({
-      textProvider: "openai",
-      textTier: "mid",
-      textModel: "",
-      imageProvider: "openai",
-      imageTier: "mid",
-      imageModel: "",
-    });
   });
 
   it("takes the post length from the caller", () => {
@@ -180,7 +158,7 @@ describe("buildCampaignDefaults values", () => {
     expect(SEO_RULES).toContain("references_list");
     expect(OPT_IN_SEO_RULES).toEqual(["references_list"]);
     // Every plan and seed: no default switches it on.
-    for (const s of [seed(), seed({ seedsModels: false }), seed({ allowedProviders: null })]) {
+    for (const s of [seed(), seed({ allowedProviders: null })]) {
       expect(buildCampaignDefaults(null, s).seoRules).not.toContain("references_list");
     }
     // The seven rules that were on before it are on, in the same order.
@@ -193,5 +171,25 @@ describe("buildCampaignDefaults values", () => {
       "eeat_signals",
       "entity_coverage",
     ]);
+  });
+});
+
+describe("clampCampaignForPlan", () => {
+  const form = { name: "x", pregenerationEnabled: true, textProvider: "anthropic" as const };
+
+  it("turns pre-generation off on Free and on for managed plans, and leaves BYOK as sent", () => {
+    expect(clampCampaignForPlan(form, "free").pregenerationEnabled).toBe(false);
+    expect(clampCampaignForPlan({ ...form, pregenerationEnabled: false }, "cloud").pregenerationEnabled).toBe(true);
+    expect(clampCampaignForPlan({ ...form, pregenerationEnabled: false }, "byok")).toEqual({ ...form, pregenerationEnabled: false });
+  });
+
+  // Since 2026-11-25 no client sends a model, so the clamp adds none (it
+  // wrote empty `textModel` and `imageModel` on managed plans before).
+  it("adds no model field on any plan", () => {
+    for (const plan of ["free", "byok", "cloud", null]) {
+      const out = clampCampaignForPlan(form, plan);
+      expect(out).not.toHaveProperty("textModel");
+      expect(out).not.toHaveProperty("imageModel");
+    }
   });
 });

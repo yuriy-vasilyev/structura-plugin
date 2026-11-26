@@ -172,14 +172,9 @@ export const flattenCampaign = (data: CampaignFormData) => {
     text_provider: intelligence.textProvider,
     image_provider: intelligence.imageProvider,
     provider: intelligence.textProvider, // Legacy field for older cloud functions
-    text_model: intelligence.textModel,
-    image_model: intelligence.imageModel,
-    // BYOK quality tier (top | mid) — sent ONLY when set so a tier-less
-    // campaign never writes one and a partial save can't wipe a stored tier
-    // (matches the plugin validator's omit-when-absent contract, §10). The
-    // cloud prefers the tier over text_model/image_model at generation time.
-    ...(intelligence.textTier ? { text_tier: intelligence.textTier } : {}),
-    ...(intelligence.imageTier ? { image_tier: intelligence.imageTier } : {}),
+    // No text_model / image_model / text_tier / image_tier since 2026-11-25:
+    // the cloud runs each provider's Standard model whatever is sent
+    // (specs/byok-ai-guidance.md §2.2).
     // Optional fallback providers — null/undefined means "no fallback".
     // Server-side validator rejects same-as-primary; we still let the payload
     // carry whatever the form has (client can't know server plan rules for

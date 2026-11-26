@@ -83,7 +83,6 @@ import { TaxonomySection } from "@/features/campaigns/components/TaxonomySection
 import { AIProvider } from "@/features/campaigns/types";
 import { ProviderToggle } from "@/features/campaigns/components/ProviderToggle";
 import { ProviderAdvice } from "@/features/campaigns/components/ProviderAdvice";
-import { mirrorModelForTier } from "@/features/campaigns/modelTier";
 import { CampaignAiEngineSection } from "@/features/campaigns/components/CampaignAiEngineSection";
 import { CoreContentSettings } from "@/features/campaigns/components/CoreContentSettings";
 import {
@@ -1289,8 +1288,7 @@ const SetupSection = ({
 }) => {
   const { formData, updateForm } = useCampaignForm();
   const { isPaidLicense } = useLicense();
-  const { availableProviders, availableImageProviders, isFullyConfigured, isCloud } =
-    useDefaultProviders();
+  const { availableProviders, availableImageProviders, isFullyConfigured } = useDefaultProviders();
 
   const { name, objective } = formData.identity;
   const language = formData.intelligence.language;
@@ -1447,45 +1445,17 @@ const SetupSection = ({
         </p>
       </div>
 
-      {/* Provider + model override — visible inline when not fully configured */}
+      {/* Provider override — visible inline when not fully configured. The
+          models are named read-only (no model or tier choice since 2026-11-25). */}
       {!isFullyConfigured && availableProviders.length > 0 && (
         <Card className="overflow-hidden border-neutral-200 p-0!">
           <ProviderToggle
             textProvider={formData.intelligence.textProvider}
             imageProvider={formData.intelligence.imageProvider}
-            onTextProviderChange={(p: AIProvider) =>
-              updateForm("intelligence", {
-                textProvider: p,
-                textModel:
-                  mirrorModelForTier(p, "text", formData.intelligence.textTier ?? "mid") ?? "",
-              })
-            }
-            onImageProviderChange={(p: AIProvider) =>
-              updateForm("intelligence", {
-                imageProvider: p,
-                imageModel:
-                  mirrorModelForTier(p, "image", formData.intelligence.imageTier ?? "mid") ?? "",
-              })
-            }
+            onTextProviderChange={(p: AIProvider) => updateForm("intelligence", { textProvider: p })}
+            onImageProviderChange={(p: AIProvider) => updateForm("intelligence", { imageProvider: p })}
             availableTextProviders={availableProviders}
             availableImageProviders={availableImageProviders}
-            showTierSelectors={!isCloud}
-            textTier={formData.intelligence.textTier ?? "mid"}
-            imageTier={formData.intelligence.imageTier ?? "mid"}
-            onTextTierChange={(t) =>
-              updateForm("intelligence", {
-                textTier: t,
-                textModel:
-                  mirrorModelForTier(formData.intelligence.textProvider, "text", t) ?? "",
-              })
-            }
-            onImageTierChange={(t) =>
-              updateForm("intelligence", {
-                imageTier: t,
-                imageModel:
-                  mirrorModelForTier(formData.intelligence.imageProvider, "image", t) ?? "",
-              })
-            }
           />
         </Card>
       )}
@@ -1495,17 +1465,13 @@ const SetupSection = ({
       {!isFullyConfigured && availableProviders.length > 0 && (
         <ProviderAdvice
           provider={formData.intelligence.textProvider}
-          onSwitch={(to, tier) => {
+          onSwitch={(to) => {
             const previous = {
               textProvider: formData.intelligence.textProvider,
-              textTier: formData.intelligence.textTier,
-              textModel: formData.intelligence.textModel,
               fallbackTextProvider: formData.intelligence.fallbackTextProvider ?? null,
             };
             updateForm("intelligence", {
               textProvider: to,
-              textTier: tier,
-              textModel: mirrorModelForTier(to, "text", tier) ?? "",
               ...(formData.intelligence.fallbackTextProvider === to
                 ? { fallbackTextProvider: null }
                 : {}),

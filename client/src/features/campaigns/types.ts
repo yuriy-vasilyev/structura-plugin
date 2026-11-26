@@ -100,21 +100,14 @@ export interface CampaignIntelligence {
   provider?: AIProvider;
   /** The provider used for text generation. */
   textProvider: AIProvider;
-  /** The provider used for image generation. */
-  imageProvider: AIProvider;
-  textModel: string;
-  imageModel: string;
   /**
-   * BYOK quality tier (top | mid) — the tier-based replacement for the concrete
-   * `textModel` / `imageModel`. When set, the cloud resolves the concrete model
-   * at generation time and prefers the tier over the model. `textModel` /
-   * `imageModel` are still written as the concrete mirror so display / legacy
-   * reads keep working. Optional and additive during rollout (§10): managed
-   * tiers leave it unset (the model is owned server-side); older campaigns have
-   * no tier and fall back to the concrete model.
+   * The provider used for image generation. No model or tier is chosen or
+   * sent since 2026-11-25: the cloud runs the provider's Standard model
+   * (specs/byok-ai-guidance.md §2.2). Older campaigns still carry
+   * `textModel`, `imageModel`, `textTier`, `imageTier` on the wire; nothing
+   * here reads them.
    */
-  textTier?: "top" | "mid";
-  imageTier?: "top" | "mid";
+  imageProvider: AIProvider;
   /**
    * Optional per-campaign safety net — on a transient (429 / 5xx / timeout)
    * failure the cloud retries the call through this provider once before

@@ -1,21 +1,18 @@
 /**
- * Tests for the model-quality TIER picker in `<ProviderToggle>`.
+ * `<ProviderToggle>`, the provider chooser of the campaign create inline
+ * setup and the one-off "Generate a Post" page, after the owner decision of
+ * 2026-11-25 (specs/byok-ai-guidance.md §2.2): no plan picks a model or a
+ * tier, and none sees one named. The Top / Standard dropdowns went that
+ * morning and the read-only "Engine" names that replaced them went the same
+ * day. Managed plans (Cloud) see nothing.
  *
- * ProviderToggle is the shared provider + model chooser used by the campaign
- * create steps (StepObjective / SimpleStepStrategy / CreateCampaignPage) and the
- * one-off "Generate a Post" flow. A user never sees a raw model list: the only
- * model choice is a top/mid quality TIER, labeled with the resolved model name.
- * Managed plans (consumer passes `showTierSelectors={false}`) show no tier at all.
- *
- * REAL test: runs against the REAL `@structura/model-catalog` registry (NOT
- * mocked), so the option labels + fired tier are exactly what production uses.
- * Only the license / provider-config edges are mocked.
+ * The component runs for real; the license, provider and served-catalog
+ * edges are mocked (the catalog answers, so a toggle that read it again
+ * would have names to show).
  */
 
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, within } from "@testing-library/react";
-
-import { getRegistryModel } from "@structura/model-catalog";
 
 const useLicenseMock = vi.hoisted(() => vi.fn());
 const useDefaultProvidersMock = vi.hoisted(() => vi.fn());
@@ -24,12 +21,28 @@ vi.mock("@/features/settings", () => ({
   useLicense: useLicenseMock,
   useDefaultProviders: useDefaultProvidersMock,
 }));
+// The served catalog the plugin relays: one text and one image model per provider.
+vi.mock("@/features/ai-engine/api/useAvailableModelsQuery", () => ({
+  useAvailableModelsQuery: () => ({
+    data: {
+      text: [
+        { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", provider: "gemini" },
+        { id: "gpt-5.6-sol", name: "GPT-5.6 Sol", provider: "openai" },
+      ],
+      image: [
+        { id: "gemini-3.1-flash-image", name: "Gemini 3.1 Flash Image", provider: "gemini" },
+        { id: "gpt-image-2.6-flare", name: "GPT Image 2.6 Flare", provider: "openai" },
+      ],
+      defaults: {
+        gemini: { text: "gemini-3.8-flash", fast: "", image: "gemini-3.1-flash-image" },
+        openai: { text: "gpt-5.6-sol", fast: "", image: "gpt-image-2.6-flare" },
+      },
+    },
+  }),
+}));
 
 import { ProviderToggle } from "../components/ProviderToggle";
-
-// Real registry labels — the test breaks loudly if a model is retired/renamed.
-const GEMINI_TEXT_TOP = getRegistryModel("gemini", "text", "top")!.name; // "Gemini 3.1 Pro"
-const GEMINI_TEXT_MID = getRegistryModel("gemini", "text", "mid")!.name; // "Gemini 3.5 Flash"
+import { MODEL_NAME } from "@/test/modelNames";
 
 function renderToggle(
   props: Partial<React.ComponentProps<typeof ProviderToggle>> = {},
@@ -40,58 +53,51 @@ function renderToggle(
     plan: isCloud ? "cloud" : "byok",
     isPaidLicense: true,
   });
-  useDefaultProvidersMock.mockReturnValue({ isProviderIncomplete: () => false, isCloud });
+  useDefaultProvidersMock.mockReturnValue({ isCloud });
 
-  const onTextTierChange = vi.fn();
-  const onImageTierChange = vi.fn();
+  const onTextProviderChange = vi.fn();
+  const onImageProviderChange = vi.fn();
 
-  render(
+  const { container } = render(
     <ProviderToggle
       textProvider="gemini"
-      imageProvider="gemini"
-      onTextProviderChange={vi.fn()}
-      onImageProviderChange={vi.fn()}
+      imageProvider="openai"
+      onTextProviderChange={onTextProviderChange}
+      onImageProviderChange={onImageProviderChange}
       availableTextProviders={["gemini", "openai"]}
       availableImageProviders={["gemini", "openai"]}
-      showTierSelectors
-      textTier="top"
-      imageTier="top"
-      onTextTierChange={onTextTierChange}
-      onImageTierChange={onImageTierChange}
       {...props}
     />,
   );
 
-  return { onTextTierChange, onImageTierChange };
+  return { onTextProviderChange, onImageProviderChange, container };
 }
 
-describe("<ProviderToggle> model tier picker", () => {
-  it("labels the tier with the real model name (BYOK)", () => {
-    renderToggle();
-    expect(
-      screen.getByRole("button", { name: new RegExp(`Top \\(${GEMINI_TEXT_TOP}\\)`) }),
-    ).toBeInTheDocument();
+describe("<ProviderToggle> no model choice and no model name (2026-11-25)", () => {
+  it("own-key: the provider buttons, and no model label or name", () => {
+    const { container } = renderToggle();
+
+    expect(screen.getByText("Text Provider")).toBeInTheDocument();
+    expect(screen.getByText("Image Provider")).toBeInTheDocument();
+    for (const label of ["Engine", "Text Model", "Image Model"]) {
+      expect(screen.queryByText(label)).toBeNull();
+    }
+    expect(container.textContent).not.toMatch(MODEL_NAME);
+    expect(screen.queryByRole("listbox")).toBeNull();
+    expect(screen.queryByRole("button", { name: /^(Top|Standard) \(/ })).toBeNull();
   });
 
-  it("fires onTextTierChange('mid') when Standard is picked", () => {
-    const { onTextTierChange } = renderToggle();
-
-    fireEvent.click(
-      screen.getByRole("button", { name: new RegExp(`Top \\(${GEMINI_TEXT_TOP}\\)`) }),
-    );
-    const listbox = screen.getByRole("listbox");
-    fireEvent.click(within(listbox).getByText(new RegExp(`Standard \\(${GEMINI_TEXT_MID}\\)`)));
-
-    expect(onTextTierChange).toHaveBeenCalledWith("mid");
+  it("the provider buttons still choose the provider", () => {
+    const { onTextProviderChange } = renderToggle();
+    fireEvent.click(document.querySelector<HTMLButtonElement>('[data-text-provider="openai"]')!);
+    expect(onTextProviderChange).toHaveBeenCalledWith("openai");
   });
 
-  it("renders NO tier selector when showTierSelectors is false (managed)", () => {
-    renderToggle({ showTierSelectors: false });
-    expect(
-      screen.queryByRole("button", { name: new RegExp(`\\(${GEMINI_TEXT_TOP}\\)`) }),
-    ).not.toBeInTheDocument();
+  it("managed (Cloud): nothing at all", () => {
+    const { container } = renderToggle({}, { isCloud: true });
+    expect(container.textContent).not.toMatch(MODEL_NAME);
+    expect(screen.queryAllByRole("button")).toHaveLength(0);
   });
-
 });
 
 describe("<ProviderToggle> text provider section by plan (2026-10-01)", () => {
@@ -99,14 +105,14 @@ describe("<ProviderToggle> text provider section by plan (2026-10-01)", () => {
   // §3.3). Flipped 2026-10-06: nor an image provider; Structura binds one
   // image model on managed plans, so the toggle renders nothing.
   it("managed: no text and no image provider section", () => {
-    renderToggle({ showTierSelectors: false }, { isCloud: true });
+    renderToggle({}, { isCloud: true });
     expect(screen.queryByText("Text Provider")).not.toBeInTheDocument();
     expect(screen.queryByText("Image Provider")).not.toBeInTheDocument();
     expect(screen.queryAllByRole("button")).toHaveLength(0);
   });
 
   it("BYOK: text and image provider sections both render", () => {
-    renderToggle({ showTierSelectors: false });
+    renderToggle();
     expect(screen.getByText("Text Provider")).toBeInTheDocument();
     expect(screen.getByText("Image Provider")).toBeInTheDocument();
     expect(screen.getAllByRole("button")).toHaveLength(4);
@@ -120,7 +126,6 @@ describe("<ProviderToggle> AI guidance labels (2026-10-02)", () => {
   // name (part of the button's accessible name). Image buttons carry none.
   it("orders text buttons best first and labels the recommended provider", () => {
     renderToggle({
-      showTierSelectors: false,
       availableTextProviders: ["gemini", "openai", "anthropic"],
       availableImageProviders: ["gemini", "openai"],
     });
@@ -129,42 +134,6 @@ describe("<ProviderToggle> AI guidance labels (2026-10-02)", () => {
     expect(textButtons.map((b) => b.dataset.textProvider)).toEqual(["anthropic", "openai", "gemini"]);
     expect(within(textButtons[0]).getByText("Recommended")).toBeInTheDocument();
     expect(screen.getAllByText("Recommended")).toHaveLength(1);
-  });
-
-  it("puts no chip on a disabled (incomplete) recommended provider", () => {
-    useLicenseMock.mockReturnValue({ isLicensed: true, plan: "byok", isPaidLicense: true });
-    useDefaultProvidersMock.mockReturnValue({
-      isProviderIncomplete: (p: string) => p === "anthropic",
-      isCloud: false,
-    });
-    render(
-      <ProviderToggle
-        textProvider="openai"
-        imageProvider="openai"
-        onTextProviderChange={vi.fn()}
-        onImageProviderChange={vi.fn()}
-        availableTextProviders={["openai", "anthropic"]}
-        availableImageProviders={["openai"]}
-      />,
-    );
-    expect(screen.queryByText("Recommended")).toBeNull();
-  });
-
-  it("labels the recommended text tier option, not the image tier options", () => {
-    renderToggle({ textProvider: "openai", imageProvider: "openai" });
-
-    const OPENAI_MID = getRegistryModel("openai", "text", "mid")!.name;
-    const OPENAI_TOP = getRegistryModel("openai", "text", "top")!.name;
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(`Top \\(${OPENAI_TOP}\\)`) }));
-    const list = screen.getByRole("listbox");
-    expect(
-      within(list).getByRole("option", { name: new RegExp(`Standard \\(${OPENAI_MID}\\).*Recommended`) }),
-    ).toBeInTheDocument();
-    fireEvent.keyDown(list, { key: "Escape" });
-
-    const imageTop = getRegistryModel("openai", "image", "top")!.name;
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(`Top \\(${imageTop}\\)`) }));
-    expect(within(screen.getByRole("listbox")).queryByText("Recommended")).toBeNull();
   });
 });
 
@@ -178,12 +147,13 @@ describe("<ProviderToggle> with no provider connected (2026-10-02)", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("no text row or text model picker without a text provider; the image row stays", () => {
-    render(<ProviderToggleNoKeys availableTextProviders={[]} availableImageProviders={["openai"]} />);
+  it("no text row without a text provider; the image row stays, with no model name", () => {
+    const { container } = render(
+      <ProviderToggleNoKeys availableTextProviders={[]} availableImageProviders={["openai"]} />,
+    );
     expect(screen.queryByText("Text Provider")).not.toBeInTheDocument();
-    expect(screen.queryByText("Text Model")).not.toBeInTheDocument();
     expect(screen.getByText("Image Provider")).toBeInTheDocument();
-    expect(screen.getByText("Image Model")).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(MODEL_NAME);
   });
 });
 
@@ -218,65 +188,41 @@ function ProviderToggleNoKeys(props: {
   availableImageProviders: string[];
 }) {
   useLicenseMock.mockReturnValue({ isLicensed: true, plan: "byok", isPaidLicense: true });
-  useDefaultProvidersMock.mockReturnValue({ isProviderIncomplete: () => false, isCloud: false });
+  useDefaultProvidersMock.mockReturnValue({ isCloud: false });
   return (
     <ProviderToggle
       textProvider="gemini"
       imageProvider="openai"
       onTextProviderChange={vi.fn()}
       onImageProviderChange={vi.fn()}
-      showTierSelectors
-      textTier="mid"
-      imageTier="mid"
-      onTextTierChange={vi.fn()}
-      onImageTierChange={vi.fn()}
       {...props}
     />
   );
 }
 
 describe("<ProviderToggle> hideSingleProviderRow (Generate a Post, 2026-10-06)", () => {
-  it("renders nothing for one provider per capability with no model picker", () => {
-    renderToggle({
+  it("renders nothing for one provider per capability", () => {
+    const { container } = renderToggle({
       availableTextProviders: ["gemini"],
       availableImageProviders: ["gemini"],
       hideSingleProviderRow: true,
-      showTierSelectors: false,
     });
+    expect(container.firstChild).toBeNull();
     expect(screen.queryByText("Text Provider")).toBeNull();
     expect(screen.queryByText("Image Provider")).toBeNull();
     expect(screen.queryByText("Engine")).toBeNull();
   });
 
-  it("keeps a lone provider's row while its model setup is incomplete", () => {
-    useLicenseMock.mockReturnValue({ isLicensed: true, plan: "byok", isPaidLicense: true });
-    useDefaultProvidersMock.mockReturnValue({ isProviderIncomplete: () => true, isCloud: false });
-    render(
-      <ProviderToggle
-        textProvider="gemini"
-        imageProvider="gemini"
-        onTextProviderChange={vi.fn()}
-        onImageProviderChange={vi.fn()}
-        availableTextProviders={["gemini"]}
-        availableImageProviders={[]}
-        hideSingleProviderRow
-      />,
-    );
-    expect(screen.getByText("Text Provider")).toBeInTheDocument();
-    expect(
-      screen.getByText("Model not selected — complete setup in AI Engine settings"),
-    ).toBeInTheDocument();
-  });
-
-  it("shows the text and image model pickers independently", () => {
+  // "Model not selected" was the only reason a lone provider kept its row;
+  // no model is selected since 2026-11-25, so a connected provider is never
+  // incomplete.
+  it("never shows a model-not-selected warning", () => {
     renderToggle({
       availableTextProviders: ["gemini"],
-      availableImageProviders: ["gemini"],
+      availableImageProviders: [],
       hideSingleProviderRow: true,
-      showTextTierSelector: false,
-      showImageTierSelector: true,
     });
-    expect(screen.queryByText("Text Model")).toBeNull();
-    expect(screen.getByText("Image Model")).toBeInTheDocument();
+    expect(screen.queryByText(/Model not selected/)).toBeNull();
+    expect(screen.queryByText("Text Provider")).toBeNull();
   });
 });

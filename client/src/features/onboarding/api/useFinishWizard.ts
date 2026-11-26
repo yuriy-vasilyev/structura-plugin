@@ -99,9 +99,7 @@ export function useFinishWizard() {
             ai: {
               defaults: {
                 text_provider: drafts.step2.textProvider,
-                text_model: drafts.step2.textModel,
                 image_provider: drafts.step2.imageProvider,
-                image_model: drafts.step2.imageModel,
               },
             },
           });

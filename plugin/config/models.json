@@ -3,67 +3,26 @@
     "defaults": {
       "text": "gpt-5.6-sol",
       "fast": "gpt-5.4-mini",
-      "image": "gpt-image-1-mini"
+      "image": "gpt-image-2.6-flare"
     },
     "available": [
-      {
-        "id": "gpt-6-astra",
-        "name": "GPT-6 Astra",
-        "type": "text"
-      },
       {
         "id": "gpt-5.6-sol",
         "name": "GPT-5.6 Sol",
         "type": "text"
       },
       {
-        "id": "gpt-5-nano-2025-08-07",
-        "name": "GPT-5 Nano",
-        "type": "text"
-      },
-      {
-        "id": "gpt-4o",
-        "name": "GPT-4o",
-        "type": "text"
-      },
-      {
-        "id": "gpt-4o-mini",
-        "name": "GPT-4o Mini",
-        "type": "text"
-      },
-      {
-        "id": "gpt-image-1-mini",
-        "name": "GPT Image 1 Mini",
-        "type": "image"
-      },
-      {
-        "id": "gpt-image-2",
-        "name": "GPT Image 2",
+        "id": "gpt-image-2.6-flare",
+        "name": "GPT Image 2.6 Flare",
         "type": "image"
       }
     ],
     "manifest": {
-      "gpt-6-astra": {
-        "family": "chat",
-        "endpoint": "v1/chat/completions"
-      },
       "gpt-5.6-sol": {
         "family": "chat",
         "endpoint": "v1/chat/completions"
       },
-      "gpt-5-nano-2025-08-07": {
-        "family": "chat",
-        "endpoint": "v1/chat/completions"
-      },
-      "gpt-4o": {
-        "family": "chat",
-        "endpoint": "v1/chat/completions"
-      },
-      "gpt-4o-mini": {
-        "family": "chat",
-        "endpoint": "v1/chat/completions"
-      },
-      "gpt-image-1-mini": {
+      "gpt-image-2.6-flare": {
         "family": "image",
         "endpoint": "v1/images/generations",
         "sizes": {
@@ -75,22 +34,8 @@
           "low",
           "medium",
           "high",
-          "auto"
-        ],
-        "default_quality": "high"
-      },
-      "gpt-image-2": {
-        "family": "image",
-        "endpoint": "v1/images/generations",
-        "sizes": {
-          "1:1": "1024x1024",
-          "16:9": "1536x1024",
-          "9:16": "1024x1536"
-        },
-        "qualities": [
-          "low",
-          "medium",
-          "high",
+          "xhigh",
+          "max",
           "auto"
         ],
         "default_quality": "high"
@@ -105,64 +50,22 @@
     },
     "available": [
       {
-        "id": "gemini-3.1-pro-preview",
-        "name": "Gemini 3.1 Pro",
-        "type": "text"
-      },
-      {
         "id": "gemini-3.8-flash",
         "name": "Gemini 3.8 Flash",
-        "type": "text"
-      },
-      {
-        "id": "gemini-3.1-flash-lite",
-        "name": "Gemini 3.1 Flash Lite",
-        "type": "text"
-      },
-      {
-        "id": "gemini-2.5-pro",
-        "name": "Gemini 2.5 Pro",
         "type": "text"
       },
       {
         "id": "gemini-3.1-flash-image",
         "name": "Gemini 3.1 Flash Image",
         "type": "image"
-      },
-      {
-        "id": "gemini-3-pro-image",
-        "name": "Gemini 3 Pro Image",
-        "type": "image"
       }
     ],
     "manifest": {
-      "gemini-3.1-pro-preview": {
-        "family": "text",
-        "endpoint": "generateContent"
-      },
       "gemini-3.8-flash": {
         "family": "text",
         "endpoint": "generateContent"
       },
-      "gemini-3.1-flash-lite": {
-        "family": "text",
-        "endpoint": "generateContent"
-      },
-      "gemini-2.5-pro": {
-        "family": "text",
-        "endpoint": "generateContent"
-      },
       "gemini-3.1-flash-image": {
-        "family": "image",
-        "endpoint": "generateContent",
-        "ratios": [
-          "1:1",
-          "4:3",
-          "16:9",
-          "9:16"
-        ]
-      },
-      "gemini-3-pro-image": {
         "family": "image",
         "endpoint": "generateContent",
         "ratios": [
@@ -185,30 +88,10 @@
         "id": "claude-sonnet-5-5",
         "name": "Claude Sonnet 5.5",
         "type": "text"
-      },
-      {
-        "id": "claude-opus-5-5",
-        "name": "Claude Opus 5.5",
-        "type": "text"
-      },
-      {
-        "id": "claude-haiku-4-5-20251001",
-        "name": "Claude Haiku 4.5",
-        "type": "text"
       }
     ],
     "manifest": {
       "claude-sonnet-5-5": {
-        "family": "messages",
-        "endpoint": "v1/messages",
-        "max_output_tokens": 8192
-      },
-      "claude-opus-5-5": {
-        "family": "messages",
-        "endpoint": "v1/messages",
-        "max_output_tokens": 8192
-      },
-      "claude-haiku-4-5-20251001": {
         "family": "messages",
         "endpoint": "v1/messages",
         "max_output_tokens": 8192

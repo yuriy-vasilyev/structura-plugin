@@ -15,8 +15,8 @@ export const ActiveQueue = ({ jobs }: { jobs: Job[] }) => {
 
   return (
     <Card className="overflow-hidden p-0! shadow-sm">
-      <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-4">
-        <h3 className="m-0! flex! items-center gap-2 text-xs font-bold tracking-widest text-gray-900 uppercase">
+      <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-4 dark:border-neutral-700 dark:bg-neutral-900">
+        <h3 className="m-0! flex! items-center gap-2 text-xs font-bold tracking-widest text-gray-900! uppercase dark:text-white!">
           <CalendarClock className="h-4 w-4 text-amber-500" />
           {__("Active Generation Queue", "structura")}
         </h3>
@@ -26,7 +26,7 @@ export const ActiveQueue = ({ jobs }: { jobs: Job[] }) => {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-gray-100 bg-gray-50 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+          <thead className="border-b border-gray-100 bg-gray-50 text-[10px] font-bold tracking-widest text-gray-400 uppercase dark:border-neutral-700 dark:bg-neutral-800">
             <tr>
               <th className="px-6 py-4">{__("Blueprint Topic", "structura")}</th>
               {showIntelligence && <th className="px-6 py-4">{__("Intelligence", "structura")}</th>}
@@ -34,7 +34,7 @@ export const ActiveQueue = ({ jobs }: { jobs: Job[] }) => {
               <th className="px-6 py-4 text-right">{__("Scheduled", "structura")}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-neutral-800">
             {jobs.length === 0 ? (
               <tr>
                 <td
@@ -46,10 +46,10 @@ export const ActiveQueue = ({ jobs }: { jobs: Job[] }) => {
               </tr>
             ) : (
               jobs.map((item) => (
-                <tr key={item.id} className="transition-colors hover:bg-amber-50/30">
-                  <td className="px-6 py-4 font-bold text-gray-900">{item.campaign_name}</td>
+                <tr key={item.id} className="transition-colors hover:bg-amber-50/30 dark:hover:bg-neutral-800/50">
+                  <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{item.campaign_name}</td>
                   {showIntelligence && (
-                    <td className="px-6 py-4 font-mono text-[10px] text-gray-500">
+                    <td className="px-6 py-4 font-mono text-[10px] text-gray-500 dark:text-gray-400">
                       {item.model_slug}
                     </td>
                   )}
@@ -58,7 +58,7 @@ export const ActiveQueue = ({ jobs }: { jobs: Job[] }) => {
                       {jobStatusLabel(item.status)}
                     </Badge>
                   </td>
-                  <td className="px-6 py-4 text-right text-xs font-medium text-gray-500">
+                  <td className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400">
                     {item.formatted_date}
                   </td>
                 </tr>

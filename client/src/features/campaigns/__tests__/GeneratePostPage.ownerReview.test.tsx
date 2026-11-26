@@ -7,9 +7,9 @@
  *     actions says what a free account and a paid plan add, built from the
  *     plan gates the form itself uses.
  *   - The AI provider block shows only a choice the site can make: the
- *     provider when several are connected, the model only for a provider
- *     whose "Use recommended model" switch is off (a stored model, no
- *     stored tier).
+ *     provider when several are connected. Since 2026-11-25 no site picks
+ *     a model or a tier (specs/byok-ai-guidance.md §2.2), so the block
+ *     never shows a model and the request carries none.
  *
  * Only the network edge (`@wordpress/api-fetch`) and the settings / persona
  * data hooks are mocked; the page, ProviderToggle, the ai-engine helpers
@@ -19,7 +19,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router";
-import { getRegistryModelId } from "@structura/model-catalog";
 
 vi.mock("@wordpress/i18n", () => ({
   __: (t: string) => t,
@@ -36,10 +35,7 @@ vi.mock("@wordpress/api-fetch", () => ({
   default: (...args: unknown[]) => apiFetchMock(...args),
 }));
 
-type ProviderSettings = Record<
-  string,
-  { connected: boolean; capabilities: Array<"text" | "image">; text_model: string; image_model: string; text_tier?: string; image_tier?: string }
->;
+type ProviderSettings = Record<string, { connected: boolean; capabilities: Array<"text" | "image"> }>;
 
 const state = vi.hoisted(() => ({
   plan: "none" as "none" | "free" | "byok",
@@ -62,8 +58,6 @@ vi.mock("@/features/settings", () => ({
     activeProviders: connected(),
     textProviders: withCapability("text"),
     imageProviders: withCapability("image"),
-    incompleteProviders: [],
-    isProviderIncomplete: () => false,
     isLoading: false,
     isFetching: false,
   }),
@@ -72,8 +66,6 @@ vi.mock("@/features/settings", () => ({
     defaultImageProvider: withCapability("image")[0] ?? "gemini",
     availableProviders: connected(),
     availableImageProviders: withCapability("image"),
-    incompleteProviders: [],
-    isProviderIncomplete: () => false,
     hasExplicitDefaults: true,
     hasExplicitTextDefault: true,
     hasExplicitImageDefault: true,
@@ -140,15 +132,10 @@ const submitAndReadWire = async (): Promise<Record<string, unknown>> => {
   return data;
 };
 
-/** A connected provider that keeps the recommended model (the switch's default). */
-const recommended = (caps: Array<"text" | "image">) => ({
-  connected: true,
-  capabilities: caps,
-  text_model: "",
-  image_model: "",
-  text_tier: caps.includes("text") ? "mid" : "",
-  image_tier: caps.includes("image") ? "mid" : "",
-});
+/** A connected provider. */
+const recommended = (caps: Array<"text" | "image">) => ({ connected: true, capabilities: caps });
+
+const MODEL_KEYS = ["text_model", "image_model", "text_tier", "image_tier"];
 
 /** The provider button in the Text Provider row (Magic suggest has its own provider pill). */
 const textProviderButton = (provider: string) =>
@@ -291,7 +278,7 @@ describe("No locked rows or upsells in the form (owner review 2026-10-06)", () =
   });
 });
 
-describe("AI provider block (owner review 2026-10-06)", () => {
+describe("AI provider block (owner review 2026-10-06; no model since 2026-11-25)", () => {
   const fieldsRowStays = () => {
     expect(screen.getByText("Persona")).toBeInTheDocument();
     expect(screen.getByText("Language")).toBeInTheDocument();
@@ -299,32 +286,21 @@ describe("AI provider block (owner review 2026-10-06)", () => {
     expect(screen.getByText("Post Status")).toBeInTheDocument();
   };
 
-  it("one provider on its recommended model: no provider or model block", () => {
+  it("one provider: no provider or model block, and the request carries no model or tier", async () => {
+    state.plan = "byok";
     renderPage();
     expect(screen.queryByText("Text Provider")).toBeNull();
     expect(screen.queryByText("Text Model")).toBeNull();
     expect(screen.queryByText("Engine")).toBeNull();
     fieldsRowStays();
-  });
-
-  it("one provider with a picked model: only the model dropdown, opened on that model's tier", async () => {
-    state.plan = "byok";
-    state.providers = {
-      openai: { ...recommended(["text", "image"]), text_tier: "", text_model: getRegistryModelId("openai", "text", "top")! },
-    };
-    renderPage();
-
-    expect(screen.queryByText("Text Provider")).toBeNull();
-    expect(screen.getByText("Text Model")).toBeInTheDocument();
-    expect(screen.queryByText("Image Model")).toBeNull();
-    fieldsRowStays();
 
     const data = await submitAndReadWire();
-    expect(data.text_tier).toBe("top");
-    expect(data.text_model).toBe(getRegistryModelId("openai", "text", "top"));
+    expect(data.text_provider).toBe("openai");
+    for (const key of MODEL_KEYS) expect(data).not.toHaveProperty(key);
   });
 
-  it("several providers on recommended models: the provider choice only", () => {
+  it("several providers: the provider choice only, and the picked provider travels without a model", async () => {
+    state.plan = "free";
     state.providers = {
       anthropic: recommended(["text"]),
       openai: recommended(["text", "image"]),
@@ -335,39 +311,14 @@ describe("AI provider block (owner review 2026-10-06)", () => {
     expect(textProviderButton("anthropic")).toBeInTheDocument();
     expect(textProviderButton("openai")).toBeInTheDocument();
     expect(screen.queryByText("Text Model")).toBeNull();
-    fieldsRowStays();
-  });
-
-  it("several providers: the model dropdown follows the selected provider's switch", async () => {
-    state.plan = "free";
-    state.providers = {
-      anthropic: recommended(["text"]),
-      openai: { ...recommended(["text", "image"]), text_tier: "", text_model: getRegistryModelId("openai", "text", "top")! },
-    };
-    renderPage();
-
-    // Anthropic (first connected) keeps the recommended model.
-    expect(screen.queryByText("Text Model")).toBeNull();
-    // A single image provider on its recommended model: no image row.
+    expect(screen.queryByText("Image Model")).toBeNull();
+    // A single image provider: no image row.
     expect(screen.queryByText("Image Provider")).toBeNull();
+    fieldsRowStays();
 
     fireEvent.click(textProviderButton("openai"));
-    expect(screen.getByText("Text Model")).toBeInTheDocument();
-
     const data = await submitAndReadWire();
     expect(data.text_provider).toBe("openai");
-    expect(data.text_tier).toBe("top");
-  });
-
-  it("free: an image provider with a picked model shows the image model dropdown", () => {
-    state.plan = "free";
-    state.providers = {
-      openai: { ...recommended(["text", "image"]), image_tier: "", image_model: getRegistryModelId("openai", "image", "top")! },
-    };
-    renderPage();
-
-    expect(screen.queryByText("Image Provider")).toBeNull();
-    expect(screen.queryByText("Text Model")).toBeNull();
-    expect(screen.getByText("Image Model")).toBeInTheDocument();
+    for (const key of MODEL_KEYS) expect(data).not.toHaveProperty(key);
   });
 });

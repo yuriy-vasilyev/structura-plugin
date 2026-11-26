@@ -3,7 +3,10 @@
  *
  * Managed plans (Cloud) never see a text provider or a model
  * name (specs/managed-ai-lineup.md §3.3), so the row goes there. BYOK
- * keeps the provider icons and the resolved model names.
+ * keeps the provider icons and names the providers. Since the owner's
+ * decision of 2026-11-25 no plan sees a model named: not the model id an
+ * older campaign stored, and not the served catalog's default, which the
+ * row showed that morning (specs/byok-ai-guidance.md §2.2).
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
@@ -22,11 +25,16 @@ vi.mock("@/features/settings", () => ({
   useLicense: () => ({ plan: planMock.plan }),
 }));
 
+// The served catalog answers, so a row that read it again would have names to show.
 vi.mock("@/features/ai-engine/api/useAvailableModelsQuery", () => ({
   useAvailableModelsQuery: () => ({
     data: {
-      text: [{ id: "gpt-x", name: "GPT-X" }],
-      image: [{ id: "imagen-x", name: "Imagen X" }],
+      text: [{ id: "gpt-5.6-sol", name: "GPT-5.6 Sol", provider: "openai" }],
+      image: [{ id: "gemini-3.1-flash-image", name: "Gemini 3.1 Flash Image", provider: "gemini" }],
+      defaults: {
+        openai: { text: "gpt-5.6-sol", fast: "", image: "" },
+        gemini: { text: "", fast: "", image: "gemini-3.1-flash-image" },
+      },
     },
   }),
 }));
@@ -42,6 +50,7 @@ vi.mock("@/features/progress", () => ({
 
 import { OverviewTab } from "../routes/CampaignViewPage";
 import type { Campaign } from "../types";
+import { MODEL_NAME } from "@/test/modelNames";
 
 const campaign = {
   id: "camp-1",
@@ -49,9 +58,9 @@ const campaign = {
   identity: { name: "Weekly Digest", objective: "Signups", campaignMode: "traffic_magnet" },
   intelligence: {
     textProvider: "openai",
-    textModel: "gpt-x",
+    // A model an older campaign stored: never shown.
+    textModel: "gpt-6-astra",
     imageProvider: "gemini",
-    imageModel: "imagen-x",
     language: "default",
     postLength: 1200,
   },
@@ -73,19 +82,19 @@ beforeEach(() => {
 });
 
 describe("OverviewTab — AI Providers row", () => {
-  it("BYOK: shows the row with the resolved model names", () => {
-    renderTab();
-    expect(screen.getByText("AI Providers")).toBeInTheDocument();
-    expect(screen.getByText("GPT-X")).toBeInTheDocument();
-    expect(screen.getByText("Imagen X")).toBeInTheDocument();
+  it("BYOK: shows the row with each provider's name and no model", () => {
+    const { container } = renderTab();
+    const row = screen.getByText("AI Providers").parentElement!;
+    expect(row).toHaveTextContent("OpenAI");
+    expect(row).toHaveTextContent("Gemini");
+    expect(container.textContent).not.toMatch(MODEL_NAME);
   });
 
   it("managed: drops the row, keeps the rest of the configuration", () => {
     planMock.plan = "cloud";
-    renderTab();
+    const { container } = renderTab();
     expect(screen.queryByText("AI Providers")).not.toBeInTheDocument();
-    expect(screen.queryByText("GPT-X")).not.toBeInTheDocument();
-    expect(screen.queryByText("Imagen X")).not.toBeInTheDocument();
+    expect(container.textContent).not.toMatch(MODEL_NAME);
     expect(screen.getByText("Campaign Configuration")).toBeInTheDocument();
     expect(screen.getByText("Post Length")).toBeInTheDocument();
   });

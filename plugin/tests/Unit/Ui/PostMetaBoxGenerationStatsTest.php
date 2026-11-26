@@ -12,11 +12,15 @@ use Structura\Ui\Post_Meta_Box;
  *
  * Since 2026-10-01 managed plans (Cloud, Cloud Pro) write with one AI
  * lineup chosen by Structura and are metered by posts, so their
- * customers never see a model id or a token count
+ * customers never see a provider, a model id or a token count
  * (specs/managed-ai-lineup.md §3.3). The cloud also starts sending
- * `generation_meta.model: ""` for them, and an older post can still carry
- * the raw model id, so the plugin hides both lines by plan. On every plan
- * a blank model must not leave an empty stat line behind.
+ * `generation_meta.model: ""` and `provider: ""` for them, and an older post
+ * can still carry the raw names, so the plugin hides both lines by plan.
+ *
+ * Since the owner decision of 2026-11-25 no plan sees a model named
+ * (specs/byok-ai-guidance.md §2.2): own-key plans see the provider that
+ * wrote the post where the raw model id was. On every plan a blank provider
+ * must not leave an empty stat line behind.
  *
  * Rendered through the public `render()` entry point with only the
  * license plan, post meta and WP output helpers stubbed at the edge.
@@ -38,7 +42,7 @@ class PostMetaBoxGenerationStatsTest extends TestCase
     }
 
     /** @test */
-    public function managed_plan_hides_the_model_and_token_lines_of_an_older_post(): void
+    public function managed_plan_hides_the_provider_and_token_lines_of_an_older_post(): void
     {
         // A post generated before the cloud blanked the model still
         // carries the raw id and usage in its meta.
@@ -50,6 +54,7 @@ class PostMetaBoxGenerationStatsTest extends TestCase
         ]);
 
         $this->assertStringNotContainsString('claude-sonnet-5-5', $html);
+        $this->assertStringNotContainsString('Anthropic Claude', $html);
         $this->assertStringNotContainsString('tokens used', $html);
         // The generated date stays, so the stats block is still there.
         $this->assertStringContainsString('structura-mb__stats', $html);
@@ -58,7 +63,7 @@ class PostMetaBoxGenerationStatsTest extends TestCase
     }
 
     /** @test */
-    public function managed_plan_with_a_blank_model_from_the_new_cloud_renders_no_model_line(): void
+    public function managed_plan_with_a_blank_provider_from_the_new_cloud_renders_no_provider_line(): void
     {
         $html = $this->render_for('cloud', [
             'model'        => '',
@@ -72,7 +77,7 @@ class PostMetaBoxGenerationStatsTest extends TestCase
     }
 
     /** @test */
-    public function byok_plan_shows_the_model_and_token_lines(): void
+    public function byok_plan_shows_the_provider_and_token_lines_and_no_model(): void
     {
         $html = $this->render_for('byok', [
             'model'        => 'gpt-5.2',
@@ -81,23 +86,26 @@ class PostMetaBoxGenerationStatsTest extends TestCase
             'generated_at' => self::GENERATED_AT,
         ]);
 
-        $this->assertStringContainsString('<span>gpt-5.2</span>', $html);
+        $this->assertStringContainsString('<span>OpenAI</span>', $html);
+        $this->assertStringNotContainsString('gpt-5.2', $html);
         $this->assertStringContainsString('4,600', $html);
         $this->assertStringContainsString('tokens used', $html);
         $this->assertSame(3, substr_count($html, 'class="structura-mb__stat"'));
     }
 
     /** @test */
-    public function byok_plan_with_a_blank_model_renders_no_empty_model_line(): void
+    public function byok_plan_with_a_blank_provider_renders_no_empty_line_and_no_model(): void
     {
         $html = $this->render_for('byok', [
-            'model'        => '  ',
+            'model'        => 'gemini-3.8-flash',
+            'provider'     => '  ',
             'usage'        => ['inputTokens' => 100, 'outputTokens' => 50],
             'generated_at' => self::GENERATED_AT,
         ]);
 
         $this->assertStringNotContainsString('<span>  </span>', $html);
         $this->assertStringNotContainsString('<span></span>', $html);
+        $this->assertStringNotContainsString('gemini-3.8-flash', $html);
         $this->assertStringContainsString('tokens used', $html);
         // Tokens + date only.
         $this->assertSame(2, substr_count($html, 'class="structura-mb__stat"'));
@@ -115,17 +123,23 @@ class PostMetaBoxGenerationStatsTest extends TestCase
     public function stats_lines_are_blank_for_both_managed_plans_and_filled_for_byok(): void
     {
         $meta = [
-            'model' => 'gemini-3.1-pro',
-            'usage' => ['promptTokens' => 7, 'completionTokens' => 3],
+            'model'    => 'gemini-3.1-pro',
+            'provider' => 'gemini',
+            'usage'    => ['promptTokens' => 7, 'completionTokens' => 3],
         ];
 
-        $this->assertSame(['model' => '', 'tokens' => 0], Post_Meta_Box::generation_stats_lines($meta, 'cloud'));
-        $this->assertSame(['model' => '', 'tokens' => 0], Post_Meta_Box::generation_stats_lines($meta, 'cloud_pro'));
+        $this->assertSame(['provider' => '', 'tokens' => 0], Post_Meta_Box::generation_stats_lines($meta, 'cloud'));
+        $this->assertSame(['provider' => '', 'tokens' => 0], Post_Meta_Box::generation_stats_lines($meta, 'cloud_pro'));
         $this->assertSame(
-            ['model' => 'gemini-3.1-pro', 'tokens' => 10],
+            ['provider' => 'Google Gemini', 'tokens' => 10],
             Post_Meta_Box::generation_stats_lines($meta, 'byok')
         );
-        $this->assertSame(['model' => '', 'tokens' => 0], Post_Meta_Box::generation_stats_lines('', 'byok'));
+        // A provider id the registry does not know is shown as stored.
+        $this->assertSame(
+            ['provider' => 'acme', 'tokens' => 10],
+            Post_Meta_Box::generation_stats_lines(['provider' => 'acme'] + $meta, 'byok')
+        );
+        $this->assertSame(['provider' => '', 'tokens' => 0], Post_Meta_Box::generation_stats_lines('', 'byok'));
     }
 
     // ──────────────────────────────────────────────────────────────────────

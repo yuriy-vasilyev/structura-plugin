@@ -15,8 +15,8 @@ export const RecentBlueprints = () => {
 
   return (
     <Card className="overflow-hidden p-0! shadow-sm">
-      <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-4 dark:bg-neutral-900">
-        <h3 className="m-0! flex! items-center gap-2 text-xs font-bold tracking-widest text-gray-900 uppercase dark:text-white">
+      <div className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-4 dark:border-neutral-700 dark:bg-neutral-900">
+        <h3 className="m-0! flex! items-center gap-2 text-xs font-bold tracking-widest text-gray-900! uppercase dark:text-white!">
           <Layout className="text-brand-600 dark:text-brand-400 h-4 w-4" />
           {__("Recently Architected", "structura")}
         </h3>

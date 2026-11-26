@@ -36,19 +36,9 @@ export const providerRecommendationLabel = (provider: string): string | null => 
   return null;
 };
 
-/** Returns the recommended tier for `provider` and `capability`, or `undefined` when it has none. */
-export const recommendedTier = (
-  provider: string,
-  capability: "text" | "image"
-): "top" | "mid" | undefined => RECOMMENDATIONS[capability].model[provider as AIProvider];
-
 /** Returns true when `provider` is the recommended text provider. */
 export const isRecommendedTextProvider = (provider: string): boolean =>
   RECOMMENDATIONS.text.provider === provider;
-
-/** Returns the recommended text tier for `provider`, or `undefined` when it has none. */
-export const recommendedTextTier = (provider: string): "top" | "mid" | undefined =>
-  RECOMMENDATIONS.text.model[provider as AIProvider];
 
 /** Returns `providers` ordered best first for text; unranked ones keep their order at the end. */
 export const orderTextProviders = <T extends string>(providers: readonly T[]): T[] => {

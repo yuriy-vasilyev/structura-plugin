@@ -380,12 +380,6 @@ export const SimpleStepSummary = ({ isSimpleMode = false }: SimpleStepSummaryPro
                 {intelligence.textProvider}
               </span>
             </div>
-            {intelligence.textModel && (
-              <div className="text-[10px] font-bold text-neutral-400">
-                {intelligence.textModel}
-                {intelligence.imageModel && ` · ${intelligence.imageModel}`}
-              </div>
-            )}
             <div className="flex items-center gap-1 pt-1">
               <span className="text-[9px] font-black text-neutral-400 uppercase">
                 {__("Persona:", "structura")}

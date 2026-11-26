@@ -425,6 +425,8 @@ export const CampaignCard = ({
   const providerVis = getProviderVisual(intelligence.textProvider);
   const ModeIcon = MODE_ICONS[identity.campaignMode ?? ""] ?? Layers;
   const ProviderIcon = providerVis.icon;
+  // The provider only: its model followed it until the owner decision of
+  // 2026-11-25 (no customer surface names a model).
   const showProvider = !isManagedAiPlan && !!intelligence.textProvider;
 
   return (
@@ -545,14 +547,6 @@ export const CampaignCard = ({
                     }
                   />
                   <span className="font-semibold">{providerVis.label}</span>
-                  {intelligence.textModel && (
-                    <>
-                      <span className="text-neutral-300 dark:text-neutral-700">·</span>
-                      <span className="text-neutral-400 dark:text-neutral-500">
-                        {intelligence.textModel}
-                      </span>
-                    </>
-                  )}
                 </span>
 
                 <span className="text-neutral-200 dark:text-neutral-700">|</span>

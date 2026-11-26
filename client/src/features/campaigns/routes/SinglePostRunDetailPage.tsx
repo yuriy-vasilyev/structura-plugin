@@ -23,7 +23,6 @@ import { SearchPerformanceSection } from "@/features/channels/components/SearchP
 import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutations";
 import type { CampaignFormData } from "@/features/campaigns/types";
 import { RunAgainConfirmDialog } from "@/features/campaigns/components/RunAgainConfirmDialog";
-import { useAvailableModelsQuery } from "@/features/ai-engine/api/useAvailableModelsQuery";
 
 /** Provider id → brand name. Logos are resolved in the modal via getProviderLogo. */
 const PROVIDER_LABELS: Record<string, string> = {
@@ -248,9 +247,7 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
   const objective = readString(inputs, "identity", "objective");
   const campaignMode = readString(inputs, "identity", "campaignMode");
   const textProvider = readString(inputs, "intelligence", "textProvider");
-  const textModel = readString(inputs, "intelligence", "textModel");
   const imageProvider = readString(inputs, "intelligence", "imageProvider");
-  const imageModel = readString(inputs, "intelligence", "imageModel");
   const language = readString(inputs, "intelligence", "language");
   const personaName = readString(inputs, "intelligence", "personaName");
 
@@ -305,18 +302,11 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
   // defensively read — legacy runs and attachment-less runs have no field.
   const researchFileNames = readResearchFileNames(inputs);
 
-  // Resolve raw model slugs to friendly catalog names ("GPT-5.2") from the
-  // served catalog — the same source CampaignViewPage's ProviderLine uses.
-  const { data: availableModels } = useAvailableModelsQuery();
-  const providerModelValue = (providerId: string, modelId: string): string => {
-    const provider = PROVIDER_LABELS[providerId] ?? providerId;
-    const model = modelId
-      ? ([...(availableModels?.text ?? []), ...(availableModels?.image ?? [])].find(
-          (m) => m.id === modelId,
-        )?.name ?? modelId)
-      : "";
-    return model ? `${provider} · ${model}` : provider;
-  };
+  // The rows name the provider only. A replay runs each provider's Standard
+  // model since 2026-11-25, and the rows named it until the owner decision
+  // of the same day: no customer surface names a model
+  // (specs/byok-ai-guidance.md §2.2).
+  const providerLabel = (providerId: string): string => PROVIDER_LABELS[providerId] ?? providerId;
 
   // Provider rows for the confirm modal — text when set, image when set.
   // Managed plans get no row: no text provider (2026-10-01) and, since
@@ -326,13 +316,13 @@ const SinglePostRunDetailLoaded = ({ run }: { run: RunStatusSerialized }) => {
       key: "text",
       role: "text" as const,
       providerId: textProvider,
-      value: providerModelValue(textProvider, textModel),
+      value: providerLabel(textProvider),
     },
     !isManagedAiPlan && imageProvider && {
       key: "image",
       role: "image" as const,
       providerId: imageProvider,
-      value: providerModelValue(imageProvider, imageModel),
+      value: providerLabel(imageProvider),
     },
   ].filter(Boolean) as {
     key: string;

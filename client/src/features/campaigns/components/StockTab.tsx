@@ -20,6 +20,7 @@ import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutati
 import { type StockEntryView, useStockListQuery } from "@/features/campaigns/api/useStockListQuery";
 import { useStockMutations } from "@/features/campaigns/api/useStockMutations";
 import { normalizePostStatus } from "@/features/campaigns/helpers";
+import { getProviderVisual } from "@/features/campaigns/constants";
 import { buildPortalStockPreviewUrl } from "@/utils/portalLinks";
 
 /**
@@ -237,11 +238,16 @@ const StockEntryRow: FC<{
   onDelete: () => void;
   onRetry: () => void;
   isRestocking: boolean;
-  /** Managed plans never see the model name (specs/managed-ai-lineup.md §3.3). */
-  hideModel: boolean;
+  /**
+   * Managed plans never see the provider (specs/managed-ai-lineup.md §3.3).
+   * Own-key plans see the provider that wrote the entry, where its model id
+   * was until the owner decision of 2026-11-25: no customer surface names a
+   * model.
+   */
+  hideProvider: boolean;
   /** The portal preview of this entry, or null when the site's activation id is unknown. */
   previewHref: string | null;
-}> = ({ entry, onDelete, onRetry, isRestocking, hideModel, previewHref }) => (
+}> = ({ entry, onDelete, onRetry, isRestocking, hideProvider, previewHref }) => (
   <div className="group flex items-start gap-4 px-5 py-4 transition-colors hover:bg-neutral-50/50 sm:px-6 dark:hover:bg-neutral-800/30">
     {/* Thumbnail — placeholder when images are off / not ready */}
     {entry.featuredImageUrl ? (
@@ -275,10 +281,10 @@ const StockEntryRow: FC<{
       )}
       <p className="mt-1! mb-0! text-[11px] text-neutral-400 dark:text-neutral-500">
         {entry.createdAt ? dayjs(entry.createdAt).fromNow() : null}
-        {entry.textModel && !hideModel ? <span> · {entry.textModel}</span> : null}
+        {entry.provider && !hideProvider ? <span> · {getProviderVisual(entry.provider).label}</span> : null}
         {entry.entryStatus === "ready" && previewHref && (
           <>
-            {entry.createdAt || (entry.textModel && !hideModel) ? <span aria-hidden> · </span> : null}
+            {entry.createdAt || (entry.provider && !hideProvider) ? <span aria-hidden> · </span> : null}
             {/* A text link: as a grey icon beside Discard it was missed (2026-11-17). */}
             <a
               href={previewHref}
@@ -505,7 +511,7 @@ export const StockTab: FC<{ campaign: Campaign }> = ({ campaign }) => {
                     onDelete={() => setConfirm({ type: "delete", stockId: entry.stockId })}
                     onRetry={() => void restock()}
                     isRestocking={isRestocking}
-                    hideModel={isCloud}
+                    hideProvider={isCloud}
                     previewHref={
                       activationId
                         ? buildPortalStockPreviewUrl(activationId, String(campaign.id), entry.stockId)

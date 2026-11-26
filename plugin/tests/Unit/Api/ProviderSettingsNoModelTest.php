@@ -8,12 +8,12 @@ use Structura\Api\Rest_Api;
 use Structura\Tests\Unit\TestCase;
 
 /**
- * The provider wizard's "Use recommended model" switch (2026-10-06,
- * specs/open-providers.md). Beside the per-provider model id the wizard
- * stores, it may store the model TIER (`text_tier` / `image_tier`), the
- * same pair campaigns carry (`textTier` + `textModel`). A stored tier lets
- * the site default follow the catalog when the tier's model moves; an
- * empty tier means the site picked a concrete model and keeps it.
+ * No site picks a model or a tier since 2026-11-25 (owner decision,
+ * specs/byok-ai-guidance.md §2.2): the provider wizard's model dropdowns
+ * and its "Use recommended model" switch are gone, and the cloud runs each
+ * provider's Standard model. The settings save no longer writes
+ * `structura_{text,image}_{model,tier}_{provider}` and the settings payload
+ * no longer reads them back. The default providers still save.
  *
  * @covers \Structura\Api\Rest_Api::update_settings
  * @covers \Structura\Api\Rest_Api::build_settings_payload
@@ -21,7 +21,7 @@ use Structura\Tests\Unit\TestCase;
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
  */
-class ProviderModelTierSettingsTest extends TestCase
+class ProviderSettingsNoModelTest extends TestCase
 {
     /** @var array<string,mixed> */
     private array $options = [];
@@ -67,57 +67,39 @@ class ProviderModelTierSettingsTest extends TestCase
     }
 
     /** @test */
-    public function a_recommended_tier_round_trips_beside_the_mirrored_model(): void
+    public function a_save_that_still_carries_models_or_tiers_writes_none_of_them(): void
     {
         (new Rest_Api())->update_settings($this->request([
             'ai' => [
-                'anthropic' => ['text_model' => 'claude-sonnet-5-5', 'text_tier' => 'mid'],
-                'gemini'    => ['image_model' => 'gemini-3.1-flash-image', 'image_tier' => 'mid'],
+                'anthropic' => ['text_model' => 'claude-opus-5-5', 'text_tier' => 'top'],
+                'gemini'    => ['image_model' => 'gemini-3-pro-image', 'image_tier' => 'top'],
+                'defaults'  => ['text_provider' => 'anthropic', 'image_provider' => 'gemini'],
             ],
         ]));
 
-        $this->assertSame('mid', $this->options['structura_text_tier_anthropic']);
-        $this->assertSame('mid', $this->options['structura_image_tier_gemini']);
-
-        $payload = Rest_Api::build_settings_payload([]);
-        $this->assertSame('mid', $payload['ai']['providers']['anthropic']['text_tier']);
-        $this->assertSame('claude-sonnet-5-5', $payload['ai']['providers']['anthropic']['text_model']);
-        $this->assertSame('mid', $payload['ai']['providers']['gemini']['image_tier']);
+        foreach (array_keys($this->options) as $key) {
+            $this->assertDoesNotMatchRegularExpression('/^structura_(text|image)_(model|tier)_/', $key);
+        }
+        // The default providers still save.
+        $this->assertSame('anthropic', $this->options['structura_default_text_provider']);
+        $this->assertSame('gemini', $this->options['structura_default_image_provider']);
     }
 
     /** @test */
-    public function a_picked_model_clears_the_tier(): void
+    public function the_settings_payload_carries_no_model_or_tier_even_for_a_site_that_stored_one(): void
     {
-        $this->options['structura_text_tier_openai'] = 'mid';
+        $this->options['structura_text_model_openai'] = 'gpt-6-astra';
+        $this->options['structura_text_tier_openai']  = 'top';
 
-        (new Rest_Api())->update_settings($this->request([
-            'ai' => ['openai' => ['text_model' => 'gpt-6-astra', 'text_tier' => '']],
-        ]));
-
-        $this->assertSame('', $this->options['structura_text_tier_openai']);
-        $payload = Rest_Api::build_settings_payload([]);
-        $this->assertSame('', $payload['ai']['providers']['openai']['text_tier']);
-        $this->assertSame('gpt-6-astra', $payload['ai']['providers']['openai']['text_model']);
-    }
-
-    /** @test */
-    public function a_tier_outside_top_and_mid_is_stored_empty(): void
-    {
-        (new Rest_Api())->update_settings($this->request([
-            'ai' => ['openai' => ['text_tier' => 'cheap<script>', 'image_tier' => 'TOP']],
-        ]));
-
-        $this->assertSame('', $this->options['structura_text_tier_openai']);
-        $this->assertSame('top', $this->options['structura_image_tier_openai']);
-    }
-
-    /** @test */
-    public function a_site_that_never_used_the_switch_reads_no_tier(): void
-    {
         $payload = Rest_Api::build_settings_payload([]);
 
-        $this->assertSame('', $payload['ai']['providers']['gemini']['text_tier']);
-        $this->assertSame('', $payload['ai']['providers']['gemini']['image_tier']);
+        foreach ($payload['ai']['providers'] as $provider) {
+            foreach (['text_model', 'image_model', 'text_tier', 'image_tier'] as $key) {
+                $this->assertArrayNotHasKey($key, $provider);
+            }
+            $this->assertArrayHasKey('connected', $provider);
+            $this->assertArrayHasKey('capabilities', $provider);
+        }
         // Every provider is listed on Free since 2026-10-06.
         $this->assertSame(['openai', 'gemini', 'anthropic'], array_keys($payload['ai']['providers']));
     }

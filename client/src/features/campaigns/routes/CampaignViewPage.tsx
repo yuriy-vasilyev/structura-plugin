@@ -42,7 +42,6 @@ import type { ArchitectedPost } from "@/features/dashboard/api/useRecentPostsQue
 import { Campaign } from "@/features/campaigns";
 import { campaignStatusLabel, postStatusLabel } from "@/features/campaigns/labels";
 import { getProviderVisual } from "@/features/campaigns/constants";
-import { useAvailableModelsQuery } from "@/features/ai-engine/api/useAvailableModelsQuery";
 import { useLicense } from "@/features/settings";
 import { isManagedPlan, type PlanId } from "@structura/types";
 import dayjs from "@/libs/dayjs";
@@ -679,16 +678,8 @@ export const OverviewTab = ({ campaign }: { campaign: Campaign }) => {
               label={__("AI Providers", "structura")}
               value={
                 <div className="space-y-1.5">
-                  <ProviderLine
-                    providerId={intelligence.textProvider}
-                    model={intelligence.textModel}
-                    kind="text"
-                  />
-                  <ProviderLine
-                    providerId={intelligence.imageProvider}
-                    model={intelligence.imageModel}
-                    kind="image"
-                  />
+                  <ProviderLine providerId={intelligence.textProvider} kind="text" />
+                  <ProviderLine providerId={intelligence.imageProvider} kind="image" />
                 </div>
               }
             />
@@ -806,25 +797,18 @@ const InfoRow = ({ label, value }: { label: string; value: React.ReactNode }) =>
   </div>
 );
 
-/** Compact provider + model line: [icon] model  (kind label) */
+/**
+ * Compact provider line: [icon] provider  (kind label). It named the model
+ * the provider runs until the owner decision of 2026-11-25: no customer
+ * surface names a model (specs/byok-ai-guidance.md §2.2).
+ */
 const ProviderLine = ({
   providerId,
-  model,
   kind,
 }: {
   providerId?: string;
-  model?: string;
   kind: "text" | "image";
 }) => {
-  // Resolve the raw model slug (e.g. "gemini-3.1-pro-preview") to its
-  // human-readable catalog name ("Gemini 3.1 Pro"). React Query dedupes the
-  // shared ["models"] key, so the two ProviderLines share one fetch.
-  const { data: models } = useAvailableModelsQuery();
-  const modelLabel = model
-    ? ([...(models?.text ?? []), ...(models?.image ?? [])].find((m) => m.id === model)?.name ??
-      model)
-    : undefined;
-
   if (!providerId) {
     return (
       <span className="flex items-center justify-end gap-1.5 text-neutral-400">
@@ -838,7 +822,7 @@ const ProviderLine = ({
   return (
     <span className="flex items-center justify-end gap-1.5">
       <Icon size={13} className={v.color} />
-      {modelLabel && <span>{modelLabel}</span>}
+      <span>{v.label}</span>
       <span className="text-[9px] font-bold text-neutral-300 uppercase dark:text-neutral-600">
         {kind}
       </span>

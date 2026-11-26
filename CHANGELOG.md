@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.45.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.44.0...v2.45.0) (2026-11-26)
+
+
+### Features
+
+* draw a recurring character on sites that use OpenAI for images ([f8f4a1a](https://github.com/yuriy-vasilyev/structura-core/commit/f8f4a1a3c73fe5bbe4ead9681f5ce67b08dc5797))
+* **functions:** reply to the requester from the integration lead email ([1d9a37d](https://github.com/yuriy-vasilyev/structura-core/commit/1d9a37d2da167cec4e77c41fc443715215f3c586))
+* run one tested model per provider and remove the model pickers ([ff81111](https://github.com/yuriy-vasilyev/structura-core/commit/ff811115d0d21a1ea9038e6fa192ab5b80078b1e))
+* show the provider, not a model name, on every customer surface ([f06155c](https://github.com/yuriy-vasilyev/structura-core/commit/f06155c1745e8647b47413db16f0445f347ed5e2))
+
+
+### Bug Fixes
+
+* **client:** dashboard numbers, card titles and the queue card are readable in dark mode ([e71f926](https://github.com/yuriy-vasilyev/structura-core/commit/e71f926005ed1607fb2502b0063fcaac0bf21191))
+
 ## [2.44.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.43.0...v2.44.0) (2026-11-23)
 
 

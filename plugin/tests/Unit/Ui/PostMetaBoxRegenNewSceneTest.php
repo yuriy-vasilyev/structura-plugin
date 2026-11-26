@@ -125,6 +125,30 @@ class PostMetaBoxRegenNewSceneTest extends TestCase
         $this->assertSame('Costs, margins and what to charge.', $payload['postExcerpt']);
     }
 
+    /**
+     * No model or tier is picked in the modal since 2026-11-25
+     * (specs/byok-ai-guidance.md §2.2): a request that still names one
+     * forwards neither, on both handlers.
+     *
+     * @test
+     */
+    public function a_regen_forwards_no_model_or_tier_the_request_names(): void
+    {
+        foreach (['ajax_regenerate_image', 'ajax_regenerate_body_image'] as $handler) {
+            $payload = $this->capture_payload($handler, [
+                'custom_prompt' => 'A red kite over a beach',
+                'attachment_id' => '88',
+                'image_model'   => 'gemini-3-pro-image',
+                'image_tier'    => 'top',
+            ]);
+
+            $this->assertIsArray($payload, $handler);
+            $this->assertNull($payload['model'], $handler);
+            $this->assertArrayNotHasKey('imageTier', $payload, $handler);
+            Mockery::close();
+        }
+    }
+
     /** @test */
     public function a_typed_featured_prompt_is_sent_as_before(): void
     {

@@ -46,7 +46,6 @@
     var $progressFill = $('#structura-progress-fill');
     var $modelSection = $('#structura-modal-model-section');
     var $modelSelect  = $('#structura-modal-model');
-    var $modelHint    = $('#structura-modal-model-hint');
     var $currentScene     = $('#structura-modal-current-scene');
     var $currentSceneText = $('#structura-modal-current-scene-text');
     var $reuseBtn         = $('#structura-modal-reuse');
@@ -97,13 +96,12 @@
         // Placeholder is set in the PHP template; nothing to do here.
         $prompt.val('');
 
-        // Populate the Top / Standard tier picker. Rows come from
-        // `structuraMetaBox.imageTiers` (pre-resolved server-side —
-        // top = recommended model, mid = default model, per provider).
-        // Rows are empty on managed plans (cloud), where
-        // Structura binds the image model (2026-10-06), so the picker
-        // stays hidden there.
-        renderModelPicker();
+        // Populate the image provider picker. Rows come from
+        // `structuraMetaBox.imageProviders` (pre-resolved server-side):
+        // empty with one connected image provider and on managed plans
+        // (cloud), where Structura binds the image model (2026-10-06), so
+        // the picker stays hidden there. No model or tier since 2026-11-25.
+        renderProviderPicker();
 
         $backdrop.fadeIn(200);
         // Lock body scroll
@@ -177,80 +175,34 @@
         if (e.key === 'Escape' && $backdrop.is(':visible')) closeModal();
     });
 
-    /* ── Model picker rendering ─────────────────────────────────────────────── */
+    /* ── Provider picker rendering ──────────────────────────────────────────── */
 
-    function tierOption(tier, providerId, label) {
-        return '<option value="' + escapeHtml(tier) + '"' +
-            ' data-provider="' + escapeHtml(providerId) + '">' +
-            escapeHtml(label) + '</option>';
-    }
+    function renderProviderPicker() {
+        var rows = Array.isArray(structuraMetaBox.imageProviders) ? structuraMetaBox.imageProviders : [];
 
-    function renderModelPicker() {
-        var rows  = Array.isArray(structuraMetaBox.imageTiers) ? structuraMetaBox.imageTiers : [];
-        var preferredProvider = structuraMetaBox.preferredProvider || structuraMetaBox.imageProvider || '';
-
-        // No connected image-capable provider → nothing to pick. Free/none
-        // get the same Top/Standard picker as paid BYOK: since cloud-only
-        // Phase 3 every tier delegates image gen to the cloud (the old
-        // "local adapter can't take per-call overrides" restriction is
-        // gone), and the rows are already scoped server-side to the tier's
-        // provider allowlist ∩ connected providers.
-        if (rows.length === 0) {
+        // Nothing to choose: one connected image provider, or a managed plan.
+        if (rows.length < 2) {
             $modelSection.hide();
             $modelSelect.empty();
             return;
         }
 
-        // Group the tier rows by provider, capturing each provider's top /
-        // mid model NAME (labels only — the cloud resolves the concrete model
-        // from provider+tier). Preferred provider pinned first so its options
-        // sit closest to "Use default".
-        var byProvider = {};
-        var providerOrder = [];
+        // One option per provider, value = provider id, opened on the
+        // post's own provider (else the first connected one). The cloud
+        // runs that provider's one image model.
+        var preferredProvider = structuraMetaBox.preferredProvider || structuraMetaBox.imageProvider || '';
+        var selected = rows[0].provider;
+        var optionsHtml = '';
         for (var i = 0; i < rows.length; i += 1) {
-            var row = rows[i];
-            var pid = row.provider || '';
+            var pid = rows[i].provider || '';
             if (!pid) continue;
-            if (!byProvider[pid]) {
-                byProvider[pid] = { name: row.providerName || pid || 'Provider', top: '', mid: '' };
-                providerOrder.push(pid);
-            }
-            if (row.tier === 'top') byProvider[pid].top = row.modelName || '';
-            if (row.tier === 'mid') byProvider[pid].mid = row.modelName || '';
-        }
-        providerOrder.sort(function (a, b) {
-            if (a === preferredProvider) return -1;
-            if (b === preferredProvider) return 1;
-            return 0;
-        });
-
-        // BYOK (pro): a Top / Standard quality choice per provider. Value is
-        // the tier ('top'/'mid'); `data-provider` carries the provider; the
-        // concrete model name is the label only. Grouped by provider via
-        // <optgroup> when more than one provider is connected.
-        var multiProvider = providerOrder.length > 1;
-        var optionsHtml = '<option value="" data-provider="">Use default model</option>';
-        for (var pi = 0; pi < providerOrder.length; pi += 1) {
-            var providerId = providerOrder[pi];
-            var entry = byProvider[providerId];
-            var providerOptions = '';
-            if (entry.top) providerOptions += tierOption('top', providerId, 'Top (' + entry.top + ')');
-            if (entry.mid) providerOptions += tierOption('mid', providerId, 'Standard (' + entry.mid + ')');
-            if (!providerOptions) continue;
-
-            if (multiProvider) {
-                optionsHtml += '<optgroup label="' + escapeHtml(entry.name) + '">'
-                    + providerOptions
-                    + '</optgroup>';
-            } else {
-                optionsHtml += providerOptions;
-            }
+            if (pid === preferredProvider) selected = pid;
+            optionsHtml += '<option value="' + escapeHtml(pid) + '">' +
+                escapeHtml(rows[i].providerName || pid) + '</option>';
         }
 
         $modelSelect.html(optionsHtml);
-        // Reset to default — empty value means "let the cloud pick".
-        $modelSelect.val('');
-        $modelHint.text('Standard is faster + cheaper. Top is highest quality.');
+        $modelSelect.val(selected);
         $modelSection.show();
     }
 
@@ -330,21 +282,11 @@
             post_id:       structuraMetaBox.postId,
             custom_prompt: $.trim($prompt.val())
         };
-        // 2026-07 — per-regen quality TIER + provider. The selected option
-        // carries the tier in its value ('top'/'mid'; empty = "use default")
-        // and the owning provider in `data-provider`. We forward `image_tier`
-        // (the cloud resolves the concrete model from provider+tier and
-        // prefers it over the campaign model) and `image_provider` (lets the
-        // user switch to another connected provider). An empty selection
-        // sends neither, so the cloud falls back to the campaign default.
-        // Managed plans emit provider-only options (empty tier value), so a
-        // provider switch forwards `image_provider` without a tier.
-        var $selectedOption = $modelSelect.length ? $modelSelect.find('option:selected') : $();
-        var selectedTier = $modelSelect.val ? $modelSelect.val() : '';
-        var selectedProvider = $selectedOption.length ? $selectedOption.attr('data-provider') : '';
-        if (selectedTier) {
-            generateData.image_tier = selectedTier;
-        }
+        // The image provider the picker shows, when it shows (two or more
+        // connected image providers). No model or tier travels since
+        // 2026-11-25; with the picker hidden nothing is sent and the cloud
+        // uses the post's campaign provider.
+        var selectedProvider = $modelSelect.children('option').length ? $modelSelect.val() : '';
         if (selectedProvider) {
             generateData.image_provider = selectedProvider;
         }

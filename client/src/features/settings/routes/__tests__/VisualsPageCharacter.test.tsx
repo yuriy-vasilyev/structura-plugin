@@ -312,7 +312,13 @@ describe("Who appears (handoff §3)", () => {
     bindPreset({}, { characterAvailable: false });
     renderPage();
     expect(whoOption("Person")).toBeDisabled();
-    expect(screen.getByText(/can’t work from a reference image/)).toBeInTheDocument();
+    // Says what to do, in the AI Engine wizard's own words (2026-11-25: a
+    // customer could not tell from the old text).
+    expect(
+      screen.getByText(
+        "A character needs images drawn with Gemini or OpenAI. Under AI Engine, connect Gemini or OpenAI and turn on Default for image generation, then come back."
+      )
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Open AI Engine/ })).toHaveAttribute(
       "href",
       "/ai-engine"
@@ -769,7 +775,7 @@ describe("sheet approval (handoff §6)", () => {
     fireEvent.click(drawButton());
     expect(
       await screen.findByText(
-        "The image setup on your website can’t work from a reference image. Switch to one that can under AI Engine to add a character."
+        "A character needs images drawn with Gemini or OpenAI. Under AI Engine, connect Gemini or OpenAI and turn on Default for image generation, then come back."
       )
     ).toBeInTheDocument();
     expect(drawButton()).toBeInTheDocument();

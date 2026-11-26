@@ -580,6 +580,13 @@ test.describe("Visuals — dark wp-admin", () => {
     await expect(overview).toBeVisible({ timeout: 20_000 });
     await expect.poll(() => backgroundLuminance(page.locator(".structura-app-wrapper"))).toBeLessThan(0.05);
     await expect.poll(() => contrastOf(overview)).toBeGreaterThan(7);
+    // Dashboard cards: wp-admin colors every h2 and h3, and the queue card
+    // had no dark styles at all (white header on a dark card, 2026-11-25).
+    const queue = page.getByRole("heading", { level: 3, name: "Active Generation Queue" });
+    await expect.poll(() => contrastOf(queue)).toBeGreaterThan(7);
+    await expect.poll(() => contrastOf(page.getByRole("heading", { level: 3, name: "Recently Architected" }))).toBeGreaterThan(7);
+    await expect.poll(() => contrastOf(page.getByRole("heading", { level: 2 }).first())).toBeGreaterThan(7);
+    await shot(page, "dashboard-dark");
     await expectSpaMounted(page, crashes);
     await page.unrouteAll({ behavior: "ignoreErrors" });
   });

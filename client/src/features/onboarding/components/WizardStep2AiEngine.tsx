@@ -5,9 +5,8 @@
  * (`InstalledProviderCard`, `AvailableProviderCard`, `WorkspaceKeysPicker`,
  * `ProviderSetupWizard`) rather than a bespoke wizard-only layout.
  * The user pointed out — correctly — that we already have a polished
- * provider-management surface with a connect flow, model selection,
- * and cross-site key reuse; the wizard should embed it, not rebuild
- * a worse copy.
+ * provider-management surface with a connect flow and cross-site key
+ * reuse; the wizard should embed it, not rebuild a worse copy.
  *
  * This step is the HARD GATE: steps 3–6 stay locked until at least
  * one working provider is connected (managed tiers are always ready;
@@ -47,10 +46,6 @@ interface WizardTarget {
   keyUrl: string;
   keyPrefix?: string;
   isConnected: boolean;
-  textModel?: string;
-  imageModel?: string;
-  textTier?: string;
-  imageTier?: string;
   isDefaultText: boolean;
   isDefaultImage: boolean;
 }
@@ -101,12 +96,10 @@ export const WizardStep2AiEngine = () => {
     if (hasWorkingProvider && defaults) {
       setStep2Draft({
         textProvider: defaults.text_provider || undefined,
-        textModel: providers?.[defaults.text_provider]?.text_model,
         imageProvider: defaults.image_provider || undefined,
-        imageModel: providers?.[defaults.image_provider]?.image_model,
       });
     }
-  }, [hasWorkingProvider, defaults, providers, setStepValid, setStep2Draft]);
+  }, [hasWorkingProvider, defaults, setStepValid, setStep2Draft]);
 
   if (isLoading || !settings || !catalog || !providers || !defaults) {
     return (
@@ -131,10 +124,6 @@ export const WizardStep2AiEngine = () => {
       keyUrl: meta.key_url,
       keyPrefix: meta.key_prefix,
       isConnected: reconfigure && !!status?.connected,
-      textModel: status?.text_model,
-      imageModel: status?.image_model,
-      textTier: status?.text_tier,
-      imageTier: status?.image_tier,
       isDefaultText: defaults.text_provider === id,
       isDefaultImage: defaults.image_provider === id,
     });
@@ -146,16 +135,14 @@ export const WizardStep2AiEngine = () => {
         <h1 className="m-0! text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">
           {__("Connect your AI engine", "structura")}
         </h1>
+        {/* Own-key plans only: managed plans skip this step (OnboardingPage).
+            The Cloud line here offered a model pick and the own-key line a
+            model choice; no plan picks a model since 2026-11-25. */}
         <p className="m-0! text-base text-neutral-600 dark:text-neutral-400">
-          {isCloud
-            ? __(
-                "Your plan runs on Structura's managed AI. Pick the models you'd like as defaults — you can swap per post later.",
-                "structura",
-              )
-            : __(
-                "Connect at least one provider so the rest of setup can use AI. Pick a model and we'll handle the provider.",
-                "structura",
-              )}
+          {__(
+            "Connect at least one provider so the rest of setup can use AI. We run each provider’s current model for you.",
+            "structura",
+          )}
         </p>
       </header>
 
@@ -173,10 +160,6 @@ export const WizardStep2AiEngine = () => {
               const meta = catalog[id];
               const status = providers[id];
               if (!meta || !status) return null;
-              const needsText =
-                status.capabilities.includes("text") && !status.text_model;
-              const needsImage =
-                status.capabilities.includes("image") && !status.image_model;
               return (
                 <InstalledProviderCard
                   key={id}
@@ -188,7 +171,6 @@ export const WizardStep2AiEngine = () => {
                   isCloud={isCloud}
                   isDefaultText={defaults.text_provider === id}
                   isDefaultImage={defaults.image_provider === id}
-                  incomplete={needsText || needsImage}
                   onManage={() => openWizard(id, true)}
                 />
               );
@@ -265,11 +247,7 @@ export const WizardStep2AiEngine = () => {
           keyUrl={wizardTarget.keyUrl}
           keyPrefix={wizardTarget.keyPrefix}
           isConnected={wizardTarget.isConnected}
-          currentTextModel={wizardTarget.textModel}
-          currentImageModel={wizardTarget.imageModel}
           isDefaultText={wizardTarget.isDefaultText}
-          currentTextTier={wizardTarget.textTier}
-          currentImageTier={wizardTarget.imageTier}
           isDefaultImage={wizardTarget.isDefaultImage}
           imagesAvailable={imagesAvailable}
         />

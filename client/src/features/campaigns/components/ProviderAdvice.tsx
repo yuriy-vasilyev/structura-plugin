@@ -13,20 +13,19 @@ import { ProviderSetupWizard } from "@/features/ai-engine/components/ProviderSet
 import { useAiConnections, useLicense } from "@/features/settings";
 import { planHasImageGeneration } from "@/features/ai-engine/helpers";
 import { buildPortalSignupUrl } from "@/utils/portalLinks";
-import { ADVICE_PROVIDER_NAMES, recommendedTextTier } from "@/features/campaigns/aiGuidance";
+import { ADVICE_PROVIDER_NAMES } from "@/features/campaigns/aiGuidance";
 import type { AIProvider } from "@/features/campaigns/types";
-import type { ModelTier } from "@/features/campaigns/modelTier";
 
 export interface ProviderAdviceProps {
   /** The text provider the campaign or post currently writes with. */
   provider: AIProvider;
   /**
-   * Applies a Switch: the caller sets the text provider and its tier (and
-   * whatever goes with them, e.g. clearing an equal fallback) and returns a
-   * function that restores the previous values and moves focus to the text
-   * provider control.
+   * Applies a Switch: the caller sets the text provider (and whatever goes
+   * with it, e.g. clearing an equal fallback) and returns a function that
+   * restores the previous values and moves focus to the text provider
+   * control. No tier travels since 2026-11-25 (specs/byok-ai-guidance.md §2.2).
    */
-  onSwitch: (to: AIProvider, tier: ModelTier) => () => void;
+  onSwitch: (to: AIProvider) => () => void;
   /** True when the advice is hidden for this campaign and this provider. */
   hidden?: boolean;
   /** Hides the advice. Without it there is no × (the generate page has none). */
@@ -131,7 +130,7 @@ export const ProviderAdvice: FC<ProviderAdviceProps> = ({
   const switchedLine = (to: AIProvider) =>
     sprintf(
       /* translators: %s: AI provider name, e.g. "Claude". */
-      _x("Switched to %s with its recommended model.", "ai advice", "structura"),
+      _x("Switched to %s.", "ai advice", "structura"),
       ADVICE_PROVIDER_NAMES[to]
     );
 
@@ -147,7 +146,7 @@ export const ProviderAdvice: FC<ProviderAdviceProps> = ({
         label: actionLabel(action),
         onClick: () => {
           const to = action.provider;
-          const undo = onSwitch(to, recommendedTextTier(to) ?? "mid");
+          const undo = onSwitch(to);
           setConfirmed({ to, undo });
           // Set before the provider-change effect runs, which keeps it.
           previousProvider.current = to;
@@ -186,10 +185,6 @@ export const ProviderAdvice: FC<ProviderAdviceProps> = ({
         keyUrl={wizardMeta.key_url}
         keyPrefix={wizardMeta.key_prefix}
         isConnected={!!wizardStatus?.connected}
-        currentTextModel={wizardStatus?.text_model}
-        currentImageModel={wizardStatus?.image_model}
-        currentTextTier={wizardStatus?.text_tier}
-        currentImageTier={wizardStatus?.image_tier}
         isDefaultText={ai?.defaults?.text_provider === wizardFor}
         isDefaultImage={ai?.defaults?.image_provider === wizardFor}
         imagesAvailable={planHasImageGeneration(plan)}

@@ -1,23 +1,18 @@
 /**
- * Tests for the BYOK model-TIER picker in `<CampaignAiEngineSection>`.
+ * `<CampaignAiEngineSection>` after the owner decision of 2026-11-25
+ * (specs/byok-ai-guidance.md §2.2): no plan picks a model or a tier, and none
+ * sees one named. Each row keeps its provider and fallback controls; the
+ * read-only "Model" cell that replaced the Top / Standard dropdown that
+ * morning went the same day, and nothing a change here writes carries a
+ * model or a tier. Managed (Cloud) plans show no row.
  *
- * The campaign engine section shows a top/mid quality-TIER dropdown for
- * non-managed (BYOK/free) plans — the tier-based replacement for the old
- * concrete-model dropdown. The campaign stores the tier (`textTier`/`imageTier`)
- * and the cloud resolves the concrete model at generation time; `textModel`/
- * `imageModel` are kept as the concrete mirror for display/back-compat. Managed
- * (Cloud) plans show no selector — the model is owned server-side.
- *
- * These are REAL tests: the component runs against the REAL
- * `@structura/model-catalog` registry (NOT mocked) — so the option labels and
- * the mirrored model id are exactly what production resolves. Only the data
- * edges (license / providers / settings / form context) are mocked.
+ * The component runs for real; the data edges (license, providers,
+ * settings, served catalog, form context) are mocked. The catalog answers,
+ * so a section that read it again would have names to show.
  */
 
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, within } from "@testing-library/react";
-
-import { getRegistryModel, getRegistryModelId } from "@structura/model-catalog";
 
 const useLicenseMock = vi.hoisted(() => vi.fn());
 const useDefaultProvidersMock = vi.hoisted(() => vi.fn());
@@ -34,29 +29,36 @@ vi.mock("@/features/settings", () => ({
 vi.mock("@/features/ai-engine", () => ({
   useAiSettingsQuery: useAiSettingsQueryMock,
 }));
+// The served catalog the plugin relays: one text and one image model per provider.
+vi.mock("@/features/ai-engine/api/useAvailableModelsQuery", () => ({
+  useAvailableModelsQuery: () => ({
+    data: {
+      text: [
+        { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", provider: "gemini" },
+        { id: "gpt-5.6-sol", name: "GPT-5.6 Sol", provider: "openai" },
+        { id: "claude-sonnet-5-5", name: "Claude Sonnet 5.5", provider: "anthropic" },
+      ],
+      image: [
+        { id: "gemini-3.1-flash-image", name: "Gemini 3.1 Flash Image", provider: "gemini" },
+        { id: "gpt-image-2.6-flare", name: "GPT Image 2.6 Flare", provider: "openai" },
+      ],
+      defaults: {
+        gemini: { text: "gemini-3.8-flash", fast: "", image: "gemini-3.1-flash-image" },
+        openai: { text: "gpt-5.6-sol", fast: "", image: "gpt-image-2.6-flare" },
+        anthropic: { text: "claude-sonnet-5-5", fast: "", image: "" },
+      },
+    },
+  }),
+}));
 vi.mock("@/features/campaigns/context/CampaignContext", () => ({
   useCampaignForm: useCampaignFormMock,
 }));
 
 import { CampaignAiEngineSection } from "../components/CampaignAiEngineSection";
+import { MODEL_NAME } from "@/test/modelNames";
 
-// Real registry labels, so the test breaks loudly if a model is retired/renamed.
-const GEMINI_TEXT_TOP = getRegistryModel("gemini", "text", "top")!.name; // "Gemini 3.1 Pro"
-const GEMINI_TEXT_MID = getRegistryModel("gemini", "text", "mid")!.name; // "Gemini 3.5 Flash"
-const GEMINI_IMAGE_TOP = getRegistryModel("gemini", "image", "top")!.name; // "Gemini 3 Pro Image"
-const GEMINI_TEXT_MID_ID = getRegistryModelId("gemini", "text", "mid")!; // "gemini-3.5-flash"
-
-function setup(opts: {
-  isCloud?: boolean;
-  textTier?: "top" | "mid";
-  imageTier?: "top" | "mid";
-  /**
-   * Legacy pre-tier campaign shape: NO `textTier`/`imageTier` on the doc,
-   * only the concrete stored models. Overrides `textTier`/`imageTier`.
-   */
-  legacyModels?: { textModel: string; imageModel: string };
-}) {
-  const { isCloud = false, textTier = "top", imageTier = "top", legacyModels } = opts;
+function setup(opts: { isCloud?: boolean; imageProvider?: "gemini" | "openai" } = {}) {
+  const { isCloud = false, imageProvider = "gemini" } = opts;
   const updateForm = vi.fn();
 
   useLicenseMock.mockReturnValue({
@@ -64,19 +66,20 @@ function setup(opts: {
     plan: isCloud ? "cloud" : "byok",
     isPaidLicense: true,
   });
-  useDefaultProvidersMock.mockReturnValue({
-    isCloud,
-    isProviderIncomplete: () => false,
+  useDefaultProvidersMock.mockReturnValue({ isCloud });
+  useAiSettingsQueryMock.mockReturnValue({
+    data: {
+      providers: {
+        gemini: { connected: true, capabilities: ["text", "image"] },
+        openai: { connected: true, capabilities: ["text", "image"] },
+      },
+    },
   });
-  useAiSettingsQueryMock.mockReturnValue({ data: { providers: {} } });
   useCampaignFormMock.mockReturnValue({
     formData: {
       intelligence: {
         textProvider: "gemini",
-        imageProvider: "gemini",
-        textModel: legacyModels?.textModel ?? getRegistryModelId("gemini", "text", textTier),
-        imageModel: legacyModels?.imageModel ?? getRegistryModelId("gemini", "image", imageTier),
-        ...(legacyModels ? {} : { textTier, imageTier }),
+        imageProvider,
         fallbackTextProvider: null,
         fallbackImageProvider: null,
       },
@@ -86,100 +89,40 @@ function setup(opts: {
     updateForm,
   });
 
-  render(
+  const { container } = render(
     <CampaignAiEngineSection
       availableTextProviders={["gemini", "openai"]}
       availableImageProviders={["gemini", "openai"]}
     />,
   );
 
-  return { updateForm };
+  return { updateForm, container };
 }
 
-describe("<CampaignAiEngineSection> model tier picker", () => {
-  it("renders top/mid tier options labeled with the real model names (BYOK)", () => {
-    setup({ textTier: "top", imageTier: "top" });
+describe("<CampaignAiEngineSection> no model choice and no model name (2026-11-25)", () => {
+  it("own-key: provider and fallback per row, no model cell and no model name", () => {
+    const { container } = setup({ imageProvider: "openai" });
 
-    // The trigger button shows the selected tier's label, built from the real
-    // registry — "Top (Gemini 3.1 Pro)" for text, "Top (Gemini 3 Pro Image)"
-    // for image. This is what proves buildTierOptions is wired to the catalog.
-    expect(
-      screen.getByRole("button", { name: new RegExp(`Top \\(${GEMINI_TEXT_TOP}\\)`) }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: new RegExp(`Top \\(${GEMINI_IMAGE_TOP}\\)`) }),
-    ).toBeInTheDocument();
+    expect(screen.getAllByText("Provider")).toHaveLength(2);
+    expect(screen.getAllByText("Fallback")).toHaveLength(2);
+    expect(screen.queryByText("Model")).toBeNull();
+    expect(container.textContent).not.toMatch(MODEL_NAME);
+    expect(screen.queryByRole("button", { name: /^(Top|Standard) \(/ })).toBeNull();
+    expect(screen.queryByText(/Select model/)).toBeNull();
   });
 
-  it("reflects a stored mid tier in the trigger label", () => {
-    setup({ textTier: "mid" });
-    expect(
-      screen.getByRole("button", { name: new RegExp(`Standard \\(${GEMINI_TEXT_MID}\\)`) }),
-    ).toBeInTheDocument();
+  it("changing the provider writes the provider only, never a model or a tier", () => {
+    const { updateForm } = setup();
+
+    fireEvent.click(screen.getAllByRole("button", { name: /^Gemini/ })[0]);
+    fireEvent.click(within(screen.getByRole("listbox")).getByText("OpenAI"));
+
+    expect(updateForm).toHaveBeenCalledWith("intelligence", { textProvider: "openai" });
   });
 
-  it("stores the chosen tier AND mirrors its concrete model", () => {
-    const { updateForm } = setup({ textTier: "top" });
-
-    // Open the text tier dropdown and pick Standard (mid).
-    const trigger = screen.getByRole("button", {
-      name: new RegExp(`Top \\(${GEMINI_TEXT_TOP}\\)`),
-    });
-    fireEvent.click(trigger);
-
-    const listbox = screen.getByRole("listbox");
-    const midOption = within(listbox).getByText(new RegExp(`Standard \\(${GEMINI_TEXT_MID}\\)`));
-    fireEvent.click(midOption);
-
-    // Stores the TIER (source of truth) and mirrors the concrete model id
-    // resolved from the real registry — not a hardcoded string.
-    expect(updateForm).toHaveBeenCalledWith("intelligence", {
-      textTier: "mid",
-      textModel: GEMINI_TEXT_MID_ID,
-    });
-  });
-
-  it("legacy tier-less campaign opens on its STORED model's tier, not Top (2026-07-23)", () => {
-    // Regression: `intelligence.textTier ?? "top"` rendered "Top (Gemini 3.1
-    // Pro)" for a pre-tier campaign whose stored model is the mid Flash — the
-    // UI claimed Top while generation kept running Standard, and any save
-    // silently migrated the doc to Top.
-    setup({
-      legacyModels: {
-        textModel: getRegistryModelId("gemini", "text", "mid")!,
-        imageModel: getRegistryModelId("gemini", "image", "mid")!,
-      },
-    });
-
-    expect(
-      screen.getByRole("button", { name: new RegExp(`Standard \\(${GEMINI_TEXT_MID}\\)`) }),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: new RegExp(`Top \\(${GEMINI_TEXT_TOP}\\)`) }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("legacy campaign with a retired stored model falls back to Standard, not Top", () => {
-    // A model id the live-confirmed bump removed from the registry — we can't
-    // know its tier, so the picker opens on the cheaper Standard tier.
-    setup({
-      legacyModels: {
-        textModel: "gemini-3-flash-preview",
-        imageModel: "gemini-3.1-flash-image-preview",
-      },
-    });
-
-    expect(
-      screen.getByRole("button", { name: new RegExp(`Standard \\(${GEMINI_TEXT_MID}\\)`) }),
-    ).toBeInTheDocument();
-  });
-
-  it("shows NO tier/model selector on a managed (Cloud) plan", () => {
-    setup({ isCloud: true });
-    // Managed owns the model server-side — no tier trigger is rendered.
-    expect(
-      screen.queryByRole("button", { name: new RegExp(`\\(${GEMINI_TEXT_TOP}\\)`) }),
-    ).not.toBeInTheDocument();
+  it("managed (Cloud): no model name at all", () => {
+    const { container } = setup({ isCloud: true });
+    expect(container.textContent).not.toMatch(MODEL_NAME);
   });
 });
 
@@ -209,15 +152,14 @@ describe("<CampaignAiEngineSection> text provider row by plan (2026-10-01)", () 
 // ─── AI guidance: labels and advice (2026-10-02) ─────────────────────────────
 //
 // specs/byok-ai-guidance.md §5 (wp-admin): text provider options best first,
-// "Recommended" on the recommended provider (option and closed trigger) and on
-// the recommended text tier option (never its closed trigger); none on the
-// image row or the fallback. The provider advice sits after the text model and
-// before the text fallback, Switch sets provider + recommended tier, × writes
-// `aiAdvice.hidden` through the form.
+// "Recommended" on the recommended provider (option and closed trigger); none
+// on the image row or the fallback. The provider advice sits after the text
+// provider and before the text fallback (after the text model until that
+// cell went on 2026-11-25), Switch sets the provider (no tier since
+// 2026-11-25), × writes `aiAdvice.hidden` through the form.
 
 function setupGuidance(opts: {
   textProvider: "gemini" | "openai" | "anthropic";
-  textTier?: "top" | "mid";
   connected: string[];
   fallbackTextProvider?: "gemini" | "openai" | "anthropic" | null;
   aiAdvice?: { hidden: { textProvider: "gemini" | "openai" | "anthropic" } | null };
@@ -225,17 +167,13 @@ function setupGuidance(opts: {
   const updateForm = vi.fn();
   connectedMock.text = opts.connected;
   useLicenseMock.mockReturnValue({ isLicensed: true, plan: "byok", isPaidLicense: true });
-  useDefaultProvidersMock.mockReturnValue({ isCloud: false, isProviderIncomplete: () => false });
+  useDefaultProvidersMock.mockReturnValue({ isCloud: false });
   useAiSettingsQueryMock.mockReturnValue({ data: { providers: {} } });
   useCampaignFormMock.mockReturnValue({
     formData: {
       intelligence: {
         textProvider: opts.textProvider,
         imageProvider: "gemini",
-        textModel: getRegistryModelId(opts.textProvider, "text", opts.textTier ?? "mid"),
-        imageModel: getRegistryModelId("gemini", "image", "mid"),
-        textTier: opts.textTier ?? "mid",
-        imageTier: "mid",
         fallbackTextProvider: opts.fallbackTextProvider ?? null,
         fallbackImageProvider: null,
       },
@@ -267,26 +205,6 @@ describe("<CampaignAiEngineSection> AI guidance labels (2026-10-02)", () => {
     expect(options.map((o) => o.textContent)).toEqual(["Claude Recommended", "OpenAI", "Gemini"]);
   });
 
-  it("labels the recommended text tier option but never the closed model trigger", () => {
-    setupGuidance({ textProvider: "openai", connected: ["openai", "gemini"] });
-    const OPENAI_MID = getRegistryModel("openai", "text", "mid")!.name;
-
-    // Closed trigger: the tier name only.
-    const tierTrigger = screen.getByRole("button", {
-      name: new RegExp(`Standard \\(${OPENAI_MID}\\)`),
-    });
-    expect(within(tierTrigger).queryByText("Recommended")).toBeNull();
-    // OpenAI is not the recommended provider: no chip on its trigger.
-    expect(within(screen.getByRole("button", { name: /^OpenAI/ })).queryByText("Recommended")).toBeNull();
-
-    fireEvent.click(tierTrigger);
-    const listbox = screen.getByRole("listbox");
-    expect(within(listbox).getByRole("option", { name: /Standard.*Recommended/ })).toBeInTheDocument();
-    expect(within(listbox).getByRole("option", { name: /^Top/ }).textContent).not.toContain(
-      "Recommended",
-    );
-  });
-
   it("puts no label on the image row or the fallback select", () => {
     setupGuidance({ textProvider: "anthropic", connected: ["anthropic", "openai", "gemini"] });
 
@@ -300,30 +218,27 @@ describe("<CampaignAiEngineSection> AI guidance labels (2026-10-02)", () => {
 });
 
 describe("<CampaignAiEngineSection> provider advice (2026-10-02)", () => {
-  it("shows the advice for Gemini text between the model and the fallback", () => {
+  it("shows the advice for Gemini text between the provider and the fallback", () => {
     setupGuidance({ textProvider: "gemini", connected: ["gemini", "openai"] });
 
     const advice = screen.getByText("Gemini isn’t recommended for writing.");
     const fallbackLabel = screen.getAllByText("Fallback")[0];
-    const modelLabel = screen.getAllByText("Model")[0];
-    // DOM order: model → advice → fallback.
-    expect(modelLabel.compareDocumentPosition(advice) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const providerLabel = screen.getAllByText("Provider")[0];
+    // DOM order: provider → advice → fallback.
+    expect(providerLabel.compareDocumentPosition(advice) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(advice.compareDocumentPosition(fallbackLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("Switch sets provider, recommended tier and model, and clears an equal fallback", () => {
+  it("Switch sets the provider and clears an equal fallback, with no model or tier", () => {
     const { updateForm } = setupGuidance({
       textProvider: "gemini",
       connected: ["gemini", "openai"],
-      textTier: "top",
       fallbackTextProvider: "openai",
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Switch to OpenAI" }));
     expect(updateForm).toHaveBeenCalledWith("intelligence", {
       textProvider: "openai",
-      textTier: "mid",
-      textModel: getRegistryModelId("openai", "text", "mid"),
       fallbackTextProvider: null,
     });
   });
@@ -372,15 +287,13 @@ describe("<CampaignAiEngineSection> fallback controls on managed plans (2026-10-
     const updateForm = vi.fn();
     connectedMock.text = [];
     useLicenseMock.mockReturnValue({ isLicensed: true, plan: "cloud", isPaidLicense: true });
-    useDefaultProvidersMock.mockReturnValue({ isCloud: true, isProviderIncomplete: () => false });
+    useDefaultProvidersMock.mockReturnValue({ isCloud: true });
     useAiSettingsQueryMock.mockReturnValue({ data: { providers: {} } });
     useCampaignFormMock.mockReturnValue({
       formData: {
         intelligence: {
           textProvider: "gemini",
           imageProvider: "gemini",
-          textModel: "",
-          imageModel: "",
           fallbackTextProvider: null,
           fallbackImageProvider: "openai",
         },

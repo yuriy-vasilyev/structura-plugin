@@ -132,7 +132,7 @@ const ManagedCycleCard = ({
         </div>
 
         {posts ? (
-          <h2 className="mt-0! text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+          <h2 className="mt-0! text-3xl font-black tracking-tight text-gray-900! dark:text-white!">
             {posts.postsUsed.toLocaleString()}
             <span className="text-sm font-medium text-gray-400">
               {" "}
@@ -142,7 +142,7 @@ const ManagedCycleCard = ({
             </span>
           </h2>
         ) : (
-          <h2 className="mt-0! text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+          <h2 className="mt-0! text-3xl font-black tracking-tight text-gray-900! dark:text-white!">
             {formatTokens(usage.tokensUsed)}
             <span className="text-sm font-medium text-gray-400">
               {" "}
@@ -209,7 +209,7 @@ const ByokCycleCard = ({
         {__("Cycle Usage", "structura")}
       </p>
       <div className="flex items-baseline gap-2">
-        <h2 className="m-0! text-3xl! font-black! text-neutral-900 dark:text-white">
+        <h2 className="m-0! text-3xl! font-black! text-neutral-900! dark:text-white!">
           {cycle.postsUsed.toLocaleString()}
         </h2>
         <span className="text-sm text-gray-400">

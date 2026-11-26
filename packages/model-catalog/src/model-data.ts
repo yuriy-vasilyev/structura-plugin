@@ -19,7 +19,7 @@ import type { CatalogModel } from "./types";
  * served catalog (see `buildProvider`).
  *
  * Image models are intentionally limited to mid + top per provider — no
- * fast/cheap image variants. Rationale + cost analysis:
+ * fast/cheap image variants; OpenAI has mid only since 2026-11-25. Rationale + cost analysis:
  * `specs/v2/cloud-pregeneration-and-model-catalog.md` §2.1.1. Overall tier +
  * binding design: `specs/model-tier-selection.md`.
  *
@@ -32,8 +32,10 @@ import type { CatalogModel } from "./types";
  *
  * `unlisted` entries are known but not offered: no tier, not served, reachable
  * only by explicit id (the eval harness, the frozen bindings). An unlisted
- * entry with `supersededTier` used to hold that tier: a stored id resolves to
- * the tier's current model (`resolveSupersededTextModelId`). Every id was confirmed on the
+ * entry with `supersededTier` used to hold that tier (a record since
+ * 2026-11-25). Since then only the role defaults are served, one Standard
+ * model per provider and role (specs/byok-ai-guidance.md §2.2); the tiers
+ * stay for the internal bindings. Every id was confirmed on the
  * provider's list-models API before it was added.
  */
 export const MODELS: readonly CatalogModel[] = [
@@ -175,15 +177,18 @@ export const MODELS: readonly CatalogModel[] = [
     pricing: { pricedAt: "2026-10-01", inputUsdPerMTok: 0.2, outputUsdPerMTok: 1.2, batchInputUsdPerMTok: 0.1, batchOutputUsdPerMTok: 0.6, longContext: { inputUsdPerMTok: 0.4, outputUsdPerMTok: 1.8, batchInputUsdPerMTok: 0.2, batchOutputUsdPerMTok: 0.9 } },
     manifest: { family: "chat", endpoint: "v1/chat/completions" },
   },
-  // Image — strict mid + top (see header). gpt-image-1-mini is the mid,
-  // gpt-image-2 the top.
+  // Image. Retired 2026-11-25 (owner decision, specs/byok-ai-guidance.md
+  // §2.1): own-key OpenAI images run on gpt-image-2.6-flare, the only
+  // listed OpenAI image model, below. Unlisted and untiered, so a stored id
+  // of either is coerced to the provider default by the image resolver and
+  // a stored Top tier falls back to Standard (`resolveByokTierModelId`).
+  // Kept for in-flight stock batches and the cost records.
   {
     id: "gpt-image-1-mini",
     name: "GPT Image 1 Mini",
     provider: "openai",
     role: "image",
-    tier: "mid",
-    default: true,
+    unlisted: true,
     deprecation: { retiresOn: "2026-12-01", note: "OpenAI shuts gpt-image-1-mini down; gpt-image-2.5-flare is the fast successor." },
     manifest: {
       family: "image",
@@ -198,7 +203,9 @@ export const MODELS: readonly CatalogModel[] = [
     name: "GPT Image 2",
     provider: "openai",
     role: "image",
-    tier: "top",
+    unlisted: true,
+    // 54 to 101 s per image (2026-11-25), past the 90 s per-attempt limit.
+    deprecation: { retiresOn: "2027-02-10", note: "Deprecated by OpenAI." },
     manifest: {
       family: "image",
       endpoint: "v1/images/generations",
@@ -217,6 +224,9 @@ export const MODELS: readonly CatalogModel[] = [
     // Managed image failover at medium quality (owner decision 2026-10-06,
     // blind image test 2026-10-05). Stays unlisted: no own-key picker offers it.
     managedImage: "failover",
+    // Held the character in 12 of 12 scenes on /v1/images/edits (2026-11-25,
+    // research/2026-11-25-openai-character).
+    referenceImages: true,
     // Image out $30 / 1M tokens, image in $8, text in $5 (2026-10-01).
     manifest: { family: "image", endpoint: "v1/images/generations", qualities: ["low", "medium", "high", "xhigh", "max", "auto"], default_quality: "high" },
   },
@@ -226,8 +236,45 @@ export const MODELS: readonly CatalogModel[] = [
     provider: "openai",
     role: "image",
     unlisted: true,
+    // Held the character in 12 of 12 scenes on /v1/images/edits (2026-11-25).
+    referenceImages: true,
     // Image out $30 / 1M tokens, image in $8, text in $5 (2026-10-01).
     manifest: { family: "image", endpoint: "v1/images/generations", qualities: ["low", "medium", "high", "xhigh", "max", "auto"], default_quality: "high" },
+  },
+  // Added for the character study (research/2026-11-25-openai-character),
+  // where both held the character in 12 of 12 scenes on /v1/images/edits.
+  // Sunburst: known, not offered, no tier, no binding.
+  {
+    id: "gpt-image-2.6-sunburst",
+    name: "GPT Image 2.6 Sunburst",
+    provider: "openai",
+    role: "image",
+    unlisted: true,
+    referenceImages: true,
+    // Image out $30 / 1M tokens, image in $8, text in $5 (2026-11-25), as 2.5.
+    manifest: { family: "image", endpoint: "v1/images/generations", qualities: ["low", "medium", "high", "xhigh", "max", "auto"], default_quality: "high" },
+  },
+  // The one OpenAI image model on own keys, both stored tiers, at quality
+  // high (owner decision 2026-11-25, specs/byok-ai-guidance.md §2.1): the
+  // owner's blind votes over 18 briefs (best 3, worst 0), 11 s per image
+  // against 30 s for 2.6 Sunburst, the same token price. No Top: a stored
+  // Top falls back to this Standard model.
+  {
+    id: "gpt-image-2.6-flare",
+    name: "GPT Image 2.6 Flare",
+    provider: "openai",
+    role: "image",
+    tier: "mid",
+    default: true,
+    referenceImages: true,
+    // Image out $30 / 1M tokens, image in $8, text in $5 (2026-11-25), as 2.5.
+    manifest: {
+      family: "image",
+      endpoint: "v1/images/generations",
+      sizes: { "1:1": "1024x1024", "16:9": "1536x1024", "9:16": "1024x1536" },
+      qualities: ["low", "medium", "high", "xhigh", "max", "auto"],
+      default_quality: "high",
+    },
   },
   // Text-to-speech (video voiceover) — registry-only, not in the served catalog.
   {

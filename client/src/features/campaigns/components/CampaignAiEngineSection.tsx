@@ -9,8 +9,13 @@
  * become three rows of compact selects:
  *
  *    [pre-generation strip]
- *    Text:  Provider ▾    Model ▾   Fallback ▾
- *    Image: Provider ▾    Model ▾   Fallback ▾
+ *    Text:  Provider ▾    Fallback ▾
+ *    Image: Provider ▾    Fallback ▾
+ *
+ * No model is picked or named since 2026-11-25 (owner decision,
+ * specs/byok-ai-guidance.md §2.2): the Top / Standard dropdown went that
+ * morning and the read-only Model cell that replaced it the same day.
+ * Nothing here writes a model or a tier.
  *
  * Why pre-generation lives here (and not in the schedule step):
  *   the pre-generation toggle modifies *how* the engine produces
@@ -29,17 +34,15 @@
 
 import { FC, ReactNode, Ref, useMemo, useRef } from "react";
 import { __ } from "@wordpress/i18n";
-import { AlertTriangle, Image as ImageIcon, Lock, Sparkles, Type, Zap } from "lucide-react";
+import { Image as ImageIcon, Lock, Sparkles, Type, Zap } from "lucide-react";
 import { Select, Switch, Tooltip } from "@structura/ui";
 import { isManagedPlan, type PlanId } from "@structura/types";
-import { getRegistryModelId } from "@structura/model-catalog";
 
 import { useAiSettingsQuery } from "@/features/ai-engine";
 import { useDefaultProviders, useLicense } from "@/features/settings";
 import { useCampaignForm } from "@/features/campaigns/context/CampaignContext";
 import { AIProvider } from "@/features/campaigns/types";
 import { getProviderVisual } from "@/features/campaigns/constants";
-import { type ModelTier, buildTierOptions, effectiveTier } from "@/features/campaigns/modelTier";
 import {
   isRecommendedTextProvider,
   orderTextProviders,
@@ -166,31 +169,22 @@ interface CapabilityRowProps {
   /** Currently selected fallback (or null = disabled). */
   fallback: AIProvider | null;
   onFallbackChange: (next: AIProvider | null) => void;
-  /** Currently selected quality tier (BYOK only — unused for managed). */
-  tier: ModelTier;
-  onTierChange: (next: ModelTier) => void;
-  /** Tier options for the chosen primary, labeled with the model name. */
-  tierOptions: { value: string; label: string; recommended?: { label: string } }[];
   /** Providers available as primary picks. */
   primaryCandidates: AIProvider[];
   /** Providers eligible to act as fallback (subset of primaryCandidates). */
   fallbackCandidates: AIProvider[];
-  /** Whether to render the tier (model) selector (false for managed/Cloud). */
-  showModelSelector: boolean;
   /** Whether the user can select a fallback at all (Free → locked). */
   fallbackLocked: boolean;
   /** When fallbackLocked is true, the tooltip shown on the lock icon. */
   fallbackLockedReason?: string;
   /** Eligibility check per fallback candidate (Pro BYOK gates). */
   isFallbackEligible: (p: AIProvider) => boolean;
-  /** Whether the primary provider is incomplete (no key / no model). */
-  primaryIncomplete: boolean;
   /**
-   * Text row only: label the recommended provider and tier ("Recommended",
+   * Text row only: label the recommended provider ("Recommended",
    * specs/byok-ai-guidance.md §5). Never on the image row or the fallback.
    */
   labelRecommended?: boolean;
-  /** Text row only: the provider advice, between the model and the fallback. */
+  /** Text row only: the provider advice, between the provider and the fallback. */
   advice?: ReactNode;
   /** Ref to the provider trigger, so Undo can return focus to it. */
   providerTriggerRef?: Ref<HTMLButtonElement>;
@@ -207,16 +201,11 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
   onPrimaryChange,
   fallback,
   onFallbackChange,
-  tier,
-  onTierChange,
-  tierOptions,
   primaryCandidates,
   fallbackCandidates,
-  showModelSelector,
   fallbackLocked,
   fallbackLockedReason,
   isFallbackEligible,
-  primaryIncomplete,
   labelRecommended = false,
   advice,
   providerTriggerRef,
@@ -293,41 +282,11 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
           )}
         </div>
 
-        {/* Model quality tier (BYOK only). Managed tiers own the model
-            server-side, so no selector is shown. The concrete model is
-            resolved from the tier at generation time; the campaign stores the
-            tier (and mirrors the concrete model for display / back-compat). */}
-        {showModelSelector && (
-          <div className="flex min-w-[180px] flex-1 items-center gap-2">
-            <span className="text-[9px] font-bold tracking-widest text-neutral-400 uppercase dark:text-neutral-500">
-              {__("Model", "structura")}
-            </span>
-            <Select
-              className="flex-1"
-              size="sm"
-              options={tierOptions}
-              value={tier}
-              onValueChange={(v) => onTierChange(v as ModelTier)}
-            >
-              <Select.Trigger placeholder={__("Select model...", "structura")} />
-              <Select.Content className="w-(--button-width)">
-                {tierOptions.map((o) => (
-                  <Select.Item
-                    key={o.value}
-                    value={o.value}
-                    recommended={labelRecommended ? o.recommended : undefined}
-                  >
-                    {o.label}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select>
-          </div>
-        )}
-
-        {/* Provider advice — full width, after the model and before the
-            fallback (handoff DOM order: provider → model → advice →
-            fallback). Renders nothing unless the advice applies. */}
+        {/* Provider advice — full width, after the provider and before the
+            fallback (handoff DOM order: provider → advice → fallback; the
+            model cell sat before the advice until 2026-11-25). Renders
+            nothing unless the advice applies; without it the provider and
+            the fallback share the line. */}
         {advice}
 
         {/* Fallback */}
@@ -375,13 +334,6 @@ const CapabilityRow: FC<CapabilityRowProps> = ({
           </div>
         )}
       </div>
-
-      {primaryIncomplete && (
-        <div className="flex items-center gap-1.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
-          <AlertTriangle size={11} />
-          {__("Model not selected — complete setup in AI Engine settings", "structura")}
-        </div>
-      )}
     </div>
   );
 };
@@ -400,85 +352,43 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
   availableImageProviders,
 }) => {
   const { formData, updateForm } = useCampaignForm();
-  const { isCloud, isProviderIncomplete } = useDefaultProviders();
+  const { isCloud } = useDefaultProviders();
   const { isLicensed } = useLicense();
   const { data: ai } = useAiSettingsQuery();
 
-  const showModelSelector = !isCloud;
   const isFree = !isLicensed;
 
   const intelligence = formData.intelligence;
   const schedule = formData.schedule;
 
-  // BYOK campaigns store a quality TIER (top | mid), resolved to a concrete
-  // model at generation time. The tier is the source of truth; `textModel` /
-  // `imageModel` are kept as the concrete mirror (display + back-compat) so
-  // the campaign doc stays self-consistent. Pre-tier campaigns derive the
-  // display tier from their stored model — never assume Top for them.
-  const textTier: ModelTier = effectiveTier(
-    intelligence.textProvider, "text", intelligence.textTier, intelligence.textModel
-  );
-  const imageTier: ModelTier = effectiveTier(
-    intelligence.imageProvider, "image", intelligence.imageTier, intelligence.imageModel
-  );
-
-  // Provider change: managed keeps the model EMPTY (the cloud resolves it from
-  // plan+provider). BYOK re-mirrors the current tier's concrete model for the
-  // newly-picked provider so the stored model tracks the tier.
   const changeProvider = (capability: "text" | "image", p: AIProvider) => {
-    const tier = capability === "text" ? textTier : imageTier;
-    const mirroredModel = showModelSelector ? (getRegistryModelId(p, capability, tier) ?? "") : "";
-    updateForm(
-      "intelligence",
-      capability === "text"
-        ? { textProvider: p, textModel: mirroredModel }
-        : { imageProvider: p, imageModel: mirroredModel }
-    );
-  };
-
-  // Tier change: store the tier and mirror its concrete model for display.
-  const changeTier = (capability: "text" | "image", tier: ModelTier) => {
-    const provider = capability === "text" ? intelligence.textProvider : intelligence.imageProvider;
-    const mirroredModel = getRegistryModelId(provider, capability, tier);
-    updateForm(
-      "intelligence",
-      capability === "text"
-        ? { textTier: tier, textModel: mirroredModel ?? intelligence.textModel }
-        : { imageTier: tier, imageModel: mirroredModel ?? intelligence.imageModel }
-    );
+    updateForm("intelligence", capability === "text" ? { textProvider: p } : { imageProvider: p });
   };
 
   // Fallback eligibility — see FallbackProviderRow for the full
   // rationale. Short version: Cloud has master keys so any other
   // provider is fine; Pro BYOK requires the candidate to be connected
-  // and to have a model selected for this capability; Free is locked
+  // (until 2026-11-25 also to have a model selected); Free is locked
   // entirely.
   const isFallbackEligibleFor = (capability: "text" | "image") => (p: AIProvider) => {
     const primary = capability === "text" ? intelligence.textProvider : intelligence.imageProvider;
     if (p === primary) return false;
     if (isFree) return false;
     if (isCloud) return true;
-    const info = ai?.providers?.[p];
-    if (!info?.connected) return false;
-    return capability === "text" ? !!info.text_model : !!info.image_model;
+    return !!ai?.providers?.[p]?.connected;
   };
 
-  // Switch from the provider advice: provider + its recommended tier (and the
-  // mirrored model on BYOK), clearing a fallback equal to the new provider.
-  // Returns the Undo, which restores all four and refocuses the provider
-  // trigger (spec: specs/byok-ai-guidance.md §5).
+  // Switch from the provider advice: the provider, clearing a fallback equal
+  // to the new provider. Returns the Undo, which restores both and
+  // refocuses the provider trigger (spec: specs/byok-ai-guidance.md §5).
   const providerTriggerRef = useRef<HTMLButtonElement>(null);
-  const switchTextProvider = (to: AIProvider, tier: ModelTier) => {
+  const switchTextProvider = (to: AIProvider) => {
     const previous = {
       textProvider: intelligence.textProvider,
-      textTier: intelligence.textTier,
-      textModel: intelligence.textModel,
       fallbackTextProvider: intelligence.fallbackTextProvider ?? null,
     };
     updateForm("intelligence", {
       textProvider: to,
-      textTier: tier,
-      textModel: showModelSelector ? (getRegistryModelId(to, "text", tier) ?? "") : "",
       ...(intelligence.fallbackTextProvider === to ? { fallbackTextProvider: null } : {}),
     });
     return () => {
@@ -517,16 +427,11 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
           onPrimaryChange={(p) => changeProvider("text", p)}
           fallback={intelligence.fallbackTextProvider ?? null}
           onFallbackChange={(p) => updateForm("intelligence", { fallbackTextProvider: p })}
-          tier={textTier}
-          onTierChange={(t) => changeTier("text", t)}
-          tierOptions={buildTierOptions(intelligence.textProvider, "text")}
           primaryCandidates={orderTextProviders(availableTextProviders)}
           fallbackCandidates={textFallbackCandidates}
-          showModelSelector={showModelSelector}
           fallbackLocked={isFree}
           fallbackLockedReason={__("Upgrade to Pro to unlock provider fallback.", "structura")}
           isFallbackEligible={isFallbackEligibleFor("text")}
-          primaryIncomplete={isProviderIncomplete(intelligence.textProvider)}
           labelRecommended
           providerTriggerRef={providerTriggerRef}
           advice={
@@ -558,15 +463,10 @@ export const CampaignAiEngineSection: FC<CampaignAiEngineSectionProps> = ({
           onPrimaryChange={(p) => changeProvider("image", p)}
           fallback={intelligence.fallbackImageProvider ?? null}
           onFallbackChange={(p) => updateForm("intelligence", { fallbackImageProvider: p })}
-          tier={imageTier}
-          onTierChange={(t) => changeTier("image", t)}
-          tierOptions={buildTierOptions(intelligence.imageProvider, "image")}
           primaryCandidates={availableImageProviders}
           fallbackCandidates={imageFallbackCandidates}
-          showModelSelector={showModelSelector}
           fallbackLocked={false}
           isFallbackEligible={isFallbackEligibleFor("image")}
-          primaryIncomplete={isProviderIncomplete(intelligence.imageProvider)}
         />
       )}
 

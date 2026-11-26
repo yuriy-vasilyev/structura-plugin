@@ -38,6 +38,7 @@ vi.mock("@/features/campaigns/api/useStockMutations", () => ({
 }));
 
 import { StockTab } from "../components/StockTab";
+import { MODEL_NAME } from "@/test/modelNames";
 import type { Campaign } from "../types";
 import type {
   StockEntryView,
@@ -266,24 +267,28 @@ describe("<StockTab>", () => {
   });
 
   // 2026-10-01: managed plans never see a model name or provider advice
-  // (specs/managed-ai-lineup.md §3.3); BYOK keeps both.
-  it("shows the model subtitle on a BYOK entry", () => {
+  // (specs/managed-ai-lineup.md §3.3). Since the owner's decision of
+  // 2026-11-25 no plan sees a model named: a BYOK entry's subtitle names the
+  // provider that wrote it, where the model id was.
+  it("names the provider, not the model, on a BYOK entry", () => {
     setup({ isCloud: false, entries: [makeEntry()] });
-    render(<StockTab campaign={makeCampaign(true)} />);
+    const { container } = render(<StockTab campaign={makeCampaign(true)} />);
 
-    expect(screen.getByText(/gemini-3\.1-pro-preview/)).toBeInTheDocument();
+    expect(screen.getByText(/Gemini/)).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(MODEL_NAME);
   });
 
-  it("hides the model subtitle on a managed entry, including an older one that still carries it", () => {
+  it("hides the provider and the model on a managed entry, including an older one that still carries them", () => {
     setup({ isCloud: true, entries: [makeEntry()] });
-    render(<StockTab campaign={makeCampaign(true)} />);
+    const { container } = render(<StockTab campaign={makeCampaign(true)} />);
 
     expect(screen.getByText("Stocked Post")).toBeInTheDocument();
-    expect(screen.queryByText(/gemini-3\.1-pro-preview/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Gemini/)).not.toBeInTheDocument();
+    expect(container.textContent).not.toMatch(MODEL_NAME);
   });
 
-  it("renders no model separator when the cloud sends a blank model (BYOK)", () => {
-    setup({ isCloud: false, entries: [makeEntry({ textModel: "" })] });
+  it("renders no separator when the cloud sends a blank provider (BYOK)", () => {
+    setup({ isCloud: false, entries: [makeEntry({ provider: "" })] });
     const { container } = render(<StockTab campaign={makeCampaign(true)} />);
 
     expect(container.textContent).not.toMatch(/ · $/m);

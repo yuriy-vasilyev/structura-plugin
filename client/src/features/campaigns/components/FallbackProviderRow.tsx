@@ -152,17 +152,14 @@ export const FallbackProviderRow: FC<FallbackRowProps> = ({ capability }) => {
     }
   };
 
-  // Pro eligibility for a candidate: key must be connected AND the model
-  // for the target capability must already be set. Otherwise the cloud
-  // wouldn't actually be able to fire the fallback, so we shouldn't pretend
-  // it will. Cloud/Agency bypass this — they always have a master key.
+  // Pro eligibility for a candidate: key must be connected (until
+  // 2026-11-25 a model had to be selected too; none is any more).
+  // Cloud/Agency bypass this — they always have a master key.
   const isProviderEligible = (p: AIProvider): boolean => {
     if (p === primary) return false; // same-as-primary never allowed
     if (isFree) return false;
     if (isCloud) return true;
-    const info = ai?.providers?.[p];
-    if (!info?.connected) return false;
-    return capability === "text" ? !!info.text_model : !!info.image_model;
+    return !!ai?.providers?.[p]?.connected;
   };
 
   const getDisabledReason = (p: AIProvider): string | undefined => {
@@ -173,27 +170,10 @@ export const FallbackProviderRow: FC<FallbackRowProps> = ({ capability }) => {
       return __("Upgrade to Pro to unlock provider fallback.", "structura");
     }
     if (isCloud) return undefined;
-    const info = ai?.providers?.[p];
-    if (!info?.connected) {
+    if (!ai?.providers?.[p]?.connected) {
       return __("Connect this provider's API key in AI Engine settings.", "structura");
     }
-    const missingModel =
-      capability === "text" ? !info.text_model : !info.image_model;
-    if (missingModel) {
-      return __("Complete model setup for this provider in AI Engine settings.", "structura");
-    }
     return undefined;
-  };
-
-  // Model hint — Pro only, when connected AND a default model is set.
-  // For Cloud users the model is decided by PLAN_DEFAULTS server-side, so
-  // showing a client-guessed hint would be misleading.
-  const modelHintFor = (p: AIProvider): string | undefined => {
-    if (isCloud || isFree) return undefined;
-    const info = ai?.providers?.[p];
-    if (!info?.connected) return undefined;
-    const model = capability === "text" ? info.text_model : info.image_model;
-    return model || undefined;
   };
 
   const icon =
@@ -248,7 +228,6 @@ export const FallbackProviderRow: FC<FallbackRowProps> = ({ capability }) => {
             disabled={!isProviderEligible(p)}
             disabledReason={getDisabledReason(p)}
             onClick={() => onPick(p)}
-            modelHint={modelHintFor(p)}
           />
         ))}
       </div>

@@ -21,7 +21,7 @@ export const StatCard = ({ label, value, subtext, variant, trend }: StatCardProp
         {label}
       </p>
       <div className="flex items-baseline gap-2">
-        <h2 className="m-0! text-3xl! font-black! text-neutral-900 dark:text-white">{value}</h2>
+        <h2 className="m-0! text-3xl! font-black! text-neutral-900! dark:text-white!">{value}</h2>
         {trend && (
           <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-600 dark:bg-brand-900/30 dark:text-brand-300">
             {trend}

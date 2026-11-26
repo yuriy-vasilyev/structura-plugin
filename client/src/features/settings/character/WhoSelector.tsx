@@ -53,7 +53,10 @@ export interface WhoSelectorProps {
   onChange: (value: VisualAppearance) => void;
   /** The plan has no character (free and none). */
   locked: boolean;
-  /** The site's image setup cannot work from a reference image. */
+  /**
+   * The cloud refuses a character for this site (`characterAvailable`
+   * false): since 2026-11-25, no Gemini or OpenAI key bound to it.
+   */
   unavailable: boolean;
   /** The saved appearance: kept selectable after a downgrade or a change of image setup. */
   savedAppearance: VisualAppearance;
@@ -166,7 +169,7 @@ export function WhoSelector({
           <ReasonRow icon={<Info size={14} />}>
             <span>
               {__(
-                "The image setup on your website can’t work from a reference image. Switch to one that can under AI Engine to add a character.",
+                "A character needs images drawn with Gemini or OpenAI. Under AI Engine, connect Gemini or OpenAI and turn on Default for image generation, then come back.",
                 "structura"
               )}
             </span>

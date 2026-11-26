@@ -20,7 +20,6 @@ import { DefaultPersonaAdvisory } from "@/components/Shared/DefaultPersonaAdviso
 import { NoPersonasBlocker } from "@/components/Shared/NoPersonasBlocker";
 import { ProviderToggle } from "@/features/campaigns/components/ProviderToggle";
 import { ProviderAdvice } from "@/features/campaigns/components/ProviderAdvice";
-import { mirrorModelForTier, type ModelTier } from "@/features/campaigns/modelTier";
 import { useCampaignMutations } from "@/features/campaigns/api/useCampaignMutations";
 import { useSingleGenQuota } from "@/features/campaigns/api/useSingleGenQuota";
 import {
@@ -40,7 +39,6 @@ import { AiLabelReminder } from "@/features/campaigns/components/AiLabelReminder
 import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
 import type { SeoRuleName, SUPPORTED_BLOCK_TYPE } from "@/features/settings/types";
 import { useAiSettingsQuery } from "@/features/ai-engine";
-import { resolveDefaultTier, usesRecommendedModel } from "@/features/ai-engine/helpers";
 import { CONTENT_BLOCKS } from "@/features/settings/constants";
 import { getCampaignFormDataForLicense, isSeoRuleUnavailable, withSeoRule } from "@/features/campaigns/helpers";
 import { NeedsAuthorityLinksHint } from "@/features/campaigns/components/NeedsAuthorityLinksHint";
@@ -317,50 +315,10 @@ const GeneratePostPage = () => {
   };
 
   const isManagedAiPlan = isManagedPlan(plan as PlanId);
-  // Managed tiers never pick models — the cloud curates the pin from
-  // (plan, provider) and ignores a client-sent model, so a picker here is
-  // a no-op that misleads (2026-07-14 decision; supersedes the earlier
-  // "Cloud Pro gets a per-post picker" differentiator, which the server
-  // stopped honoring in b682d66bd). Only BYOK-style plans choose models.
-  const showPerPostModelPicker = !isManagedAiPlan;
-  // Managed plans store and send no concrete model (specs/managed-ai-lineup.md
-  // §3.3). The text provider stays on the form, hidden: the plugin's
-  // /post/generate requires one and the cloud keeps it for utility calls.
-  // Both the pre-2026-10-01 cloud (resolves the model from plan + provider)
-  // and the current one (one managed writer) ignore a managed model anyway.
-  const mirrorModel = (
-    provider: AIProvider,
-    capability: "text" | "image",
-    tier: ModelTier
-  ): string => (isManagedAiPlan ? "" : (mirrorModelForTier(provider, capability, tier) ?? ""));
 
-  // The site's settings for a provider (AI Engine wizard, 2026-10-06): the
-  // tier its "Use recommended model" switch stored, or the model it picked.
-  const providerSettings = aiSettings?.providers;
-  /** Returns the tier the site uses for a provider, else `fallback`. */
-  const siteTier = (
-    provider: AIProvider,
-    capability: "text" | "image",
-    fallback: ModelTier
-  ): ModelTier =>
-    isManagedAiPlan
-      ? fallback
-      : (resolveDefaultTier({ provider, capability, providerSettings }) ?? fallback);
-  /** Returns true when the site picked a model for the provider (its switch is off). */
-  const sitePickedModel = (provider: AIProvider, capability: "text" | "image"): boolean => {
-    const settings = providerSettings?.[provider];
-    return !usesRecommendedModel(
-      provider,
-      capability,
-      capability === "text" ? settings?.text_tier : settings?.image_tier,
-      capability === "text" ? settings?.text_model : settings?.image_model
-    );
-  };
-
-  // Initialize form with license-aware defaults. The one-off "Generate a Post"
-  // flow uses the SAME top/mid tier picker as the campaign form (BYOK/free),
-  // so it carries `textTier`/`imageTier` from the defaults; `flattenCampaign`
-  // forwards them and the cloud resolves the concrete model at gen time.
+  // Initialize form with license-aware defaults. No model or tier is chosen
+  // or sent since 2026-11-25: the cloud runs each provider's Standard model
+  // (specs/byok-ai-guidance.md §2.2).
   const [formData, setFormData] = useState<CampaignFormData>(() =>
     getCampaignFormDataForLicense({ isPaidLicense, isLicensed })
   );
@@ -402,9 +360,7 @@ const GeneratePostPage = () => {
   // hydrates. Without this, the form keeps the static "gemini" fallback
   // baked into DEFAULT_CAMPAIGN_FORM_DATA even when the only connected
   // provider is OpenAI. Mirrors the seeding the wizard's CampaignProvider
-  // already does (CampaignContext.tsx). The concrete model is mirrored from
-  // the current tier for the new provider so the doc stays self-consistent
-  // (the tier remains the source of truth; the cloud resolves it at gen time).
+  // already does (CampaignContext.tsx).
   const hasSyncedProviders = useRef(false);
   useEffect(() => {
     if (hasSyncedProviders.current) return;
@@ -419,25 +375,14 @@ const GeneratePostPage = () => {
     // 2026-09-02).
     if (!isManagedAiPlan && (connectionsLoading || connectionsFetching)) return;
     hasSyncedProviders.current = true;
-    setFormData((prev) => {
-      // The site's own tier per provider (2026-10-06): the recommended one,
-      // or the tier of the model it picked, so a hidden model picker sends
-      // what the site uses and a shown one opens on it.
-      const textTier = siteTier(defaultTextProvider, "text", prev.intelligence.textTier ?? "mid");
-      const imageTier = siteTier(defaultImageProvider, "image", prev.intelligence.imageTier ?? "mid");
-      return {
-        ...prev,
-        intelligence: {
-          ...prev.intelligence,
-          textProvider: defaultTextProvider,
-          imageProvider: defaultImageProvider,
-          textTier,
-          imageTier,
-          textModel: mirrorModel(defaultTextProvider, "text", textTier),
-          imageModel: mirrorModel(defaultImageProvider, "image", imageTier),
-        },
-      };
-    });
+    setFormData((prev) => ({
+      ...prev,
+      intelligence: {
+        ...prev.intelligence,
+        textProvider: defaultTextProvider,
+        imageProvider: defaultImageProvider,
+      },
+    }));
   }, [
     aiSettings,
     defaultTextProvider,
@@ -778,54 +723,16 @@ const GeneratePostPage = () => {
         <ProviderToggle
           textProvider={formData.intelligence.textProvider}
           imageProvider={formData.intelligence.imageProvider}
-          onTextProviderChange={(p) => {
-            // A new provider brings its own site tier (its model picker may
-            // be hidden, 2026-10-06).
-            const textTier = siteTier(p, "text", "mid");
-            update("intelligence", {
-              textProvider: p,
-              textTier,
-              textModel: mirrorModel(p, "text", textTier),
-            });
-          }}
-          onImageProviderChange={(p) => {
-            const imageTier = siteTier(p, "image", "mid");
-            update("intelligence", {
-              imageProvider: p,
-              imageTier,
-              imageModel: mirrorModel(p, "image", imageTier),
-            });
-          }}
+          onTextProviderChange={(p) => update("intelligence", { textProvider: p })}
+          onImageProviderChange={(p) => update("intelligence", { imageProvider: p })}
           availableTextProviders={
             isManagedAiPlan ? ["gemini", "openai", "anthropic"] : activeProviders
           }
           availableImageProviders={isManagedAiPlan ? ["gemini", "openai"] : imageProviders}
           // Owner review 2026-10-06: only a choice the site can make. A lone
-          // provider has no row; a model picker only for a provider whose
-          // "Use recommended model" switch is off.
+          // provider has no row. No model names here: there is no model to
+          // choose since 2026-11-25, and the AI Engine page names them.
           hideSingleProviderRow
-          showTextTierSelector={
-            showPerPostModelPicker && sitePickedModel(formData.intelligence.textProvider, "text")
-          }
-          showImageTierSelector={
-            showPerPostModelPicker && sitePickedModel(formData.intelligence.imageProvider, "image")
-          }
-          textTier={formData.intelligence.textTier ?? "mid"}
-          imageTier={formData.intelligence.imageTier ?? "mid"}
-          onTextTierChange={(t) =>
-            update("intelligence", {
-              textTier: t,
-              textModel:
-                mirrorModelForTier(formData.intelligence.textProvider, "text", t) ?? "",
-            })
-          }
-          onImageTierChange={(t) =>
-            update("intelligence", {
-              imageTier: t,
-              imageModel:
-                mirrorModelForTier(formData.intelligence.imageProvider, "image", t) ?? "",
-            })
-          }
         />
 
         {/* Provider advice for a caution text provider (Free / BYOK only).
@@ -833,17 +740,9 @@ const GeneratePostPage = () => {
             specs/byok-ai-guidance.md §5. */}
         <ProviderAdvice
           provider={formData.intelligence.textProvider}
-          onSwitch={(to, tier) => {
-            const previous = {
-              textProvider: formData.intelligence.textProvider,
-              textTier: formData.intelligence.textTier,
-              textModel: formData.intelligence.textModel,
-            };
-            update("intelligence", {
-              textProvider: to,
-              textTier: tier,
-              textModel: mirrorModel(to, "text", tier),
-            });
+          onSwitch={(to) => {
+            const previous = { textProvider: formData.intelligence.textProvider };
+            update("intelligence", { textProvider: to });
             return () => {
               update("intelligence", previous);
               document

@@ -472,14 +472,12 @@ const RunInputsCard = ({ run }: { run: RunStatusSerialized }) => {
                   <ProviderRow
                     slotLabel={__("Text Provider", "structura")}
                     providerId={textProvider.id}
-                    model={textProvider.model}
                   />
                 )}
                 {imageProvider && (
                   <ProviderRow
                     slotLabel={__("Image Provider", "structura")}
                     providerId={imageProvider.id}
-                    model={imageProvider.model}
                   />
                 )}
                 {/* Only render fallback rows when they actually fired —
@@ -489,7 +487,6 @@ const RunInputsCard = ({ run }: { run: RunStatusSerialized }) => {
                   <ProviderRow
                     slotLabel={__("Text Fallback (used)", "structura")}
                     providerId={textFallback.id}
-                    model={textFallback.model}
                     secondary
                   />
                 )}
@@ -497,7 +494,6 @@ const RunInputsCard = ({ run }: { run: RunStatusSerialized }) => {
                   <ProviderRow
                     slotLabel={__("Image Fallback (used)", "structura")}
                     providerId={imageFallback.id}
-                    model={imageFallback.model}
                     secondary
                   />
                 )}
@@ -565,15 +561,18 @@ const PROVIDER_LABELS: Record<string, string> = {
   anthropic: "Anthropic",
 };
 
+/**
+ * One provider row of the run's configuration. The model id the run recorded
+ * followed the name in parentheses until the owner decision of 2026-11-25:
+ * no customer surface names a model.
+ */
 const ProviderRow = ({
   slotLabel,
   providerId,
-  model,
   secondary,
 }: {
   slotLabel: string;
   providerId: string;
-  model?: string;
   secondary?: boolean;
 }) => {
   const name = PROVIDER_LABELS[providerId] ?? providerId;
@@ -585,17 +584,7 @@ const ProviderRow = ({
       )}
     >
       <span className="text-xs font-medium text-neutral-500">{slotLabel}</span>
-      <span className="text-xs font-bold dark:text-neutral-200">
-        {name}
-        {model && (
-          <>
-            {" "}
-            <span className="font-mono text-[11px] font-normal text-neutral-500 dark:text-neutral-400">
-              ({model})
-            </span>
-          </>
-        )}
-      </span>
+      <span className="text-xs font-bold dark:text-neutral-200">{name}</span>
     </div>
   );
 };

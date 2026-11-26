@@ -20,7 +20,6 @@ import {
   resolveSocialCopyModelId,
   resolveStudyJudgeModelId,
   resolveSuggestionModelId,
-  resolveSupersededTextModelId,
   resolveUtilityModelId,
   type AdviceContext,
   type AIProvider,
@@ -59,13 +58,14 @@ describe("frozen bindings (pinned at their pre-refresh ids)", () => {
     for (const p of PROVIDERS) expect(MODEL_CATALOG[p].defaults.fast).toBe(resolveFastModelId(p));
   });
 
-  it("utility calls and images stay where they were", () => {
+  // OpenAI images moved on their own on 2026-11-25 (owner decision, §2.1;
+  // catalog.test.ts "own-key OpenAI images").
+  it("utility calls and Gemini images stay where they were", () => {
     expect(resolveUtilityModelId("openai")).toBe("gpt-5-nano-2025-08-07");
     expect(resolveUtilityModelId("gemini")).toBe("gemini-3.1-flash-lite");
     expect(resolveUtilityModelId("anthropic")).toBe("claude-haiku-4-5-20251001");
     expect(resolveManagedModelId("cloud", "image", "gemini")).toBe("gemini-3.1-flash-image");
-    expect(resolveManagedModelId("cloud", "image", "openai")).toBe("gpt-image-1-mini");
-    expect(getDefaultModel("openai", "image")).toBe("gpt-image-1-mini");
+    expect(getDefaultModel("gemini", "image")).toBe("gemini-3.1-flash-image");
   });
 });
 
@@ -120,28 +120,6 @@ describe("BYOK post default and fallback model", () => {
 });
 
 describe("superseded ids", () => {
-  it("run the current model of the tier they held", () => {
-    expect(resolveSupersededTextModelId("anthropic", "claude-sonnet-5")).toBe("claude-sonnet-5-5");
-    expect(resolveSupersededTextModelId("anthropic", "claude-opus-4-8")).toBe("claude-opus-5-5");
-    expect(resolveSupersededTextModelId("openai", "gpt-5.4-mini")).toBe("gpt-5.6-sol");
-    expect(resolveSupersededTextModelId("openai", "gpt-5.2-2025-12-11")).toBe("gpt-6-astra");
-    expect(resolveSupersededTextModelId("gemini", "gemini-3.5-flash")).toBe("gemini-3.8-flash");
-  });
-
-  it("leave current ids, never-tiered ids, unknown ids and a provider mismatch unchanged", () => {
-    for (const [p, id] of [
-      ["anthropic", "claude-sonnet-5-5"],
-      ["gemini", "gemini-3.1-pro-preview"],
-      ["openai", "gpt-4o"],
-      ["gemini", "gemini-2.5-pro"],
-      ["anthropic", "claude-haiku-4-5-20251001"],
-      ["anthropic", "claude-sonnet-4-6"],
-      ["openai", "claude-sonnet-5"],
-    ] as Array<[AIProvider, string]>) {
-      expect(resolveSupersededTextModelId(p, id)).toBe(id);
-    }
-  });
-
   it("stay out of the served catalog", () => {
     for (const [p, id] of [
       ["anthropic", "claude-sonnet-5"],
@@ -184,9 +162,12 @@ describe("RECOMMENDATIONS", () => {
   });
 
   // FROZEN legacy image flags (not from testing): old clients preselect the
-  // recommended image model, so these must not move with this change.
-  it("keeps the served image `recommended` flags exactly as before 2026-10-01", () => {
-    expect(recommended("openai", "image")).toEqual(["gpt-image-2"]);
+  // recommended image model, so these must not move with this change. The
+  // OpenAI one went with GPT Image 2 on 2026-11-25: no longer served, so no
+  // old client could preselect it, and every old client falls back to
+  // `defaults.image` (specs/byok-ai-guidance.md §2.1).
+  it("keeps the served image `recommended` flags as before 2026-10-01, without the retired GPT Image 2", () => {
+    expect(recommended("openai", "image")).toEqual([]);
     expect(recommended("gemini", "image")).toEqual(["gemini-3.1-flash-image"]);
     expect(recommended("anthropic", "image")).toEqual([]);
   });

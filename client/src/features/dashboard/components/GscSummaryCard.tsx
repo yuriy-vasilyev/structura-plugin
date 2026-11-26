@@ -120,7 +120,7 @@ const PopulatedCard = ({
     <Card className={cn(SHELL, "border-l-emerald-500")}>
       <p className={OVERLINE}>{__("Search Clicks · 28d", "structura")}</p>
       <div className="flex items-baseline gap-2">
-        <h2 className="m-0! text-3xl! font-black! text-neutral-900 dark:text-white">
+        <h2 className="m-0! text-3xl! font-black! text-neutral-900! dark:text-white!">
           {formatMetricCount(totals28.clicks, locale)}
         </h2>
         {delta.label && (
@@ -200,7 +200,7 @@ const CollectingCard = () => (
     <div className="flex items-baseline gap-2">
       {/* Em-dash placeholder keeps the value slot's height so the grid
           never reflows once real numbers arrive. */}
-      <h2 className="m-0! text-3xl! font-black! text-neutral-300 dark:text-neutral-600">
+      <h2 className="m-0! text-3xl! font-black! text-neutral-300! dark:text-neutral-600!">
         —
       </h2>
     </div>

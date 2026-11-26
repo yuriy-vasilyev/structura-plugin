@@ -108,39 +108,29 @@ class GenerateSinglePostSeoTargetingTest extends TestCase
         $this->assertArrayNotHasKey('authorityDomains', $campaign);
     }
 
-    /** @test */
-    public function it_maps_a_valid_model_tier_onto_the_inline_campaign(): void
+    /**
+     * No model or tier is picked since 2026-11-25 (specs/byok-ai-guidance.md
+     * §2.2): the inline campaign carries none, even when a request still
+     * sends them, and the cloud runs the provider's Standard model.
+     *
+     * @test
+     */
+    public function the_inline_campaign_carries_no_model_or_tier(): void
     {
-        // The single post-gen picker sends text_tier/image_tier; they must ride
-        // on the ephemeral campaign's intelligence block so the cloud resolves
-        // the concrete model at gen time (preferring the tier over *_model).
         $campaign = $this->run_and_capture_campaign([
             'topic'         => 'A practical guide to headless WordPress',
             'text_provider' => 'gemini',
             'persona_id'    => 'p1',
+            'text_model'    => 'gemini-3.1-pro-preview',
+            'image_model'   => 'gemini-3-pro-image',
             'text_tier'     => 'top',
-            'image_tier'    => 'mid',
+            'image_tier'    => 'top',
         ]);
 
-        $this->assertSame('top', $campaign['intelligence']['textTier'] ?? null);
-        $this->assertSame('mid', $campaign['intelligence']['imageTier'] ?? null);
-    }
-
-    /** @test */
-    public function it_leaves_the_model_tier_null_when_none_is_picked(): void
-    {
-        // No tier picked → null on the inline campaign, so the cloud falls back
-        // to the concrete textModel/imageModel exactly as before the picker.
-        $campaign = $this->run_and_capture_campaign([
-            'topic'         => 'A practical guide to headless WordPress',
-            'text_provider' => 'gemini',
-            'persona_id'    => 'p1',
-        ]);
-
-        $this->assertArrayHasKey('textTier', $campaign['intelligence']);
-        $this->assertNull($campaign['intelligence']['textTier']);
-        $this->assertArrayHasKey('imageTier', $campaign['intelligence']);
-        $this->assertNull($campaign['intelligence']['imageTier']);
+        $this->assertSame('gemini', $campaign['intelligence']['textProvider']);
+        foreach (['textModel', 'imageModel', 'textTier', 'imageTier'] as $key) {
+            $this->assertArrayNotHasKey($key, $campaign['intelligence']);
+        }
     }
 
     /**

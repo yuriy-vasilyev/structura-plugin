@@ -76,7 +76,7 @@ export const UpgradeCard: FC = () => {
         </p>
       </div>
 
-      <h3 className="mt-2! mb-1! text-lg font-black text-neutral-900 dark:text-white">
+      <h3 className="mt-2! mb-1! text-lg font-black text-neutral-900! dark:text-white!">
         {content.title}
       </h3>
 

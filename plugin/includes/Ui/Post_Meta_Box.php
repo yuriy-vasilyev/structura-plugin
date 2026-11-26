@@ -13,7 +13,7 @@ use Structura\Core\Source_Check;
 /**
  * Structura post-editor meta box.
  *
- * Shows generation metadata (keyword, keyphrase, model, tokens) and
+ * Shows generation metadata (keyword, keyphrase, provider, tokens) and
  * provides actions like "Regenerate Featured Image" for paid users.
  * Uses add_meta_box() so it works in both Gutenberg and Classic Editor.
  */
@@ -401,54 +401,19 @@ class Post_Meta_Box
     }
 
     /**
-     * Validate a per-regen image quality tier before forwarding it to the
-     * cloud. Only the two picker-selectable tiers pass; anything else (a typo,
-     * a retired `cheap` tag, an injected value) returns null so the regen falls
-     * back to the campaign / concrete-model default rather than pinning to a
-     * tier the picker never offers.
+     * Returns the image providers the regen modal offers: one row per
+     * connected image-capable provider, or none when there is nothing to
+     * choose (one provider) or Structura picks the image model (Cloud).
      *
-     * @param mixed $raw Raw `image_tier` value from the regen request.
-     * @return string|null 'top' | 'mid', or null when absent/invalid.
-     */
-    private static function sanitize_image_tier_override($raw): ?string
-    {
-        if ( ! is_string($raw)) {
-            return null;
-        }
-        $candidate = sanitize_key($raw);
-        return in_array($candidate, ['top', 'mid'], true) ? $candidate : null;
-    }
-
-    /**
-     * Build the per-provider Top/Standard tier catalog the regen modal renders.
-     *
-     * For each connected image-capable provider we surface at most two rows —
-     * a `top` and a `mid` — so the modal offers a quality tier, never a raw
-     * model list. The concrete model NAME is carried only as the human label;
-     * the cloud resolves the actual model from (provider, tier) at generation
-     * time.
-     *
-     * Derivation: image models are intentionally exactly top + mid per provider
-     * (see `@structura/model-catalog` model-data), and the served catalog marks
-     * the MID model with `default: true` (what `getDefaultModel(_,'image')`
-     * returns). So mid = the `default` image model; top = the other (non-
-     * default) one. We deliberately do NOT key top off `recommended` — for
-     * Gemini the recommended flag sits on the *mid* Flash-Image (the cost
-     * default), so "top = recommended" would hide Pro-Image entirely. A
-     * provider exposing only one image model yields only the tier we can place.
-     *
-     * Extracted from the enqueue path so the derivation is unit-testable
-     * without standing up admin enqueue.
-     *
-     * Managed plans (Cloud) get no rows, so the modal hides its
-     * picker: since 2026-10-06 Structura binds the image model there and the
-     * cloud ignores a provider or tier sent with a managed regen
-     * (specs/managed-ai-lineup.md).
+     * Since 2026-11-25 no model or tier is picked (owner decision,
+     * specs/byok-ai-guidance.md §2.2): until then the modal listed
+     * "Top (name)" / "Standard (name)" per provider after "Use default
+     * model". Public so the rule is testable without admin enqueue.
      *
      * @param string $tier License plan id — scopes the connected-provider set.
-     * @return array<int, array{provider:string, providerName:string, tier:string, modelName:string}>
+     * @return array<int, array{provider:string, providerName:string}>
      */
-    private static function build_image_tier_catalog(string $tier): array
+    public static function build_image_provider_choices(string $tier): array
     {
         // 'cloud_pro': retired 2026-10-12, accepted for one release window (see License_Manager::get_plan()).
         if (in_array($tier, ['cloud', 'cloud_pro'], true)) {
@@ -458,71 +423,43 @@ class Post_Meta_Box
             return [];
         }
 
-        $rows      = [];
-        $connected = \Structura\Core\Provider_Registry::get_connected_providers($tier);
-        foreach ($connected as $provider) {
+        $rows = [];
+        foreach (\Structura\Core\Provider_Registry::get_connected_providers($tier) as $provider) {
             $provider_id = (string) ($provider['id'] ?? '');
-            $caps        = (array) ($provider['capabilities'] ?? []);
-            if ($provider_id === '' || ! in_array('image', $caps, true)) {
+            if ($provider_id === '' || ! in_array('image', (array) ($provider['capabilities'] ?? []), true)) {
                 continue;
             }
-            $provider_name = (string) ($provider['name'] ?? $provider_id);
-            $catalog       = \Structura\Core\Provider_Registry::get_models($provider_id, 'image');
-
-            $top = null;
-            $mid = null;
-            foreach ($catalog as $m) {
-                if ( ! empty($m['default'])) {
-                    // The `default`-flagged image model is the mid pin.
-                    if ($mid === null) {
-                        $mid = $m;
-                    }
-                } elseif ($top === null) {
-                    // Any non-default image model is the top pin.
-                    $top = $m;
-                }
-            }
-
-            if ($top !== null) {
-                $rows[] = [
-                    'provider'     => $provider_id,
-                    'providerName' => $provider_name,
-                    'tier'         => 'top',
-                    'modelName'    => (string) ($top['name'] ?? $top['id'] ?? ''),
-                ];
-            }
-            if ($mid !== null) {
-                $rows[] = [
-                    'provider'     => $provider_id,
-                    'providerName' => $provider_name,
-                    'tier'         => 'mid',
-                    'modelName'    => (string) ($mid['name'] ?? $mid['id'] ?? ''),
-                ];
-            }
+            $rows[] = [
+                'provider'     => $provider_id,
+                'providerName' => (string) ($provider['name'] ?? $provider_id),
+            ];
         }
 
-        return $rows;
+        return count($rows) > 1 ? $rows : [];
     }
 
     /**
-     * Returns the "Generation Stats" model id and token total to show for
-     * a post's `_structura_generation_meta`; '' and 0 mean "no line".
+     * Returns the "Generation Stats" provider name and token total to show
+     * for a post's `_structura_generation_meta`; '' and 0 mean "no line".
      *
      * Managed plans (Cloud, Cloud Pro) show neither: their customers never
-     * see a model name and are metered by posts, not tokens
+     * see a provider or model name and are metered by posts, not tokens
      * (specs/managed-ai-lineup.md §3.3, 2026-10-01). The cloud also sends a
-     * blank model for them; a blank model never renders a line on any plan.
+     * blank provider for them; a blank provider never renders a line on any
+     * plan. The line showed the raw model id until the owner decision of
+     * 2026-11-25: no customer surface names a model
+     * (specs/byok-ai-guidance.md §2.2).
      *
      * @param mixed  $gen_meta Raw post meta value.
      * @param string $plan     License plan id.
      *
-     * @return array{model: string, tokens: int}
+     * @return array{provider: string, tokens: int}
      */
     public static function generation_stats_lines($gen_meta, string $plan): array
     {
         // 'cloud_pro': retired 2026-10-12, accepted for one release window (see License_Manager::get_plan()).
         if ( ! is_array($gen_meta) || in_array($plan, ['cloud', 'cloud_pro'], true)) {
-            return ['model' => '', 'tokens' => 0];
+            return ['provider' => '', 'tokens' => 0];
         }
 
         $tokens = 0;
@@ -533,11 +470,16 @@ class Post_Meta_Box
             $tokens     = $tokens_in + $tokens_out;
         }
 
-        $model = $gen_meta['model'] ?? '';
+        $provider_id = isset($gen_meta['provider']) && is_string($gen_meta['provider'])
+            ? trim($gen_meta['provider'])
+            : '';
+        $provider    = $provider_id !== '' && class_exists(\Structura\Core\Provider_Registry::class)
+            ? \Structura\Core\Provider_Registry::get_provider($provider_id)
+            : null;
 
         return [
-            'model'  => is_string($model) ? trim($model) : '',
-            'tokens' => $tokens,
+            'provider' => (string) ($provider['name'] ?? $provider_id),
+            'tokens'   => $tokens,
         ];
     }
 
@@ -579,39 +521,18 @@ class Post_Meta_Box
                 true,
         );
 
-        // 2026-05-02 — image model picker. We pre-resolve the
-        // catalog server-side and pass it to the modal so the user
-        // gets an instantly-populated dropdown on first open. The
-        // catalog comes from `Provider_Registry::get_models($pid,
-        // 'image')` — same source the "Add Provider" SPA dropdown
-        // uses, so any catalog changes (new model, deprecated
-        // model) flow through both surfaces consistently.
-        //
-        // Tier rules applied client-side:
-        //   - free / pro: full non-fast catalog for the user's
-        //     image provider.
-        //   - cloud (managed mid): only `default: true` entries
-        //     (mid-tier); top entries appear DISABLED with an
-        //     "Agency only" hint.
-        //   - agency (managed top): full non-fast catalog (master
-        //     keys, full access).
+        // The modal's picker offers the image provider only, when more
+        // than one is connected on an own-key plan (2026-11-25: no model or
+        // tier is picked, `build_image_provider_choices`). The stamped
+        // provider rides along as `preferredProvider` so the JS opens on it.
         $license_data = License_Manager::get_license_data();
         $tier         = $license_data['plan'] ?? 'free';
 
-        // 2026-07 — the picker offers a quality TIER (Top / Standard), never a
-        // raw model list. For each connected image-capable provider we surface
-        // its top (`recommended`) + mid (`default`) image models as the two
-        // tiers, labeled with the model NAME so the user sees "Top (Gemini 3
-        // Pro Image)". The cloud resolves the concrete model from (provider,
-        // tier) at gen time, so a model bump auto-applies without a re-pick.
-        // The stamped provider rides along as
-        // `preferredProvider` so the JS can pin it first / drive the implicit
-        // "Use default" entry.
         $stamped_image_provider = (string) get_post_meta($post->ID, '_structura_image_provider', true);
         // No managed-plan fill-in since 2026-10-06: the picker is hidden there.
         $preferred_provider     = $stamped_image_provider;
 
-        $image_tiers_catalog = self::build_image_tier_catalog($tier);
+        $image_provider_choices = self::build_image_provider_choices($tier);
 
         wp_localize_script('structura-post-meta-box', 'structuraMetaBox', [
                 'ajaxUrl'           => admin_url('admin-ajax.php'),
@@ -622,7 +543,7 @@ class Post_Meta_Box
                 // reads `imageProvider` off the localized object.
                 'imageProvider'     => $preferred_provider,
                 'preferredProvider' => $preferred_provider,
-                'imageTiers'        => $image_tiers_catalog,
+                'imageProviders'    => $image_provider_choices,
         ]);
 
         wp_enqueue_style(
@@ -1015,12 +936,12 @@ class Post_Meta_Box
             $keyphrase = get_post_meta($post->ID, 'rank_math_focus_keyword', true);
         }
 
-        // Model line and token total for Generation Stats; both blank on
+        // Provider line and token total for Generation Stats; both blank on
         // managed plans.
-        $stats        = self::generation_stats_lines($gen_meta, License_Manager::get_plan());
-        $model_raw    = $stats['model'];
-        $tokens_total = $stats['tokens'];
-        // Keeps the generated date visible when the model and token lines
+        $stats          = self::generation_stats_lines($gen_meta, License_Manager::get_plan());
+        $provider_label = $stats['provider'];
+        $tokens_total   = $stats['tokens'];
+        // Keeps the generated date visible when the provider and token lines
         // are hidden (managed plans, or a cloud that sent neither).
         $has_generated_at = is_array($gen_meta) && ! empty($gen_meta['generated_at']);
 
@@ -1107,10 +1028,10 @@ class Post_Meta_Box
 
             <!-- Generation Stats -->
             <?php
-            if (is_array($gen_meta) && ($model_raw !== '' || $tokens_total || $has_generated_at)): ?>
+            if (is_array($gen_meta) && ($provider_label !== '' || $tokens_total || $has_generated_at)): ?>
                 <div class="structura-mb__stats">
                     <?php
-                    if ($model_raw !== ''): ?>
+                    if ($provider_label !== ''): ?>
                         <div class="structura-mb__stat">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1120,7 +1041,7 @@ class Post_Meta_Box
                                 <path d="M15.44 13a10.1 10.1 0 0 1 .6 3.36c0 2.36-1.27 4.64-3.04 4.64"/>
                             </svg>
                             <span><?php
-                                echo esc_html($model_raw); ?></span>
+                                echo esc_html($provider_label); ?></span>
                         </div>
                     <?php
                     endif; ?>
@@ -1392,14 +1313,13 @@ class Post_Meta_Box
                         </p>
                     </div>
 
-                    <!-- Image model picker (2026-05-02) — populated
-                         by post-meta-box.js based on tier + provider.
-                         Hidden by JS for free tier (local adapter
-                         doesn't support per-post model overrides). -->
+                    <!-- Image provider picker — populated by post-meta-box.js
+                         when two or more image providers are connected on an
+                         own-key plan; hidden otherwise. A model picker until
+                         2026-11-25 (no model or tier is picked any more). -->
                     <div class="structura-modal__model-section" id="structura-modal-model-section" style="display:none;">
                         <label for="structura-modal-model" class="structura-modal__label">
-                            <?php esc_html_e('Image model', 'structura'); ?>
-                            <span class="structura-modal__label-hint" id="structura-modal-model-hint"></span>
+                            <?php esc_html_e('Image provider', 'structura'); ?>
                         </label>
                         <select id="structura-modal-model" class="structura-modal__select"></select>
                     </div>
@@ -1570,14 +1490,9 @@ class Post_Meta_Box
 
             add_filter('update_post_metadata', $block_thumb, 10, 3);
 
-            // 2026-05-02 — accept per-regen image model override
-            // from the modal's model picker. Sanitised aggressively
-            // (alnum + hyphen + dot only — every catalog id matches
-            // that shape) so we can hand it through to cloud
-            // without a separate validate-and-throw round-trip.
-            $override_model = isset($_POST['image_model']) && is_string($_POST['image_model'])
-                ? preg_replace('/[^A-Za-z0-9._\-]/', '', sanitize_text_field(wp_unslash($_POST['image_model'])))
-                : '';
+            // The per-regen image model (2026-05-02) and tier overrides went
+            // on 2026-11-25: the modal picks no model or tier, and a request
+            // that names one is ignored (specs/byok-ai-guidance.md §2.2).
 
             // 2026-05-07 — accept per-regen image provider override.
             // The picker now lists every connected image-capable
@@ -1592,23 +1507,13 @@ class Post_Meta_Box
                 isset($_POST['image_provider']) ? sanitize_text_field(wp_unslash($_POST['image_provider'])) : null
             );
 
-            // Per-regen quality tier (top|mid) from the modal's Top/Standard
-            // picker — the tier-based replacement for the concrete model
-            // override. The cloud resolves the concrete image model from
-            // (provider, tier) and prefers it over the model.
-            $override_tier = self::sanitize_image_tier_override(
-                isset($_POST['image_tier']) ? sanitize_text_field(wp_unslash($_POST['image_tier'])) : null
-            );
-
             $task_runner = new \Structura\Scheduler\Task_Runner();
             $task_runner->generate_post_images(
                 $post_id,
                 'featured',
                 $image_data,
                 $campaign,
-                $override_model !== '' ? $override_model : null,
-                $override_provider,
-                $override_tier
+                $override_provider
             );
 
             remove_filter('update_post_metadata', $block_thumb, 10);
@@ -1820,24 +1725,10 @@ class Post_Meta_Box
             // because that would hit inject_image_into_content; we
             // restore the slot on the resulting attachment's meta
             // immediately after.
-            // 2026-05-02 — same per-regen model override path as
-            // the featured handler.
-            $override_model = isset($_POST['image_model']) && is_string($_POST['image_model'])
-                ? preg_replace('/[^A-Za-z0-9._\-]/', '', sanitize_text_field(wp_unslash($_POST['image_model'])))
-                : '';
-
             // 2026-05-07 — same per-regen provider override path as
             // the featured handler. See its docblock for rationale.
             $override_provider = self::sanitize_image_provider_override(
                 isset($_POST['image_provider']) ? sanitize_text_field(wp_unslash($_POST['image_provider'])) : null
-            );
-
-            // Per-regen quality tier (top|mid) from the modal's Top/Standard
-            // picker — the tier-based replacement for the concrete model
-            // override. The cloud resolves the concrete image model from
-            // (provider, tier) and prefers it over the model.
-            $override_tier = self::sanitize_image_tier_override(
-                isset($_POST['image_tier']) ? sanitize_text_field(wp_unslash($_POST['image_tier'])) : null
             );
 
             $task_runner = new \Structura\Scheduler\Task_Runner();
@@ -1846,9 +1737,7 @@ class Post_Meta_Box
                 'featured',
                 $image_data,
                 $campaign,
-                $override_model !== '' ? $override_model : null,
-                $override_provider,
-                $override_tier
+                $override_provider
             );
 
             remove_filter('update_post_metadata', $block_thumb, 10);

@@ -45,16 +45,8 @@ export interface UnifiedSettings {
         connected: boolean;
         masked_key: string;
         capabilities: Array<"text" | "image">;
-        text_model: string;
-        image_model: string;
-        /**
-         * The tier ("top" | "mid") the setup wizard's "Use recommended
-         * model" switch stored, or "" when the site picked a model. Wins
-         * over `text_model` / `image_model` (`resolveDefaultModel`).
-         * Absent on plugin builds before the release after 2026-10-06.
-         */
-        text_tier?: string;
-        image_tier?: string;
+        // `text_model`, `image_model`, `text_tier`, `image_tier` went on
+        // 2026-11-25 with the model pickers (specs/byok-ai-guidance.md §2.2).
       };
     };
     /** Provider catalog — structural metadata (capabilities, key_url, etc.) */

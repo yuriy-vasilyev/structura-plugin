@@ -22,7 +22,6 @@ import {
   acceptsReferenceImages,
   TEXT_OUTPUT_BUDGET,
   resolveByokTierModelId,
-  tierForModelId,
   type AIProvider,
   type CatalogModel,
 } from "../index";
@@ -34,43 +33,29 @@ import {
  * refactor is caught before it ships a broken catalog to clients.
  */
 const EXPECTED_CATALOG = {
+  // One text and one image model per provider since 2026-11-25 (owner
+  // decision, specs/byok-ai-guidance.md §2.2): the model own-key posts run on.
+  // An un-updated plugin's wizard and regenerate modal read this list, so
+  // they offer nothing the cloud would then ignore.
   openai: {
     // 2026-10-01 refresh (specs/byok-ai-guidance.md §2): `text` is the
     // Standard tier, `fast` stays frozen at the superseded fast model.
     defaults: {
       text: "gpt-5.6-sol",
       fast: "gpt-5.4-mini",
-      image: "gpt-image-1-mini",
+      // One OpenAI image model on own keys since 2026-11-25 (owner decision,
+      // specs/byok-ai-guidance.md §2.1); it carries no frozen `recommended`.
+      image: "gpt-image-2.6-flare",
     },
-    text: [
-      { id: "gpt-6-astra", name: "GPT-6 Astra" },
-      { id: "gpt-5.6-sol", name: "GPT-5.6 Sol", default: true, recommended: true },
-      { id: "gpt-5-nano-2025-08-07", name: "GPT-5 Nano" },
-      { id: "gpt-4o", name: "GPT-4o" },
-      { id: "gpt-4o-mini", name: "GPT-4o Mini" },
-    ],
-    image: [
-      { id: "gpt-image-1-mini", name: "GPT Image 1 Mini", default: true },
-      { id: "gpt-image-2", name: "GPT Image 2", recommended: true },
-    ],
+    text: [{ id: "gpt-5.6-sol", name: "GPT-5.6 Sol", default: true, recommended: true }],
+    image: [{ id: "gpt-image-2.6-flare", name: "GPT Image 2.6 Flare", default: true }],
     manifest: {
-      "gpt-6-astra": { family: "chat", endpoint: "v1/chat/completions" },
       "gpt-5.6-sol": { family: "chat", endpoint: "v1/chat/completions" },
-      "gpt-5-nano-2025-08-07": { family: "chat", endpoint: "v1/chat/completions" },
-      "gpt-4o": { family: "chat", endpoint: "v1/chat/completions" },
-      "gpt-4o-mini": { family: "chat", endpoint: "v1/chat/completions" },
-      "gpt-image-1-mini": {
+      "gpt-image-2.6-flare": {
         family: "image",
         endpoint: "v1/images/generations",
         sizes: { "1:1": "1024x1024", "16:9": "1536x1024", "9:16": "1024x1536" },
-        qualities: ["low", "medium", "high", "auto"],
-        default_quality: "high",
-      },
-      "gpt-image-2": {
-        family: "image",
-        endpoint: "v1/images/generations",
-        sizes: { "1:1": "1024x1024", "16:9": "1536x1024", "9:16": "1024x1536" },
-        qualities: ["low", "medium", "high", "auto"],
+        qualities: ["low", "medium", "high", "xhigh", "max", "auto"],
         default_quality: "high",
       },
     },
@@ -82,27 +67,11 @@ const EXPECTED_CATALOG = {
       fast: "gemini-3.5-flash",
       image: "gemini-3.1-flash-image",
     },
-    text: [
-      { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro" },
-      { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", default: true },
-      { id: "gemini-3.1-flash-lite", name: "Gemini 3.1 Flash Lite" },
-      { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro" },
-    ],
-    image: [
-      { id: "gemini-3.1-flash-image", name: "Gemini 3.1 Flash Image", default: true, recommended: true },
-      { id: "gemini-3-pro-image", name: "Gemini 3 Pro Image" },
-    ],
+    text: [{ id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", default: true }],
+    image: [{ id: "gemini-3.1-flash-image", name: "Gemini 3.1 Flash Image", default: true, recommended: true }],
     manifest: {
-      "gemini-3.1-pro-preview": { family: "text", endpoint: "generateContent" },
       "gemini-3.8-flash": { family: "text", endpoint: "generateContent" },
-      "gemini-3.1-flash-lite": { family: "text", endpoint: "generateContent" },
-      "gemini-2.5-pro": { family: "text", endpoint: "generateContent" },
       "gemini-3.1-flash-image": {
-        family: "image",
-        endpoint: "generateContent",
-        ratios: ["1:1", "4:3", "16:9", "9:16"],
-      },
-      "gemini-3-pro-image": {
         family: "image",
         endpoint: "generateContent",
         ratios: ["1:1", "4:3", "16:9", "9:16"],
@@ -115,16 +84,10 @@ const EXPECTED_CATALOG = {
       fast: "claude-haiku-4-5-20251001",
       image: "",
     },
-    text: [
-      { id: "claude-sonnet-5-5", name: "Claude Sonnet 5.5", default: true, recommended: true },
-      { id: "claude-opus-5-5", name: "Claude Opus 5.5" },
-      { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5", fast: true },
-    ],
+    text: [{ id: "claude-sonnet-5-5", name: "Claude Sonnet 5.5", default: true, recommended: true }],
     image: [],
     manifest: {
       "claude-sonnet-5-5": { family: "messages", endpoint: "v1/messages", max_output_tokens: 8192 },
-      "claude-opus-5-5": { family: "messages", endpoint: "v1/messages", max_output_tokens: 8192 },
-      "claude-haiku-4-5-20251001": { family: "messages", endpoint: "v1/messages", max_output_tokens: 8192 },
     },
   },
 };
@@ -169,6 +132,18 @@ describe("authoring invariants", () => {
     }
     expect(MODELS.filter((m) => m.provider === "anthropic" && m.role === "image")).toHaveLength(0);
   });
+
+  // An own-key image with no stored model, an own-key fallback and a retired
+  // stored id all run the provider default, and a character needs reference
+  // images on it (specs/visual-signatures.md §13.6).
+  it("makes each image default a listed Standard model that takes reference images", () => {
+    for (const provider of ["openai", "gemini"] as const) {
+      const d = MODELS.find((m) => m.provider === provider && m.role === "image" && m.default)!;
+      expect(d.unlisted).toBeUndefined();
+      expect(d.tier).toBe("mid");
+      expect(acceptsReferenceImages(provider, d.id)).toBe(true);
+    }
+  });
 });
 
 describe("selectors", () => {
@@ -187,12 +162,12 @@ describe("selectors", () => {
     expect(getRecommendedModel("gemini", "text")).toBe("gemini-3.8-flash");
   });
 
-  it("isKnownImageModelForProvider validates and honors requireMidOnly", () => {
-    expect(isKnownImageModelForProvider("openai", "gpt-image-2")).toBe(true);
+  it("isKnownImageModelForProvider answers for the served image models only", () => {
+    expect(isKnownImageModelForProvider("gemini", "gemini-3.1-flash-image")).toBe(true);
+    expect(isKnownImageModelForProvider("openai", "gpt-image-2.6-flare")).toBe(true);
     expect(isKnownImageModelForProvider("openai", "nope")).toBe(false);
-    // gpt-image-2 is top (recommended), not mid — blocked when mid-only.
-    expect(isKnownImageModelForProvider("openai", "gpt-image-2", true)).toBe(false);
-    expect(isKnownImageModelForProvider("openai", "gpt-image-1-mini", true)).toBe(true);
+    // Gemini 3 Pro Image keeps its Top tier in the registry but is not served (2026-11-25).
+    expect(isKnownImageModelForProvider("gemini", "gemini-3-pro-image")).toBe(false);
   });
 });
 
@@ -203,11 +178,12 @@ describe("managed-tier resolution (replaces PLAN_DEFAULTS)", () => {
     expect(resolveManagedModelId("cloud", "text", "gemini")).toBe("gemini-3.5-flash");
     expect(resolveManagedModelId("cloud", "text", "openai")).toBe("gpt-5.4-mini");
     expect(resolveManagedModelId("cloud", "text", "anthropic")).toBe("claude-sonnet-5");
-    // Images resolve the registry mid tier.
+    // Images resolve the registry mid tier. No Cloud image reaches this:
+    // the managed image binding answers first (2026-10-06).
     expect(resolveManagedModelId("cloud", "image", "gemini")).toBe(
       "gemini-3.1-flash-image",
     );
-    expect(resolveManagedModelId("cloud", "image", "openai")).toBe("gpt-image-1-mini");
+    expect(resolveManagedModelId("cloud", "image", "openai")).toBe("gpt-image-2.6-flare");
   });
 });
 
@@ -281,11 +257,13 @@ describe("registry tiers (binding layer)", () => {
   });
 
   it("resolves image mid/top and has no cheap image tier", () => {
-    expect(getRegistryModelId("openai", "image", "mid")).toBe("gpt-image-1-mini");
-    expect(getRegistryModelId("openai", "image", "top")).toBe("gpt-image-2");
+    expect(getRegistryModelId("openai", "image", "mid")).toBe("gpt-image-2.6-flare");
+    // One OpenAI image model since 2026-11-25: no Top for OpenAI images.
+    expect(getRegistryModelId("openai", "image", "top")).toBeUndefined();
     expect(getRegistryModelId("gemini", "image", "mid")).toBe(
       "gemini-3.1-flash-image",
     );
+    expect(getRegistryModelId("gemini", "image", "top")).toBe("gemini-3-pro-image");
     expect(getRegistryModelId("openai", "image", "cheap")).toBeUndefined();
   });
 
@@ -408,40 +386,12 @@ describe("use-case bindings", () => {
     expect(resolveByokTierModelId("anthropic", "text", "mid")).toBe("claude-sonnet-5-5");
     expect(resolveByokTierModelId("openai", "text", "top")).toBe("gpt-6-astra");
     expect(resolveByokTierModelId("openai", "text", "mid")).toBe("gpt-5.6-sol");
-    expect(resolveByokTierModelId("openai", "image", "top")).toBe("gpt-image-2");
-    expect(resolveByokTierModelId("openai", "image", "mid")).toBe("gpt-image-1-mini");
+    // OpenAI images have one model (2026-11-25): a stored Top falls back to it.
+    expect(resolveByokTierModelId("openai", "image", "top")).toBe("gpt-image-2.6-flare");
+    expect(resolveByokTierModelId("openai", "image", "mid")).toBe("gpt-image-2.6-flare");
+    expect(resolveByokTierModelId("gemini", "image", "top")).toBe("gemini-3-pro-image");
     // No stored tier (legacy campaign) → undefined, caller keeps its model.
     expect(resolveByokTierModelId("openai", "text", undefined)).toBeUndefined();
-  });
-});
-
-describe("tierForModelId (reverse lookup — legacy campaigns store a model, not a tier)", () => {
-  it("maps a live registry id back to its tier", () => {
-    expect(tierForModelId("gemini", "text", "gemini-3.1-pro-preview")).toBe("top");
-    expect(tierForModelId("gemini", "text", "gemini-3.8-flash")).toBe("mid");
-    expect(tierForModelId("openai", "image", "gpt-image-2")).toBe("top");
-    expect(tierForModelId("anthropic", "text", "claude-sonnet-5-5")).toBe("mid");
-  });
-
-  it("maps a superseded id to the tier it held, which is the tier it now runs on", () => {
-    expect(tierForModelId("gemini", "text", "gemini-3.5-flash")).toBe("mid");
-    expect(tierForModelId("anthropic", "text", "claude-sonnet-5")).toBe("mid");
-    expect(tierForModelId("anthropic", "text", "claude-opus-4-8")).toBe("top");
-    expect(tierForModelId("openai", "text", "gpt-5.4-mini")).toBe("mid");
-    expect(tierForModelId("openai", "text", "gpt-5.2-2025-12-11")).toBe("top");
-  });
-
-  it("returns undefined for retired/unknown ids and empty input", () => {
-    // Retired by the live-confirmed model bump — not in the registry anymore.
-    expect(tierForModelId("gemini", "text", "gemini-3-flash-preview")).toBeUndefined();
-    expect(tierForModelId("openai", "text", "no-such-model")).toBeUndefined();
-    expect(tierForModelId("openai", "text", "")).toBeUndefined();
-    expect(tierForModelId("openai", "text", undefined)).toBeUndefined();
-  });
-
-  it("is scoped by provider and role — an id never matches across either", () => {
-    expect(tierForModelId("openai", "text", "gemini-3.5-flash")).toBeUndefined();
-    expect(tierForModelId("gemini", "image", "gemini-3.5-flash")).toBeUndefined();
   });
 });
 
@@ -547,13 +497,13 @@ describe("unlisted models (known, not offered)", () => {
     }
   });
 
-  it("serves the newly tiered models, roles included, on their tier", () => {
+  it("keeps the newly tiered models listed on their tier; only the Standard ones are served since 2026-11-25", () => {
     for (const [p, id] of NOW_TIERED) {
       const m = find(p, id)!;
       expect(m.unlisted).toBeUndefined();
-      expect(MODEL_CATALOG[p].text.some((e) => e.id === id)).toBe(true);
-      expect(id in MODEL_CATALOG[p].manifest).toBe(true);
       expect(getRegistryModelId(p, "text", m.tier!)).toBe(id);
+      expect(MODEL_CATALOG[p].text.some((e) => e.id === id)).toBe(m.tier === "mid");
+      expect(id in MODEL_CATALOG[p].manifest).toBe(m.tier === "mid");
     }
   });
 
@@ -562,7 +512,7 @@ describe("unlisted models (known, not offered)", () => {
       const block = MODEL_CATALOG[p];
       expect([...block.text, ...block.image].some((e) => e.id === id)).toBe(false);
       expect(id in block.manifest).toBe(false);
-      expect(tierForModelId(p, find(p, id)!.role, id)).toBeUndefined();
+      expect(find(p, id)!.tier).toBeUndefined();
     }
     for (const p of PROVIDERS) {
       for (const tier of ["top", "mid", "cheap"] as const) {
@@ -570,6 +520,24 @@ describe("unlisted models (known, not offered)", () => {
         expect(getRegistryModel(p, "image", tier)?.unlisted).toBeUndefined();
       }
     }
+  });
+
+  // 2026-11-25: GPT Image 2.6 Sunburst, known for the eval harness and the
+  // character study (research/2026-11-25-openai-character). Its Flare twin
+  // became the own-key OpenAI image model the same day (next describe).
+  it("carries GPT Image 2.6 Sunburst unlisted, shaped like 2.5 Sunburst and offered nowhere", () => {
+    const id = "gpt-image-2.6-sunburst";
+    const m = find("openai", id)!;
+    expect(MODELS.filter((x) => x.id === id)).toHaveLength(1);
+    expect(m).toMatchObject({ provider: "openai", role: "image", unlisted: true });
+    expect(m.manifest).toEqual(find("openai", "gpt-image-2.5-sunburst")!.manifest);
+    expect(m.tier).toBeUndefined();
+    expect(m.default ?? m.fast).toBeUndefined();
+    expect(m.managedImage).toBeUndefined();
+    expect(m.batchInputUsdPerMTok).toBeUndefined();
+    expect(MODEL_CATALOG.openai.image.some((e) => e.id === id)).toBe(false);
+    expect(id in MODEL_CATALOG.openai.manifest).toBe(false);
+    expect(isKnownImageModelForProvider("openai", id)).toBe(false);
   });
 
   it("prices the new text models as read on 2026-10-01", () => {
@@ -598,6 +566,96 @@ describe("unlisted models (known, not offered)", () => {
     }
     expect(resolveTextOutputBudget("openai", "gpt-6.1-sol")).toBe(TEXT_OUTPUT_BUDGET);
     expect(resolveTextOutputBudget("gemini", "gemini-3.8-flash")).toBe(TEXT_OUTPUT_BUDGET);
+  });
+});
+
+// Owner decision 2026-11-25 (specs/byok-ai-guidance.md §2.1): own-key OpenAI
+// images run on one model, GPT Image 2.6 Flare at quality high. It replaces
+// GPT Image 1 Mini (OpenAI shuts it down 2026-12-01) and GPT Image 2
+// (deprecated, shut down 2027-02-10, 54 to 101 s per image).
+describe("own-key OpenAI images: one model (2026-11-25)", () => {
+  const find = (id: string) => MODELS.find((m) => m.provider === "openai" && m.id === id)!;
+  const RETIRED = ["gpt-image-1-mini", "gpt-image-2"];
+
+  it("serves GPT Image 2.6 Flare as the only OpenAI image model: Standard, the default, takes references, quality high", () => {
+    const m = find("gpt-image-2.6-flare");
+    expect(m).toMatchObject({ role: "image", tier: "mid", default: true, referenceImages: true });
+    expect(m.unlisted).toBeUndefined();
+    expect(m.managedImage).toBeUndefined();
+    expect(m.manifest.default_quality).toBe("high");
+    expect(m.manifest.sizes).toEqual({ "1:1": "1024x1024", "16:9": "1536x1024", "9:16": "1024x1536" });
+    expect(MODEL_CATALOG.openai.image.map((e) => e.id)).toEqual([m.id]);
+    expect(getDefaultModel("openai", "image")).toBe(m.id);
+  });
+
+  it("resolves both stored tiers to it", () => {
+    for (const tier of ["top", "mid"] as const) {
+      expect(resolveByokTierModelId("openai", "image", tier)).toBe(getDefaultModel("openai", "image"));
+    }
+  });
+
+  it("retires GPT Image 1 Mini and GPT Image 2: known, unlisted, untiered, unserved, so a stored id runs the default", () => {
+    for (const id of RETIRED) {
+      const m = find(id);
+      expect(m).toMatchObject({ role: "image", unlisted: true });
+      expect(m.tier).toBeUndefined();
+      expect(m.supersededTier).toBeUndefined();
+      expect(m.default).toBeUndefined();
+      expect(MODEL_CATALOG.openai.image.some((e) => e.id === id)).toBe(false);
+      expect(id in MODEL_CATALOG.openai.manifest).toBe(false);
+      expect(isKnownImageModelForProvider("openai", id)).toBe(false);
+    }
+  });
+
+  // The frozen image `recommended` flag kept old builds preselecting
+  // GPT Image 2. It is no longer served, and every old build falls back to
+  // `defaults.image` when no image entry is recommended.
+  it("serves no `recommended` flag on OpenAI images", () => {
+    expect(MODEL_CATALOG.openai.image.some((e) => e.recommended)).toBe(false);
+  });
+
+  it("leaves the Cloud image binding alone", () => {
+    expect(resolveManagedImageBinding("cloud")).toEqual({
+      primary: { provider: "gemini", model: "gemini-3.1-flash-image" },
+      failover: { provider: "openai", model: "gpt-image-2.5-sunburst", quality: "medium" },
+    });
+  });
+});
+
+// Owner decision 2026-11-25 (specs/byok-ai-guidance.md §2.2): no customer
+// picks a model or a tier. Own-key posts and images run the provider's
+// Standard model, so the served catalog lists that one model per role.
+describe("served catalog: the Standard model per provider and role (2026-11-25)", () => {
+  it("serves exactly the model an own-key post and image run on, and it is the served default", () => {
+    for (const p of PROVIDERS) {
+      expect(MODEL_CATALOG[p].text.map((e) => e.id)).toEqual([getRegistryModelId(p, "text", "mid")]);
+      expect(MODEL_CATALOG[p].defaults.text).toBe(getRegistryModelId(p, "text", "mid"));
+    }
+    for (const p of ["openai", "gemini"] as const) {
+      expect(MODEL_CATALOG[p].image.map((e) => e.id)).toEqual([getRegistryModelId(p, "image", "mid")]);
+      expect(MODEL_CATALOG[p].defaults.image).toBe(getRegistryModelId(p, "image", "mid"));
+    }
+    expect(MODEL_CATALOG.anthropic.image).toEqual([]);
+  });
+
+  it("serves no Top, cheap or untiered model, and no manifest for one", () => {
+    for (const p of PROVIDERS) {
+      const block = MODEL_CATALOG[p];
+      for (const id of [...block.text, ...block.image].map((e) => e.id).concat(Object.keys(block.manifest))) {
+        expect(MODELS.find((m) => m.provider === p && m.id === id)?.tier).toBe("mid");
+      }
+    }
+    for (const id of ["claude-opus-5-5", "gpt-6-astra", "gemini-3.1-pro-preview", "gemini-3-pro-image", "gpt-4o", "gemini-2.5-pro", "claude-haiku-4-5-20251001"]) {
+      expect(JSON.stringify(MODEL_CATALOG)).not.toContain(`"id":"${id}"`);
+    }
+  });
+
+  it("leaves the registry tiers and the internal bindings that read them alone", () => {
+    expect(getRegistryModelId("anthropic", "text", "top")).toBe("claude-opus-5-5");
+    expect(getRegistryModelId("gemini", "image", "top")).toBe("gemini-3-pro-image");
+    expect(resolveUtilityModelId("openai")).toBe("gpt-5-nano-2025-08-07");
+    expect(resolveGroundingAuditModel("cloud")).toEqual({ provider: "anthropic", model: "claude-opus-5-5" });
+    expect(MODEL_CATALOG.anthropic.defaults.fast).toBe("claude-haiku-4-5-20251001");
   });
 });
 
@@ -637,6 +695,7 @@ describe("deprecations", () => {
     const dep = (id: string) => MODELS.find((m) => m.id === id)?.deprecation;
     expect(dep("gpt-5-nano-2025-08-07")?.retiresOn).toBe("2026-12-11");
     expect(dep("gpt-image-1-mini")?.retiresOn).toBe("2026-12-01");
+    expect(dep("gpt-image-2")?.retiresOn).toBe("2027-02-10");
     expect(dep("claude-haiku-4-5-20251001")?.retiresOn).toBeUndefined();
     expect(dep("claude-haiku-4-5-20251001")?.note).toContain("2026-10-15");
     expect(dep("gemini-2.5-pro")?.note).toContain("already used 2.5");
@@ -655,17 +714,37 @@ describe("low reasoning capability", () => {
   });
 });
 
-// specs/visual-signatures.md §13.6 (2026-11-18): a recurring character needs
-// reference images attached to the image call. Verified on one model only
-// (research/2026-11-18-recurring-character).
+// specs/visual-signatures.md §13.6: a recurring character needs reference
+// images attached to the image call. Verified on Gemini 3.1 Flash Image
+// (2026-11-18, research/2026-11-18-recurring-character) and on GPT Image 2.5
+// and 2.6 Sunburst and Flare (2026-11-25, research/2026-11-25-openai-character).
 describe("reference image capability", () => {
-  it("is true only for the image model the study verified", () => {
-    expect(MODELS.filter((m) => m.referenceImages).map((m) => m.id)).toEqual(["gemini-3.1-flash-image"]);
+  it("is true only for the image models the studies verified", () => {
+    expect(MODELS.filter((m) => m.referenceImages).map((m) => m.id)).toEqual([
+      "gpt-image-2.5-sunburst",
+      "gpt-image-2.5-flare",
+      "gpt-image-2.6-sunburst",
+      "gpt-image-2.6-flare",
+      "gemini-3.1-flash-image",
+    ]);
     expect(acceptsReferenceImages("gemini", "gemini-3.1-flash-image")).toBe(true);
+    expect(acceptsReferenceImages("openai", "gpt-image-2.5-sunburst")).toBe(true);
+    expect(acceptsReferenceImages("openai", "gpt-image-2.6-flare")).toBe(true);
     expect(acceptsReferenceImages("gemini", "gemini-3-pro-image")).toBe(false);
-    expect(acceptsReferenceImages("openai", "gpt-image-2.5-sunburst")).toBe(false);
+    // Held the character in the 2026-11-25 study too, but at a median 81 s
+    // per image its tail runs past the 90 s per-attempt limit. Retired from
+    // own-key sites the same day; a stored id runs the default, which takes them.
+    expect(acceptsReferenceImages("openai", "gpt-image-2")).toBe(false);
+    expect(acceptsReferenceImages("openai", "gpt-image-1-mini")).toBe(false);
     expect(acceptsReferenceImages("openai", "gemini-3.1-flash-image")).toBe(false);
     expect(acceptsReferenceImages("gemini", "unknown-image-model")).toBe(false);
+  });
+
+  // Behaviour change 2026-11-25: until then a Cloud image with a character
+  // never failed over (the failover took no references).
+  it("the managed image failover takes the references, so a Cloud character survives a failover", () => {
+    const { failover } = resolveManagedImageBinding("cloud")!;
+    expect(acceptsReferenceImages(failover.provider, failover.model)).toBe(true);
   });
 
   it("stays off the served catalog (wire contract unchanged)", () => {

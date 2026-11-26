@@ -43,8 +43,20 @@ vi.mock("@/features/settings/api/useLicense", () => ({
   useLicense: () => ({ hasUsableLicense: true, hasWorkspace: true }),
 }));
 
+// The served catalog the plugin relays: the model each provider runs.
+vi.mock("@/features/ai-engine/api/useAvailableModelsQuery", () => ({
+  useAvailableModelsQuery: () => ({
+    data: {
+      text: [{ id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", provider: "gemini" }],
+      image: [],
+      defaults: { gemini: { text: "gemini-3.8-flash", fast: "", image: "" } },
+    },
+  }),
+}));
+
 import { CampaignCard } from "../routes/CampaignsPage";
 import type { Campaign } from "../types";
+import { MODEL_NAME } from "@/test/modelNames";
 
 /**
  * Render helper that wraps the card in a fresh QueryClientProvider per
@@ -73,8 +85,6 @@ const BASE_CAMPAIGN: Campaign = {
   intelligence: {
     textProvider: "gemini",
     imageProvider: "gemini",
-    textModel: "gemini-1.5-pro",
-    imageModel: "imagen-3",
     personaId: 1,
     language: "en_US",
     postLength: 1200,
@@ -334,15 +344,25 @@ describe("CampaignCard — failure indicator", () => {
   });
 });
 
-describe("CampaignCard — provider and model line by plan (2026-10-01)", () => {
+describe("CampaignCard — provider line by plan (2026-10-01)", () => {
   // Managed plans never see a text provider or model name
-  // (specs/managed-ai-lineup.md §3.3); BYOK keeps the line.
-  it("BYOK: shows the text provider label and the model", () => {
-    renderCard(
-      <CampaignCard campaign={BASE_CAMPAIGN} personaName="Editor" onClick={() => {}} />,
+  // (specs/managed-ai-lineup.md §3.3); BYOK keeps the provider. Since the
+  // owner's decision of 2026-11-25 no plan sees a model named, the stored
+  // one or the one the provider runs (specs/byok-ai-guidance.md §2.2).
+  it("BYOK: shows the text provider label and no model", () => {
+    const { container } = renderCard(
+      <CampaignCard
+        campaign={{
+          ...BASE_CAMPAIGN,
+          intelligence: { ...BASE_CAMPAIGN.intelligence, textModel: "gemini-1.5-pro" } as Campaign["intelligence"],
+        }}
+        personaName="Editor"
+        onClick={() => {}}
+      />,
     );
 
-    expect(screen.getByText("gemini-1.5-pro")).toBeInTheDocument();
+    expect(screen.getByText("Gemini")).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(MODEL_NAME);
     expect(screen.getByText("Editor")).toBeInTheDocument();
   });
 
@@ -356,7 +376,7 @@ describe("CampaignCard — provider and model line by plan (2026-10-01)", () => 
       />,
     );
 
-    expect(screen.queryByText("gemini-1.5-pro")).not.toBeInTheDocument();
+    expect(screen.queryByText("Gemini 3.8 Flash")).not.toBeInTheDocument();
     expect(container.textContent).not.toMatch(/gemini/i);
     expect(screen.getByText("Editor")).toBeInTheDocument();
   });
@@ -366,7 +386,7 @@ describe("CampaignCard — provider and model line by plan (2026-10-01)", () => 
       <CampaignCard
         campaign={{
           ...BASE_CAMPAIGN,
-          intelligence: { ...BASE_CAMPAIGN.intelligence, textProvider: "" as never, textModel: "" },
+          intelligence: { ...BASE_CAMPAIGN.intelligence, textProvider: "" as never },
         }}
         personaName="Editor"
         onClick={() => {}}

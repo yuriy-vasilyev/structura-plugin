@@ -18,6 +18,7 @@ import type { ReactNode } from "react";
 vi.mock("@wordpress/i18n", () => ({ __: (text: string) => text }));
 
 const createMock = vi.hoisted(() => vi.fn());
+const saveAiMock = vi.hoisted(() => vi.fn());
 const updateMock = vi.hoisted(() => vi.fn());
 const presetsMock = vi.hoisted(() => ({
   current: { boundPresetId: null as string | null, presets: [] as unknown[] },
@@ -28,7 +29,7 @@ vi.mock("@/features/settings", () => ({
   usePublicSiteProfileMutation: () => ({ mutateAsync: vi.fn() }),
 }));
 vi.mock("@/features/ai-engine/api/useUpdateAiSettings", () => ({
-  useUpdateAiSettings: () => ({ mutateAsync: vi.fn() }),
+  useUpdateAiSettings: () => ({ mutateAsync: saveAiMock }),
 }));
 vi.mock("@/features/settings/api/useVisualPresets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/features/settings/api/useVisualPresets")>()),
@@ -67,6 +68,7 @@ function wrapper({ children }: { children: ReactNode }) {
 
 beforeEach(() => {
   useWizardStore.getState().reset();
+  saveAiMock.mockReset().mockResolvedValue({});
   createMock.mockReset().mockResolvedValue({});
   updateMock.mockReset().mockResolvedValue({});
   presetsMock.current = { boundPresetId: null, presets: [] };
@@ -288,5 +290,21 @@ describe("useFinishWizard — visual signature (specs/visual-signatures.md §8)"
     await result.current.mutateAsync();
     await waitFor(() => expect(updateMock).toHaveBeenCalled());
     expect("signature" in updateMock.mock.calls[0][0].content).toBe(false);
+  });
+});
+
+// Since 2026-11-25 no site picks a model (specs/byok-ai-guidance.md §2.2):
+// the AI engine step saves the default providers only.
+describe("useFinishWizard — step 2 AI defaults", () => {
+  it("saves the default text and image providers and no model", async () => {
+    useWizardStore.getState().setStep2Draft({ textProvider: "anthropic", imageProvider: "gemini" });
+
+    const { result } = renderHook(() => useFinishWizard(), { wrapper });
+    await result.current.mutateAsync();
+
+    await waitFor(() => expect(saveAiMock).toHaveBeenCalled());
+    expect(saveAiMock).toHaveBeenCalledWith({
+      ai: { defaults: { text_provider: "anthropic", image_provider: "gemini" } },
+    });
   });
 });

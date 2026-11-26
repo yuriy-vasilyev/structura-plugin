@@ -25,7 +25,7 @@ vi.mock("@/features/ai-engine", () => ({
     isLoading: false,
     data: {
       providers: {
-        openai: { connected: true, capabilities: ["text", "image"], text_model: "m", image_model: "i" },
+        openai: { connected: true, capabilities: ["text", "image"] },
         gemini: { connected: false, capabilities: ["text", "image"] },
         anthropic: { connected: false, capabilities: ["text"] },
       },
@@ -41,8 +41,13 @@ vi.mock("@/features/ai-engine", () => ({
 }));
 
 vi.mock("../components/InstalledProviderCard", () => ({
-  InstalledProviderCard: ({ id, capabilities }: { id: string; capabilities: string[] }) => (
-    <div data-testid="installed" data-id={id} data-caps={capabilities.join(",")} />
+  InstalledProviderCard: (props: { id: string; capabilities: string[] }) => (
+    <div
+      data-testid="installed"
+      data-id={props.id}
+      data-caps={props.capabilities.join(",")}
+      data-incomplete={String("incomplete" in props)}
+    />
   ),
 }));
 vi.mock("../components/AvailableProviderCard", () => ({
@@ -111,5 +116,15 @@ describe("AiEngine — every provider on every plan", () => {
     fireEvent.click(screen.getAllByTestId("avail")[1]);
 
     expect(screen.getByRole("dialog").dataset.images).toBe("true");
+  });
+});
+
+// Since 2026-11-25 no site picks a model (specs/byok-ai-guidance.md §2.2),
+// so a connected provider is never "incomplete" for want of one.
+describe("AiEngine — no model to complete", () => {
+  it("passes no incomplete state to a connected provider's card", () => {
+    planMock.plan = "byok";
+    renderPage();
+    expect(screen.getByTestId("installed").dataset.incomplete).toBe("false");
   });
 });

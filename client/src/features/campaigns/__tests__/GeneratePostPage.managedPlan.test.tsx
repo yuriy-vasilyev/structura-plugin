@@ -18,7 +18,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router";
-import { getRegistryModelId } from "@structura/model-catalog";
 
 vi.mock("@wordpress/i18n", () => ({
   __: (t: string) => t,
@@ -58,8 +57,6 @@ vi.mock("@/features/settings", () => ({
       activeProviders: active,
       textProviders: active,
       imageProviders: active,
-      incompleteProviders: [],
-      isProviderIncomplete: () => false,
       isLoading: false,
       isFetching: false,
     };
@@ -75,8 +72,6 @@ vi.mock("@/features/settings", () => ({
         ? ["gemini", "openai"]
         : ["openai"],
     availableImageProviders: planMock.managed ? ["gemini", "openai"] : ["openai"],
-    incompleteProviders: [],
-    isProviderIncomplete: () => false,
     hasExplicitDefaults: !planMock.managed,
     hasExplicitTextDefault: !planMock.managed,
     hasExplicitImageDefault: !planMock.managed,
@@ -175,23 +170,24 @@ describe("GeneratePostPage — managed plan (2026-10-01)", () => {
     expect(screen.queryByRole("button", { name: /^(Gemini|OpenAI)$/i })).not.toBeInTheDocument();
   });
 
-  it("sends the hidden text and image providers with no text or image model", async () => {
+  it("sends the hidden text and image providers with no model or tier", async () => {
     renderPage();
     const data = await submitAndReadWire();
 
     // The plugin's /post/generate requires a text provider.
     expect(data.text_provider).toBe("gemini");
     expect(data.image_provider).toBe("gemini");
-    expect(data.text_model).toBe("");
-    expect(data.image_model).toBe("");
+    for (const key of ["text_model", "image_model", "text_tier", "image_tier"]) {
+      expect(data).not.toHaveProperty(key);
+    }
   });
 });
 
 describe("GeneratePostPage — BYOK plan", () => {
-  // Owner review 2026-10-06: one connected provider on its recommended
-  // model leaves nothing to choose, so the provider block is hidden; the
-  // request still carries the provider and the tier's concrete model.
-  it("hides the block for one provider on its recommended model and sends the tier's concrete model", async () => {
+  // Owner review 2026-10-06: one connected provider leaves nothing to
+  // choose, so the provider block is hidden. Since 2026-11-25 the request
+  // carries the provider and no model: the cloud runs its Standard model.
+  it("hides the block for one provider and sends the provider with no model or tier", async () => {
     planMock.managed = false;
     renderPage();
 
@@ -200,21 +196,21 @@ describe("GeneratePostPage — BYOK plan", () => {
 
     const data = await submitAndReadWire();
     expect(data.text_provider).toBe("openai");
-    expect(data.text_model).toBe(getRegistryModelId("openai", "text", "mid"));
-    expect(data.text_model).not.toBe("");
+    expect(data).not.toHaveProperty("text_model");
+    expect(data).not.toHaveProperty("text_tier");
   });
 });
 
 describe("GeneratePostPage — provider advice (2026-10-02)", () => {
   // specs/byok-ai-guidance.md §5: the same advice as the campaign form, with
-  // no hide control on this page; Switch sets provider + recommended tier.
+  // no hide control on this page; Switch sets the provider (no tier since 2026-11-25).
   it("managed plans see no advice and no Recommended label", () => {
     renderPage();
     expect(screen.queryByText("Gemini isn’t recommended for writing.")).toBeNull();
     expect(screen.queryByText("Recommended")).toBeNull();
   });
 
-  it("BYOK writing with Gemini: advice without ×; Switch sends OpenAI on its Standard model", async () => {
+  it("BYOK writing with Gemini: advice without ×; Switch sends OpenAI with no model or tier", async () => {
     planMock.managed = false;
     planMock.byokGemini = true;
     renderPage();
@@ -223,12 +219,12 @@ describe("GeneratePostPage — provider advice (2026-10-02)", () => {
     expect(screen.queryByRole("button", { name: "Hide this advice for this campaign" })).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "Switch to OpenAI" }));
-    expect(screen.getByText("Switched to OpenAI with its recommended model.")).toBeInTheDocument();
+    expect(screen.getByText("Switched to OpenAI.")).toBeInTheDocument();
 
     const data = await submitAndReadWire();
     expect(data.text_provider).toBe("openai");
-    expect(data.text_tier).toBe("mid");
-    expect(data.text_model).toBe(getRegistryModelId("openai", "text", "mid"));
+    expect(data).not.toHaveProperty("text_tier");
+    expect(data).not.toHaveProperty("text_model");
   });
 });
 

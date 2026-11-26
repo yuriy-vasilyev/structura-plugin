@@ -1,46 +1,48 @@
 import type { Route } from "@playwright/test";
-import { getRegistryModel } from "@structura/model-catalog";
 
 import { test, expect, expectSpaMounted, SPA_PAGE } from "./support/fixtures";
-
-// The tier labels the picker builds from the bundled catalog (`buildTierOptions`):
-// "<Tier> (<model name>)". Read from the same catalog so a model refresh does
-// not break the spec (2026-11-20: mid moved from Gemini 3.5 to 3.8 Flash).
-const TOP_LABEL = `Top (${getRegistryModel("gemini", "text", "top")?.name})`;
-const STANDARD_LABEL = `Standard (${getRegistryModel("gemini", "text", "mid")?.name})`;
+import { MODEL_NAME } from "../src/test/modelNames";
 
 /**
- * Campaign model-TIER picker in the wp-admin SPA (browser-real).
+ * Campaign AI Engine section in the wp-admin SPA (browser-real), after the
+ * owner decision of 2026-11-25 (specs/byok-ai-guidance.md §2.2): no plan
+ * picks a model or a tier, and none sees one named. The read-only model
+ * names that replaced the Top / Standard dropdown that morning went the same
+ * day: an own-key campaign's rows are Provider and Fallback. A save carries
+ * no model and no tier even for a campaign that stored Top before. The
+ * served catalog relay answers, so a section that read names from it again
+ * would show them.
  *
- * The campaign edit AI-Engine section shows a top/mid quality-tier dropdown for
- * BYOK plans — the campaign stores the TIER (`text_tier`/`image_tier`) and the
- * cloud resolves the concrete model at generation time. The jsdom unit test
- * (`CampaignAiEngineSection.test.tsx`) pins the store logic; this spec pins that
- * the picker actually mounts and saves the chosen tier inside a real wp-admin —
- * the "went blank / dropdown does nothing during a demo" class the unit test
- * can't see.
+ * Replaces `model-tier-picker.spec.ts` (the tier dropdown it drove is gone).
  *
  * A campaign + its cloud model catalog can't be produced on a cloud-less local
- * WP, so the campaign fetch, the model catalog, the license (→ BYOK, so the
- * tier picker renders), a connected Gemini key in the settings read (→ the
- * "AI Engine" group renders) and the PATCH are stubbed AT THE NETWORK EDGE. Everything
- * between — the edit page, the AI-Engine section, the real `@structura/model-
- * catalog` tier options, and the real `flattenCampaign` on save — runs for real.
+ * WP, so the campaign fetch, the served model catalog relay, the license
+ * (→ BYOK), a connected Gemini key in the settings read (→ the "AI Engine"
+ * group renders) and the PATCH are stubbed AT THE NETWORK EDGE. Everything
+ * between — the edit page, the AI-Engine section and the real
+ * `flattenCampaign` on save — runs for real.
  *
  * NOTE: this suite runs pre-release against ddev WP (not in the merge gate).
- * If a label/selector below drifts, verify against the live SPA — the store
- * contract itself is also covered by the jsdom + web-portal e2e nets.
  */
+
+// The served catalog relay (`GET /structura/v1/models`): one text and one
+// image model per provider since 2026-11-25.
+const SERVED_MODELS = {
+  text: [{ id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", provider: "gemini" }],
+  image: [{ id: "gemini-3.1-flash-image", name: "Gemini 3.1 Flash Image", provider: "gemini" }],
+  defaults: { gemini: { text: "gemini-3.8-flash", fast: "gemini-3.5-flash", image: "gemini-3.1-flash-image" } },
+};
 
 const CAMPAIGN_ID = "camp-e2e-tier";
 
-// cloud_to_wp-shaped campaign (what /scheduler/campaigns returns), BYOK, with a
-// stored top tier so the picker opens on "Top (…)".
+// cloud_to_wp-shaped campaign (what /scheduler/campaigns returns), BYOK, as an
+// older plugin saved it: a stored Top tier and its models, which the cloud
+// ignores since 2026-11-25.
 const BYOK_CAMPAIGN = {
   id: CAMPAIGN_ID,
   status: "active",
   identity: {
-    name: "Tier picker e2e",
+    name: "Model name e2e",
     objective: "A sufficiently long objective for the campaign edit form to load.",
     campaignMode: "traffic_magnet",
   },
@@ -78,10 +80,10 @@ const BYOK_CAMPAIGN = {
   stats: { postsPublished: 0, postsCreated: 0, nextRun: "Not Scheduled" },
 };
 
-test.describe("campaign model tier picker", () => {
+test.describe("campaign AI engine: no model picked or named", () => {
   test.beforeEach(async ({ page }) => {
-    // BYOK license so the AI-Engine section renders the tier (model) selector
-    // (managed plans show provider-only).
+    // BYOK license so the AI-Engine section renders its provider rows
+    // (managed plans show none).
     await page.route(/structura\/v1\/license\/cloud-status/, (route) =>
       route.fulfill({
         status: 200,
@@ -117,8 +119,6 @@ test.describe("campaign model tier picker", () => {
                 connected: true,
                 masked_key: "AIza…e2e1",
                 capabilities: ["text", "image"],
-                text_model: "gemini-3.1-pro-preview",
-                image_model: "gemini-3-pro-image",
               },
             },
             defaults: { text_provider: "gemini", image_provider: "gemini" },
@@ -128,9 +128,19 @@ test.describe("campaign model tier picker", () => {
         },
       });
     });
+    // The served model catalog the plugin relays.
+    await page.route(/structura\/v1\/models(?:$|[?&])/, (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(SERVED_MODELS) }),
+    );
   });
 
-  test("renders the tier options and saves the chosen tier", async ({ page, crashes }) => {
+  // The settings route fetches the real response; a fetch still in flight
+  // when the test ends failed the next spec once (2026-11-25).
+  test.afterEach(async ({ page }) => {
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+  });
+
+  test("names no model and saves no model or tier", async ({ page, crashes }) => {
     // Capture the PATCH body the SPA submits on save. api-fetch appends
     // `?_locale=user`, so the pattern allows a query string.
     let patchBody: string | null = null;
@@ -158,26 +168,27 @@ test.describe("campaign model tier picker", () => {
     await page.getByRole("button", { name: /Advanced Settings/i }).click();
     await page.getByRole("button", { name: /^AI Engine$/ }).click();
 
-    // The text tier dropdown opens on the stored tier, labeled from the real
-    // bundled catalog.
-    expect(TOP_LABEL).not.toContain("undefined");
-    expect(STANDARD_LABEL).not.toContain("undefined");
-    const textTier = page.getByRole("button", { name: TOP_LABEL });
-    await expect(textTier).toBeVisible();
-    await textTier.click();
+    // Provider and Fallback per row; no Model cell, no name, no tier dropdown.
+    await expect(page.getByText("Provider", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Model", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^(Top|Standard) \(/ })).toHaveCount(0);
+    await page.waitForTimeout(500);
+    const lines = (await page.locator("#structura-root").innerText())
+      .split("\n")
+      .filter((line) => MODEL_NAME.test(line));
+    expect(lines, "the campaign edit page names a model").toEqual([]);
 
-    // Both tiers are offered; pick Standard (mid).
-    await expect(page.getByRole("option", { name: TOP_LABEL })).toBeVisible();
-    await expect(page.getByRole("option", { name: STANDARD_LABEL })).toBeVisible();
-    await page.getByRole("option", { name: STANDARD_LABEL }).click();
-
-    // Save → the campaign persists the chosen TIER (not a bare model id).
+    // Save → no model and no tier on the wire, though the campaign stored Top.
     const patched = page.waitForResponse((r) =>
       new RegExp(`scheduler/campaign/${CAMPAIGN_ID}(?:$|\\?)`).test(r.url()),
     );
     await page.getByRole("button", { name: "Save Changes" }).click();
     await patched;
 
-    expect(patchBody).toContain('"text_tier":"mid"');
+    expect(patchBody).not.toBeNull();
+    for (const key of ["text_tier", "image_tier", "text_model", "image_model"]) {
+      expect(patchBody).not.toContain(`"${key}"`);
+    }
+    expect(patchBody).toContain('"text_provider":"gemini"');
   });
 });
