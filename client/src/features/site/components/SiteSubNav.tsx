@@ -36,8 +36,8 @@ const Tab = ({ to, icon, children }: TabProps) => (
       cn(
         "-mb-px inline-flex items-center gap-2 border-b-2 px-1 pb-3 text-sm font-medium transition-colors",
         isActive
-          ? "border-brand-500 text-brand-600!"
-          : "border-transparent text-neutral-500! hover:border-neutral-300 hover:text-neutral-800!",
+          ? "border-brand-500 text-brand-600! dark:text-brand-400!"
+          : "border-transparent text-neutral-500! dark:text-neutral-400! hover:border-neutral-300 dark:hover:border-neutral-600 hover:text-neutral-800! dark:hover:text-neutral-100!",
       )
     }
   >
@@ -51,7 +51,7 @@ const Tab = ({ to, icon, children }: TabProps) => (
 export const SiteSubNav = () => (
   <nav
     aria-label={__("Site sections", "structura")}
-    className="flex flex-wrap items-center gap-6 border-b border-neutral-200"
+    className="flex flex-wrap items-center gap-6 border-b border-neutral-200 dark:border-neutral-800"
   >
     {/*
       Tab order — Info first because it carries the always-available

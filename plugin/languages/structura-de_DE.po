@@ -12981,3 +12981,15 @@ msgstr "Abmessungen"
 
 msgid "Format"
 msgstr "Format"
+
+msgid "No images on this site yet"
+msgstr "Diese Website hat noch keine Bilder"
+
+msgid "Images are drawn with your own OpenAI or Gemini key, and this site has neither connected. Posts are published without images until you connect one."
+msgstr "Bilder entstehen mit deinem eigenen OpenAI- oder Gemini-Schlüssel, und mit dieser Website ist keiner von beiden verbunden. Beiträge erscheinen ohne Bilder, bis du einen verbindest."
+
+msgid "Connect a key"
+msgstr "Schlüssel verbinden"
+
+msgid "Images are drawn with your own OpenAI or Gemini key, and this site has neither connected."
+msgstr "Bilder entstehen mit deinem eigenen OpenAI- oder Gemini-Schlüssel, und mit dieser Website ist keiner von beiden verbunden."

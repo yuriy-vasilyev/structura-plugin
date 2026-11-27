@@ -34,6 +34,8 @@ export interface SignaturePreviewProps {
   buildRequest: () => PreviewVisualSignatureInput | null;
   /** One line under the button, e.g. that previews show no character until one is approved. */
   note?: string;
+  /** Nothing can draw the sample, e.g. the site has no image key; the caller says why. */
+  disabled?: boolean;
 }
 
 type PreviewStatus = "idle" | "rendering" | "ok" | "failed";
@@ -46,6 +48,7 @@ export function SignaturePreview({
   imagesResetOn,
   buildRequest,
   note,
+  disabled = false,
 }: SignaturePreviewProps) {
   const preview = usePreviewVisualSignatureMutation();
   const [status, setStatus] = useState<PreviewStatus>("idle");
@@ -196,7 +199,7 @@ export function SignaturePreview({
             variant="secondary"
             onClick={run}
             loading={rendering}
-            disabled={imagesResetOn !== null}
+            disabled={disabled || imagesResetOn !== null}
             className="whitespace-nowrap"
           >
             <ImageIcon aria-hidden="true" />

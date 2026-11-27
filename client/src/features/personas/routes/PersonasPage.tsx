@@ -51,15 +51,15 @@ export const PersonasPage = () => {
       />
 
       {/* SYSTEM ARCHITECTURE FOOTER */}
-      <div className="mt-12 flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+      <div className="mt-12 flex items-center gap-4 rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-6 shadow-sm">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400">
           <Layers className="h-6 w-6" />
         </div>
         <div>
-          <h4 className="m-0! text-sm font-bold text-gray-900">
+          <h4 className="m-0! text-sm font-bold text-gray-900 dark:text-white">
             {__("Persona Modularization", "structura")}
           </h4>
-          <p className="mt-0.5! mb-0! max-w-xl text-xs text-gray-500">
+          <p className="mt-0.5! mb-0! max-w-xl text-xs text-gray-500 dark:text-neutral-400">
             {__(
               "All Personas operate as independent architectural modules. You can select any Persona when initiating a Campaign or a One-Time post deployment.",
               "structura"

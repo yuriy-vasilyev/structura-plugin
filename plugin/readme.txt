@@ -322,6 +322,18 @@ logs, and settings unless you explicitly turn the toggle on first.
 
 == Changelog ==
 
+= 2.46.0 =
+* New: a site with no OpenAI or Gemini key says so. On plans that run on
+  your own key, the campaign and one-off post forms and the Visuals page
+  show "No images on this site yet" with a way to connect a key, the
+  image switches are off and disabled, and the Regenerate buttons in the
+  post editor box are disabled. Before, these controls stayed live and
+  failed.
+* Fixed: the Visuals preview is drawn by the image provider you have
+  connected. With only an OpenAI key it failed with "Try again in a
+  moment".
+* Fixed: headings and light-only components are readable in dark mode.
+
 = 2.45.0 =
 * New: a recurring character works with OpenAI images. If OpenAI draws
   your images, you can now choose Person or Mascot on the Visuals page;
@@ -613,6 +625,10 @@ repository:
 [github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md](https://github.com/yuriy-vasilyev/structura-plugin/blob/main/CHANGELOG.md)
 
 == Upgrade Notice ==
+
+= 2.46.0 =
+Sites with no image key now say so instead of failing, and the Visuals
+preview works with an OpenAI key. Safe upgrade. No database migrations.
 
 = 2.45.0 =
 Recurring characters now work with OpenAI images, and model choices are

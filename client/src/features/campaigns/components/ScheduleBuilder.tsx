@@ -247,7 +247,7 @@ export const ScheduleBuilder = () => {
       {/* Summary Footer */}
       <div className="border-t border-neutral-100 bg-brand-50/30 p-4 dark:border-neutral-700 dark:bg-brand-950/10">
         <div className="flex items-center gap-3">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-emerald-600">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-emerald-600 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-400">
             <Check size={16} />
           </div>
           <div className="overflow-hidden">

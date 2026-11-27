@@ -84,6 +84,7 @@ import { SignaturePicker } from "../signatures/SignaturePicker";
 import { SignatureBuilder } from "../signatures/SignatureBuilder";
 import { BrandPaletteField } from "../signatures/BrandPaletteField";
 import { SignaturePreview } from "../signatures/SignaturePreview";
+import { NoImageProviderNotice } from "@/features/campaigns/components/NoImageProviderNotice";
 import { signatureName } from "../signatures/signatureCopy";
 import {
   BUILDER_FIELDS,
@@ -255,7 +256,7 @@ export const VisualsPage = () => {
     isBinding,
   } = useVisualPresetMutations();
   const { suggest, isSuggesting } = useMagicSuggest();
-  const { defaultImageProvider, defaultTextProvider, isCloud } = useDefaultProviders();
+  const { defaultImageProvider, defaultTextProvider, isCloud, noImageProvider = false } = useDefaultProviders();
   const { data: profile } = usePublicSiteProfile();
   const suggestion = useVisualSignatureSuggestion(presetsData?.visualSuggestion);
   const suggestSignature = useSuggestVisualSignatureMutation();
@@ -1066,6 +1067,10 @@ export const VisualsPage = () => {
           aria-label={hasVideoTab ? __("Images", "structura") : undefined}
           hidden={shownTab !== "images"}
         >
+          {/* An own-key site with no OpenAI or Gemini key draws no images:
+              the same warning as the campaign forms, and the preview below
+              is disabled (2026-11-27). */}
+          {noImageProvider && <NoImageProviderNotice className="mb-7 max-w-[640px]" />}
           {/* Who appears (recurring-character handoff §3), before the signature. */}
           {characterOffered && boundPreset && (
             <>
@@ -1340,6 +1345,7 @@ export const VisualsPage = () => {
             upgradeHref={upgradeHref}
             imagesResetOn={imagesResetOn}
             buildRequest={previewRequest}
+            disabled={noImageProvider}
             note={
               characterMode && character.shown !== "card"
                 ? __(

@@ -206,11 +206,11 @@ export const ChannelsConnectionsPage = () => {
       {!showVideoGate && isError && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900"
+          className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200"
         >
           {__("We couldn't load your channel connections.", "structura")}
           {error instanceof Error && (
-            <p className="mt-1! mb-0! text-xs text-red-700">{error.message}</p>
+            <p className="mt-1! mb-0! text-xs text-red-700 dark:text-red-300">{error.message}</p>
           )}
         </div>
       )}

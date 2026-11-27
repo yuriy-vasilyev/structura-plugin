@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.46.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.45.0...v2.46.0) (2026-11-27)
+
+
+### Features
+
+* **client,plugin:** say when a site can draw no images and disable the image controls ([4894607](https://github.com/yuriy-vasilyev/structura-core/commit/4894607afe234f2bfbf3b0928adf976b425eac3b))
+* **functions:** confirm an account deletion by email ([0660839](https://github.com/yuriy-vasilyev/structura-core/commit/0660839177f9f9a2cdc29ab5dcf038a617b849c4))
+* **functions:** onboarding emails for AppSumo buyers after the welcome ([446162a](https://github.com/yuriy-vasilyev/structura-core/commit/446162a8035b6ce14d2074aa99af281e5db6a502))
+* **functions:** send AppSumo buyers their own welcome email ([7160896](https://github.com/yuriy-vasilyev/structura-core/commit/7160896e4fbee87326be7dd38f572af1ff4c7b36))
+* let an account stop setup emails by link or in the customer portal ([67d88e1](https://github.com/yuriy-vasilyev/structura-core/commit/67d88e1b685085959a629e8922a0f321bc451186))
+* **web:** connect a saved key to a site, and say when a site can draw no images ([df694d4](https://github.com/yuriy-vasilyev/structura-core/commit/df694d41e2557ac91e53b408bef3d87a180a497a))
+
+
+### Bug Fixes
+
+* **client:** headings and light-only components are readable in dark mode ([6528f8a](https://github.com/yuriy-vasilyev/structura-core/commit/6528f8a8a51dd696413d055b4ea67182cc83dbb7))
+* **functions:** a rejected SERP query no longer pages as a Serper account outage ([9294261](https://github.com/yuriy-vasilyev/structura-core/commit/9294261a5efb66b755864d5d2a0f531d107a2032))
+* **functions:** no Jina account incident when Jina refuses a localhost address ([3d48b93](https://github.com/yuriy-vasilyev/structura-core/commit/3d48b933a86c346ff88b6c4fd930428ea77ed3ab))
+* **functions:** plugin one-off posts research and write on their typed topic ([74a5f8b](https://github.com/yuriy-vasilyev/structura-core/commit/74a5f8bd647d0cd44c7bb2b9f1c64699630b1618))
+* **functions:** replies to the activation reminder reach support ([88ec04f](https://github.com/yuriy-vasilyev/structura-core/commit/88ec04feb9f0313bc09e06f24546aa79380b011f))
+* **functions:** the Visuals preview draws on the site's own image provider ([457903d](https://github.com/yuriy-vasilyev/structura-core/commit/457903dc7b5f8550bb05860012525568bccd4b24))
+
 ## [2.45.0](https://github.com/yuriy-vasilyev/structura-core/compare/v2.44.0...v2.45.0) (2026-11-26)
 
 

@@ -43,10 +43,10 @@ export const ChannelsStorePage = () => {
       <ChannelsSubNav />
 
       <header>
-        <h2 className="m-0! text-xl font-bold tracking-tight text-neutral-900">
+        <h2 className="m-0! text-xl font-bold tracking-tight text-neutral-900 dark:text-white">
           {__("Store", "structura")}
         </h2>
-        <p className="mt-1! mb-0! text-sm text-neutral-500">
+        <p className="mt-1! mb-0! text-sm text-neutral-500 dark:text-neutral-400">
           {__(
             "Browse integrations and connect the ones you need. Items available on your current plan show an Install button; the rest link out to upgrade.",
             "structura",
@@ -93,21 +93,21 @@ export const ChannelsStorePage = () => {
       {isError && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-900"
+          className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-900 dark:text-red-200"
         >
           {__("We couldn't load the integration catalog.", "structura")}
           {error instanceof Error && (
-            <p className="mt-1! mb-0! text-xs text-red-700">{error.message}</p>
+            <p className="mt-1! mb-0! text-xs text-red-700 dark:text-red-300">{error.message}</p>
           )}
         </div>
       )}
 
       {!isLoading && !isError && data && data.entries.length === 0 && (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-neutral-200 bg-neutral-50 px-8 py-16 text-center">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-brand-100 text-brand-600">
+        <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50 px-8 py-16 text-center">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-brand-100 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400">
             <StoreIcon size={22} />
           </div>
-          <h3 className="m-0! text-base font-bold tracking-tight text-neutral-900">
+          <h3 className="m-0! text-base font-bold tracking-tight text-neutral-900 dark:text-white">
             {__("The catalog is empty right now", "structura")}
           </h3>
         </div>

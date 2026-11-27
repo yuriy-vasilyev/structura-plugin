@@ -69,6 +69,35 @@ class PostMetaBoxImageProviderChoiceTest extends TestCase
     }
 
     /**
+     * 2026-11-27: with only a Claude key (or none) an own-key site can draw
+     * no image, so the meta box disables its Regenerate buttons.
+     *
+     * @test
+     * @covers \Structura\Ui\Post_Meta_Box::has_no_image_provider
+     */
+    public function an_own_key_site_with_only_claude_or_no_key_has_no_image_provider(): void
+    {
+        $this->connected(['anthropic' => self::ANTHROPIC]);
+
+        $this->assertTrue(Post_Meta_Box::has_no_image_provider('byok'));
+        $this->assertTrue(Post_Meta_Box::has_no_image_provider('free'));
+        // Managed plans draw on Structura's keys.
+        $this->assertFalse(Post_Meta_Box::has_no_image_provider('cloud'));
+        $this->assertFalse(Post_Meta_Box::has_no_image_provider('cloud_pro'));
+    }
+
+    /**
+     * @test
+     * @covers \Structura\Ui\Post_Meta_Box::has_no_image_provider
+     */
+    public function a_connected_openai_or_gemini_key_is_an_image_provider(): void
+    {
+        $this->connected(['openai' => self::OPENAI, 'anthropic' => self::ANTHROPIC]);
+
+        $this->assertFalse(Post_Meta_Box::has_no_image_provider('byok'));
+    }
+
+    /**
      * Alias-mock Provider_Registry with a fixed connected-provider map.
      *
      * @param array<string, array<string, mixed>> $connected

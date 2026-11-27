@@ -31,10 +31,10 @@ export const StepSeoRules = () => {
   return (
     <div className="animate-in slide-in-from-right-4 space-y-6 duration-500">
       <header className="flex flex-col gap-1">
-        <h3 className="m-0! text-lg font-black tracking-tight text-neutral-900 uppercase">
+        <h3 className="m-0! text-lg font-black tracking-tight text-neutral-900 dark:text-white uppercase">
           {__("SEO Directives", "structura")}
         </h3>
-        <p className="m-0! text-xs text-neutral-500">
+        <p className="m-0! text-xs text-neutral-500 dark:text-neutral-400">
           {__(
             "Configure granular intelligence rules for this roadmap. Pro rules are automatically locked for Free accounts.",
             "structura"

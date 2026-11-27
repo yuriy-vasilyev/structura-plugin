@@ -37,7 +37,7 @@ vi.mock("@wordpress/api-fetch", () => ({
 
 // Plan state, swapped per test: managed (no keys, all providers run by
 // Structura) or BYOK (one connected OpenAI key).
-const planMock = vi.hoisted(() => ({ managed: true, byokGemini: false, byokNoKeys: false }));
+const planMock = vi.hoisted(() => ({ managed: true, byokGemini: false, byokNoKeys: false, noImageProvider: false }));
 
 vi.mock("@/features/settings", () => ({
   useLicense: () => ({
@@ -79,6 +79,7 @@ vi.mock("@/features/settings", () => ({
     isAutoResolved: false,
     isFullyConfigured: true,
     isCloud: planMock.managed,
+    noImageProvider: planMock.noImageProvider,
   }),
 }));
 
@@ -154,6 +155,7 @@ beforeEach(() => {
   planMock.managed = true;
   planMock.byokGemini = false;
   planMock.byokNoKeys = false;
+  planMock.noImageProvider = false;
 });
 
 describe("GeneratePostPage — managed plan (2026-10-01)", () => {
@@ -198,6 +200,33 @@ describe("GeneratePostPage — BYOK plan", () => {
     expect(data.text_provider).toBe("openai");
     expect(data).not.toHaveProperty("text_model");
     expect(data).not.toHaveProperty("text_tier");
+  });
+});
+
+// 2026-11-27: an own-key site with no OpenAI or Gemini key draws no images.
+// The image switches stayed live there and the image step failed per post.
+describe("GeneratePostPage — a site with no image provider", () => {
+  it("warns, shows the image switches off and disabled, and asks for a text-only post", async () => {
+    planMock.managed = false;
+    planMock.noImageProvider = true;
+    renderPage();
+
+    expect(screen.getByText("No images on this site yet")).toBeInTheDocument();
+    for (const name of ["Featured image", "Body images"]) {
+      const toggle = screen.getByRole("switch", { name });
+      expect(toggle).toBeDisabled();
+      expect(toggle).not.toBeChecked();
+    }
+    const data = await submitAndReadWire();
+    expect(data.featured_image).toBe(false);
+    expect(data.body_images).toBe(false);
+  });
+
+  it("with an image provider: no warning and live switches", () => {
+    planMock.managed = false;
+    renderPage();
+    expect(screen.queryByText("No images on this site yet")).not.toBeInTheDocument();
+    expect(screen.getByRole("switch", { name: "Featured image" })).toBeEnabled();
   });
 });
 

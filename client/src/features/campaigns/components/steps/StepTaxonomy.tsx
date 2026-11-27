@@ -64,7 +64,7 @@ export const StepTaxonomy = () => {
         }
       />
 
-      <div className="h-px w-full bg-neutral-100" />
+      <div className="h-px w-full bg-neutral-100 dark:bg-neutral-800" />
 
       {/* TAG GOVERNANCE */}
       <TaxonomySection

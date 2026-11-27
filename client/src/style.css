@@ -65,6 +65,18 @@ body.structura-wizard-open #headlessui-portal-root {
     z-index: 100050;
 }
 
+/* wp-admin's common.css colors every h1, h2 and h3 #1d2327. It is
+   unlayered, so it beats our layered text utilities, and in dark mode that
+   left dark ink on dark cards across the app (2026-11-26). This rule is
+   unlayered too and more specific, so headings are white on a dark page;
+   a heading that needs another dark color sets it with `!`. Dialogs render
+   in the Headless UI portal root and the setup wizard in its own overlay,
+   both outside #structura-root. */
+:is(.dark, .dark *):is(#structura-root, #headlessui-portal-root, .structura-wizard-overlay) :is(h1, h2, h3),
+:is(.dark, .dark *) :is(#structura-root, #headlessui-portal-root, .structura-wizard-overlay) :is(h1, h2, h3) {
+    color: var(--color-white);
+}
+
 @layer base {
     :where(#structura-root) :where(h1, h2, h3, h4, h5, h6) {
         margin-top: 0;

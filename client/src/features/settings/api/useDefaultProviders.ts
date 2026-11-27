@@ -24,8 +24,8 @@ import { orderTextProviders } from "@/features/campaigns/aiGuidance";
  */
 export const useDefaultProviders = () => {
   const { data: ai } = useAiSettingsQuery();
-  const { textProviders, imageProviders, activeProviders } = useAiConnections();
-  const { plan } = useLicense();
+  const { textProviders, imageProviders, activeProviders, isLoading, isFetching } = useAiConnections();
+  const { plan, isLicensed } = useLicense();
 
   const isCloud = isManagedPlan(plan as PlanId);
   const defaults = ai?.defaults;
@@ -125,7 +125,18 @@ export const useDefaultProviders = () => {
   // When false, it's visible inline during campaign creation.
   const isFullyConfigured = isCloud || (hasExplicitTextDefault && hasExplicitImageDefault);
 
+  // True when this site can draw no images: an own-key plan (Free, BYOK)
+  // with no OpenAI or Gemini key connected (none at all, or only Claude).
+  // Managed plans draw on Structura's keys; an unlicensed site has its own
+  // lock on the image switches. False until the connection state has loaded,
+  // so the warning never flashes on first paint. Read by every screen that
+  // needs an image model: the image switches of the campaign and one-off
+  // post forms and the Visuals page (2026-11-27).
+  const noImageProvider =
+    !isCloud && isLicensed && !isLoading && !isFetching && imageProviders.length === 0;
+
   return {
+    noImageProvider,
     defaultTextProvider,
     defaultImageProvider,
     availableProviders,

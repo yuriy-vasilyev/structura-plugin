@@ -16,7 +16,8 @@ import { useRef } from "react";
 import { SelectionCard } from "@/components/Shared/SelectionCard";
 import { CampaignLanguageField } from "@/features/campaigns/components/CampaignLanguageField";
 import { AiLabelReminder } from "@/features/campaigns/components/AiLabelReminder";
-import { SUPPORTED_BLOCK_TYPE } from "@/features/settings";
+import { NoImageProviderNotice } from "@/features/campaigns/components/NoImageProviderNotice";
+import { SUPPORTED_BLOCK_TYPE, useDefaultProviders } from "@/features/settings";
 import { buildReferralLabels } from "@/utils/referralLabels";
 
 export const StepArchitecture = () => {
@@ -26,6 +27,9 @@ export const StepArchitecture = () => {
   // images would silently never save. Same probe as the cross-wp-admin
   // banner (Image_Uploads_Unwritable_Notice); false on older plugins.
   const uploadsUnwritable = !!window.structuraConfig?.uploads_unwritable;
+  // An own-key site with no OpenAI or Gemini key draws no images: the
+  // switches read off and disabled under the warning (2026-11-27).
+  const { noImageProvider = false } = useDefaultProviders();
 
   const { intelligence, structure } = formData;
   const maxPostLength = isPaidLicense ? POST_LENGTH_MAX : FREE_POST_LENGTH_MAX;
@@ -149,16 +153,17 @@ export const StepArchitecture = () => {
             {__("Images", "structura")}
           </h4>
         </div>
+        {noImageProvider && <NoImageProviderNotice />}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SelectionCard
             id="featuredImage"
             label={__("Generate featured image", "structura")}
             description={__("Create a relevant featured image for the post.", "structura")}
-            isEnabled={structure.featuredImage}
+            isEnabled={structure.featuredImage && !noImageProvider}
             onToggle={() => updateForm("structure", { featuredImage: !structure.featuredImage })}
             isFree
             hasFreeAccess={isLicensed}
-            disabled={uploadsUnwritable}
+            disabled={uploadsUnwritable || noImageProvider}
           />
 
           <SelectionCard
@@ -167,9 +172,9 @@ export const StepArchitecture = () => {
             description={__("Identify spots and generate images in the post body.", "structura")}
             isPro
             hasProAccess={isPaidLicense}
-            isEnabled={structure.bodyImages}
+            isEnabled={structure.bodyImages && !noImageProvider}
             onToggle={() => updateForm("structure", { bodyImages: !structure.bodyImages })}
-            disabled={uploadsUnwritable}
+            disabled={uploadsUnwritable || noImageProvider}
           />
         </div>
         {uploadsUnwritable && (
@@ -188,7 +193,7 @@ export const StepArchitecture = () => {
             </a>
           </p>
         )}
-        {!structure.featuredImage && !structure.bodyImages && !uploadsUnwritable && (
+        {!structure.featuredImage && !structure.bodyImages && !uploadsUnwritable && !noImageProvider && (
           <p className="m-0! text-[11px] leading-snug text-neutral-500 dark:text-neutral-400">
             {__(
               "Posts will arrive without images. You add your own photos in the WordPress editor.",
@@ -260,7 +265,7 @@ export const StepArchitecture = () => {
             }
             disabled={!structure.disclosure.enabled}
             rows={2}
-            className="bg-white"
+            className="bg-white dark:bg-neutral-900"
           />
         </Card>
       </div>

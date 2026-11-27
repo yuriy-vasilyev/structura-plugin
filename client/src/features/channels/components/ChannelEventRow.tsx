@@ -80,13 +80,13 @@ export const ChannelEventRow = ({ event }: ChannelEventRowProps) => {
         );
 
   return (
-    <li className="flex items-start gap-3 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
-      <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+    <li className="flex items-start gap-3 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 shadow-sm">
+      <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400">
         <Radio size={16} />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-3">
-          <p className="truncate text-sm font-semibold text-neutral-900">
+          <p className="truncate text-sm font-semibold text-neutral-900 dark:text-white">
             {event.postTitle ||
               sprintf(__("Post #%d", "structura"), event.postId)}
           </p>
@@ -95,7 +95,7 @@ export const ChannelEventRow = ({ event }: ChannelEventRowProps) => {
               href={event.postUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-brand-600 hover:underline"
+              className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-brand-600 dark:text-brand-400 hover:underline"
             >
               {__("Open", "structura")}
               <ExternalLink size={12} />
@@ -123,7 +123,7 @@ export const ChannelEventRow = ({ event }: ChannelEventRowProps) => {
                     href={result.externalUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-brand-600 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400 hover:text-brand-600 dark:hover:text-brand-400 hover:underline"
                     aria-label={sprintf(
                       // translators: %s is the integration id (e.g. "slack")
                       __("Open the message in %s", "structura"),
@@ -135,7 +135,7 @@ export const ChannelEventRow = ({ event }: ChannelEventRowProps) => {
                 )}
                 {result.error && (
                   <span
-                    className="text-xs text-red-700"
+                    className="text-xs text-red-700 dark:text-red-300"
                     title={result.error.code}
                   >
                     {result.error.message}
@@ -146,7 +146,7 @@ export const ChannelEventRow = ({ event }: ChannelEventRowProps) => {
             })}
           </ul>
         ) : (
-          <p className="mt-1 text-xs text-neutral-500">{fallbackLabel}</p>
+          <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">{fallbackLabel}</p>
         )}
 
         <p className="mt-1 text-xs text-neutral-400">

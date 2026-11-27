@@ -38,7 +38,7 @@ export const ProviderCard = ({
   return (
     <>
       <div
-        className={`glass-card rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm transition-all duration-300 ${isConnected ? "opacity-100" : "opacity-80"}`}
+        className={`glass-card rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-8 shadow-sm transition-all duration-300 ${isConnected ? "opacity-100" : "opacity-80"}`}
       >
         <div className="mb-8 flex items-start justify-between">
           <div className="flex items-center gap-5">
@@ -48,7 +48,7 @@ export const ProviderCard = ({
               <Key size={28} />
             </div>
             <div>
-              <h3 className="m-0! text-xl leading-none font-black tracking-tight text-neutral-900 uppercase">
+              <h3 className="m-0! text-xl leading-none font-black tracking-tight text-neutral-900 dark:text-white uppercase">
                 {name}
               </h3>
               <div className="flex items-center gap-2">

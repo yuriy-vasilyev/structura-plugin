@@ -35,6 +35,7 @@ import type { AIProvider, CampaignFormData, CampaignPostStatus, } from "@/featur
 import { useSitePersonasQuery } from "@/features/personas";
 import { useAiConnections, useDefaultProviders, useLicense } from "@/features/settings";
 import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
+import { NoImageProviderNotice } from "@/features/campaigns/components/NoImageProviderNotice";
 import { AiLabelReminder } from "@/features/campaigns/components/AiLabelReminder";
 import { buildMarketingPricingUrl, buildPortalSignupUrl } from "@/utils/portalLinks";
 import type { SeoRuleName, SUPPORTED_BLOCK_TYPE } from "@/features/settings/types";
@@ -296,7 +297,9 @@ const GeneratePostPage = () => {
     isFetching: connectionsFetching,
   } = useAiConnections();
   const { data: aiSettings } = useAiSettingsQuery();
-  const { defaultTextProvider, defaultImageProvider } = useDefaultProviders();
+  // `noImageProvider`: an own-key site with no OpenAI or Gemini key draws no
+  // images, so the switches read off and disabled under the warning (2026-11-27).
+  const { defaultTextProvider, defaultImageProvider, noImageProvider = false } = useDefaultProviders();
   const { generatePost, isGenerating } = useCampaignMutations();
   const { suggest, isSuggesting } = useMagicSuggest();
 
@@ -481,7 +484,8 @@ const GeneratePostPage = () => {
   // missing preset no longer blocks — a site upgraded from "none" (which
   // skipped the Visuals wizard step) can still generate images. The
   // `VisualStyleFallbackNotice` below just makes the user aware.
-  const wantsAnyImage = formData.structure.featuredImage || formData.structure.bodyImages;
+  const wantsAnyImage =
+    !noImageProvider && (formData.structure.featuredImage || formData.structure.bodyImages);
 
   const canGenerate = isValid && isEngineReady && !hasNoPersonas && !atWeeklyCap;
 
@@ -501,7 +505,12 @@ const GeneratePostPage = () => {
       // disappearing form (the pre-2026-05-01 UX, where users had no
       // idea whether their submission was queued, dispatched, failed,
       // or done).
-      const result = await generatePost({ data: { ...formData, researchAttachments } });
+      // A site with no image key asks for a text-only post, as the disabled
+      // switches show, instead of failing the image step (2026-11-27).
+      const structure = noImageProvider
+        ? { ...formData.structure, featuredImage: false, bodyImages: false }
+        : formData.structure;
+      const result = await generatePost({ data: { ...formData, structure, researchAttachments } });
       const runId = (result as { run_id?: string })?.run_id;
       if (runId) {
         navigate(`/generate/runs/${runId}`);
@@ -868,6 +877,7 @@ const GeneratePostPage = () => {
       {/* ── 3. Content options ────────────────────────────────── */}
       <Section title={__("Content Options", "structura")}>
         <div className="space-y-3">
+          {noImageProvider && <NoImageProviderNotice />}
           {/* Featured image - available for free license+ */}
           {isLicensed && (
             <div className="flex items-center justify-between">
@@ -880,8 +890,8 @@ const GeneratePostPage = () => {
               <Switch
                 label={__("Featured image", "structura")}
                 hiddenLabel
-                disabled={uploadsUnwritable}
-                checked={formData.structure.featuredImage && !uploadsUnwritable}
+                disabled={uploadsUnwritable || noImageProvider}
+                checked={formData.structure.featuredImage && !uploadsUnwritable && !noImageProvider}
                 onChange={(checked) => update("structure", { featuredImage: checked })}
               />
             </div>
@@ -899,8 +909,8 @@ const GeneratePostPage = () => {
               <Switch
                 label={__("Body images", "structura")}
                 hiddenLabel
-                disabled={uploadsUnwritable}
-                checked={formData.structure.bodyImages && !uploadsUnwritable}
+                disabled={uploadsUnwritable || noImageProvider}
+                checked={formData.structure.bodyImages && !uploadsUnwritable && !noImageProvider}
                 onChange={(checked) => update("structure", { bodyImages: checked })}
               />
             </div>

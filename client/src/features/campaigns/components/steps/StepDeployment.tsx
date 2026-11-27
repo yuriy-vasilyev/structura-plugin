@@ -31,7 +31,7 @@ export const StepDeployment = () => {
         <ScheduleBuilder />
 
         {/* 3. Termination Logic (End Condition) */}
-        <div className="space-y-4 rounded-2xl border border-neutral-100 bg-white p-6 shadow-sm">
+        <div className="space-y-4 rounded-2xl border border-neutral-100 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
           <label className="text-[10px] font-black tracking-widest text-neutral-400 uppercase">
             {__("Lifecycle Termination", "structura")}
           </label>

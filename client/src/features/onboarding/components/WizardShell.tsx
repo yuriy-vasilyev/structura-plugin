@@ -202,7 +202,7 @@ export const WizardShell = ({
   // own container chrome surrounds the overlay and the wp-admin
   // chrome bleeds through.
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 z-[100000] flex flex-col bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+    <div className="structura-wizard-overlay fixed inset-0 z-[100000] flex flex-col bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
       {/* Header — full wordmark on the left, "Setup wizard" label
           centered, exit affordance on the right. 3-column grid keeps
           the center label optically centered regardless of left/right

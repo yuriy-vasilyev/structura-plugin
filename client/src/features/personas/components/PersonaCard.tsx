@@ -26,7 +26,7 @@ export const PersonaCard = ({ persona, author, onEdit }: PersonaCardProps) => {
 
   return (
     <>
-      <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all hover:-translate-y-1 hover:border-brand-500 hover:shadow-xl">
+      <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 transition-all hover:-translate-y-1 hover:border-brand-500 hover:shadow-xl">
         <div className="p-6 pb-4">
           <div className="mb-6 flex items-start justify-between">
             {/* AVATAR LOGIC */}
@@ -37,7 +37,7 @@ export const PersonaCard = ({ persona, author, onEdit }: PersonaCardProps) => {
                 alt={author.name}
               />
             ) : (
-              <div className="grid h-11 w-11 grid-cols-2 gap-0.5 rounded-xl border border-brand-100 bg-brand-50 p-1">
+              <div className="grid h-11 w-11 grid-cols-2 gap-0.5 rounded-xl border border-brand-100 dark:border-brand-900/50 bg-brand-50 dark:bg-brand-950/40 p-1">
                 <div className="rounded-lg bg-brand-400" />
                 <div className="rounded-lg bg-brand-600" />
                 <div className="col-span-2 rounded-lg bg-brand-200" />
@@ -51,7 +51,7 @@ export const PersonaCard = ({ persona, author, onEdit }: PersonaCardProps) => {
             </Badge>
           </div>
 
-          <h3 className="m-0! text-xl leading-tight font-extrabold text-gray-900">
+          <h3 className="m-0! text-xl leading-tight font-extrabold text-gray-900 dark:text-white">
             {persona.name}
           </h3>
           <div className="mt-1 text-xs font-bold tracking-wider text-gray-400 uppercase">
@@ -61,11 +61,11 @@ export const PersonaCard = ({ persona, author, onEdit }: PersonaCardProps) => {
           </div>
         </div>
 
-        <div className="border-y border-gray-100 bg-gray-50/50 px-6 py-4">
+        <div className="border-y border-gray-100 dark:border-neutral-800 bg-gray-50/50 dark:bg-neutral-800/50 px-6 py-4">
           <div className="mb-2 font-mono text-[9px] font-black tracking-[0.2em] text-gray-400 uppercase">
             {__("System Directive", "structura")}
           </div>
-          <p className="line-clamp-3 font-mono text-xs leading-relaxed text-gray-600 italic">
+          <p className="line-clamp-3 font-mono text-xs leading-relaxed text-gray-600 dark:text-neutral-300 italic">
             "{persona.system_prompt}"
           </p>
         </div>
@@ -76,11 +76,11 @@ export const PersonaCard = ({ persona, author, onEdit }: PersonaCardProps) => {
             <span className="text-[9px] font-black tracking-widest text-gray-400 uppercase">
               {__("Reading Level", "structura")}
             </span>
-            <span className="text-[10px] font-bold text-gray-700">
+            <span className="text-[10px] font-bold text-gray-700 dark:text-neutral-200">
               {getReadingLevelLabel(persona.reading_level)}
             </span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-neutral-800">
             <div
               className={`${getReadingLevelColor(persona.reading_level).progress} h-full transition-all duration-1000`}
               style={{ width: `${getReadingLevelProgress(persona.reading_level)}%` }}
@@ -89,10 +89,10 @@ export const PersonaCard = ({ persona, author, onEdit }: PersonaCardProps) => {
         </div>
 
         {/* ACTIONS */}
-        <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4">
+        <div className="flex items-center justify-between border-t border-gray-100 dark:border-neutral-800 bg-gray-50 dark:bg-neutral-800/50 px-6 py-4">
           <button
             onClick={onEdit}
-            className="flex cursor-pointer items-center gap-2 text-[10px]! font-bold! tracking-widest text-gray-600 uppercase hover:text-brand-600"
+            className="flex cursor-pointer items-center gap-2 text-[10px]! font-bold! tracking-widest text-gray-600 dark:text-neutral-300 uppercase hover:text-brand-600 dark:hover:text-brand-400"
           >
             <Settings2 size={14} strokeWidth={2.5} />
             {__("Configure", "structura")}

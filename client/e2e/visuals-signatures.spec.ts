@@ -590,4 +590,39 @@ test.describe("Visuals — dark wp-admin", () => {
     await expectSpaMounted(page, crashes);
     await page.unrouteAll({ behavior: "ignoreErrors" });
   });
+
+  // wp-admin's common.css colors every h1, h2 and h3 #1d2327 and beats our
+  // layered text utilities, so headings stayed dark on the dark page
+  // (run detail, campaign view, Account, 2026-11-26).
+  test("headings on the other pages read on a dark page", async ({ page, crashes }) => {
+    await license(page, "cloud");
+    await openVisuals(page);
+    await expectSpaMounted(page, crashes);
+    await page.evaluate(() => document.documentElement.classList.add("dark"));
+
+    for (const route of ["campaigns", "personas", "ai-engine", "site", "settings", "account", "logs", "notices"]) {
+      await page.evaluate((hash) => {
+        window.location.hash = `#/${hash}`;
+      }, route);
+      const headings = page.locator("#structura-root :is(h1, h2, h3):visible");
+      await expect(headings.first()).toBeVisible({ timeout: 20_000 });
+      await expect
+        .poll(
+          async () => {
+            const unreadable: string[] = [];
+            for (const heading of await headings.all()) {
+              const contrast = await contrastOf(heading).catch(() => 21);
+              if (contrast < 4.5) {
+                unreadable.push(`${(await heading.innerText()).slice(0, 40)} (${contrast.toFixed(1)})`);
+              }
+            }
+            return unreadable;
+          },
+          { message: `unreadable headings on #/${route}` }
+        )
+        .toEqual([]);
+      await shot(page, `dark-${route}`);
+    }
+    await expectSpaMounted(page, crashes);
+  });
 });

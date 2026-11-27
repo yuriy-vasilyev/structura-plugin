@@ -401,6 +401,31 @@ class Post_Meta_Box
     }
 
     /**
+     * True when this site can regenerate no image: an own-key plan (Free,
+     * BYOK) with no connected OpenAI or Gemini key. Managed plans draw on
+     * Structura's keys. The meta box then disables its Regenerate buttons
+     * and says why (2026-11-27). Public so the rule is testable.
+     *
+     * @param string $tier License plan id.
+     */
+    public static function has_no_image_provider(string $tier): bool
+    {
+        // 'cloud_pro': retired 2026-10-12, accepted for one release window (see License_Manager::get_plan()).
+        if (in_array($tier, ['cloud', 'cloud_pro'], true)) {
+            return false;
+        }
+        if ( ! class_exists(\Structura\Core\Provider_Registry::class)) {
+            return false;
+        }
+        foreach (\Structura\Core\Provider_Registry::get_connected_providers($tier) as $provider) {
+            if (in_array('image', (array) ($provider['capabilities'] ?? []), true)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Returns the image providers the regen modal offers: one row per
      * connected image-capable provider, or none when there is nothing to
      * choose (one provider) or Structura picks the image model (Cloud).
@@ -1112,7 +1137,8 @@ class Post_Meta_Box
 
             <!-- Featured Image -->
             <?php
-            if (License_Manager::can_generate_featured_image()): ?>
+            if (License_Manager::can_generate_featured_image()):
+                $no_image_provider = self::has_no_image_provider(License_Manager::get_plan()); ?>
                 <div class="structura-mb__divider"></div>
 
                 <div class="structura-mb__image-section">
@@ -1142,6 +1168,7 @@ class Post_Meta_Box
                     // the editor renders.
                     ?>
                     <button type="button" id="structura-regen-image" class="structura-mb__btn"
+                            <?php if ($no_image_provider): ?>disabled<?php endif; ?>
                             data-slot="featured" data-attachment-id="<?php echo esc_attr((string) $thumb_id); ?>"
                             data-topic="<?php echo esc_attr($thumb_id ? (string) get_post_meta((int) $thumb_id, '_structura_image_topic', true) : ''); ?>">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -1154,6 +1181,24 @@ class Post_Meta_Box
                         <span><?php
                             esc_html_e('Regenerate Featured Image', 'structura'); ?></span>
                     </button>
+                    <?php
+                    // No OpenAI or Gemini key on an own-key plan: nothing
+                    // can draw the image, so the buttons are disabled and
+                    // this line says why (2026-11-27).
+                    if ($no_image_provider): ?>
+                        <p class="structura-mb__note">
+                            <span>
+                                <?php esc_html_e(
+                                    'Images are drawn with your own OpenAI or Gemini key, and this site has neither connected.',
+                                    'structura'
+                                ); ?>
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=structura#/ai-engine')); ?>">
+                                    <?php esc_html_e('Connect a key', 'structura'); ?>
+                                </a>
+                            </span>
+                        </p>
+                    <?php
+                    endif; ?>
                 </div>
             <?php
             endif; ?>
@@ -1203,6 +1248,7 @@ class Post_Meta_Box
                             </div>
                             <button type="button"
                                     class="structura-mb__btn structura-mb__btn--body"
+                                    <?php if ( ! empty($no_image_provider)): ?>disabled<?php endif; ?>
                                     data-slot="<?php echo esc_attr($body_slot); ?>"
                                     data-attachment-id="<?php echo esc_attr((string) $body_attachment_id); ?>"
                                     data-topic="<?php echo esc_attr((string) get_post_meta((int) $body_attachment_id, '_structura_image_topic', true)); ?>">
@@ -1245,6 +1291,7 @@ class Post_Meta_Box
                     </p>
                     <button type="button"
                             class="structura-mb__btn structura-mb__btn--body"
+                            <?php if ( ! empty($no_image_provider)): ?>disabled<?php endif; ?>
                             data-slot="body-0"
                             data-attachment-id="0">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"

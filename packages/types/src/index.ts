@@ -58,8 +58,8 @@ export interface User {
     xerxBanner?: Record<string, "dismissed" | "sent">;
   };
   /**
-   * Account-level preferences. Only the product-updates fields are typed
-   * here; `locale` also lives in this map server-side (read by
+   * Account-level preferences. Only the email fields are typed here;
+   * `locale` also lives in this map server-side (read by
    * `functions/src/i18n/resolve-locale.ts`).
    *
    * `productUpdatesOptIn` — the user agreed to occasional "what's new"
@@ -70,10 +70,20 @@ export interface User {
    * `productUpdatesOptInAt` — server timestamp of the latest change, on or
    * off, so it records the consent or the withdrawal time. Written with the
    * flag.
+   *
+   * `onboardingEmailsOptOut`: the user stopped the setup emails
+   * (specs/appsumo-onboarding-emails.md §5). Opt-out: absent means false.
+   * Written by the unsubscribe link (`mailUnsubscribe`) and by the account
+   * page switch (`useOnboardingEmailsPreference`, merge `setDoc`).
+   *
+   * `onboardingEmailsOptOutAt`: server timestamp of the latest change, on
+   * or off. Written with the flag.
    */
   preferences?: {
     productUpdatesOptIn?: boolean;
     productUpdatesOptInAt?: Timestamp;
+    onboardingEmailsOptOut?: boolean;
+    onboardingEmailsOptOutAt?: Timestamp;
   };
   /**
    * First-occurrence stamps for the deep funnel milestones (`growth/events.ts`).
@@ -947,6 +957,14 @@ export interface License {
   lastResetAt: Timestamp;
 
   flags: string[];
+
+  /**
+   * When `appsumoOnboardingTick` last queued an AppSumo onboarding email for
+   * this license, so two never go out within 24 hours
+   * (specs/appsumo-onboarding-emails.md §3). Optional: absent until the
+   * first one (field added 2026-11-26).
+   */
+  appsumoOnboardingLastSentAt?: Timestamp;
 
   /**
    * Per-license feature flags. Absent keys are treated as their default —

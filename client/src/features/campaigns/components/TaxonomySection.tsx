@@ -102,9 +102,9 @@ export const TaxonomySection = ({
     )}
 
     {mode === "disabled" && (
-      <div className="animate-in fade-in mt-2 flex items-start gap-3 rounded-xl bg-neutral-50 p-4 duration-300">
+      <div className="animate-in fade-in mt-2 flex items-start gap-3 rounded-xl bg-neutral-50 p-4 duration-300 dark:bg-neutral-800/50">
         <OctagonX size={16} className="mt-0.5 shrink-0 text-neutral-400" />
-        <p className="m-0! text-[11px] leading-relaxed font-medium text-neutral-500">
+        <p className="m-0! text-[11px] leading-relaxed font-medium text-neutral-500 dark:text-neutral-400">
           {__(
             "No terms will be assigned automatically. You can set them manually on each post after publishing.",
             "structura"

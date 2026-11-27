@@ -53,6 +53,7 @@ import { NoPersonasBlocker } from "@/components/Shared/NoPersonasBlocker";
 import { usePersonasQuery } from "@/features/personas";
 import { PageBuilderCompatCard } from "@/features/campaigns/components/PageBuilderCompatCard";
 import { VisualStyleFallbackNotice } from "@/features/campaigns/components/VisualStyleFallbackNotice";
+import { NoImageProviderNotice } from "@/features/campaigns/components/NoImageProviderNotice";
 import { AiLabelReminder } from "@/features/campaigns/components/AiLabelReminder";
 import { withSeoRule } from "@/features/campaigns/helpers";
 import { isContentSettingRule } from "@/features/settings/api/useSeoRules";
@@ -883,7 +884,8 @@ const AdvancedSettings = () => {
   // images would silently never save. Same probe as the cross-wp-admin
   // banner (Image_Uploads_Unwritable_Notice); false on older plugins.
   const uploadsUnwritable = !!window.structuraConfig?.uploads_unwritable;
-  const { availableProviders, availableImageProviders, isCloud, isFullyConfigured } = useDefaultProviders();
+  const { availableProviders, availableImageProviders, isCloud, isFullyConfigured, noImageProvider = false } =
+    useDefaultProviders();
   const { rules, isLoading: loadingSeoRules } = useSeoRules();
 
   const [open, setOpen] = useState(false);
@@ -1021,20 +1023,21 @@ const AdvancedSettings = () => {
             icon={<ImageIcon size={13} className="text-emerald-500" />}
             label={__("Images", "structura")}
           >
+            {noImageProvider && <NoImageProviderNotice />}
             <CompactToggle
               label={__("Generate featured image", "structura")}
               description={__("Create a relevant featured image for each post.", "structura")}
-              isEnabled={structure.featuredImage}
+              isEnabled={structure.featuredImage && !noImageProvider}
               onToggle={() => updateForm("structure", { featuredImage: !structure.featuredImage })}
-              isDisabled={!isLicensed || uploadsUnwritable}
+              isDisabled={!isLicensed || uploadsUnwritable || noImageProvider}
               badge={!isLicensed ? <FreeBadge /> : undefined}
             />
             <CompactToggle
               label={__("Body image generation", "structura")}
               description={__("Identify spots and generate images in the post body.", "structura")}
-              isEnabled={structure.bodyImages}
+              isEnabled={structure.bodyImages && !noImageProvider}
               onToggle={() => updateForm("structure", { bodyImages: !structure.bodyImages })}
-              isDisabled={!isPaidLicense || uploadsUnwritable}
+              isDisabled={!isPaidLicense || uploadsUnwritable || noImageProvider}
               badge={!isPaidLicense ? <ProBadge /> : undefined}
             />
             {uploadsUnwritable && (
@@ -1057,12 +1060,12 @@ const AdvancedSettings = () => {
                 style is bound — the cloud falls back to a generic look
                 (2026-07-09). */}
             <VisualStyleFallbackNotice
-              imagesEnabled={structure.featuredImage || structure.bodyImages}
+              imagesEnabled={!noImageProvider && (structure.featuredImage || structure.bodyImages)}
             />
             {/* EU AI label reminder (specs/ai-image-label.md §7); after the
                 fallback notice when both show. */}
             <AiLabelReminder
-              imagesEnabled={structure.featuredImage || structure.bodyImages}
+              imagesEnabled={!noImageProvider && (structure.featuredImage || structure.bodyImages)}
               language={intelligence.language}
             />
           </SettingsGroup>
